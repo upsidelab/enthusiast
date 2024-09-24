@@ -95,3 +95,34 @@ completion = client.chat.completions.create(
 
 print(completion.choices[0].message)
 ```
+
+### Start Django
+Take a look at [EDB short intro](https://www.enterprisedb.com/postgres-tutorials/how-use-postgresql-django).
+* Note: you have to install PostgreSQL first at your local environment
+* Add pg_config to the PATH
+* Install psycopg2
+```
+pip3 install psycopg2
+```
+* Install django
+```
+pip3 install django
+```
+* Run server:
+Note: below example runs django at the port 5000
+```
+(venv) kuba@totem ecl % python3 ./manage.py runserver 127.0.0.1:5000
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+September 24, 2024 - 12:49:20
+Django version 5.1.1, using settings 'ecl.settings'
+Starting development server at http://127.0.0.1:5000/
+Quit the server with CONTROL-C.
+```
+* Verify installation: open 127.0.0.1:5000 URL in the browser. If you see Django welcome message, you are most probably well configured. Congrats.
+```
+The install worked successfully! Congratulations!
+View release notes for Django 5.1
+```

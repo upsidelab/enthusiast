@@ -1,3 +1,5 @@
+import { AuthenticationProvider } from "./authentication-provider.ts";
+
 export type DataSet = {
   id: number;
   code: string;
@@ -27,7 +29,7 @@ export type User = {
 export class ApiClient {
   private readonly apiBase: string;
 
-  constructor(private readonly authenticationProvider) {
+  constructor(private readonly authenticationProvider: AuthenticationProvider) {
     this.apiBase = import.meta.env.VITE_API_BASE;
   }
 

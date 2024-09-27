@@ -1,4 +1,4 @@
-interface AuthenticationProvider {
+export interface AuthenticationProvider {
   token: string | null;
   isAuthenticated(): boolean;
   login(token: string): boolean;

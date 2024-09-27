@@ -121,3 +121,18 @@ class RawDataSets(models.Model):
     properties = models.CharField(max_length=1024)
     categories = models.CharField(max_length=1024)
     price = models.FloatField()
+
+
+class Conversation(models.Model):
+    started_at = models.DateTimeField()
+    model = models.ForeignKey("EmbeddingModels", on_delete=models.SET_NULL, null=True)
+    dimensions = models.IntegerField
+
+
+class Question(models.Model):
+    conversation = models.ForeignKey("Conversation", on_delete=models.SET_NULL, null=True)
+    asked_at = models.DateTimeField()
+    question = models.TextField()
+    question_embedding = VectorField()
+    answer = models.TextField()
+    answer_embedding = VectorField()

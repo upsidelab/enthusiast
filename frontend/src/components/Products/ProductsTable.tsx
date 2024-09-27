@@ -4,22 +4,28 @@ import { authenticationProviderInstance } from "@/lib/authentication-provider.ts
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { SkeletonLoader } from "@/components/util/SkeletonLoader.tsx";
+import { useApplicationContext } from "@/lib/use-application-context.ts";
 
 const api = new ApiClient(authenticationProviderInstance);
 
 export function ProductsTable() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { dataSetId } = useApplicationContext()!;
 
   useEffect(() => {
+    if (dataSetId === null) {
+      return;
+    }
+
     const loadData = async () => {
-      const apiProducts = await api.getProducts(1);
+      const apiProducts = await api.getProducts(dataSetId);
       setProducts(apiProducts);
       setIsLoading(false);
     };
 
     loadData();
-  }, []);
+  }, [dataSetId]);
 
   return (
     <SkeletonLoader skeleton={<Skeleton className="w-full h-[100px]"/>} isLoading={isLoading}>

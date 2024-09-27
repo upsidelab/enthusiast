@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useState } from "react";
 
 export interface SkeletonLoaderProps {
-  children: ReactNode[];
+  children: ReactNode;
   skeleton: ReactNode;
   isLoading: boolean;
 }

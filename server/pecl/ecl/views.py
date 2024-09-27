@@ -26,6 +26,6 @@ def product_list(request, data_set_id):
 
 
 def content_list(request, data_set_id):
-    contents = Contents.objects.filter(company_code=data_set_id)
+    contents = Contents.objects.filter(company_id=data_set_id)
     serializer = ContentSerializer(contents, many=True)
     return JsonResponse(serializer.data, safe=False)

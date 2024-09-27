@@ -1,50 +1,15 @@
-# React + TypeScript + Vite
+# E-Commerce LLM Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is a repository that contains the frontend part of the system.
 
-Currently, two official plugins are available:
+## Getting started
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. Install nodejs (20+) and [pnpm](https://pnpm.io/) on your machine 
+2. Run `pnpm install`
+3. Set `VITE_API_BASE` env variable to point to your backend (e.g. `VITE_API_BASE=http://localhost:8000`)
+4. Make sure that your backend instance has the CORS headers set correctly (i.e. set `ECL_DJANGO_CORS_ALLOWED_ORIGINS=["http://localhost:5173"]`) 
+5. To develop locally run `pnpm run dev`
 
-## Expanding the ESLint configuration
+## Building the application
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
-
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
-
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+1. Run `pnpm build`

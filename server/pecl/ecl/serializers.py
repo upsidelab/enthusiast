@@ -1,20 +1,20 @@
 from rest_framework import serializers
-from .models import Companies, RawDataSets, Contents
+from .models import DataSet, Product, Document
 
 
-class CompanySerializer(serializers.ModelSerializer):
+class DataSetSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Companies
+        model = DataSet
         fields = ['id', 'code', 'name']
 
 
-class RawDataSetSerializer(serializers.ModelSerializer):
+class ProductSerializer(serializers.ModelSerializer):
     class Meta:
-        model = RawDataSets
+        model = Product
         fields = ['name', 'slug', 'sku', 'description', 'categories']
 
 
-class ContentSerializer(serializers.ModelSerializer):
+class DocumentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Contents
+        model = Document
         fields = ['url', 'title', 'content']

@@ -39,6 +39,8 @@ export ECL_DB_PORT='port'
 export ECL_DJANGO_SECRET_KEY='your-secret-key'
 export ECL_DJANGO_DEBUG='True'
 export ECL_DJANGO_ALLOWED_HOSTS='["127.0.0.1"]'
+export ECL_BASICAUTH_USERNAME='app-user-on-environment'
+export ECL_BASICAUTH_PASSWORD='your-pass-on-environment'
 ```
 
 ### Setup database with pgvector extension
@@ -163,3 +165,71 @@ Note: below example runs django at the port 5000 (however you may run that on a 
     ```
     python3 ./manage.py startap 
     ```
+    
+# Django shell examples
+## Before you start
+If you want to check stuff on your local environment, [use django shell](https://docs.djangoproject.com/en/5.1/intro/tutorial02/#playing-with-the-api).
+
+Navigate to the folder with your django project, run
+```
+python3 manage.py shell
+```
+
+Now you may play with the API
+
+## Embedding calculation
+
+```
+import django, importlib, os, sys
+import ecl.models as ecl_models
+from openai import OpenAI
+
+embedding_model = ecl_models.EmbeddingModel
+embedding_dimension = ecl_models.EmbeddingDimension
+data_set = ecl_models.DataSet
+document = ecl_models.Document
+embedding = ecl_models.DocumentEmbedding
+
+my_model = embedding_model.objects.get(id=1) # My model.
+my_dimension = embedding_dimension.objects.get(id=1)  # My dimension.
+my_data_set = data_set.objects.get(id=1)  # My data set.
+my_documents = mds.document.all()  # My data-set documents.
+
+# Below method will reaload all embeddings calculated with my_model and provided dimensions.
+my_data_set.set_content_embeddings(my_model, 3)
+
+# Below method will reaload all embeddings for: all models and all dimensions.
+my_data_set.reload_all_embeddings()
+```
+
+## Similarity search
+Below example shows the general flow of processing a user's question.
+
+```
+from openai import OpenAI
+from ecl.models import *
+from pgvector.django import CosineDistance
+
+model = EmbeddingModel.objects.first()
+dimensions = 512
+
+question = "My internet connection doesnt work after installing an esim"
+
+client = OpenAI()
+openai_embedding = client.embeddings.create(model=model.name, dimensions=dimensions, input=question)
+embedding_vector = openai_embedding.data[0].embedding
+
+contents_with_distance = DocumentEmbedding.objects.annotate(
+    distance=CosineDistance("embedding", embedding_vector)
+).order_by("distance")[:12]
+
+titles = list(map(lambda x: x.document.title, contents_with_distance))
+print(titles)
+
+result = client.chat.completions.create(model='gpt-4o', messages=[
+    { 'role': 'system', 'content': 'you are a helpful assistant'},
+    { 'role': 'user', 'content': f'Based on the following content delimited by three backticks ```{contents_with_distance[0].document.content}``` write a blog post that answers the question ${question} and promotes simoptions esim cards' }
+])
+
+print(result.choices[0].message.content)
+```

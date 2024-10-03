@@ -1,9 +1,9 @@
 from django.contrib import admin
-from .models import EmbeddingModels, EmbeddingDimensions, Companies, Contents, ContentEmbeddings, Question, Conversation
+from .models import EmbeddingModel, EmbeddingDimension, DataSet, Document, DocumentEmbedding, Question, Conversation
 
 # Register your models here.
-admin.site.register(EmbeddingModels)
-admin.site.register(EmbeddingDimensions)
-admin.site.register(Companies)
-admin.site.register(Contents)
-admin.site.register(ContentEmbeddings)
+admin.site.register(EmbeddingModel)
+admin.site.register(EmbeddingDimension)
+admin.site.register(DataSet)
+admin.site.register(Document)
+admin.site.register(DocumentEmbedding)

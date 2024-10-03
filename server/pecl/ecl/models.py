@@ -3,18 +3,18 @@ from openai import OpenAI
 from pgvector.django import VectorField
 
 
-class EmbeddingModels(models.Model):
+class EmbeddingModel(models.Model):
     """ECL Config - list of models to be used."""
     code = models.CharField(max_length=5, default="UNSET")
     name = models.CharField(max_length=30)
 
 
-class EmbeddingDimensions(models.Model):
+class EmbeddingDimension(models.Model):
     """ECL Config - list of LLM vector lengths to be used for embeddings."""
     dimension = models.IntegerField()
 
 
-class Companies(models.Model):
+class DataSet(models.Model):
     code = models.CharField(max_length=5)
     name = models.CharField(max_length=30)
 
@@ -26,8 +26,8 @@ class Companies(models.Model):
         embeddings for model ALFA and dimensions 216 were calculated before, while now ECL config is set to
         calculate embeddings with model BETA and dimensions set to 1536.
         """
-        embedding_models = EmbeddingModels.objects.all()
-        embedding_dimensions = EmbeddingDimensions.objects.all()
+        embedding_models = EmbeddingModel.objects.all()
+        embedding_dimensions = EmbeddingDimension.objects.all()
 
         for m in embedding_models:
             for d in embedding_dimensions:
@@ -44,19 +44,19 @@ class Companies(models.Model):
          we are able to precalculate different vectors and flexibly switch between those on admin panel level.
 
          Args:
-             model: EmbeddingModels, ID of an OpenAI model used to generate embeddings.
+             model: EmbeddingModel, ID of an OpenAI model used to generate embeddings.
              dimensions: Integer, length of an embedding vector.
          """
         cnt = 0
-        for content in self.contents.all():
+        for document in self.document.all():
             cnt += 1
-            content.set_embedding(model, dimensions)
+            document.set_embedding(model, dimensions)
 
 
-class Contents(models.Model):
-    company = models.ForeignKey("Companies", related_name="contents", on_delete=models.SET_NULL, null=True)
+class Document(models.Model):
+    data_set = models.ForeignKey("DataSet", related_name="document", on_delete=models.SET_NULL, null=True)
     url = models.CharField(max_length=255)
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=1024)
     content = models.TextField()
 
     def set_embedding(self, model, dimensions):
@@ -77,12 +77,12 @@ class Contents(models.Model):
 
         # Upsert a new embedding. TODO: prettify upsert method (remove for).
         cnt = 0
-        for emb in self.embeddings.all().filter(dimensions=dimensions):
+        for emb in self.embedding.all().filter(dimensions=dimensions):
             emb.set_embedding(model=model, dimensions=dimensions, embedding_vector=embedding_vector)
             cnt += 1
 
         if cnt == 0:
-            new_emb = ContentEmbeddings(content=self,
+            new_emb = DocumentEmbedding(document=self,
                                         model=model,
                                         dimensions=dimensions,
                                         embedding=embedding_vector
@@ -90,9 +90,9 @@ class Contents(models.Model):
             new_emb.save()
 
 
-class ContentEmbeddings(models.Model):
-    content = models.ForeignKey("Contents", related_name="embeddings", on_delete=models.SET_NULL, null=True)
-    model = models.ForeignKey("EmbeddingModels", on_delete=models.SET_NULL, null=True)
+class DocumentEmbedding(models.Model):
+    document = models.ForeignKey("Document", related_name="embedding", on_delete=models.SET_NULL, null=True)
+    model = models.ForeignKey("EmbeddingModel", on_delete=models.SET_NULL, null=True)
     dimensions = models.IntegerField()
     embedding = VectorField()
 
@@ -111,21 +111,21 @@ class ContentEmbeddings(models.Model):
         self.embedding = embedding_vector
 
 
-class RawDataSets(models.Model):
-    company_code = models.ForeignKey("Companies", on_delete=models.SET_NULL, null=True)
+class Product(models.Model):
+    company_code = models.ForeignKey("DataSet", on_delete=models.SET_NULL, null=True)
     entry_id = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     slug = models.CharField(max_length=255)
     description = models.TextField()
     sku = models.CharField(max_length=255)
-    properties = models.CharField(max_length=1024)
-    categories = models.CharField(max_length=1024)
+    properties = models.CharField(max_length=65535)
+    categories = models.CharField(max_length=65535)
     price = models.FloatField()
 
 
 class Conversation(models.Model):
     started_at = models.DateTimeField()
-    model = models.ForeignKey("EmbeddingModels", on_delete=models.SET_NULL, null=True)
+    model = models.ForeignKey("EmbeddingModel", on_delete=models.SET_NULL, null=True)
     dimensions = models.IntegerField
 
 

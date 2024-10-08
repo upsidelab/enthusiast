@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collect Embeddings</title>
+    <style>
+        <style> {% include 'css/basic.css' %} </style>
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <div class="conversation-header">
+        <h3>Calculate embeddings</h3>
+    </div>
+
+    <form method="post" action="{% url 'embedding' %}" class="input-form">
+        {% csrf_token %}
+        <div>
+            <button type="submit">Collect embeddings</button>
+        </div>
+    </form>
+</div>
+
+
+</body>
+</html>

@@ -152,18 +152,19 @@ Note: below example runs django at the port 5000 (however you may run that on a 
   ```
 
 ## If you're creating a brand-new django project and app
+Below is an example how ECL app may be created.
   * Read [Writing your first Django app docs](https://docs.djangoproject.com/en/1.8/intro/tutorial01/)
-  * Create folder named server in your main project directory, cd to this folder
-  * Create project named pecl inside server folder:
+  * Create folder named **server** in your main project directory, navigate to this folder
+  * Create project named **pecl** (naming convention **P**roject for **ECL** app: pecl) inside **server** folder:
     
-    Note: below code uses installation from virtual environment created at the project level
+    Note: below code uses virtual environment
     ```
-    python3 ../venv/bin/django-admin startproject mysite
+    python3 ../venv/bin/django-admin startproject pecl
     ```
   * A new folder named pecl should be created with the whole django content with models.py file, among the others.
   * Create application: go to pecl folder and run
     ```
-    python3 ./manage.py startap 
+    python3 ./manage.py startapp ecl 
     ```
     
 # Django shell examples

@@ -152,6 +152,7 @@ class Question(models.Model):
     asked_at = models.DateTimeField(auto_now_add=True)
     question = models.TextField()
     question_embedding = VectorField(null=True)
+    prompt_message = models.TextField(null=True, default=None)
     answer = models.TextField(null=True)
     answer_embedding = VectorField(null=True)
 
@@ -194,11 +195,14 @@ class Question(models.Model):
             ad.cosine_distance = doc.distance
             ad.save()
 
+        # Define the prompt
+        self.prompt_message = f"Based on the following content delimited by three backticks ```{embedding_with_distance[0].document.content}``` write an answer to the following request ${self.question}"
+
         # Get the document content aware answer for a user's question.
         completion = client.chat.completions.create(
             model="gpt-4o",
             messages=[{"role": "user",
-                       "content": f"Based on the following content delimited by three backticks ```{embedding_with_distance[0].document.content}``` write an answer to the following request ${self.question}"}
+                       "content": self.prompt_message}
         ])
 
         self.answer = completion.choices[0].message.content

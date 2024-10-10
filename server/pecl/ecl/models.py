@@ -3,20 +3,38 @@ from openai import OpenAI
 from pgvector.django import CosineDistance, VectorField
 
 
+class Owner(models.Model):
+    name = models.CharField(max_length=30, unique=True)
+
+    class Meta:
+        db_table_comment = "Owner groups data sets, for instance: all data sets that belong to one company."
+
 class EmbeddingModel(models.Model):
     """ECL Config - list of models to be used."""
-    code = models.CharField(max_length=5, default="UNSET")
-    name = models.CharField(max_length=30)
+    code = models.CharField(max_length=5, null=True)  # Short name - to be displayed on UI
+    name = models.CharField(max_length=30, unique=True)  # Full name of a model
+
+    class Meta:
+        db_table_comment = "Models used to create embedding vectors. Note: all models from this table will be used when action 'reload all embeddings' is performed by admin."
+        db_table = "ecl_embedding_model"
 
 
 class EmbeddingDimension(models.Model):
     """ECL Config - list of LLM vector lengths to be used for embeddings."""
-    dimension = models.IntegerField()
+    dimension = models.IntegerField(unique=True)
 
+    class Meta:
+        db_table_comment = "Lengths of embedding vector that are collected from OpenAI for documents or products. For one item we may collect multiple embedding vectors of different lengths. Note: vectors for all dimensions from this table will be collected when action 'reload all embeddings' is performed by admin."
+        db_table = "ecl_embedding_dimension"
 
 class DataSet(models.Model):
     code = models.CharField(max_length=5)
     name = models.CharField(max_length=30)
+    owner = models.ForeignKey(Owner, related_name="data_set", on_delete=models.PROTECT, null=True)
+
+    class Meta:
+        db_table_comment = "List of various data sets. One data set may be the whole company's content such as blog posts, or some part of it: a data set may be represent a brand or department."
+        db_table = "ecl_data_set"
 
     def reload_all_embeddings(self):
         """Reloads embeddings for all models and dimensions registered in ECL config.
@@ -54,10 +72,13 @@ class DataSet(models.Model):
 
 
 class Document(models.Model):
-    data_set = models.ForeignKey("DataSet", related_name="document", on_delete=models.SET_NULL, null=True)
+    data_set = models.ForeignKey(DataSet, related_name="document", on_delete=models.PROTECT, null=True)
     url = models.CharField(max_length=255)
     title = models.CharField(max_length=1024)
     content = models.TextField()
+
+    class Meta:
+        db_table_comment = "List of documents being part of a larger data set. A document may be for instance a blog post. This is the main entity being analysed by ECL engine when user asks questions regarding company's offer."
 
     def set_embedding(self, model, dimensions):
         """Sets embeddings with a given model and dimension for this content.
@@ -96,10 +117,14 @@ class Document(models.Model):
 
 
 class DocumentEmbedding(models.Model):
-    document = models.ForeignKey("Document", related_name="embedding", on_delete=models.SET_NULL, null=True)
-    model = models.ForeignKey("EmbeddingModel", on_delete=models.SET_NULL, null=True)
+    document = models.ForeignKey(Document, related_name="embedding", on_delete=models.PROTECT, null=True)
+    model = models.ForeignKey(EmbeddingModel, on_delete=models.PROTECT, null=True)
     dimensions = models.IntegerField()
     embedding = VectorField()
+
+    class Meta:
+        db_table_comment = "Embedding vectors collected for one document. One document may have several different embedding vectors which have different dimensions. Agent processing user's questions chooses the best vector for the purpose."
+        db_table = "ecl_document_embedding"
 
     def set_embedding(self, model, dimensions, embedding_vector):
         """Sets embedding vector for given model and dimensions.
@@ -117,7 +142,7 @@ class DocumentEmbedding(models.Model):
 
 
 class Product(models.Model):
-    company_code = models.ForeignKey("DataSet", on_delete=models.SET_NULL, null=True)
+    company_code = models.ForeignKey(DataSet, on_delete=models.PROTECT, null=True)
     entry_id = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     slug = models.CharField(max_length=255)
@@ -127,13 +152,19 @@ class Product(models.Model):
     categories = models.CharField(max_length=65535)
     price = models.FloatField()
 
+    class Meta:
+        db_table_comment = "List of a company's products."
+
 
 class Conversation(models.Model):
     started_at = models.DateTimeField(auto_now_add=True)
-    model = models.ForeignKey(EmbeddingModel, related_name="conversation", on_delete=models.SET_NULL, null=True)
+    model = models.ForeignKey(EmbeddingModel, related_name="conversation", on_delete=models.PROTECT, null=True)
     dimensions = models.IntegerField(null=True)
-    user_name = models.CharField(max_length=50, default="user")  # Who asks questions.
-    system_name = models.CharField(max_length=50, default="system")  # Who answers.
+    user_name = models.CharField(max_length=50, default="user", null=True)  # Who asks questions.
+    system_name = models.CharField(max_length=50, default="system", null=True)  # Who answers.
+
+    class Meta:
+        db_table_comment = "A conversation is a collection of various messages exchanged during one session. Messages are mostly questions and answers and have different actors such as end user asking question and ECL agent answering those questions."
 
     def get_history(self):
         """Return list of messages exchanged during a conversation.
@@ -148,13 +179,16 @@ class Conversation(models.Model):
 
 
 class Question(models.Model):
-    conversation = models.ForeignKey(Conversation, related_name="question", on_delete=models.SET_NULL, null=True)
+    conversation = models.ForeignKey(Conversation, related_name="question", on_delete=models.PROTECT)
     asked_at = models.DateTimeField(auto_now_add=True)
     question = models.TextField()
     question_embedding = VectorField(null=True)
     prompt_message = models.TextField(null=True, default=None)
     answer = models.TextField(null=True)
     answer_embedding = VectorField(null=True)
+
+    class Meta:
+        db_table_comment = "A question is a collection of two messages: question itself followed by a system's answer."
 
     def get_qa_str(self):
         """Return two messages: question and answer.
@@ -209,13 +243,13 @@ class Question(models.Model):
 
 
 class AnswerDocument(models.Model):
-    conversation = models.ForeignKey(Conversation, related_name="answer_document", on_delete=models.SET_NULL, null=True)
-    question = models.ForeignKey(Question, related_name="answer_document", on_delete=models.SET_NULL, null=True)
-    document = models.ForeignKey(Document, related_name="answer_document", on_delete=models.SET_NULL, null=True)
-    document_embedding = models.ForeignKey(DocumentEmbedding, related_name="answer_document", on_delete=models.SET_NULL, null=True)
+    conversation = models.ForeignKey(Conversation, related_name="answer_document", on_delete=models.PROTECT)
+    question = models.ForeignKey(Question, related_name="answer_document", on_delete=models.PROTECT)
+    document = models.ForeignKey(Document, related_name="answer_document", on_delete=models.PROTECT)
+    document_embedding = models.ForeignKey(DocumentEmbedding, related_name="answer_document", on_delete=models.PROTECT, null=True)
     document_title = models.CharField(max_length=1024)
     cosine_distance = models.FloatField(null=True)
 
     class Meta:
-        db_table_comment = "Document considered by our similarity search engine as similar to the question. Documents from this table were used to formulate the answer"
+        db_table_comment = "Document considered by our similarity search engine as relevant to the question. Documents from this table are used to formulate the answer."
         db_table = "ecl_answer_document"

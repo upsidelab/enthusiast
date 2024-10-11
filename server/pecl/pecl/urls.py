@@ -19,6 +19,7 @@ from django.urls import include, path
 
 urlpatterns = [
     path('', include('ecl.urls')),  # By default load ECL homepage.
+    path("", include("agent.urls")),
     path("ecl/", include("ecl.urls")),
     path('admin/', admin.site.urls),
 ]

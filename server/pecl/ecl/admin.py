@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import EmbeddingModel, EmbeddingDimension, DataSet, Document, DocumentEmbedding, Question, Conversation
+from .models import EmbeddingModel, EmbeddingDimension, DataSet, Document, DocumentEmbedding
 
 # Register your models here.
 admin.site.register(EmbeddingModel)

@@ -119,7 +119,7 @@ class Document(models.Model):
 class DocumentEmbedding(models.Model):
     document = models.ForeignKey(Document, related_name="embedding", on_delete=models.PROTECT, null=True)
     model = models.ForeignKey(EmbeddingModel, on_delete=models.PROTECT, null=True)
-    dimensions = models.IntegerField()
+    dimensions = models.ForeignKey(EmbeddingDimension, on_delete=models.PROTECT, null=True)
     embedding = VectorField()
 
     class Meta:
@@ -155,101 +155,3 @@ class Product(models.Model):
     class Meta:
         db_table_comment = "List of a company's products."
 
-
-class Conversation(models.Model):
-    started_at = models.DateTimeField(auto_now_add=True)
-    model = models.ForeignKey(EmbeddingModel, related_name="conversation", on_delete=models.PROTECT, null=True)
-    dimensions = models.IntegerField(null=True)
-    user_name = models.CharField(max_length=50, default="user", null=True)  # Who asks questions.
-    system_name = models.CharField(max_length=50, default="system", null=True)  # Who answers.
-
-    class Meta:
-        db_table_comment = "A conversation is a collection of various messages exchanged during one session. Messages are mostly questions and answers and have different actors such as end user asking question and ECL agent answering those questions."
-
-    def get_history(self):
-        """Return list of messages exchanged during a conversation.
-
-        Messages are stored as an object and may be used by various clients such as html template
-        to display history of a conversation on the conversation page.
-        """
-        history = []
-        for question in self.question.all():
-            history += question.get_qa_str()
-        return history
-
-
-class Question(models.Model):
-    conversation = models.ForeignKey(Conversation, related_name="question", on_delete=models.PROTECT)
-    asked_at = models.DateTimeField(auto_now_add=True)
-    question = models.TextField()
-    question_embedding = VectorField(null=True)
-    prompt_message = models.TextField(null=True, default=None)
-    answer = models.TextField(null=True)
-    answer_embedding = VectorField(null=True)
-
-    class Meta:
-        db_table_comment = "A question is a collection of two messages: question itself followed by a system's answer."
-
-    def get_qa_str(self):
-        """Return two messages: question and answer.
-
-        A question in our model question entity consists of two actions: a question asked is followed by an answer.
-        Hence, for one question there are two messages in a conversation.
-        """
-        return [{"sender": "user", "name": self.conversation.user_name, "text": self.question},
-                   {"sender": "system", "name": self.conversation.system_name, "text": self.answer}]
-
-    def get_answer(self):
-        """Formulate an answer to a given question and store the decision-making process.
-
-        Engine calculates embedding for a question and using similarity search collects documents that may contain
-        relevant content.
-        """
-        client = OpenAI()
-
-        # Calculate embedding for a question.
-        openai_embedding = client.embeddings.create(model=self.conversation.model.name,
-                                                    dimensions=self.conversation.dimensions,
-                                                    input=self.question)
-        self.question_embedding = openai_embedding.data[0].embedding
-
-        # Aggregate distance for Documents.
-        embedding_with_distance = DocumentEmbedding.objects.filter(dimensions=self.conversation.dimensions).annotate(
-            distance=CosineDistance("embedding", self.question_embedding)
-        ).order_by("distance")[:12]
-
-        # Persist an answer details.
-        for doc in embedding_with_distance:
-            ad = AnswerDocument()
-            ad.conversation = self.conversation
-            ad.question = self
-            ad.document = doc.document
-            ad.document_embedding = doc
-            ad.document_title = doc.document.title
-            ad.cosine_distance = doc.distance
-            ad.save()
-
-        # Define the prompt
-        self.prompt_message = f"Based on the following content delimited by three backticks ```{embedding_with_distance[0].document.content}``` write an answer to the following request ${self.question}"
-
-        # Get the document content aware answer for a user's question.
-        completion = client.chat.completions.create(
-            model="gpt-4o",
-            messages=[{"role": "user",
-                       "content": self.prompt_message}
-        ])
-
-        self.answer = completion.choices[0].message.content
-
-
-class AnswerDocument(models.Model):
-    conversation = models.ForeignKey(Conversation, related_name="answer_document", on_delete=models.PROTECT)
-    question = models.ForeignKey(Question, related_name="answer_document", on_delete=models.PROTECT)
-    document = models.ForeignKey(Document, related_name="answer_document", on_delete=models.PROTECT)
-    document_embedding = models.ForeignKey(DocumentEmbedding, related_name="answer_document", on_delete=models.PROTECT, null=True)
-    document_title = models.CharField(max_length=1024)
-    cosine_distance = models.FloatField(null=True)
-
-    class Meta:
-        db_table_comment = "Document considered by our similarity search engine as relevant to the question. Documents from this table are used to formulate the answer."
-        db_table = "ecl_answer_document"

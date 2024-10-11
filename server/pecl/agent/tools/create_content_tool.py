@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 from agent.core import LlmProvider
 from agent.retrievers import DocumentRetriever
 from agent.retrievers import ProductRetriever
-from ecl.models import DataSet
+from ecl.models import DataSet, EmbeddingModel, EmbeddingDimension
 
 CREATE_CONTENT_PROMPT_TEMPLATE = """
     Based on the following documents delimited by three backticks
@@ -36,13 +36,20 @@ class CreateContentTool(BaseTool):
     args_schema: Type[BaseModel] = CreateContentToolInput
     return_direct: bool = True
     data_set: DataSet = None
+    embedding_model: EmbeddingModel = None
+    embedding_dimensions: EmbeddingDimension = None
 
-    def __init__(self, data_set: DataSet, **kwargs: Any):
+    def __init__(self, data_set: DataSet, embedding_model: EmbeddingModel,
+                 embedding_dimensions: EmbeddingDimension, **kwargs: Any):
         super().__init__(**kwargs)
         self.data_set = data_set
+        self.embedding_model = embedding_model
+        self.embedding_dimensions = embedding_dimensions
 
     def _run(self, query: str):
-        relevant_documents = DocumentRetriever(data_set=self.data_set).find_documents_matching_query(query)
+        document_retriever = DocumentRetriever(data_set=self.data_set, embedding_model=self.embedding_model,
+                                               embedding_dimensions=self.embedding_dimensions)
+        relevant_documents = document_retriever.find_documents_matching_query(query)
         relevant_products = ProductRetriever(data_set=self.data_set).find_products_matching_query(query)
 
         document_context = ' '.join(map(lambda x: x.content, relevant_documents))

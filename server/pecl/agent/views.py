@@ -2,6 +2,7 @@ from datetime import datetime
 
 from django.shortcuts import render
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -92,6 +93,7 @@ def conversation_view(request, conversation_id=None, embedding_model=None):
 
 
 class GetAnswer(APIView):
+    authentication_classes = [IsAuthenticated]
     """
     View to handle the question message and return the answer.
     """

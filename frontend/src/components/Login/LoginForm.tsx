@@ -20,11 +20,12 @@ export function LoginForm({ className, ...props }: HTMLAttributes<HTMLDivElement
     event.preventDefault();
     setIsLoading(true);
 
-    const invitationCode = (event.target as any).invitationCode.value;
-    authenticationProviderInstance.login(invitationCode);
+    const email = (event.target as any).email.value;
+    const password = (event.target as any).password.value;
 
     try {
-      await api.getUser();
+      const { token } = await api.login(email, password);
+      authenticationProviderInstance.login(token);
       navigate('/campaign');
     } catch (e) {
       setIsError(true);
@@ -46,9 +47,18 @@ export function LoginForm({ className, ...props }: HTMLAttributes<HTMLDivElement
               Your invitation code
             </Label>
             <Input
-              id="invitationCode"
-              placeholder="UP-XXXXX-XXXX-XXXX-XXXXX"
-              type="text"
+              id="email"
+              placeholder="user@example.com"
+              type="email"
+              autoCapitalize="none"
+              autoComplete="email"
+              autoCorrect="off"
+              disabled={isLoading}
+            />
+            <Input
+              id="password"
+              placeholder="password"
+              type="password"
               autoCapitalize="none"
               autoComplete="off"
               autoCorrect="off"

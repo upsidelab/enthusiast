@@ -1,5 +1,7 @@
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render
+from rest_framework.generics import ListAPIView
+from rest_framework.permissions import IsAuthenticated
 
 from .models import DataSet, Product, Document
 from .serializers import DataSetSerializer, DocumentSerializer, ProductSerializer
@@ -9,26 +11,26 @@ def index(request):
     return HttpResponse("Hello, world. You're at The E-Cell welcome page.")
 
 
-def user_detail(request):
-    return JsonResponse({"status": "ok"})
+class DataSetListView(ListAPIView):
+    queryset = DataSet.objects.all()
+    serializer_class = DataSetSerializer
+    permission_classes = [IsAuthenticated]
 
 
-def data_set_list(request):
-    data_set = DataSet.objects.all()
-    serializer = DataSetSerializer(data_set, many=True)
-    return JsonResponse(serializer.data, safe=False)
+class ProductListView(ListAPIView):
+    serializer_class = ProductSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Product.objects.filter(company_code=self.kwargs['data_set_id'])
 
 
-def product_list(request, data_set_id):
-    products = Product.objects.filter(company_code=data_set_id)
-    serializer = ProductSerializer(products, many=True)
-    return JsonResponse(serializer.data, safe=False)
+class DocumentListView(ListAPIView):
+    serializer_class = DocumentSerializer
+    permission_classes = [IsAuthenticated]
 
-
-def document_list(request, data_set_id):
-    document = Document.objects.filter(company_id=data_set_id)
-    serializer = DocumentSerializer(document, many=True)
-    return JsonResponse(serializer.data, safe=False)
+    def get_queryset(self):
+        return Document.objects.filter(data_set_id=self.kwargs['data_set_id'])
 
 
 def embedding_view(request):

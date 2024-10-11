@@ -22,8 +22,8 @@ export type Content = {
   content: string;
 }
 
-export type User = {
-  status: string;
+export type Token = {
+  token: string;
 }
 
 export class ApiClient {
@@ -48,15 +48,26 @@ export class ApiClient {
     return await response.json() as Promise<Content[]>;
   }
 
-  async getUser(): Promise<User> {
-    const response = await fetch(`${this.apiBase}/api/user`, this._requestConfiguration());
-    return await response.json() as Promise<User>;
+  async login(email: string, password: string): Promise<Token> {
+    const response = await fetch(`${this.apiBase}/api/auth/login`, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      method: 'POST',
+      body: JSON.stringify({ email, password })
+    });
+
+    if (response.status !== 200) {
+      throw 'Could not sign in';
+    }
+    
+    return await response.json() as Promise<Token>;
   }
 
   _requestConfiguration(): RequestInit {
     return {
       headers: {
-        'Authorization': `Bearer ${this.authenticationProvider.token}`
+        'Authorization': `Token ${this.authenticationProvider.token}`
       }
     }
   }

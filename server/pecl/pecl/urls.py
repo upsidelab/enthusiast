@@ -22,4 +22,5 @@ urlpatterns = [
     path("", include("agent.urls")),
     path("ecl/", include("ecl.urls")),
     path('admin/', admin.site.urls),
+    path("", include("account.urls"))
 ]

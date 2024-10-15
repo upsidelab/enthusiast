@@ -49,7 +49,7 @@ class DataSet(models.Model):
 
         for m in embedding_models:
             for d in embedding_dimensions:
-                self.set_content_embeddings(m, d.dimension)
+                self.set_content_embeddings(m, d)
 
 
     def set_content_embeddings(self, model, dimensions):
@@ -93,7 +93,7 @@ class Document(models.Model):
         client = OpenAI()
         try:
             openai_embedding = client.embeddings.create(model=model.name,
-                                                        dimensions=dimensions,
+                                                        dimensions=dimensions.dimension,
                                                         input=self.content)
             embedding_vector = openai_embedding.data[0].embedding
 
@@ -113,7 +113,7 @@ class Document(models.Model):
 
 
         except Exception as error:
-            pass  #TODO: add error handling (planned along with logging module)
+            print(error)  #TODO: add error handling (planned along with logging module)
 
 
 class DocumentEmbedding(models.Model):
@@ -139,6 +139,7 @@ class DocumentEmbedding(models.Model):
         self.model = model
         self.dimensions = dimensions
         self.embedding = embedding_vector
+        self.save()
 
 
 class Product(models.Model):

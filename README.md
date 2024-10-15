@@ -197,7 +197,7 @@ my_data_set = data_set.objects.get(id=1)  # My data set.
 my_documents = mds.document.all()  # My data-set documents.
 
 # Below method will reaload all embeddings calculated with my_model and provided dimensions.
-my_data_set.set_content_embeddings(my_model, 3)
+my_data_set.set_content_embeddings(my_model, my_dimension)
 
 # Below method will reaload all embeddings for: all models and all dimensions.
 my_data_set.reload_all_embeddings()

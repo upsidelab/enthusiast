@@ -26,6 +26,10 @@ export type Token = {
   token: string;
 }
 
+export type Account = {
+  email: string;
+}
+
 export class ApiClient {
   private readonly apiBase: string;
 
@@ -62,6 +66,11 @@ export class ApiClient {
     }
     
     return await response.json() as Promise<Token>;
+  }
+
+  async getAccount(): Promise<Account> {
+    const response = await fetch(`${this.apiBase}/api/account`, this._requestConfiguration());
+    return await response.json() as Promise<Account>;
   }
 
   _requestConfiguration(): RequestInit {

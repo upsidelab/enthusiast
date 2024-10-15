@@ -5,6 +5,7 @@ import { useState } from "react";
 
 export interface MessageComposerProps {
   onSubmit: (message: string) => void;
+  isLoading: boolean;
 }
 
 export function MessageComposer({onSubmit}: MessageComposerProps) {

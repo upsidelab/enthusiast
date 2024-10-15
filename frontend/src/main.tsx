@@ -3,11 +3,16 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import { createBrowserRouter, redirect, RouterProvider } from "react-router-dom";
+import { Conversations } from "@/pages/Conversations.tsx";
 import { Campaign } from "@/pages/Campaign.tsx";
 import { Products } from "@/pages/Products.tsx";
 import { Documents } from "@/pages/Documents.tsx";
 import Login from "@/pages/Login.tsx";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
+import { ApiConnection } from "@/pages/ApiConnection.tsx";
+import { Settings } from "@/pages/Settings.tsx";
+import { Docs } from "@/pages/Docs.tsx";
+import { Billing } from "@/pages/Billing.tsx";
 
 const protectedLoginLoader = () => {
   if (!authenticationProviderInstance.isAuthenticated()) {
@@ -34,6 +39,26 @@ const router = createBrowserRouter([
       {
         path: '/campaign?',
         element: <Campaign />
+      },
+      {
+        path: '/conversations',
+        element: <Conversations />
+      },
+      {
+        path: '/api-connection',
+        element: <ApiConnection />
+      },
+      {
+        path: '/docs',
+        element: <Docs />
+      },
+      {
+        path: '/settings',
+        element: <Settings />
+      },
+      {
+        path: '/billing',
+        element: <Billing />
       }
     ]
   },

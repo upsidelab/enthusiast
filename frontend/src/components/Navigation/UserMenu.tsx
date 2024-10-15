@@ -7,7 +7,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
 import { ApiClient } from "@/lib/api.ts";
@@ -20,7 +20,7 @@ export function UserMenu() {
     authenticationProviderInstance.logout();
     navigate("/login");
   };
-  const { account, setAccount } = useApplicationContext();
+  const { account, setAccount } = useApplicationContext()!;
 
   const userName = () => {
     if (!account) {
@@ -72,11 +72,15 @@ export function UserMenu() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            Billing
+          <DropdownMenuItem asChild>
+            <Link to="/billing">
+              Billing
+            </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            Settings
+          <DropdownMenuItem asChild>
+            <Link to="/settings">
+              Settings
+            </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />

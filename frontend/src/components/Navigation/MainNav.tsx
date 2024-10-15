@@ -12,12 +12,6 @@ export function MainNav({className}: React.HTMLAttributes<HTMLElement>) {
         Dashboard
       </a>
       <a
-        href="/settings"
-        className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-      >
-        Settings
-      </a>
-      <a
         href="/docs"
         className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
       >

@@ -22,8 +22,21 @@ export type Document = {
   content: string;
 }
 
+export type Conversation = {
+  started_at: Date;
+  model: string;
+  dimensions: number;
+  data_set: string;
+}
+
 export type Token = {
   token: string;
+}
+
+export type Answer = {
+  conversation_id: number;
+  query_message: string;
+  answer: string;
 }
 
 export type Account = {
@@ -50,6 +63,34 @@ export class ApiClient {
   async getDocuments(dataSetId: number): Promise<Document[]> {
     const response = await fetch(`${this.apiBase}/api/documents/${dataSetId}`, this._requestConfiguration());
     return await response.json() as Promise<Document[]>;
+  }
+
+  async getConversations(dataSetId: number): Promise<Conversation[]> {
+    const response = await fetch(`${this.apiBase}/api/conversations/${dataSetId}`, this._requestConfiguration());
+    return await response.json() as Promise<Conversation[]>;
+  }
+
+  async getAnswer(conversation_id: number | null, message: string): Promise<Answer> {
+    type RequestBody = {
+       question_message: string;
+       conversation_id?: number;
+     };
+
+    const body: RequestBody = { "question_message": message }
+    if (conversation_id !== null) {
+      body.conversation_id = conversation_id
+    }
+
+    const response = await fetch(`${this.apiBase}/api/ask/`, {
+      headers: {
+        ...this._requestConfiguration().headers,
+        'Content-Type': 'application/json'
+      },
+      method: 'POST',
+      body: JSON.stringify(body)
+    });
+
+    return await response.json() as Promise<Answer>;
   }
 
   async login(email: string, password: string): Promise<Token> {

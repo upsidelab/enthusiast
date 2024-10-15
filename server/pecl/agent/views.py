@@ -2,12 +2,13 @@ from datetime import datetime
 
 from django.shortcuts import render
 from rest_framework import status
+from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from agent.models import Conversation, Question
-from agent.serializers import AskQuestionSerializer
+from agent.serializers import AskQuestionSerializer, ConversationSerializer
 from ecl.models import EmbeddingModel, EmbeddingDimension, DataSet
 
 
@@ -93,7 +94,7 @@ def conversation_view(request, conversation_id=None, embedding_model=None):
 
 
 class GetAnswer(APIView):
-    authentication_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     """
     View to handle the question message and return the answer.
     """
@@ -130,3 +131,11 @@ class GetAnswer(APIView):
                 status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ConversationListView(ListAPIView):
+    serializer_class = ConversationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Conversation.objects.filter(data_set_id=self.kwargs['data_set_id']).select_related('model', 'dimensions', 'data_set')

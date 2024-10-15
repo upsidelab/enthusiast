@@ -1,22 +1,37 @@
 import { useState } from "react";
 import { MessageComposer } from "@/components/ConversationView/MessageComposer.tsx";
 import { MessageBubble } from "@/components/ConversationView/MessageBubble.tsx";
+import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
+import { ApiClient } from "@/lib/api.ts";
 
 export interface MessageProps {
   role: "user" | "agent";
   text: string;
 }
 
+const api = new ApiClient(authenticationProviderInstance);
+
 export function Conversation() {
+  const [conversationId, setConversationId] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
   const [messages, setMessages] = useState([
     { role: "agent", text: "How can I help you today?" },
-    { role: "user", text: "Write a facebook ad promoting the new t-shirt with palm tree print" }
   ]);
 
   const onMessageComposerSubmit = (message: string) => {
-    setMessages(
-      [...messages, { role: "user", text: message }]
+    const fetchAnswer = async () => {
+      const apiAnswer = await api.getAnswer(conversationId, message);
+      setMessages((currMessages) => [...currMessages, { role: "agent", text: apiAnswer.answer }]);
+      setConversationId(apiAnswer.conversation_id);
+      setIsLoading(false);
+    };
+
+    setIsLoading(true);
+    setMessages((currMessages) =>
+      [...currMessages, { role: "user", text: message }]
     );
+    fetchAnswer();
   };
 
   return (
@@ -27,7 +42,7 @@ export function Conversation() {
         ))}
       </div>
       <div className="flex-shrink-0">
-        <MessageComposer onSubmit={onMessageComposerSubmit} />
+        <MessageComposer onSubmit={onMessageComposerSubmit} isLoading={isLoading} />
       </div>
     </div>
   )

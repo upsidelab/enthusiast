@@ -86,3 +86,13 @@ class AskQuestionSerializer(serializers.Serializer):
         if value <=0:
             raise serializers.ValidationError(f'Provided embedding dimension value ({value}) is not correct. Value of embedding dimension has to be an Integer greater than zero.')
         return value
+
+
+class ConversationSerializer(serializers.ModelSerializer):
+    model = serializers.SlugRelatedField(slug_field='name', read_only=True)
+    dimensions = serializers.SlugRelatedField(slug_field='dimension', read_only=True)
+    data_set = serializers.SlugRelatedField(slug_field='name', read_only=True)
+    class Meta:
+        model = Conversation
+        fields = ['started_at', 'model', 'dimensions', 'data_set']
+

@@ -8,9 +8,9 @@ export function Sidebar() {
       key: "products"
     },
     {
-      title: "Content",
-      link: "/content",
-      key: "content"
+      title: "Documents",
+      link: "/documents",
+      key: "documents"
     }
   ];
 

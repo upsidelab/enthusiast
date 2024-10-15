@@ -5,7 +5,7 @@ import './index.css'
 import { createBrowserRouter, redirect, RouterProvider } from "react-router-dom";
 import { Campaign } from "@/pages/Campaign.tsx";
 import { Products } from "@/pages/Products.tsx";
-import { Content } from "@/pages/Content.tsx";
+import { Documents } from "@/pages/Documents.tsx";
 import Login from "@/pages/Login.tsx";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 
@@ -28,8 +28,8 @@ const router = createBrowserRouter([
         element: <Products />
       },
       {
-        path: '/content',
-        element: <Content />
+        path: '/documents',
+        element: <Documents />
       },
       {
         path: '/campaign',

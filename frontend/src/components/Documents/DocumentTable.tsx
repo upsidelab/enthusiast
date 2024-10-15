@@ -2,7 +2,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { useEffect, useState } from "react";
 import { SkeletonLoader } from "@/components/util/SkeletonLoader.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
-import { ApiClient, Content } from "@/lib/api.ts";
+import { ApiClient, Document } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet.tsx";
 import { Button } from "@/components/ui/button.tsx";
@@ -11,11 +11,11 @@ import { useApplicationContext } from "@/lib/use-application-context.ts";
 
 const api = new ApiClient(authenticationProviderInstance);
 
-export function ContentTable() {
-  const [contents, setContents] = useState<Content[]>([]);
+export function DocumentTable() {
+  const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { dataSetId } = useApplicationContext()!;
-  const [selectedPreview, setSelectedPreview] = useState<Content | null>(null);
+  const [selectedPreview, setSelectedPreview] = useState<Document | null>(null);
 
   const extractSlug = (url: string) => {
     if (!URL.canParse(url)) {
@@ -31,8 +31,8 @@ export function ContentTable() {
     }
 
     const loadData = async () => {
-      const apiContents = await api.getContents(dataSetId);
-      setContents(apiContents);
+      const apiDocuments = await api.getDocuments(dataSetId);
+      setDocuments(apiDocuments);
       setSelectedPreview(null);
       setIsLoading(false);
     };
@@ -52,7 +52,7 @@ export function ContentTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {contents.map((item, index) => (
+          {documents.map((item, index) => (
             <TableRow key={index}>
               <TableCell>
                 <Button variant="link" asChild>

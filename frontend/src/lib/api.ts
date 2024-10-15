@@ -15,7 +15,7 @@ export type Product = {
   categories: string;
 }
 
-export type Content = {
+export type Document = {
   id: number;
   url: string;
   title: string;
@@ -43,9 +43,9 @@ export class ApiClient {
     return await response.json() as Promise<Product[]>;
   }
 
-  async getContents(dataSetId: number): Promise<Content[]> {
-    const response = await fetch(`${this.apiBase}/api/contents/${dataSetId}`, this._requestConfiguration());
-    return await response.json() as Promise<Content[]>;
+  async getDocuments(dataSetId: number): Promise<Document[]> {
+    const response = await fetch(`${this.apiBase}/api/documents/${dataSetId}`, this._requestConfiguration());
+    return await response.json() as Promise<Document[]>;
   }
 
   async login(email: string, password: string): Promise<Token> {

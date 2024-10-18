@@ -90,7 +90,7 @@ def conversation_view(request, conversation_id=None, embedding_model=None):
         'available_dimensions': available_dimensions,
         'conversation_history': conversation_history,
     }
-    return render(request, 'ecl/conversation.html', context)
+    return render(request, 'agent/conversation.html', context)
 
 
 class GetAnswer(APIView):

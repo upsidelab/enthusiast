@@ -12,7 +12,8 @@ class Agent:
         self._tools = [CreateContentTool(
             data_set=data_set,
             embedding_model=embedding_model,
-            embedding_dimensions=embedding_dimensions
+            embedding_dimensions=embedding_dimensions,
+            chat_model=self._llm.model_name
         )]
         self._system_message = SystemMessage(
             "You are an agent that knows everything about company\'s product catalog and content")

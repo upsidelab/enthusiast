@@ -39,7 +39,7 @@ class ProductRetriever:
 
     def find_products_matching_query(self, where_clause: str):
         where_clause = self._build_where_clause_for_query(where_clause)
-        return Product.objects.raw("SELECT * FROM ecl_product " + where_clause + " AND company_code_id = %s",
+        return Product.objects.raw("SELECT * FROM ecl_product " + where_clause + " AND company_code_id = %s limit 13",
                                    [self.data_set.id])
 
     def _get_sample_products_json(self):

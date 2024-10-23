@@ -6,7 +6,7 @@ from ecl.models import Product, DataSet
 
 QUERY_PROMPT_TEMPLATE = """
     With the following database schema delimited by three backticks ```
-    CREATE TABLE ecl_products (
+    CREATE TABLE ecl_product (
         \"id\" int8 NOT NULL,
         \"entry_id\" varchar NOT NULL,
         \"name\" varchar NOT NULL,
@@ -28,19 +28,23 @@ QUERY_PROMPT_TEMPLATE = """
     ``` 
     {query} 
     ```
-    Respond with the where portion of the query only, don't include any other characters.
+    Respond with the where portion of the query only, don't include any other characters, 
+    skip initial where keyword, skip order by clause.
 """
 
 
 class ProductRetriever:
-    def __init__(self, data_set: DataSet, max_sample_products: int = 12):
+    def __init__(self, data_set: DataSet, number_of_products: int = 12, max_sample_products: int = 12):
         self.data_set = data_set
+        self.number_of_products = number_of_products
         self.max_sample_products = max_sample_products
 
-    def find_products_matching_query(self, where_clause: str):
-        where_clause = self._build_where_clause_for_query(where_clause)
-        return Product.objects.raw("SELECT * FROM ecl_product " + where_clause + " AND company_code_id = %s limit 13",
-                                   [self.data_set.id])
+    def find_products_matching_query(self, user_query: str):
+        agent_where_clause = self._build_where_clause_for_query(user_query)
+        where_conditions = [f"company_code_id = {self.data_set.id}"]  # Security: access only to approved data set.
+        if agent_where_clause:
+            where_conditions.append(agent_where_clause)
+        return Product.objects.extra(where=where_conditions)[:self.number_of_products]
 
     def _get_sample_products_json(self):
         sample_products = Product.objects.filter(company_code_id__exact=self.data_set.id)[:self.max_sample_products]
@@ -49,5 +53,5 @@ class ProductRetriever:
     def _build_where_clause_for_query(self, query: str):
         chain = PromptTemplate.from_template(QUERY_PROMPT_TEMPLATE) | LlmProvider.provide_llm_instance()
         llm_result = chain.invoke({"sample_products_json": self._get_sample_products_json(), "query": query})
-        sanitized_result = llm_result.content.strip("`").replace("%", "%%")
+        sanitized_result = llm_result.content.strip("`").removeprefix("sql").strip("\n").replace("%", "%%")
         return sanitized_result

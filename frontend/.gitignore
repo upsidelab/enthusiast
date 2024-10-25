@@ -26,3 +26,4 @@ dist-ssr
 # Builder
 /tsconfig.node.tsbuildinfo
 /tsconfig.app.tsbuildinfo
+.vite/

@@ -24,7 +24,7 @@ In a nutshell:
 * Run hello world!
 * Have fun
 
-### Local variables to be set
+### Local environment variables to be set
 In ~/.zshrc file set variables used by ECL.
 
 Note: ECL_DJANGO_ALLOWED_HOSTS is a list, below is a sample for localhost.
@@ -39,6 +39,7 @@ export ECL_DB_PORT='port'
 export ECL_DJANGO_SECRET_KEY='your-secret-key'
 export ECL_DJANGO_DEBUG='True'
 export ECL_DJANGO_ALLOWED_HOSTS='["127.0.0.1"]'
+# To access django templates (to be deprecated in future) set up your passwords:
 export ECL_BASICAUTH_USERNAME='app-user-on-environment'
 export ECL_BASICAUTH_PASSWORD='your-pass-on-environment'
 ```
@@ -84,7 +85,7 @@ ecl=# create schema ecl;
 CREATE SCHEMA
 ```
 
-### Enable vector extension
+### Enable vector extension on your database
 Connect to new ecl database
 ```
 postgres=# \connect ecl
@@ -94,6 +95,15 @@ You are now connected to database "ecl" as user "postgres".
 Create extension
 ```
 ecl=# CREATE EXTENSION vector;
+CREATE EXTENSION
+```
+
+If you're using **PostgreSQL** - you have to do the same also template1 database.
+
+[PostgreSQL engine is using template1](https://www.postgresql.org/docs/current/manage-ag-templatedbs.html#MANAGE-AG-TEMPLATEDBS) when creating new databases.
+When django creates new database for [unit testing](https://docs.djangoproject.com/en/5.1/topics/testing/overview/#running-tests), we need to make sure that all extensions will be created before tests run. Hence, you have to configure your PostgreSQL instance to create vector extension on each newly created database.
+```
+template1=# CREATE EXTENSION vector;
 CREATE EXTENSION
 ```
 
@@ -133,19 +143,19 @@ CREATE EXTENSION
   pip3 install django
   ```
 * Run server:
-Note: below example runs django at the port 5000 (however you may run that on a default port).
+Note: below example runs django at the default port.
   ```
-  (venv) kuba@totem ecl % python3 ./manage.py runserver 127.0.0.1:5000
+  (venv) kuba@totem ecl % python3 ./manage.py runserver
   Watching for file changes with StatReloader
   Performing system checks...
   
   System check identified no issues (0 silenced).
   September 24, 2024 - 12:49:20
   Django version 5.1.1, using settings 'ecl.settings'
-  Starting development server at http://127.0.0.1:5000/
+  Starting development server at http://127.0.0.1:8000/
   Quit the server with CONTROL-C.
   ```
-* Verify installation: open 127.0.0.1:5000 URL in the browser. If you see Django welcome message, you are most probably well configured. Congrats.
+* Verify installation: open 127.0.0.1:8000 URL in the browser. If you see Django welcome message, you are most probably well configured. Congrats.
   ```
   The install worked successfully! Congratulations!
   View release notes for Django 5.1
@@ -233,4 +243,52 @@ result = client.chat.completions.create(model='gpt-4o', messages=[
 ])
 
 print(result.choices[0].message.content)
+```
+
+# Troubleshooting and known issues
+## Known issues
+### Problem with 'vector' reported during testing on PostgreSQL instance
+Problem statement:
+
+When you [run tests](https://docs.djangoproject.com/en/5.1/topics/testing/overview/#running-tests) 
+```python3 manage.py test```
+
+error appears:
+```django.db.utils.ProgrammingError: type "vector" does not exist```
+
+Solution:
+Configure template1 database. Log into template1 wwith psql, run:
+```
+template1=# CREATE EXTENSION vector;
+CREATE EXTENSION
+```
+More details you'll find above, in the chapter regarding ECL database setup.
+
+### Problem with accessing REST APIs
+Problem statement: \
+You run curl to check new api, for instance:
+```
+curl -v -X POST http://127.0.0.1:8000/api/ask/ \
+-H "Content-Type: application/json" \
+-H "Custom-Header: CustomValue" \
+-d '{"question_message": "What is the best Product?"}'
+```
+...but you get...
+```
+HTTP/1.1 403 Forbidden
+```
+Solution: you need to add authorisation header with your token 
+```
+curl -v -X POST http://127.0.0.1:8000/api/ask/ \
+-H "Content-Type: application/json" \
+-H "Authorization: Token <your-token>" \
+-H "Custom-Header: CustomValue" \
+-d '{"question_message": "What is the best Product?"}'
+```
+
+## It may help
+### Django logs
+Run server in verbose mode
+```
+python manage.py runserver --verbosity 3
 ```

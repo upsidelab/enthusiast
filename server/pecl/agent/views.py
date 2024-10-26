@@ -45,54 +45,6 @@ def process_question(conversation, question_message):
     return question
 
 
-def conversation_view(request, conversation_id=None, embedding_model=None):
-    # Populate context.
-    available_models = []
-    for m in EmbeddingModel.objects.all():
-        available_models.append(m)
-    available_dimensions = []
-    for d in EmbeddingDimension.objects.all():
-        available_dimensions.append(d)
-
-    question_message = conversation_history = embedding_dimensions = embedding_model = None
-    if request.method == 'POST':
-        question_message = request.POST.get('user_message')
-        selected_model_id = request.POST.get('selected_model')
-        if selected_model_id:
-            embedding_model = EmbeddingModel.objects.get(id=selected_model_id)
-        selected_dimensions_id = request.POST.get('selected_dimensions')
-        if selected_dimensions_id:
-            embedding_dimensions = EmbeddingDimension.objects.get(id=selected_dimensions_id).dimension
-
-    # Get conversation.
-    conversation = initialize_conversation(conversation_id,
-                                           embedding_model,
-                                           embedding_dimensions,
-                                           "WebUser",
-                                           "WebSystem")
-
-    conversation_history = conversation.get_history()
-
-    # Get the answer if the question message was provided (a user pushed 'Send' button on a conversation page).
-    if question_message:
-        question = process_question(conversation, question_message)
-        # Extend history with current question-answer pair.
-        conversation_history += question.get_qa_str()
-
-    context = {
-        'conversation_id': conversation.id,
-        'embedding_model': conversation.model.name,
-        'embedding_dimensions': conversation.dimensions,
-        'user_name': conversation.user_name,
-        'system_name': conversation.system_name,
-        'started_at': conversation.started_at,
-        'available_models': available_models,
-        'available_dimensions': available_dimensions,
-        'conversation_history': conversation_history,
-    }
-    return render(request, 'agent/conversation.html', context)
-
-
 class GetAnswer(APIView):
     permission_classes = [IsAuthenticated]
     """

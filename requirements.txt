@@ -6,6 +6,7 @@ anyio==4.5.0
 asgiref==3.8.1
 attrs==24.2.0
 Brotli==1.1.0
+celery~=5.4.0
 certifi==2024.8.30
 charset-normalizer==3.3.2
 click==8.1.7
@@ -37,6 +38,7 @@ psycopg2==2.9.9
 pydantic==2.9.2
 pydantic_core==2.23.4
 PyYAML==6.0.2
+redis==5.2.0
 regex==2024.9.11
 requests==2.32.3
 requests-toolbelt==1.0.0

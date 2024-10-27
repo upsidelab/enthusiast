@@ -1,48 +1,13 @@
-from datetime import datetime
+from celery.result import AsyncResult
 
-from django.shortcuts import render
 from rest_framework import status
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from agent.models import Conversation, Question
+from agent.models import Conversation
 from agent.serializers import AskQuestionSerializer, ConversationSerializer
-from ecl.models import EmbeddingModel, EmbeddingDimension, DataSet
-
-
-def initialize_conversation(conversation_id, embedding_model, embedding_dimensions, user_name, system_name):
-    # Create a new or continue an existing conversation.
-    if conversation_id is not None:
-        conversation = Conversation.objects.get(id=conversation_id)
-    else:
-        # Load default model and dimensions if not defined in params.
-        if not embedding_model:
-            embedding_model = EmbeddingModel.objects.first()
-        if not embedding_dimensions:
-            embedding_dimensions = EmbeddingDimension.objects.first()
-
-        # Start a new conversation.
-        conversation = Conversation(started_at=datetime.now(),
-                                    model=embedding_model,
-                                    dimensions=embedding_dimensions,
-                                    user_name=user_name,
-                                    system_name=system_name,
-                                    data_set=DataSet.objects.first())
-        conversation.save()  # Save it now to allow adding child entities such as questions (connected by foreign key).
-    return conversation
-
-
-def process_question(conversation, question_message):
-    # Ask your question.
-    question = Question(conversation=conversation,
-                        asked_at=datetime.now(),
-                        question=question_message)
-    question.save()  # Save it now to allow adding child entities such as relevant documents (connected by foreign key).
-    question.get_answer()
-    question.save()
-    return question
 
 
 class GetAnswer(APIView):
@@ -54,35 +19,52 @@ class GetAnswer(APIView):
     def post(self, request):
         serializer = AskQuestionSerializer(data=request.data)
         if serializer.is_valid():
+            from agent.tasks import answer_question_task
             # Collect params.
             conversation_id = serializer.validated_data.get('conversation_id')
             embedding_model_name = serializer.validated_data.get('embedding_model_name')
-            embedding_dimensions = serializer.validated_data.get('embedding_dimensions')
+            embedding_dimensions_value = serializer.validated_data.get('embedding_dimensions')
             user_name = serializer.validated_data.get('user_name')
             system_name = serializer.validated_data.get('system_name')
             question_message = serializer.validated_data.get('question_message')
 
-            # Collect required objects.
-            embedding_model = None
-            if embedding_model_name:
-                embedding_model = EmbeddingModel.objects.get(name=embedding_model_name)
+            # Run the task asynchronously.
+            task = answer_question_task.apply_async(args=[conversation_id,
+                                                          embedding_model_name,
+                                                          embedding_dimensions_value,
+                                                          user_name,
+                                                          system_name,
+                                                          question_message])
 
-            # Get conversation.
-            conversation = initialize_conversation(conversation_id,
-                                                   embedding_model,
-                                                   embedding_dimensions,
-                                                   user_name,
-                                                   system_name)
-            # Get the answer.
-            question = process_question(conversation, question_message)
-
-            return Response({
-                'conversation_id': question.conversation.id,
-                'query_message': question.question,
-                'answer': question.answer},
-                status=status.HTTP_200_OK)
+            return Response({"task_id": task.id}, status=status.HTTP_202_ACCEPTED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GetTaskStatus(APIView):
+    permission_classes = [IsAuthenticated]
+    """
+    View to check status of an enqueued task that's runed in the background.
+    """
+
+    def get(self, request, task_id):
+        task_result = AsyncResult(task_id)
+        if task_result.state == 'PENDING':
+            response = {"state": task_result.state, "status": "Pending..."}
+        elif task_result.state == 'SUCCESS':
+            response = {
+                "state": task_result.state,
+                "result": task_result.result
+            }
+        elif task_result.state == 'FAILURE':
+            response = {
+                "state": task_result.state,
+                "status": str(task_result.info)
+            }
+        else:
+            response = {"state": task_result.state}
+
+        return Response(response)
 
 
 class ConversationListView(ListAPIView):

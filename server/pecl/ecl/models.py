@@ -1,6 +1,13 @@
+import logging
+
+from importlib import reload
+
 from django.db import models
 from openai import OpenAI
 from pgvector.django import CosineDistance, VectorField
+
+
+logger = logging.getLogger(__name__)
 
 
 class Owner(models.Model):
@@ -36,6 +43,13 @@ class DataSet(models.Model):
         db_table_comment = "List of various data sets. One data set may be the whole company's content such as blog posts, or some part of it: a data set may be represent a brand or department."
         db_table = "ecl_data_set"
 
+    def async_reload_all_embeddings(self):
+        from .tasks import reload_all_embeddings_task
+
+        logging.info("Models/Start async reload all embeddings task")
+        reload_all_embeddings_task.apply_async(args=[self.id])
+        logging.info("Models/Stop async reload all embeddings task")
+
     def reload_all_embeddings(self):
         """Reloads embeddings for all models and dimensions registered in ECL config.
 
@@ -44,12 +58,16 @@ class DataSet(models.Model):
         embeddings for model ALFA and dimensions 216 were calculated before, while now ECL config is set to
         calculate embeddings with model BETA and dimensions set to 1536.
         """
+        logging.info("Start reload all embeddings method")
         embedding_models = EmbeddingModel.objects.all()
         embedding_dimensions = EmbeddingDimension.objects.all()
 
         for m in embedding_models:
+            logging.info(f"- reload embeddings for model: {m.name}")
             for d in embedding_dimensions:
+                logging.info(f"- reload embeddings for dimension: {d.dimension}")
                 self.set_content_embeddings(m, d)
+        logging.info("Stop reload all embeddings method")
 
 
     def set_content_embeddings(self, model, dimensions):

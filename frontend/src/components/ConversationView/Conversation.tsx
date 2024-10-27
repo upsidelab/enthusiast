@@ -19,8 +19,13 @@ export function Conversation() {
     { role: "agent", text: "How can I help you today?" },
   ]);
 
-const onMessageComposerSubmit = (message: string) => {
-  const fetchAnswer = async () => {
+  const onMessageComposerSubmit = async (message: string) => {
+    setIsLoading(true);
+    setMessages((currMessages) => [
+      ...currMessages,
+      { role: "user", text: message }
+    ]);
+
     try {
       const apiAnswer = await api.getAnswer(conversationId, message);
       setMessages((currMessages) => [...currMessages, { role: "agent", text: apiAnswer.answer }]);
@@ -31,13 +36,6 @@ const onMessageComposerSubmit = (message: string) => {
       setIsLoading(false); // Ensure isLoading is reset after API call (even if api fails)
     }
   };
-
-  setIsLoading(true);
-  setMessages((currMessages) =>
-    [...currMessages, { role: "user", text: message }]
-  );
-  fetchAnswer();
-};
 
   return (
     <div className="flex flex-col h-full p-4">

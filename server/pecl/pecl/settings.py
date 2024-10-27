@@ -181,3 +181,8 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication'
     ]
 }
+
+# CELERY
+CELERY_BROKER_URL = os.environ.get('ECL_CELERY_BROKER_URL')
+CELERY_RESULT_BACKEND = os.environ.get('ECL_CELERY_RESULT_BACKEND')
+CELERY_TIMEZONE = os.environ.get('ECL_CELERY_TIMEZONE')

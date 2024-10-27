@@ -48,8 +48,12 @@ class CreateContentTool(BaseTool):
     max_retry: int = 3
     chat_model: str = None
 
-    def __init__(self, data_set: DataSet, embedding_model: EmbeddingModel,
-                 embedding_dimensions: EmbeddingDimension, chat_model: str, **kwargs: Any):
+    def __init__(self,
+                 data_set: DataSet,
+                 embedding_model: EmbeddingModel,
+                 embedding_dimensions: EmbeddingDimension,
+                 chat_model: str,
+                 **kwargs: Any):
         super().__init__(**kwargs)
         self.data_set = data_set
         self.embedding_model = embedding_model
@@ -91,7 +95,8 @@ class CreateContentTool(BaseTool):
         return document_context
 
     def _run(self, query: str):
-        document_retriever = DocumentRetriever(data_set=self.data_set, embedding_model=self.embedding_model,
+        document_retriever = DocumentRetriever(data_set=self.data_set,
+                                               embedding_model=self.embedding_model,
                                                embedding_dimensions=self.embedding_dimensions)
         relevant_documents = document_retriever.find_documents_matching_query(query)
         relevant_products = ProductRetriever(data_set=self.data_set).find_products_matching_query(query)

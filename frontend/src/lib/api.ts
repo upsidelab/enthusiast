@@ -70,27 +70,79 @@ export class ApiClient {
     return await response.json() as Promise<Conversation[]>;
   }
 
-  async getAnswer(conversation_id: number | null, message: string): Promise<Answer> {
-    type RequestBody = {
-       question_message: string;
-       conversation_id?: number;
-     };
+  async getAnswer(conversation_id: number | null, message: string) {
+    try {
+      type RequestBody = {
+         question_message: string;
+         conversation_id?: number;
+       };
 
-    const body: RequestBody = { "question_message": message }
-    if (conversation_id !== null) {
-      body.conversation_id = conversation_id
+      const body: RequestBody = { "question_message": message }
+      if (conversation_id !== null) {
+        body.conversation_id = conversation_id
+      }
+
+      // Step 1: Enqueue the task
+      const response = await fetch(`${this.apiBase}/api/ask/`, {
+        headers: {
+          ...this._requestConfiguration().headers,
+          'Content-Type': 'application/json'
+        },
+        method: 'POST',
+        body: JSON.stringify(body)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to enqueue task: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const taskId = data.task_id;
+
+      // Step 2: Polling function to check task status (with a defined frequency)
+      const pollTaskStatus = async (taskId: string): Promise<any> => {
+        return new Promise((resolve, reject) => {
+          const pollInterval = setInterval(async () => {
+            try {
+              const response = await fetch(`${this.apiBase}/api/task_status/${taskId}/`, {
+                headers: {
+                  ...this._requestConfiguration().headers,
+                  'Content-Type': 'application/json'
+                },
+                method: 'GET'
+              });
+
+              if (!response.ok) {
+                throw new Error(`Failed to fetch task status: ${response.statusText}`);
+              }
+
+              const data = await response.json();
+              const { state, result } = data;
+
+              if (state === "SUCCESS") {
+                clearInterval(pollInterval);
+                resolve(result);
+              } else if (state === "FAILURE") {
+                clearInterval(pollInterval);
+                reject(new Error("Task failed"));
+              }
+            } catch (error) {
+              clearInterval(pollInterval);
+              reject(error);
+            }
+          }, 2000); // Polling interval.
+        });
+      };
+
+      // Step 3: Await polling result and return final answer
+      return await pollTaskStatus(taskId);
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`Failed to get answer: ${error.message}`);
+      } else {
+        throw new Error("Failed to get answer: An unknown error occurred.");
+      }
     }
-
-    const response = await fetch(`${this.apiBase}/api/ask/`, {
-      headers: {
-        ...this._requestConfiguration().headers,
-        'Content-Type': 'application/json'
-      },
-      method: 'POST',
-      body: JSON.stringify(body)
-    });
-
-    return await response.json() as Promise<Answer>;
   }
 
   async login(email: string, password: string): Promise<Token> {

@@ -12,9 +12,11 @@ def index(request):
 
 
 class DataSetListView(ListAPIView):
-    queryset = DataSet.objects.all()
     serializer_class = DataSetSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return DataSet.objects.filter(users=self.request.user)
 
 
 class ProductListView(ListAPIView):

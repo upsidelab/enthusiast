@@ -5,6 +5,7 @@ from importlib import reload
 from django.db import models
 from openai import OpenAI
 from pgvector.django import CosineDistance, VectorField
+from django.conf import settings
 
 
 logger = logging.getLogger(__name__)
@@ -38,6 +39,7 @@ class DataSet(models.Model):
     code = models.CharField(max_length=5)
     name = models.CharField(max_length=30)
     owner = models.ForeignKey(Owner, related_name="data_set", on_delete=models.PROTECT, null=True)
+    users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="data_sets")
 
     class Meta:
         db_table_comment = "List of various data sets. One data set may be the whole company's content such as blog posts, or some part of it: a data set may be represent a brand or department."

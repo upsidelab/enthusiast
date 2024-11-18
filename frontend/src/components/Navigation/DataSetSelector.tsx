@@ -25,7 +25,7 @@ export function DataSetSelector({className}: HTMLAttributes<HTMLElement>) {
       const apiDataSets = await api.getDataSets();
       setDataSets(apiDataSets);
       if (!apiDataSets.find((e) => e.id === dataSetId)) {
-        setDataSetId(apiDataSets[0].id);
+        setDataSetId(apiDataSets[0]?.id || null);
       }
     };
 
@@ -52,17 +52,23 @@ export function DataSetSelector({className}: HTMLAttributes<HTMLElement>) {
         <DropdownMenuLabel className="text-xs text-muted-foreground">
           Data Sets
         </DropdownMenuLabel>
-        {dataSets.map((dataSet) => (
-          <DropdownMenuItem
-            key={dataSet.name}
-            onClick={() => setDataSetId(dataSet.id)}
-            className="items-start gap-2 px-1.5"
-          >
-            <div className="grid flex-1 leading-tight">
-              <div className="line-clamp-1 font-medium">{dataSet.name}</div>
-            </div>
+        {dataSets.length === 0 ? (
+          <DropdownMenuItem disabled className="text-muted-foreground">
+            No data sets available
           </DropdownMenuItem>
-        ))}
+        ) : (
+          dataSets.map((dataSet) => (
+            <DropdownMenuItem
+              key={dataSet.name}
+              onClick={() => setDataSetId(dataSet.id)}
+              className="items-start gap-2 px-1.5"
+            >
+              <div className="grid flex-1 leading-tight">
+                <div className="line-clamp-1 font-medium">{dataSet.name}</div>
+              </div>
+            </DropdownMenuItem>
+          ))
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   )

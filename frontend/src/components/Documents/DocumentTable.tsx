@@ -40,6 +40,14 @@ export function DocumentTable() {
     loadData();
   }, [dataSetId]);
 
+  if (documents.length === 0) {
+      return(
+        <div className="text-center">
+          <h2 className="font-bold">No documents available</h2>
+        </div>
+    );
+  }
+
   return (
     <SkeletonLoader skeleton={<Skeleton className="w-full h-[100px]"/>} isLoading={isLoading}>
       <Table>

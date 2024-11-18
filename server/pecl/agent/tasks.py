@@ -5,14 +5,14 @@ from agent.services import ConversationManager
 def answer_question_task(conversation_id,
                          embedding_model_name,
                          embedding_dimensions_value,
-                         user_name,
+                         user_id,
                          system_name,
                          question_message):
     manager = ConversationManager()
     question = manager.answer_question(conversation_id,
                                embedding_model_name,
                                embedding_dimensions_value,
-                               user_name,
+                               user_id,
                                system_name,
                                question_message)
 

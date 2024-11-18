@@ -1,9 +1,10 @@
 from datetime import datetime
 from agent.models import Conversation, Question
+from account.models import CustomUser
 from ecl.models import EmbeddingModel, EmbeddingDimension, DataSet
 
 class ConversationManager:
-    def initialize_conversation(self, conversation_id, embedding_model, embedding_dimensions, user_name, system_name):
+    def initialize_conversation(self, conversation_id, embedding_model, embedding_dimensions, user_id, system_name):
         # Create a new or continue an existing conversation.
         if conversation_id is not None:
             conversation = Conversation.objects.get(id=conversation_id)
@@ -18,7 +19,7 @@ class ConversationManager:
             conversation = Conversation(started_at=datetime.now(),
                                         model=embedding_model,
                                         dimensions=embedding_dimensions,
-                                        user_name=user_name,
+                                        user=CustomUser.objects.get(id=user_id),
                                         system_name=system_name,
                                         data_set=DataSet.objects.first())
             conversation.save()  # Save it now to allow adding child entities such as questions (connected by foreign key).
@@ -35,7 +36,7 @@ class ConversationManager:
         return question
 
     def answer_question(self, conversation_id, embedding_model_name, embedding_dimensions_value,
-                        user_name, system_name, question_message):
+                        user_id, system_name, question_message):
 
         # Collect required objects.
         embedding_dimensions = embedding_model = None
@@ -48,7 +49,7 @@ class ConversationManager:
         conversation = self.initialize_conversation(conversation_id,
                                                embedding_model,
                                                embedding_dimensions,
-                                               user_name,
+                                               user_id,
                                                system_name)
 
         # Get the answer.

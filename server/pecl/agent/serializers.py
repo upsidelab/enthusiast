@@ -17,8 +17,6 @@ class AskQuestionSerializer(serializers.Serializer):
         embedding_dimensions:
             Integer, You may provide a desired embedding vector length for a new conversation, if you skip this
             attribute, we will use default embedding vector length.
-        user_name:
-            Str, Name of a user asking questions to be displayed on the Conversation page. You may skip this attribute.
         system_name:
             Str, Name of a system user that is answering questions to be displayed on the Conversation page.
             You may skip this attribute.
@@ -46,14 +44,7 @@ class AskQuestionSerializer(serializers.Serializer):
             'null': 'Embedding dimensions value cannot be blank. Either skip this parameter (a default dimension will be used), or provide a valid number greater that zero'
         }
     )
-    user_name = serializers.CharField(
-        required=False,
-        default='APIUser',
-        allow_blank = False,
-        error_messages = {
-            'blank': 'User name cannot be blank. Provide valid user name or skip this param (default value will be used)'
-        }
-    )
+
     system_name = serializers.CharField(
         required=False,
         default='APISystem',

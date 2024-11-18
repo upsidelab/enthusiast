@@ -23,8 +23,8 @@ class GetAnswer(APIView):
             # Collect params.
             conversation_id = serializer.validated_data.get('conversation_id')
             embedding_model_name = serializer.validated_data.get('embedding_model_name')
+
             embedding_dimensions_value = serializer.validated_data.get('embedding_dimensions')
-            user_name = serializer.validated_data.get('user_name')
             system_name = serializer.validated_data.get('system_name')
             question_message = serializer.validated_data.get('question_message')
 
@@ -32,7 +32,7 @@ class GetAnswer(APIView):
             task = answer_question_task.apply_async(args=[conversation_id,
                                                           embedding_model_name,
                                                           embedding_dimensions_value,
-                                                          user_name,
+                                                          request.user.id,
                                                           system_name,
                                                           question_message])
 

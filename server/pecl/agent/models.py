@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 from pgvector.django import VectorField
 
@@ -8,10 +9,10 @@ from langchain_core.messages import AIMessage, HumanMessage
 
 
 class Conversation(models.Model):
+    user = models.ForeignKey(get_user_model(), on_delete=models.PROTECT, null=True)
     started_at = models.DateTimeField(auto_now_add=True)
     model = models.ForeignKey(EmbeddingModel, related_name="conversation", on_delete=models.PROTECT, null=True)
     dimensions = models.ForeignKey(EmbeddingDimension, on_delete=models.PROTECT, null=True)
-    user_name = models.CharField(max_length=50, default="user", null=True)  # Who asks questions.
     system_name = models.CharField(max_length=50, default="system", null=True)  # Who answers.
     data_set = models.ForeignKey(DataSet, on_delete=models.PROTECT, null=False)
 

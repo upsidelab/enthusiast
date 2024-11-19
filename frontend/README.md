@@ -45,7 +45,7 @@ from account.models import CustomUser
 # Get the user whose password you want to change
 user = CustomUser.objects.get(email='dale.cooper@example.com')
 
-token = Token.objects.get(user=user)
+token, created = Token.objects.get_or_create(user=user)
 print(token)
 ```
 Move to terminal where you run your django server, run

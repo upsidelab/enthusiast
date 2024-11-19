@@ -1,0 +1,50 @@
+name: Lint
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  lint-backend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install Ruff
+        run: pip install ruff
+
+      - name: Run Ruff
+        run: ruff check server/pecl
+
+  lint-frontend:
+      runs-on: ubuntu-latest
+
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@v3
+
+        - name: Set up Node.js
+          uses: actions/setup-node@v3
+          with:
+            node-version: '20'
+
+        - name: Install pnpm
+          run: npm install -g pnpm
+          working-directory: frontend
+
+        - name: Install dependencies
+          run: pnpm install
+          working-directory: frontend
+
+        - name: Run ESLint
+          run: pnpm exec eslint src
+          working-directory: frontend

@@ -25,9 +25,15 @@ export function Conversation() {
       ...currMessages,
       { role: "user", text: message }
     ]);
-
     try {
       const apiAnswer = await api.getAnswer(conversationId, message);
+      if (!apiAnswer) {
+        setMessages((currMessages) => [
+            ...currMessages,
+            { role: "agent", text: "An error occurred. Please try again." },
+        ]);
+        return;
+      }
       setMessages((currMessages) => [...currMessages, { role: "agent", text: apiAnswer.answer }]);
       setConversationId(apiAnswer.conversation_id);
     } catch (error) {

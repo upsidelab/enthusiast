@@ -4,7 +4,8 @@ from account.models import CustomUser
 from ecl.models import EmbeddingModel, EmbeddingDimension, DataSet
 
 class ConversationManager:
-    def initialize_conversation(self, conversation_id, embedding_model, embedding_dimensions, user_id, system_name):
+    def initialize_conversation(self, user_id, conversation_id=None,embedding_model=None, embedding_dimensions=None,
+                                system_name=None):
         # Create a new or continue an existing conversation.
         if conversation_id is not None:
             conversation = Conversation.objects.get(id=conversation_id)
@@ -46,11 +47,11 @@ class ConversationManager:
             embedding_dimensions = EmbeddingDimension.objects.get(dimensions=embedding_dimensions_value)
 
         # Get conversation.
-        conversation = self.initialize_conversation(conversation_id,
-                                               embedding_model,
-                                               embedding_dimensions,
-                                               user_id,
-                                               system_name)
+        conversation = self.initialize_conversation(user_id=user_id,
+                                                    conversation_id=conversation_id,
+                                                    embedding_model=embedding_model,
+                                                    embedding_dimensions=embedding_dimensions,
+                                                    system_name=system_name)
 
         # Get the answer.
         return self.process_question(conversation, question_message)

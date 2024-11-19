@@ -27,6 +27,7 @@ export type Conversation = {
   model: string;
   dimensions: number;
   data_set: string;
+  history?: Message[];
 }
 
 export type Token = {
@@ -41,6 +42,12 @@ export type Answer = {
 
 export type Account = {
   email: string;
+}
+
+export type Message = {
+  id: number;
+  role: string;
+  text: string;
 }
 
 export class ApiClient {
@@ -74,15 +81,35 @@ export class ApiClient {
     try {
       type RequestBody = {
          question_message: string;
-         conversation_id?: number;
+         conversation_id: number | null;
        };
 
-      const body: RequestBody = { "question_message": message }
-      if (conversation_id !== null) {
-        body.conversation_id = conversation_id
+      // Initialize a conversation
+      if (conversation_id === null) {
+        try {
+          const response = await fetch(`${this.apiBase}/api/conversation/`, {
+            method: "POST",
+            headers: {
+              ...this._requestConfiguration().headers,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error(`Failed to create conversation: ${response.statusText}`);
+          }
+
+          const data = await response.json();
+          conversation_id = data.id;
+        } catch (error) {
+          console.error("Error creating conversation:", error);
+          throw error;
+        }
       }
 
-      // Step 1: Enqueue the task
+      const body: RequestBody = { "question_message": message, "conversation_id": conversation_id }
+
+      // Enqueue the task
       const response = await fetch(`${this.apiBase}/api/ask/`, {
         headers: {
           ...this._requestConfiguration().headers,
@@ -99,7 +126,7 @@ export class ApiClient {
       const data = await response.json();
       const taskId = data.task_id;
 
-      // Step 2: Polling function to check task status (with a defined frequency)
+      // Polling function to check task status (with a defined interval)
       const pollTaskStatus = async (taskId: string): Promise<any> => {
         return new Promise((resolve, reject) => {
           const pollInterval = setInterval(async () => {
@@ -117,11 +144,11 @@ export class ApiClient {
               }
 
               const data = await response.json();
-              const { state, result } = data;
+              const { state } = data;
 
               if (state === "SUCCESS") {
                 clearInterval(pollInterval);
-                resolve(result);
+                resolve(state);
               } else if (state === "FAILURE") {
                 clearInterval(pollInterval);
                 reject(new Error("Task failed"));
@@ -133,14 +160,48 @@ export class ApiClient {
           }, 2000); // Polling interval.
         });
       };
+      // Function to wait for task and return history.
+      const status = await pollTaskStatus(taskId);
 
-      // Step 3: Await polling result and return final answer
-      return await pollTaskStatus(taskId);
+      if (status === "SUCCESS") {
+        const conversation = await this.getConversation(conversation_id);
+        const latestMessage = conversation.history?.[conversation.history.length - 1];  //Latest message is an answer.
+        return {
+            conversation_id: conversation_id,
+            answer: latestMessage?.text || "No answer available",
+        };
+      }
     } catch (error) {
       if (error instanceof Error) {
         throw new Error(`Failed to get answer: ${error.message}`);
       } else {
         throw new Error("Failed to get answer: An unknown error occurred.");
+      }
+    }
+  }
+
+  async getConversation(conversation_id: number | null): Promise<Conversation> {
+    try {
+      const response = await fetch(`${this.apiBase}/api/conversation/${conversation_id}`, {
+        headers: {
+          ...this._requestConfiguration().headers,
+          'Content-Type': 'application/json'
+        },
+        method: 'GET',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get conversation: ${response.statusText}`);
+      }
+
+      const conversation = await response.json();
+
+      return conversation;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`Failed to get conversation history: ${error.message}`);
+      } else {
+        throw new Error("Failed to get conversation history: An unknown error occurred.");
       }
     }
   }

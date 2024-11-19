@@ -85,3 +85,6 @@ fabric.properties
 /.idea/misc.xml
 /.idea/inspectionProfiles/profiles_settings.xml
 /.idea/vcs.xml
+
+# Redis snapshot
+/dump.rdb

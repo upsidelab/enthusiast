@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from agent.models import Conversation
+from agent.models import Conversation, Question
 from ecl.models import EmbeddingModel, EmbeddingDimension
 
 
@@ -80,10 +80,45 @@ class AskQuestionSerializer(serializers.Serializer):
 
 
 class ConversationSerializer(serializers.ModelSerializer):
-    model = serializers.SlugRelatedField(slug_field='name', read_only=True)
-    dimensions = serializers.SlugRelatedField(slug_field='dimension', read_only=True)
-    data_set = serializers.SlugRelatedField(slug_field='name', read_only=True)
     class Meta:
         model = Conversation
-        fields = ['started_at', 'model', 'dimensions', 'data_set']
+        fields = ['id', 'started_at']
 
+
+class MessagesSerializer(serializers.ModelSerializer):
+    """Serializer to get list of messages exchanged during a given conversation.
+
+        Arguments:
+        conversation_id:
+            Integer, obligatory, provide this argument to get messages exchanged during one conversation provide.
+        min_message_id:
+            Integer, to get messages starting at a given point of a conversation.
+    """
+    class Meta:
+        model = Question
+        fields = ['id', 'question', 'answer']
+
+    def to_representation(self, instance):
+        # A Question contains two messages: question itself followed by an answer.
+        return [
+            {'id': instance.id, 'role': 'user', 'text': instance.question},
+            {'id': instance.id, 'role': 'agent', 'text': instance.answer}
+        ]
+
+class ConversationContentSerializer(ConversationSerializer):
+    # This serializer returns conversation extended with history.
+    history = MessagesSerializer(many=True)
+
+    class Meta(ConversationSerializer.Meta):
+        fields = ConversationSerializer.Meta.fields + ['history']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        flattened_history = []
+        for message in data.get('history', []):
+            flattened_history.extend(message)
+
+        data['history'] = flattened_history
+
+        return data

@@ -6,8 +6,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from agent.models import Conversation
-from agent.serializers import AskQuestionSerializer, ConversationSerializer
+from agent.models import Conversation, Question
+from agent.serializers import AskQuestionSerializer, ConversationSerializer, ConversationContentSerializer, MessagesSerializer
+from agent.services import ConversationManager
 
 
 class GetAnswer(APIView):
@@ -44,19 +45,12 @@ class GetAnswer(APIView):
 class GetTaskStatus(APIView):
     permission_classes = [IsAuthenticated]
     """
-    View to check status of an enqueued task that's runed in the background.
+    View to check status of an enqueued task that's running in the background.
     """
 
     def get(self, request, task_id):
         task_result = AsyncResult(task_id)
-        if task_result.state == 'PENDING':
-            response = {"state": task_result.state, "status": "Pending..."}
-        elif task_result.state == 'SUCCESS':
-            response = {
-                "state": task_result.state,
-                "result": task_result.result
-            }
-        elif task_result.state == 'FAILURE':
+        if task_result.state == 'FAILURE':
             response = {
                 "state": task_result.state,
                 "status": str(task_result.info)
@@ -67,9 +61,50 @@ class GetTaskStatus(APIView):
         return Response(response)
 
 
+class ConversationCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+    """
+    View to initialize a new conversation.
+    """
+
+    def post(self, request):
+        manager = ConversationManager()
+        conversation = manager.initialize_conversation(user_id=request.user.id)
+
+        conversation_data = ConversationSerializer(conversation).data
+
+        serializer = ConversationContentSerializer({
+            **conversation_data,  # Conversation details
+            "history": []
+        })
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class ConversationRetrieveView(APIView):
+    permission_classes = [IsAuthenticated]
+    """
+    View to retrieve details of an existing conversation.
+    """
+    def get(self, request, conversation_id):
+        conversation = Conversation.objects.get(id=conversation_id)
+
+        messages = Question.objects.filter(conversation=conversation).order_by('id')
+
+        conversation_data = ConversationSerializer(conversation).data
+
+        serializer = ConversationContentSerializer({
+            **conversation_data,  # Conversation details
+            "history": messages
+        })
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 class ConversationListView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    """
+    View to retrieve details of an existing conversation.
+    """
     serializer_class = ConversationSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Conversation.objects.filter(data_set_id=self.kwargs['data_set_id']).select_related('model', 'dimensions', 'data_set')
+        return Conversation.objects.filter(data_set_id=self.kwargs['data_set_id'])

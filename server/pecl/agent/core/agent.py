@@ -36,7 +36,7 @@ class Agent:
             verbose=True
         )
         # Populate memory with history of conversation.
-        logger.debug(f"Fetch memories. Number of messages in conversation history: {len(messages)}")
+        logger.debug(f"Populate memory. Number of messages in conversation history: {len(messages)}")
         self._populate_agent_memory(messages)
 
     def _populate_agent_memory(self, messages):

@@ -17,5 +17,6 @@ def answer_question_task(conversation_id,
                                question_message)
 
     return {'conversation_id': question.conversation.id,
+            'question_id': question.id,
             'query_message': question.question,
             'answer': question.answer}

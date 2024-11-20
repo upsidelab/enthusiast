@@ -34,14 +34,13 @@ export type Token = {
   token: string;
 }
 
-export type Answer = {
-  conversation_id: number;
-  query_message: string;
-  answer: string;
-}
-
 export type Account = {
   email: string;
+}
+
+export type FeedbackData = {
+  answer_rating: number | null;
+  answer_feedback: string;
 }
 
 export type Message = {
@@ -169,6 +168,7 @@ export class ApiClient {
         return {
             conversation_id: conversation_id,
             answer: latestMessage?.text || "No answer available",
+            question_id: latestMessage?.id || null,
         };
       }
     } catch (error) {
@@ -225,6 +225,23 @@ export class ApiClient {
   async getAccount(): Promise<Account> {
     const response = await fetch(`${this.apiBase}/api/account`, this._requestConfiguration());
     return await response.json() as Promise<Account>;
+  }
+
+  async updateMessageFeedback(questionId: number | null, feedbackData: FeedbackData): Promise<void> {
+    const response = await fetch(`${this.apiBase}/api/question/${questionId}/feedback/`, {
+      headers: {
+        ...this._requestConfiguration().headers,
+        'Content-Type': 'application/json',
+      },
+      method: 'PATCH',
+      body: JSON.stringify(feedbackData),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Could not update feedback for question ID ${questionId}`);
+    }
+
+    return await response.json() as Promise<void>;
   }
 
   _requestConfiguration(): RequestInit {

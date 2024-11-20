@@ -85,6 +85,15 @@ class ConversationSerializer(serializers.ModelSerializer):
         fields = ['id', 'started_at']
 
 
+class MessageFeedbackSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Question
+        fields = ['answer_rating', 'answer_feedback']
+        extra_kwargs = {
+            'answer_rating': {'required': True},
+        }
+
+
 class MessagesSerializer(serializers.ModelSerializer):
     """Serializer to get list of messages exchanged during a given conversation.
 

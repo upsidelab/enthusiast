@@ -17,7 +17,9 @@ class Conversation(models.Model):
     data_set = models.ForeignKey(DataSet, on_delete=models.PROTECT, null=False)
 
     class Meta:
-        db_table_comment = "A conversation is a collection of various messages exchanged during one session. Messages are mostly questions and answers and have different actors such as end user asking question and ECL agent answering those questions."
+        db_table_comment = ("A conversation is a collection of various messages exchanged during one session. Messages "
+                            "are mostly questions and answers and have different actors such as end user asking "
+                            "question and ECL agent answering those questions.")
 
     def get_messages(self):
         """Return list of messages exchanged during a conversation.
@@ -33,9 +35,12 @@ class Question(models.Model):
     asked_at = models.DateTimeField(auto_now_add=True)
     question = models.TextField()
     question_embedding = VectorField(null=True)
-    prompt_message = models.TextField(null=True, default=None)
+    prompt_message = models.TextField(null=True)
     answer = models.TextField(null=True)
     answer_embedding = VectorField(null=True)
+    # User's feedback regarding answer provided by agent.
+    answer_rating = models.IntegerField(null=True)  # Category (range bad->good represented as number).
+    answer_feedback = models.TextField(null=True)  # Free text to provide information regarding answer's accuracy.
 
     class Meta:
         db_table_comment = "A question is a collection of two messages: question itself followed by a system's answer."
@@ -65,5 +70,6 @@ class AnswerDocument(models.Model):
     cosine_distance = models.FloatField(null=True)
 
     class Meta:
-        db_table_comment = "Document considered by our similarity search engine as relevant to the question. Documents from this table are used to formulate the answer."
+        db_table_comment = ("Document considered by our similarity search engine as relevant to the question. "
+                            "Documents from this table are used to formulate the answer.")
         db_table = "agent_answer_document"

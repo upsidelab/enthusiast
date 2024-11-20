@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from agent.models import Conversation, Question
+from agent.models import Conversation, Message
 from ecl.models import EmbeddingModel, EmbeddingDimension
 
 
@@ -87,47 +87,22 @@ class ConversationSerializer(serializers.ModelSerializer):
 
 class MessageFeedbackSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Question
-        fields = ['answer_rating', 'answer_feedback']
+        model = Message
+        fields = ['rating', 'feedback']
         extra_kwargs = {
-            'answer_rating': {'required': True},
+            'rating': {'required': True},
         }
 
 
 class MessagesSerializer(serializers.ModelSerializer):
-    """Serializer to get list of messages exchanged during a given conversation.
-
-        Arguments:
-        conversation_id:
-            Integer, obligatory, provide this argument to get messages exchanged during one conversation provide.
-        min_message_id:
-            Integer, to get messages starting at a given point of a conversation.
-    """
+    # Serializer to get list of messages exchanged during a given conversation.
     class Meta:
-        model = Question
-        fields = ['id', 'question', 'answer']
-
-    def to_representation(self, instance):
-        # A Question contains two messages: question itself followed by an answer.
-        return [
-            {'id': instance.id, 'role': 'user', 'text': instance.question},
-            {'id': instance.id, 'role': 'agent', 'text': instance.answer}
-        ]
+        model = Message
+        fields = ['id', 'text']
 
 class ConversationContentSerializer(ConversationSerializer):
-    # This serializer returns conversation extended with history.
+    # This serializer returns conversation details extended with history.
     history = MessagesSerializer(many=True)
 
     class Meta(ConversationSerializer.Meta):
         fields = ConversationSerializer.Meta.fields + ['history']
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-
-        flattened_history = []
-        for message in data.get('history', []):
-            flattened_history.extend(message)
-
-        data['history'] = flattened_history
-
-        return data

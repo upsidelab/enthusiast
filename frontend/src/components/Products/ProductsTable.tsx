@@ -27,7 +27,7 @@ export function ProductsTable() {
     loadData();
   }, [dataSetId]);
 
-  if (products.length === 0) {
+  if (products.length === 0 && !isLoading) {
       return (
         <div className="text-center">
           <h2 className="font-bold">No products available</h2>

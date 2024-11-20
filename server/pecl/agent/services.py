@@ -1,9 +1,25 @@
 from datetime import datetime
-from agent.models import Conversation, Question
+from agent.core import Agent
+from agent.models import Conversation, Message
 from account.models import CustomUser
 from ecl.models import EmbeddingModel, EmbeddingDimension, DataSet
 
 class ConversationManager:
+
+    def get_answer(self, conversation: Conversation, question_message):
+        """Formulate an answer to a given question and store the decision-making process.
+
+        Engine calculates embedding for a question and using similarity search collects documents that may contain
+        relevant content.
+        """
+        agent = Agent(data_set=conversation.data_set,
+                      embedding_model=conversation.model,
+                      embedding_dimensions=conversation.dimensions,
+                      messages=conversation.get_messages())
+        response = agent.process_user_request(question_message)
+
+        return response["output"]
+
     def initialize_conversation(self, user_id, conversation_id=None,embedding_model=None, embedding_dimensions=None,
                                 system_name=None):
         # Create a new or continue an existing conversation.
@@ -27,14 +43,19 @@ class ConversationManager:
         return conversation
 
     def process_question(self, conversation, question_message):
-        # Ask your question.
-        question = Question(conversation=conversation,
-                            asked_at=datetime.now(),
-                            question=question_message)
+        # Define a question.
+        question = Message(conversation=conversation,
+                           created_at=datetime.now(),
+                           role='user',
+                           text=question_message)
         question.save()  # Save it now to allow adding child entities such as relevant documents (connected by foreign key).
-        question.get_answer()
-        question.save()
-        return question
+        # Define an answer.
+        answer = Message(conversation=conversation,
+                         created_at=datetime.now(),
+                         role='agent',
+                         text=self.get_answer(conversation, question.text))
+        answer.save()
+        return answer
 
     def answer_question(self, conversation_id, embedding_model_name, embedding_dimensions_value,
                         user_id, system_name, question_message):

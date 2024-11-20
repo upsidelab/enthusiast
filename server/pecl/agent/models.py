@@ -30,6 +30,21 @@ class Conversation(models.Model):
         return history
 
 
+class Message(models.Model):
+    conversation = models.ForeignKey(Conversation, related_name="message", on_delete=models.PROTECT)
+    created_at = models.DateTimeField(auto_now_add=True)
+    role = models.CharField(max_length=15)
+    text = models.TextField()
+    # Feedback regarding a message (for instance: feedback regarding answer provided by agent).
+    rating = models.IntegerField(null=True)  # Category (range bad->good represented as number).
+    feedback = models.TextField(null=True)  # Free text to provide information regarding answer's accuracy.
+
+
+    class Meta:
+        db_table_comment = ("A message sent during a conversation. Role describes category of a message, it may be "
+                            "a question asked by a user, agent's answer, or system message.")
+
+
 class Question(models.Model):
     conversation = models.ForeignKey(Conversation, related_name="question", on_delete=models.PROTECT)
     asked_at = models.DateTimeField(auto_now_add=True)

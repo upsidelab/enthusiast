@@ -39,8 +39,8 @@ export type Account = {
 }
 
 export type FeedbackData = {
-  answer_rating: number | null;
-  answer_feedback: string;
+  rating: number | null;
+  feedback: string;
 }
 
 export type Message = {
@@ -126,7 +126,7 @@ export class ApiClient {
       const taskId = data.task_id;
 
       // Polling function to check task status (with a defined interval)
-      const pollTaskStatus = async (taskId: string): Promise<any> => {
+      const pollTaskStatus = async (taskId: string): Promise<string> => {
         return new Promise((resolve, reject) => {
           const pollInterval = setInterval(async () => {
             try {
@@ -168,7 +168,7 @@ export class ApiClient {
         return {
             conversation_id: conversation_id,
             answer: latestMessage?.text || "No answer available",
-            question_id: latestMessage?.id || null,
+            message_id: latestMessage?.id || null,
         };
       }
     } catch (error) {

@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from agent.models import Conversation, Question
+from agent.models import Conversation, Message
 from agent.serializers import AskQuestionSerializer, ConversationSerializer, ConversationContentSerializer, MessageFeedbackSerializer
 from agent.services import ConversationManager
 
@@ -88,7 +88,7 @@ class ConversationRetrieveView(APIView):
     def get(self, request, conversation_id):
         conversation = Conversation.objects.get(id=conversation_id)
 
-        messages = Question.objects.filter(conversation=conversation).order_by('id')
+        messages = Message.objects.filter(conversation=conversation).order_by('id')
 
         conversation_data = ConversationSerializer(conversation).data
 
@@ -112,11 +112,11 @@ class MessageFeedbackView(APIView):
     """View to provide feedback on a message."""
     def patch(self, request, id):
         try:
-            question = Question.objects.get(id=id)
-        except Question.DoesNotExist:
-            return Response({"error": "Question not found."}, status=status.HTTP_404_NOT_FOUND)
+            message = Message.objects.get(id=id)
+        except Message.DoesNotExist:
+            return Response({"error": "Message not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = MessageFeedbackSerializer(question, data=request.data, partial=True)
+        serializer = MessageFeedbackSerializer(message, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)

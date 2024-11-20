@@ -35,7 +35,7 @@ export function Conversation() {
         ]);
         return;
       }
-      setMessages((currMessages) => [...currMessages, { role: "agent", text: apiAnswer.answer, questionId: apiAnswer.question_id }]);
+      setMessages((currMessages) => [...currMessages, { role: "agent", text: apiAnswer.answer, questionId: apiAnswer.message_id }]);
       setConversationId(apiAnswer.conversation_id);
     } catch (error) {
       console.error("Error fetching answer:", error);

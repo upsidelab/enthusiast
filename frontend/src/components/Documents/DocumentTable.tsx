@@ -40,7 +40,7 @@ export function DocumentTable() {
     loadData();
   }, [dataSetId]);
 
-  if (documents.length === 0) {
+  if (documents.length === 0 && !isLoading) {
       return(
         <div className="text-center">
           <h2 className="font-bold">No documents available</h2>

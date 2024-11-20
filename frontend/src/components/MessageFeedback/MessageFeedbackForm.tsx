@@ -27,14 +27,14 @@ export function MessageFeedbackForm({ questionId }: MessageFeedbackFormProps, { 
     setIsLoading(true);
 
     const feedbackData = {
-      answer_rating: rating,
-      answer_feedback: feedback,
+      rating: rating,
+      feedback: feedback,
     };
 
     try {
       await api.updateMessageFeedback(questionId, feedbackData);
       setIsSubmitted(true);
-    } catch (e) {
+    } catch {
       setIsError(true);
     } finally {
       setIsLoading(false);

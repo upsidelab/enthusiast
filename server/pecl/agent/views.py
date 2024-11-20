@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from agent.models import Conversation, Question
-from agent.serializers import AskQuestionSerializer, ConversationSerializer, ConversationContentSerializer, MessageFeedbackSerializer, MessagesSerializer
+from agent.serializers import AskQuestionSerializer, ConversationSerializer, ConversationContentSerializer, MessageFeedbackSerializer
 from agent.services import ConversationManager
 
 

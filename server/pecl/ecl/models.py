@@ -1,10 +1,9 @@
 import logging
 
-from importlib import reload
 
 from django.db import models
 from openai import OpenAI
-from pgvector.django import CosineDistance, VectorField
+from pgvector.django import VectorField
 from django.conf import settings
 
 

@@ -30,7 +30,7 @@ export function DataSetSelector({className}: HTMLAttributes<HTMLElement>) {
     };
 
     fetchData();
-  }, []);
+  }, [dataSetId, setDataSetId]);
 
   return (
     <DropdownMenu>

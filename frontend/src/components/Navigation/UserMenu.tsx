@@ -48,7 +48,7 @@ export function UserMenu() {
     };
 
     ensureAccount();
-  }, []);
+  }, [account, setAccount]);
 
   return (
     <DropdownMenu>

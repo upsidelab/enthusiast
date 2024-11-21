@@ -20,14 +20,14 @@ export function LoginForm({ className, ...props }: HTMLAttributes<HTMLDivElement
     event.preventDefault();
     setIsLoading(true);
 
-    const email = (event.target as any).email.value;
-    const password = (event.target as any).password.value;
+    const email = (event.target as HTMLFormElement).email.value;
+    const password = (event.target as HTMLFormElement).password.value;
 
     try {
       const { token } = await api.login(email, password);
       authenticationProviderInstance.login(token);
       navigate('/campaign');
-    } catch (e) {
+    } catch {
       setIsError(true);
     } finally {
       setIsLoading(false);

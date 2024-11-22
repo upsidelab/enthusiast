@@ -10,19 +10,14 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 
-class Owner(models.Model):
-    name = models.CharField(max_length=30, unique=True)
-
-    class Meta:
-        db_table_comment = "Owner groups data sets, for instance: all data sets that belong to one company."
-
 class EmbeddingModel(models.Model):
     """ECL Config - list of models to be used."""
     code = models.CharField(max_length=5, null=True)  # Short name - to be displayed on UI
     name = models.CharField(max_length=30, unique=True)  # Full name of a model
 
     class Meta:
-        db_table_comment = "Models used to create embedding vectors. Note: all models from this table will be used when action 'reload all embeddings' is performed by admin."
+        db_table_comment = ("Models used to create embedding vectors. Note: all models from this table will be used "
+                            "when action 'reload all embeddings' is performed by admin.")
         db_table = "ecl_embedding_model"
 
 
@@ -31,17 +26,20 @@ class EmbeddingDimension(models.Model):
     dimension = models.IntegerField(unique=True)
 
     class Meta:
-        db_table_comment = "Lengths of embedding vector that are collected from OpenAI for documents or products. For one item we may collect multiple embedding vectors of different lengths. Note: vectors for all dimensions from this table will be collected when action 'reload all embeddings' is performed by admin."
+        db_table_comment = ("Lengths of embedding vector that are collected from OpenAI for documents or products. For "
+                            "one item we may collect multiple embedding vectors of different lengths. Note: vectors "
+                            "for all dimensions from this table will be collected when action 'reload all embeddings' "
+                            "is performed by admin.")
         db_table = "ecl_embedding_dimension"
 
 class DataSet(models.Model):
     code = models.CharField(max_length=5)
     name = models.CharField(max_length=30)
-    owner = models.ForeignKey(Owner, related_name="data_set", on_delete=models.PROTECT, null=True)
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="data_sets")
 
     class Meta:
-        db_table_comment = "List of various data sets. One data set may be the whole company's content such as blog posts, or some part of it: a data set may be represent a brand or department."
+        db_table_comment = ("List of various data sets. One data set may be the whole company's content such as blog "
+                            "posts, or some part of it: a data set may be represent a brand or department.")
         db_table = "ecl_data_set"
 
     def async_reload_all_embeddings(self):
@@ -97,7 +95,9 @@ class Document(models.Model):
     content = models.TextField()
 
     class Meta:
-        db_table_comment = "List of documents being part of a larger data set. A document may be for instance a blog post. This is the main entity being analysed by ECL engine when user asks questions regarding company's offer."
+        db_table_comment = ("List of documents being part of a larger data set. A document may be for instance a blog "
+                            "post. This is the main entity being analysed by ECL engine when user asks questions "
+                            "regarding company's offer.")
 
     def set_embedding(self, model, dimensions):
         """Sets embeddings with a given model and dimension for this content.
@@ -142,7 +142,9 @@ class DocumentEmbedding(models.Model):
     embedding = VectorField()
 
     class Meta:
-        db_table_comment = "Embedding vectors collected for one document. One document may have several different embedding vectors which have different dimensions. Agent processing user's questions chooses the best vector for the purpose."
+        db_table_comment = ("Embedding vectors collected for one document. One document may have several different "
+                            "embedding vectors which have different dimensions. Agent processing user's questions "
+                            "chooses the best vector for the purpose.")
         db_table = "ecl_document_embedding"
 
     def set_embedding(self, model, dimensions, embedding_vector):

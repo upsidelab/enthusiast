@@ -1,14 +1,9 @@
-from django.http import HttpResponse
 from django.shortcuts import render
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 
 from .models import DataSet, Product, Document
 from .serializers import DataSetSerializer, DocumentSerializer, ProductSerializer
-
-
-def index(request):
-    return HttpResponse("Hello, world. You're at The E-Cell welcome page.")
 
 
 class DataSetListView(ListAPIView):

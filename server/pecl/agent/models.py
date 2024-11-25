@@ -25,8 +25,13 @@ class Conversation(models.Model):
         """Return list of messages exchanged during a conversation.
         """
         history = []
-        for question in self.question.all().order_by('id'):
-            history += [HumanMessage(content=question.question or ""), AIMessage(content=question.answer or "")]
+        for message in self.message.all().order_by('id'):
+            if message.role == 'user':
+                history.append(HumanMessage(content=message.text or ""))
+            elif message.role == 'agent':
+                history.append(AIMessage(content=message.text or ""))
+            else:
+                raise Exception(f"Unregistered role: '{message.role}'. Unable to retrieve conversation history.")
         return history
 
 

@@ -1,18 +1,21 @@
 import { ChevronsUpDown } from "lucide-react";
 import {
   DropdownMenu,
-  DropdownMenuContent, DropdownMenuItem,
-  DropdownMenuLabel, DropdownMenuTrigger
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu.tsx";
-import { HTMLAttributes, useEffect, useState } from "react";
-import { cn } from "@/lib/utils.ts";
+import { useEffect, useState } from "react";
 import { ApiClient, DataSet } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
+import { SidebarMenuButton } from "@/components/ui/sidebar.tsx";
+import logoUrl from "@/assets/logo.png";
 
 const api = new ApiClient(authenticationProviderInstance);
 
-export function DataSetSelector({className}: HTMLAttributes<HTMLElement>) {
+export function DataSetSelector() {
   const [dataSets, setDataSets] = useState<DataSet[]>([]);
   const { dataSetId, setDataSetId } = useApplicationContext()!;
 
@@ -34,14 +37,21 @@ export function DataSetSelector({className}: HTMLAttributes<HTMLElement>) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        className={cn("w-1/5 rounded-md ring-ring hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 data-[state=open]:bg-accent", className)}>
-        <div className="flex items-center gap-1.5 overflow-hidden px-2 py-1.5 text-left text-sm transition-all">
-          <div className="line-clamp-1 flex-1 pr-2 font-medium">
-            {activeDataSet()?.name || ''}
+      <DropdownMenuTrigger asChild>
+        <SidebarMenuButton
+          size="lg"
+          className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+        >
+          <div
+            className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+            <img src={logoUrl} alt="Upside" className="size-8 rounded-lg"/>
           </div>
-          <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50"/>
-        </div>
+          <div className="flex flex-col gap-0.5 leading-none">
+          <span className="font-semibold">Data Set</span>
+            <span className="">{activeDataSet()?.name}</span>
+          </div>
+          <ChevronsUpDown className="ml-auto" />
+        </SidebarMenuButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         className="w-64"

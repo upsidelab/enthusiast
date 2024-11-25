@@ -1,16 +1,19 @@
 import {
   DropdownMenu,
-  DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
-  DropdownMenuLabel, DropdownMenuSeparator,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu.tsx";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar.tsx";
-import { Button } from "@/components/ui/button.tsx";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
 import { ApiClient } from "@/lib/api.ts";
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar.tsx";
 
 const api = new ApiClient(authenticationProviderInstance);
 
@@ -30,6 +33,14 @@ export function UserMenu() {
     const components = account.email.split('@');
     return components[0].toUpperCase().slice(0, 1) + components[0].slice(1);
   };
+
+  const email = () => {
+    if (!account) {
+      return 'Email';
+    }
+
+    return account.email;
+  }
 
   const initial = () => {
     if (!account) {
@@ -51,13 +62,23 @@ export function UserMenu() {
   }, [account, setAccount]);
 
   return (
+    <SidebarMenu>
+      <SidebarMenuItem>
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar className="h-8 w-8">
+        <SidebarMenuButton
+          size="lg"
+          className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+          >
+          <Avatar className="h-8 w-8 rounded-lg">
             <AvatarFallback>{initial()}</AvatarFallback>
           </Avatar>
-        </Button>
+          <div className="grid flex-1 text-left test-sm leading-tight">
+            <span className="truncate font-semibold">{userName()}</span>
+            <span className="truncate text-xs">{email()}</span>
+          </div>
+
+        </SidebarMenuButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
@@ -89,5 +110,7 @@ export function UserMenu() {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+      </SidebarMenuItem>
+    </SidebarMenu>
   )
 }

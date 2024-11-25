@@ -1,21 +1,20 @@
 import './App.css'
-import { Sidebar } from "@/components/Navigation/Sidebar.tsx";
-import { MainMenu } from "@/components/Navigation/MainMenu.tsx";
 import { Outlet } from "react-router-dom";
 import { ApplicationContextProvider } from "@/components/util/ApplicationContextProvider.tsx";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar.tsx";
+import { MainSidebar } from "@/components/Navigation/MainSidebar.tsx";
 
 function App() {
   return (
     <ApplicationContextProvider>
-      <div className="h-full flex flex-col">
-        <MainMenu/>
-        <div className="grid lg:grid-cols-5 flex-1">
-          <Sidebar/>
-          <div className="col-span-3 lg:col-span-4 lg:border-l">
-            <Outlet/>
-          </div>
+      <SidebarProvider>
+        <MainSidebar />
+        <SidebarInset>
+        <div className="flex flex-col grow">
+          <Outlet/>
         </div>
-      </div>
+        </SidebarInset>
+      </SidebarProvider>
     </ApplicationContextProvider>
   )
 }

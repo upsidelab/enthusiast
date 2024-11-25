@@ -1,8 +1,8 @@
-import { Input } from "@/components/ui/input.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import { Send, Loader } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { Loader, Send } from "lucide-react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import './MessageComposer.css';
+import { Textarea } from "@/components/ui/textarea.tsx";
 
 export interface MessageComposerProps {
   onSubmit: (message: string) => void;
@@ -11,8 +11,18 @@ export interface MessageComposerProps {
 
 export function MessageComposer({ onSubmit, isLoading }: MessageComposerProps) {
   const [input, setInput] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const inputLength = input.trim().length;
+
+  const resizeTextArea = (element: HTMLTextAreaElement) => {
+    element.style.height = '0px';
+    element.style.height = `${element.scrollHeight}px`;
+  }
+
+  const handleTextAreaInput = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(event.target.value);
+    resizeTextArea(event.target);
+  }
 
   // Focus back to the input field after response is received.
   useEffect(() => {
@@ -32,14 +42,14 @@ export function MessageComposer({ onSubmit, isLoading }: MessageComposerProps) {
       className="flex w-full items-center space-x-2 relative"
     >
       <div className="relative flex-1">
-        <Input
+        <Textarea
           id="message"
           ref={inputRef}
           placeholder="Type your message..."
-          className="w-full"
+          className="w-full overflow-hidden resize-none"
           autoComplete="off"
           value={input}
-          onChange={(event) => setInput(event.target.value)}
+          onChange={(event) => handleTextAreaInput(event)}
           disabled={isLoading}
         />
       </div>

@@ -3,7 +3,7 @@ from django.db import models
 from pgvector.django import VectorField
 
 from agent.core import Agent
-from ecl.models import EmbeddingModel, DocumentEmbedding, Document, DataSet, EmbeddingDimension
+from ecl.models import EmbeddingModel, DocumentChunkEmbedding, Document, DataSet, EmbeddingDimension
 
 from langchain_core.messages import AIMessage, HumanMessage
 
@@ -84,8 +84,8 @@ class AnswerDocument(models.Model):
     conversation = models.ForeignKey(Conversation, related_name="answer_document", on_delete=models.PROTECT)
     question = models.ForeignKey(Question, related_name="answer_document", on_delete=models.PROTECT)
     document = models.ForeignKey(Document, related_name="answer_document", on_delete=models.PROTECT)
-    document_embedding = models.ForeignKey(DocumentEmbedding, related_name="answer_document", on_delete=models.PROTECT,
-                                           null=True)
+    document_embedding = models.ForeignKey(DocumentChunkEmbedding, related_name="answer_document",
+                                           on_delete=models.PROTECT, null=True)
     document_title = models.CharField(max_length=1024)
     cosine_distance = models.FloatField(null=True)
 

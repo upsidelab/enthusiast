@@ -1,5 +1,6 @@
 import logging
 
+from langchain.text_splitter import TokenTextSplitter
 
 from django.db import models
 from openai import OpenAI
@@ -49,6 +50,20 @@ class DataSet(models.Model):
         reload_all_embeddings_task.apply_async(args=[self.id])
         logging.info("Models/Stop async reload all embeddings task")
 
+    def reindex_documents(self, **kwargs):
+        """Recreate the whole structure used by ECL to process user's question.
+
+        This method does not change data sets. It recreates internal layer that is calculated after the raw data set is
+        imported. Data set consists of different objects such as products and documents. To be able to process user's
+        questions we have to split larger documents into chunks and collect embeddings for them.
+
+        **kwargs:
+            chunk_size (int, optional): maximum number tokens per one chunk.
+            chunk_overlap (int, optional): an overlap between neighbouring chunks.
+        """
+        self.split_documents(**kwargs)
+        self.reload_all_embeddings()
+
     def reload_all_embeddings(self):
         """Reloads embeddings for all models and dimensions registered in ECL config.
 
@@ -61,15 +76,15 @@ class DataSet(models.Model):
         embedding_models = EmbeddingModel.objects.all()
         embedding_dimensions = EmbeddingDimension.objects.all()
 
-        for m in embedding_models:
-            logging.info(f"- reload embeddings for model: {m.name}")
-            for d in embedding_dimensions:
-                logging.info(f"- reload embeddings for dimension: {d.dimension}")
-                self.set_content_embeddings(m, d)
+        for model in embedding_models:
+            logging.info(f"- reload embeddings for model: {model.name}")
+            for dimension in embedding_dimensions:
+                logging.info(f"- reload embeddings for dimension: {dimension.dimension}")
+                self.set_embeddings(model, dimension)
         logging.info("Stop reload all embeddings method")
 
 
-    def set_content_embeddings(self, model, dimensions):
+    def set_embeddings(self, model, dimensions):
         """Sets embeddings with a given model and dimension for all the content of the company.
 
          Embeddings are sourced from OpenAI, args define how we generate embeddings. We would like to
@@ -85,8 +100,19 @@ class DataSet(models.Model):
         cnt = 0
         for document in self.document.all():
             cnt += 1
-            document.set_embedding(model, dimensions)
+            document.set_embeddings(model, dimensions)
 
+    def split_documents(self, **kwargs):
+        """Split documents into chunks with a defined overlap.
+
+        **kwargs:
+            chunk_size (int, optional): maximum number tokens per one chunk.
+            chunk_overlap (int, optional): an overlap between neighbouring chunks.
+        """
+        logging.info("Start recreating document chunks")
+        for document in self.document.all():
+            document.split(**kwargs)
+        logging.info("Stop recreating document chunks")
 
 class Document(models.Model):
     data_set = models.ForeignKey(DataSet, related_name="document", on_delete=models.PROTECT, null=True)
@@ -99,68 +125,78 @@ class Document(models.Model):
                             "post. This is the main entity being analysed by ECL engine when user asks questions "
                             "regarding company's offer.")
 
+    def split(self, **kwargs):
+        """Split document into chunks that fit embedding model limits.
+
+        A document is split into one or more chunks that overlap each other. Chunks are used to provide context
+        for user's questions. Golden rule: a chunk must fit within embedding model token limit: long documents that
+        exceed this limit are divided into several smaller chunks, shorter documents consist of one chunk.
+
+        **kwargs:
+            chunk_size (int, optional): maximum number tokens per one chunk.
+            chunk_overlap (int, optional): an overlap between neighbouring chunks.
+        """
+        # Configure splitter.
+        chunk_size = kwargs.get("chunk_size", 3000)
+        chunk_overlap = kwargs.get("chunk_overlap", 150)
+        # Delete old chunks.
+        self.chunk.all().delete()
+        # Create new chunks.
+        splitter = TokenTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+
+        chunks = splitter.split_text(self.content)
+
+        for chunk in chunks:
+            DocumentChunk.objects.create(document=self, content=chunk)
+
+    def set_embeddings(self, model, dimensions):
+        for chunk in self.chunk.all():
+            chunk.set_embedding(model, dimensions)
+
+
+class DocumentChunk(models.Model):
+    document = models.ForeignKey(Document, related_name="chunk", on_delete=models.CASCADE, null=False)
+    content = models.TextField()
+
     def set_embedding(self, model, dimensions):
         """Sets embeddings with a given model and dimension for this content.
 
          For more info please refer to docs on a Company level (parent of this entity).
 
          Args:
-             model: Integer, ID of an OpenAI model used to generate embeddings.
-             dimensions: Integer, length of an embedding model.
+             model: EmbeddingModel, represents an OpenAI model used to generate embeddings.
+             dimensions: EmbeddingDimension, represents length of an embedding vector.
          """
+        # Delete old embeddings.
+        self.embedding.filter(model=model, dimensions=dimensions).delete()
         # Obtain a new embedding vector for this content.
         client = OpenAI()
-        try:
-            openai_embedding = client.embeddings.create(model=model.name,
-                                                        dimensions=dimensions.dimension,
-                                                        input=self.content)
-            embedding_vector = openai_embedding.data[0].embedding
 
-            # Upsert a new embedding. TODO: prettify upsert method (remove for).
-            cnt = 0
-            for emb in self.embedding.all().filter(dimensions=dimensions):
-                emb.set_embedding(model=model, dimensions=dimensions, embedding_vector=embedding_vector)
-                cnt += 1
+        openai_embedding = client.embeddings.create(model=model.name,
+                                                    dimensions=dimensions.dimension,
+                                                    input=self.content)
+        embedding_vector = openai_embedding.data[0].embedding
 
-            if cnt == 0:
-                new_emb = DocumentEmbedding(document=self,
-                                            model=model,
-                                            dimensions=dimensions,
-                                            embedding=embedding_vector
-                                            )
-                new_emb.save()
+        # Create a new embedding.
+        DocumentChunkEmbedding.objects.create(chunk=self,
+                                              model=model,
+                                              dimensions=dimensions,
+                                              embedding=embedding_vector)
 
 
-        except Exception as error:
-            print(error)  #TODO: add error handling (planned along with logging module)
-
-
-class DocumentEmbedding(models.Model):
-    document = models.ForeignKey(Document, related_name="embedding", on_delete=models.PROTECT, null=True)
+class DocumentChunkEmbedding(models.Model):
+    chunk = models.ForeignKey(DocumentChunk, related_name="embedding", on_delete=models.CASCADE, null=True)
     model = models.ForeignKey(EmbeddingModel, on_delete=models.PROTECT, null=True)
     dimensions = models.ForeignKey(EmbeddingDimension, on_delete=models.PROTECT, null=True)
     embedding = VectorField()
 
     class Meta:
-        db_table_comment = ("Embedding vectors collected for one document. One document may have several different "
+        db_table_comment = ("Embedding vectors collected for one chunk. One chunk may have several different "
                             "embedding vectors which have different dimensions. Agent processing user's questions "
                             "chooses the best vector for the purpose.")
-        db_table = "ecl_document_embedding"
-
-    def set_embedding(self, model, dimensions, embedding_vector):
-        """Sets embedding vector for given model and dimensions.
-
-        For more info regarding embedding calculation please refer to docs on a Company level.
-
-        Args:
-            model: Integer, ID of an OpenAI model used to generate embeddings.
-            dimensions: Integer, length of an embedding model.
-            embedding_vector: VectorField, LLM vector with a given dimension.
-        """
-        self.model = model
-        self.dimensions = dimensions
-        self.embedding = embedding_vector
-        self.save()
+        constraints = [
+            models.UniqueConstraint(fields=['chunk', 'model', 'dimensions'], name="document_chunk_embedding_uk")
+        ]
 
 
 class Product(models.Model):

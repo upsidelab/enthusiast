@@ -9,6 +9,8 @@ export interface MessageComposerProps {
   isLoading: boolean;
 }
 
+const maxHeight = 300;
+
 export function MessageComposer({ onSubmit, isLoading }: MessageComposerProps) {
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -16,7 +18,7 @@ export function MessageComposer({ onSubmit, isLoading }: MessageComposerProps) {
 
   const resizeTextArea = (element: HTMLTextAreaElement) => {
     element.style.height = '0px';
-    element.style.height = `${element.scrollHeight}px`;
+    element.style.height = `${Math.min(element.scrollHeight, maxHeight)}px`;
   }
 
   const handleTextAreaInput = (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -46,7 +48,7 @@ export function MessageComposer({ onSubmit, isLoading }: MessageComposerProps) {
           id="message"
           ref={inputRef}
           placeholder="Type your message..."
-          className="w-full overflow-hidden resize-none"
+          className="w-full resize-none"
           autoComplete="off"
           value={input}
           onChange={(event) => handleTextAreaInput(event)}

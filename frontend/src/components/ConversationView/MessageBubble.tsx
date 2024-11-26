@@ -33,10 +33,10 @@ export function MessageBubble({ text, variant, questionId }: MessageBubbleProps)
   };
 
   return (
-    <div className="message-bubble-container">
+    <div className="message-bubble-container flex">
       <div
         className={cn(
-          "flex flex-col w-max max-w-[75%] items-centered gap-2 rounded-lg px-3 py-2 text-sm",
+          "flex flex-col max-w-[75%] items-centered gap-2 rounded-lg px-3 py-2 text-sm",
           variant === "primary"
             ? "ml-auto bg-primary text-primary-foreground"
             : "bg-muted"

@@ -98,7 +98,7 @@ class MessagesSerializer(serializers.ModelSerializer):
     # Serializer to get list of messages exchanged during a given conversation.
     class Meta:
         model = Message
-        fields = ['id', 'text']
+        fields = ['id', 'text', 'role']
 
 class ConversationContentSerializer(ConversationSerializer):
     # This serializer returns conversation details extended with history.

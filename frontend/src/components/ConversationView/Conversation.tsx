@@ -4,28 +4,32 @@ import { MessageBubble } from "@/components/ConversationView/MessageBubble.tsx";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { ApiClient } from "@/lib/api.ts";
 
+export interface ConversationProps {
+  conversationId: number | null;
+}
+
 export interface MessageProps {
   role: "user" | "agent";
   text: string;
-  questionId: number | null;
+  id: number | null;
 }
 
 const api = new ApiClient(authenticationProviderInstance);
 
-export function Conversation() {
-  const [conversationId, setConversationId] = useState<number | null>(null);
+export function Conversation(props: ConversationProps) {
+  const [conversationId, setConversationId] = useState<number | null>(props.conversationId);
   const [isLoading, setIsLoading] = useState(false);
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
 
   const [messages, setMessages] = useState<MessageProps[]>([
-    { role: "agent", text: "How can I help you today?", questionId: null },
+    { role: "agent", text: "How can I help you today?", id: null },
   ]);
 
   const onMessageComposerSubmit = async (message: string) => {
     setIsLoading(true);
     setMessages((currMessages) => [
       ...currMessages,
-      { role: "user", text: message, questionId: null }
+      { role: "user", text: message, id: null }
     ]);
     setTimeout(() => {
       lastMessageRef.current?.scrollIntoView({behavior: "smooth"});
@@ -35,11 +39,11 @@ export function Conversation() {
       if (!apiAnswer) {
         setMessages((currMessages) => [
             ...currMessages,
-            { role: "agent", text: "An error occurred. Please try again.", questionId: null },
+            { role: "agent", text: "An error occurred. Please try again.", id: null },
         ]);
         return;
       }
-      setMessages((currMessages) => [...currMessages, { role: "agent", text: apiAnswer.answer, questionId: apiAnswer.message_id }]);
+      setMessages((currMessages) => [...currMessages, { role: "agent", text: apiAnswer.answer, id: apiAnswer.message_id }]);
       setConversationId(apiAnswer.conversation_id);
     } catch (error) {
       console.error("Error fetching answer:", error);
@@ -52,6 +56,17 @@ export function Conversation() {
   };
 
   useEffect(() => {
+    const loadInitialMessages = async () => {
+      if (!conversationId) {
+        return;
+      }
+
+      const conversation = await api.getConversation(conversationId);
+      const initialMessages = conversation.history as MessageProps[];
+      setMessages(initialMessages);
+    }
+
+    loadInitialMessages();
     setTimeout(() => {
       lastMessageRef.current?.scrollIntoView({behavior: "smooth"});
     });
@@ -61,7 +76,7 @@ export function Conversation() {
     <div className="flex flex-col h-full px-4 pt-4">
       <div className="grow flex-1 space-y-4">
         {messages.map((message, index) => (
-          <MessageBubble key={index} text={message.text} variant={message.role === "user" ? "primary" : "secondary"} questionId={message.questionId}/>
+          <MessageBubble key={index} text={message.text} variant={message.role === "user" ? "primary" : "secondary"} questionId={message.id}/>
         ))}
         <div className="mb-4" />
         <div ref={lastMessageRef} />

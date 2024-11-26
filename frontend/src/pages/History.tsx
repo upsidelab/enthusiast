@@ -1,6 +1,6 @@
 import { ConversationTable } from "@/components/Conversations/ConversationTable.tsx";
 
-export function Conversations() {
+export function History() {
   return (
     <div className="p-4">
       <ConversationTable />

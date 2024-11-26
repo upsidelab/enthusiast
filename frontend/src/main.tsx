@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 import { createBrowserRouter, redirect, RouterProvider } from "react-router-dom";
-import { Conversations } from "@/pages/Conversations.tsx";
+import { History } from "@/pages/History.tsx";
 import { Campaign } from "@/pages/Campaign.tsx";
 import { Products } from "@/pages/Products.tsx";
 import { Documents } from "@/pages/Documents.tsx";
@@ -46,12 +46,16 @@ const router = createBrowserRouter([
         element: <Documents />
       },
       {
-        path: '/campaign?',
+        path: "/",
         element: <Campaign />
       },
       {
-        path: '/conversations',
-        element: <Conversations />
+        path: '/ask/chat/:id?',
+        element: <Campaign />
+      },
+      {
+        path: '/ask/history',
+        element: <History />
       },
       {
         path: '/api-connection',

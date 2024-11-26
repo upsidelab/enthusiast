@@ -1,7 +1,7 @@
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from "@/components/ui/sidebar.tsx";
 import { DataSetSelector } from "@/components/Navigation/DataSetSelector.tsx";
 import { MainSidebarSection, SidebarSectionItemProps } from "@/components/Navigation/MainSidebarSection.tsx";
-import { BookOpenIcon, BotMessageSquareIcon, FileTextIcon, PlugZapIcon } from "lucide-react";
+import { BookOpenIcon, BotMessageSquareIcon, FileTextIcon, HistoryIcon, PlugZapIcon } from "lucide-react";
 import { UserMenu } from "@/components/Navigation/UserMenu.tsx";
 
 const synchronizeItems: SidebarSectionItemProps[] = [
@@ -21,10 +21,16 @@ const synchronizeItems: SidebarSectionItemProps[] = [
 
 const askItems: SidebarSectionItemProps[] = [
   {
-    title: "Campaign",
-    link: "/campaign",
-    key: "campaign",
+    title: "Chat",
+    link: "/ask/chat",
+    key: "chat",
     icon: <BotMessageSquareIcon />
+  },
+  {
+    title: "History",
+    link: "/ask/history",
+    key: "history",
+    icon: <HistoryIcon />
   }
 ];
 

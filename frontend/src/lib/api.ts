@@ -23,6 +23,7 @@ export type Document = {
 }
 
 export type Conversation = {
+  id: number;
   started_at: Date;
   model: string;
   dimensions: number;

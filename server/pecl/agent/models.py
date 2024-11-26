@@ -9,7 +9,7 @@ from langchain_core.messages import AIMessage, HumanMessage
 
 
 class Conversation(models.Model):
-    user = models.ForeignKey(get_user_model(), on_delete=models.PROTECT, null=True)
+    user = models.ForeignKey(get_user_model(), on_delete=models.PROTECT)
     started_at = models.DateTimeField(auto_now_add=True)
     model = models.ForeignKey(EmbeddingModel, related_name="conversation", on_delete=models.PROTECT, null=True)
     dimensions = models.ForeignKey(EmbeddingDimension, on_delete=models.PROTECT, null=True)

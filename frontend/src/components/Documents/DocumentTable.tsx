@@ -8,12 +8,23 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Button } from "@/components/ui/button.tsx";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
+import RenderPaginationItems from "@/components/util/PaginationUtils.tsx";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const api = new ApiClient(authenticationProviderInstance);
 
 export function DocumentTable() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalDocuments, setTotalDocuments] = useState(0);
+  const itemsPerPage = 25;
   const { dataSetId } = useApplicationContext()!;
   const [selectedPreview, setSelectedPreview] = useState<Document | null>(null);
 
@@ -31,25 +42,32 @@ export function DocumentTable() {
     }
 
     const loadData = async () => {
-      const apiDocuments = await api.getDocuments(dataSetId);
-      setDocuments(apiDocuments);
+      const response = await api.getDocuments(dataSetId, currentPage);
+      setDocuments(response.results);
+      setTotalDocuments(response.count);
       setSelectedPreview(null);
       setIsLoading(false);
     };
 
     loadData();
-  }, [dataSetId]);
+  }, [dataSetId, currentPage]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const totalPages = Math.ceil(totalDocuments / itemsPerPage);
 
   if (documents.length === 0 && !isLoading) {
-      return(
-        <div className="text-center">
-          <h2 className="font-bold">No documents available</h2>
-        </div>
+    return (
+      <div className="text-center">
+        <h2 className="font-bold">No documents available</h2>
+      </div>
     );
   }
 
   return (
-    <SkeletonLoader skeleton={<Skeleton className="w-full h-[100px]"/>} isLoading={isLoading}>
+    <SkeletonLoader skeleton={<Skeleton className="w-full h-[100px]" />} isLoading={isLoading}>
       <Table>
         <TableCaption>Sync Status: Manual</TableCaption>
         <TableHeader>
@@ -87,6 +105,29 @@ export function DocumentTable() {
           </ScrollArea>
         </SheetContent>
       </Sheet>
+      {!isLoading && (
+        <Pagination className="my-4 text-lg">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
+              />
+            </PaginationItem>
+              <RenderPaginationItems
+                currentPage={currentPage}
+                totalPages={totalPages}
+                handlePageChange={handlePageChange}
+              />
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
     </SkeletonLoader>
   );
 }

@@ -50,6 +50,11 @@ export type Message = {
   text: string;
 }
 
+interface PaginatedResult<T> {
+  results: T[];
+  count: number;
+}
+
 export class ApiClient {
   private readonly apiBase: string;
 
@@ -59,17 +64,17 @@ export class ApiClient {
 
   async getDataSets(): Promise<DataSet[]> {
     const response = await fetch(`${this.apiBase}/api/data_sets`, this._requestConfiguration());
-    return await response.json() as Promise<DataSet[]>;
+    return (await response.json()).results as DataSet[];
   }
 
-  async getProducts(dataSetId: number): Promise<Product[]> {
-    const response = await fetch(`${this.apiBase}/api/products/${dataSetId}`, this._requestConfiguration());
-    return await response.json() as Promise<Product[]>;
+  async getProducts(dataSetId: number, page: number = 1): Promise<PaginatedResult<Product>> {
+    const response = await fetch(`${this.apiBase}/api/products/${dataSetId}/?page=${page}`, this._requestConfiguration());
+    return await response.json() as Promise<PaginatedResult<Product>>;
   }
 
-  async getDocuments(dataSetId: number): Promise<Document[]> {
-    const response = await fetch(`${this.apiBase}/api/documents/${dataSetId}`, this._requestConfiguration());
-    return await response.json() as Promise<Document[]>;
+  async getDocuments(dataSetId: number, page: number = 1): Promise<PaginatedResult<Document>> {
+    const response = await fetch(`${this.apiBase}/api/documents/${dataSetId}/?page=${page}`, this._requestConfiguration());
+    return await response.json() as Promise<PaginatedResult<Document>>;
   }
 
   async getConversations(dataSetId: number): Promise<Conversation[]> {

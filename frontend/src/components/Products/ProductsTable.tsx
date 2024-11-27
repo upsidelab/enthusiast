@@ -1,16 +1,27 @@
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table.tsx";
+import { useEffect, useState } from "react";
+import { SkeletonLoader } from "@/components/util/SkeletonLoader.tsx";
+import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { ApiClient, Product } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
-import { useEffect, useState } from "react";
-import { Skeleton } from "@/components/ui/skeleton.tsx";
-import { SkeletonLoader } from "@/components/util/SkeletonLoader.tsx";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
+import RenderPaginationItems from "@/components/util/PaginationUtils.tsx";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const api = new ApiClient(authenticationProviderInstance);
 
 export function ProductsTable() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const itemsPerPage = 25;
   const { dataSetId } = useApplicationContext()!;
 
   useEffect(() => {
@@ -19,24 +30,31 @@ export function ProductsTable() {
     }
 
     const loadData = async () => {
-      const apiProducts = await api.getProducts(dataSetId);
-      setProducts(apiProducts);
+      const response = await api.getProducts(dataSetId, currentPage);
+      setProducts(response.results);
+      setTotalProducts(response.count);
       setIsLoading(false);
     };
 
     loadData();
-  }, [dataSetId]);
+  }, [dataSetId, currentPage]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const totalPages = Math.ceil(totalProducts / itemsPerPage);
 
   if (products.length === 0 && !isLoading) {
-      return (
-        <div className="text-center">
-          <h2 className="font-bold">No products available</h2>
-        </div>
-      );
+    return (
+      <div className="text-center">
+        <h2 className="font-bold">No products available</h2>
+      </div>
+    );
   }
 
   return (
-    <SkeletonLoader skeleton={<Skeleton className="w-full h-[100px]"/>} isLoading={isLoading}>
+    <SkeletonLoader skeleton={<Skeleton className="w-full h-[100px]" />} isLoading={isLoading}>
       <Table>
         <TableCaption>Sync Status: Manual</TableCaption>
         <TableHeader>
@@ -60,6 +78,29 @@ export function ProductsTable() {
           ))}
         </TableBody>
       </Table>
+      {!isLoading && (
+        <Pagination className="my-4 text-lg">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
+              />
+            </PaginationItem>
+              <RenderPaginationItems
+                currentPage={currentPage}
+                totalPages={totalPages}
+                handlePageChange={handlePageChange}
+              />
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
     </SkeletonLoader>
   );
 }

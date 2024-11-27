@@ -178,7 +178,9 @@ BASICAUTH_PASSWORD = os.environ.get('ECL_BASICAUTH_PASSWORD')
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication'
-    ]
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 25
 }
 
 # CELERY

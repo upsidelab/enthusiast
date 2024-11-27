@@ -11,6 +11,8 @@ class AskQuestionSerializer(serializers.Serializer):
         conversation_id:
             Integer, To continue an existing conversation provide ID, if you skip this attribute,
             we will create a new conversation.
+        data_set_id:
+            Integer, Provide an ID of a data set to be used
         embedding_model_name:
             Str, You may provide a desired model name for a new conversation, if you skip this param we will use
             default model.
@@ -28,6 +30,13 @@ class AskQuestionSerializer(serializers.Serializer):
         allow_null=False,
         error_messages={
             'null': 'Conversation ID cannot be blank. Either skip this parameter (a new conversation will be created), or provide a valid ID of an existing conversation'
+        }
+    )
+    data_set_id = serializers.IntegerField(
+        required=False,
+        allow_null=False,
+        error_messages={
+            'null': 'Data Set ID cannot be blank. Either skip this parameter, or provide a valid ID of a data set'
         }
     )
     embedding_model_name = serializers.CharField(
@@ -77,6 +86,16 @@ class AskQuestionSerializer(serializers.Serializer):
         if value <=0:
             raise serializers.ValidationError(f'Provided embedding dimension value ({value}) is not correct. Value of embedding dimension has to be an Integer greater than zero.')
         return value
+
+
+class ConversationCreationSerializer(serializers.Serializer):
+    data_set_id = serializers.IntegerField(
+        required=False,
+        allow_null=False,
+        error_messages={
+            'null': 'Data Set ID cannot be blank. Either skip this parameter, or provide a valid ID of a data set'
+        }
+    )
 
 
 class ConversationSerializer(serializers.ModelSerializer):

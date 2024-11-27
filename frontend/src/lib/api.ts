@@ -77,11 +77,12 @@ export class ApiClient {
     return await response.json() as Promise<Conversation[]>;
   }
 
-  async getAnswer(conversation_id: number | null, message: string) {
+  async getAnswer(conversation_id: number | null, dataSetId: number, message: string) {
     try {
       type RequestBody = {
          question_message: string;
          conversation_id: number | null;
+         data_set_id: number;
        };
 
       // Initialize a conversation
@@ -93,6 +94,7 @@ export class ApiClient {
               ...this._requestConfiguration().headers,
               "Content-Type": "application/json",
             },
+            body: JSON.stringify({"data_set_id": dataSetId})
           });
 
           if (!response.ok) {
@@ -107,7 +109,11 @@ export class ApiClient {
         }
       }
 
-      const body: RequestBody = { "question_message": message, "conversation_id": conversation_id }
+      const body: RequestBody = {
+        "question_message": message,
+        "conversation_id": conversation_id,
+        "data_set_id": dataSetId
+      }
 
       // Enqueue the task
       const response = await fetch(`${this.apiBase}/api/ask/`, {

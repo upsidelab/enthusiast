@@ -1,8 +1,10 @@
 from datetime import datetime
+
+from account.models import CustomUser
 from agent.core import Agent
 from agent.models import Conversation, Message
-from account.models import CustomUser
-from ecl.models import EmbeddingModel, EmbeddingDimension, DataSet
+from ecl.models import EmbeddingModel, EmbeddingDimension
+
 
 class ConversationManager:
 
@@ -20,11 +22,13 @@ class ConversationManager:
 
         return response["output"]
 
-    def initialize_conversation(self, user_id, conversation_id=None,embedding_model=None, embedding_dimensions=None,
-                                system_name=None):
+    def initialize_conversation(self, user_id, data_set_id, conversation_id=None,embedding_model=None,
+                                embedding_dimensions=None, system_name=None):
+        user = CustomUser.objects.get(id=user_id)
+        data_set = user.data_sets.get(id=data_set_id)
         # Create a new or continue an existing conversation.
         if conversation_id is not None:
-            conversation = Conversation.objects.get(id=conversation_id)
+            conversation = Conversation.objects.get(id=conversation_id, data_set=data_set)
         else:
             # Load default model and dimensions if not defined in params.
             if not embedding_model:
@@ -38,7 +42,7 @@ class ConversationManager:
                                         dimensions=embedding_dimensions,
                                         user=CustomUser.objects.get(id=user_id),
                                         system_name=system_name,
-                                        data_set=DataSet.objects.first())
+                                        data_set=data_set)
             conversation.save()  # Save it now to allow adding child entities such as questions (connected by foreign key).
         return conversation
 
@@ -57,7 +61,7 @@ class ConversationManager:
         answer.save()
         return answer
 
-    def answer_question(self, conversation_id, embedding_model_name, embedding_dimensions_value,
+    def answer_question(self, conversation_id, data_set_id, embedding_model_name, embedding_dimensions_value,
                         user_id, system_name, question_message):
 
         # Collect required objects.
@@ -69,6 +73,7 @@ class ConversationManager:
 
         # Get conversation.
         conversation = self.initialize_conversation(user_id=user_id,
+                                                    data_set_id=data_set_id,
                                                     conversation_id=conversation_id,
                                                     embedding_model=embedding_model,
                                                     embedding_dimensions=embedding_dimensions,

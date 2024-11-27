@@ -7,7 +7,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from agent.models import Conversation, Message
-from agent.serializers import AskQuestionSerializer, ConversationSerializer, ConversationContentSerializer, MessageFeedbackSerializer
+from agent.serializers import AskQuestionSerializer, ConversationSerializer, ConversationContentSerializer, \
+    MessageFeedbackSerializer, ConversationCreationSerializer
 from agent.services import ConversationManager
 
 
@@ -23,6 +24,7 @@ class GetAnswer(APIView):
             from agent.tasks import answer_question_task
             # Collect params.
             conversation_id = serializer.validated_data.get('conversation_id')
+            data_set_id = serializer.validated_data.get('data_set_id')
             embedding_model_name = serializer.validated_data.get('embedding_model_name')
 
             embedding_dimensions_value = serializer.validated_data.get('embedding_dimensions')
@@ -31,6 +33,7 @@ class GetAnswer(APIView):
 
             # Run the task asynchronously.
             task = answer_question_task.apply_async(args=[conversation_id,
+                                                          data_set_id,
                                                           embedding_model_name,
                                                           embedding_dimensions_value,
                                                           request.user.id,
@@ -69,7 +72,12 @@ class ConversationCreateView(APIView):
 
     def post(self, request):
         manager = ConversationManager()
-        conversation = manager.initialize_conversation(user_id=request.user.id)
+        input_serializer = ConversationCreationSerializer(data=request.data)
+        if not input_serializer.is_valid():
+            return Response(input_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        conversation = manager.initialize_conversation(user_id=request.user.id,
+                                                       data_set_id=input_serializer.validated_data.get("data_set_id"))
 
         conversation_data = ConversationSerializer(conversation).data
 

@@ -3,6 +3,7 @@ import { MessageComposer } from "@/components/ConversationView/MessageComposer.t
 import { MessageBubble } from "@/components/ConversationView/MessageBubble.tsx";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { ApiClient } from "@/lib/api.ts";
+import { useApplicationContext } from "@/lib/use-application-context.ts";
 
 export interface ConversationProps {
   conversationId: number | null;
@@ -20,6 +21,7 @@ export function Conversation(props: ConversationProps) {
   const [conversationId, setConversationId] = useState<number | null>(props.conversationId);
   const [isLoading, setIsLoading] = useState(false);
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
+  const { dataSetId } = useApplicationContext()!;
 
   const [messages, setMessages] = useState<MessageProps[]>([
     { role: "agent", text: "How can I help you today?", id: null },
@@ -35,7 +37,7 @@ export function Conversation(props: ConversationProps) {
       lastMessageRef.current?.scrollIntoView({behavior: "smooth"});
     });
     try {
-      const apiAnswer = await api.getAnswer(conversationId, message);
+      const apiAnswer = await api.getAnswer(conversationId, dataSetId!, message);
       if (!apiAnswer) {
         setMessages((currMessages) => [
             ...currMessages,

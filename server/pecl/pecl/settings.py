@@ -69,7 +69,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'ecl',
     'agent',
-    'account'
+    'account',
+    'drf_yasg'
 ]
 
 MIDDLEWARE = [
@@ -181,6 +182,19 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 25
+}
+
+# SWAGGER
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Token': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    },
+    'USE_SESSION_AUTH': False,
 }
 
 # CELERY

@@ -12,39 +12,6 @@ from agent.serializers import AskQuestionSerializer, ConversationSerializer, Con
 from agent.services import ConversationManager
 
 
-class GetAnswer(APIView):
-    permission_classes = [IsAuthenticated]
-    """
-    View to handle the question message and return the answer.
-    """
-
-    def post(self, request):
-        serializer = AskQuestionSerializer(data=request.data)
-        if serializer.is_valid():
-            from agent.tasks import answer_question_task
-            # Collect params.
-            conversation_id = serializer.validated_data.get('conversation_id')
-            data_set_id = serializer.validated_data.get('data_set_id')
-            embedding_model_name = serializer.validated_data.get('embedding_model_name')
-
-            embedding_dimensions_value = serializer.validated_data.get('embedding_dimensions')
-            system_name = serializer.validated_data.get('system_name')
-            question_message = serializer.validated_data.get('question_message')
-
-            # Run the task asynchronously.
-            task = answer_question_task.apply_async(args=[conversation_id,
-                                                          data_set_id,
-                                                          embedding_model_name,
-                                                          embedding_dimensions_value,
-                                                          request.user.id,
-                                                          system_name,
-                                                          question_message])
-
-            return Response({"task_id": task.id}, status=status.HTTP_202_ACCEPTED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 class GetTaskStatus(APIView):
     permission_classes = [IsAuthenticated]
     """
@@ -105,6 +72,31 @@ class ConversationRetrieveView(APIView):
             "history": messages
         })
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, conversation_id):
+        serializer = AskQuestionSerializer(data=request.data)
+        if serializer.is_valid():
+            from agent.tasks import answer_question_task
+            # Collect params.
+            data_set_id = serializer.validated_data.get('data_set_id')
+            embedding_model_name = serializer.validated_data.get('embedding_model_name')
+
+            embedding_dimensions_value = serializer.validated_data.get('embedding_dimensions')
+            system_name = serializer.validated_data.get('system_name')
+            question_message = serializer.validated_data.get('question_message')
+
+            # Run the task asynchronously.
+            task = answer_question_task.apply_async(args=[conversation_id,
+                                                          data_set_id,
+                                                          embedding_model_name,
+                                                          embedding_dimensions_value,
+                                                          request.user.id,
+                                                          system_name,
+                                                          question_message])
+
+            return Response({"task_id": task.id}, status=status.HTTP_202_ACCEPTED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ConversationListView(ListAPIView):

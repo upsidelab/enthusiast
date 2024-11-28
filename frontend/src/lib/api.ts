@@ -55,6 +55,24 @@ interface PaginatedResult<T> {
   count: number;
 }
 
+type CreateConversationRequestBody = {
+  data_set_id: number;
+}
+
+type SendMessageBody = {
+  question_message: string;
+  conversation_id: number | null;
+  data_set_id: number;
+}
+
+type TaskState = {
+  state: string;
+}
+
+export type TaskHandle = {
+  task_id: string;
+}
+
 export class ApiClient {
   private readonly apiBase: string;
 
@@ -82,133 +100,77 @@ export class ApiClient {
     return await response.json() as Promise<Conversation[]>;
   }
 
-  async getAnswer(conversation_id: number | null, dataSetId: number, message: string) {
-    try {
-      type RequestBody = {
-         question_message: string;
-         conversation_id: number | null;
-         data_set_id: number;
-       };
+  async createConversation(dataSetId: number): Promise<number> {
+    const requestBody: CreateConversationRequestBody = {
+      data_set_id: dataSetId
+    };
 
-      // Initialize a conversation
-      if (conversation_id === null) {
-        try {
-          const response = await fetch(`${this.apiBase}/api/conversation/`, {
-            method: "POST",
-            headers: {
-              ...this._requestConfiguration().headers,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({"data_set_id": dataSetId})
-          });
+    const requestConfiguration = this._requestConfiguration();
+    requestConfiguration.method = "POST";
+    requestConfiguration.body = JSON.stringify(requestBody);
 
-          if (!response.ok) {
-            throw new Error(`Failed to create conversation: ${response.statusText}`);
-          }
+    const response = await fetch(`${this.apiBase}/api/conversation/`, requestConfiguration);
 
-          const data = await response.json();
-          conversation_id = data.id;
-        } catch (error) {
-          console.error("Error creating conversation:", error);
-          throw error;
-        }
-      }
-
-      const body: RequestBody = {
-        "question_message": message,
-        "conversation_id": conversation_id,
-        "data_set_id": dataSetId
-      }
-
-      // Enqueue the task
-      const response = await fetch(`${this.apiBase}/api/ask/`, {
-        headers: {
-          ...this._requestConfiguration().headers,
-          'Content-Type': 'application/json'
-        },
-        method: 'POST',
-        body: JSON.stringify(body)
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to enqueue task: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      const taskId = data.task_id;
-
-      // Polling function to check task status (with a defined interval)
-      const pollTaskStatus = async (taskId: string): Promise<string> => {
-        return new Promise((resolve, reject) => {
-          const pollInterval = setInterval(async () => {
-            try {
-              const response = await fetch(`${this.apiBase}/api/task_status/${taskId}/`, {
-                headers: {
-                  ...this._requestConfiguration().headers,
-                  'Content-Type': 'application/json'
-                },
-                method: 'GET'
-              });
-
-              if (!response.ok) {
-                throw new Error(`Failed to fetch task status: ${response.statusText}`);
-              }
-
-              const data = await response.json();
-              const { state } = data;
-
-              if (state === "SUCCESS") {
-                clearInterval(pollInterval);
-                resolve(state);
-              } else if (state === "FAILURE") {
-                clearInterval(pollInterval);
-                reject(new Error("Task failed"));
-              }
-            } catch (error) {
-              clearInterval(pollInterval);
-              reject(error);
-            }
-          }, 2000); // Polling interval.
-        });
-      };
-      // Function to wait for task and return history.
-      const status = await pollTaskStatus(taskId);
-
-      if (status === "SUCCESS") {
-        const conversation = await this.getConversation(conversation_id);
-        const latestMessage = conversation.history?.[conversation.history.length - 1];  //Latest message is an answer.
-        return {
-            conversation_id: conversation_id,
-            answer: latestMessage?.text || "No answer available",
-            message_id: latestMessage?.id || null,
-        };
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(`Failed to get answer: ${error.message}`);
-      } else {
-        throw new Error("Failed to get answer: An unknown error occurred.");
-      }
+    if (!response.ok) {
+      throw new Error(`Failed to create conversation: ${response.statusText}`);
     }
+
+    const { id } = await response.json();
+    return id;
+  }
+
+  async sendMessage(conversationId: number, dataSetId: number, message: string): Promise<TaskHandle> {
+    const requestBody: SendMessageBody = {
+      "question_message": message,
+      "conversation_id": conversationId,
+      "data_set_id": dataSetId
+    }
+
+    const response = await fetch(`${this.apiBase}/api/conversation/${conversationId}`, {
+      ...this._requestConfiguration(),
+      method: "POST",
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to enqueue task: ${response.statusText}`);
+    }
+
+    return await response.json() as TaskHandle;
+  }
+
+  async getTaskStatus(taskHandle: TaskHandle): Promise<string> {
+    const response = await fetch(`${this.apiBase}/api/task_status/${taskHandle.task_id}`, {...this._requestConfiguration()});
+    const { state } = await response.json() as TaskState;
+    return state;
+  }
+
+  async fetchResponseMessage(conversationId: number, taskHandle: TaskHandle): Promise<Message | null> {
+    const taskStatus = await this.getTaskStatus(taskHandle);
+
+    if (taskStatus === "FAILURE") {
+      throw new Error("Failed to get a response");
+    }
+
+    if (taskStatus === "SUCCESS") {
+      const conversation = await this.getConversation(conversationId);
+      return conversation.history![conversation.history!.length - 1];
+    }
+
+    return null;
   }
 
   async getConversation(conversation_id: number | null): Promise<Conversation> {
     try {
       const response = await fetch(`${this.apiBase}/api/conversation/${conversation_id}`, {
-        headers: {
-          ...this._requestConfiguration().headers,
-          'Content-Type': 'application/json'
-        },
-        method: 'GET',
+        ...this._requestConfiguration()
       });
 
       if (!response.ok) {
         throw new Error(`Failed to get conversation: ${response.statusText}`);
       }
 
-      const conversation = await response.json();
-
-      return conversation;
+      return await response.json();
     } catch (error) {
       if (error instanceof Error) {
         throw new Error(`Failed to get conversation history: ${error.message}`);
@@ -230,7 +192,7 @@ export class ApiClient {
     if (response.status !== 200) {
       throw 'Could not sign in';
     }
-    
+
     return await response.json() as Promise<Token>;
   }
 
@@ -241,10 +203,7 @@ export class ApiClient {
 
   async updateMessageFeedback(questionId: number | null, feedbackData: FeedbackData): Promise<void> {
     const response = await fetch(`${this.apiBase}/api/question/${questionId}/feedback/`, {
-      headers: {
-        ...this._requestConfiguration().headers,
-        'Content-Type': 'application/json',
-      },
+      ...this._requestConfiguration(),
       method: 'PATCH',
       body: JSON.stringify(feedbackData),
     });
@@ -259,7 +218,8 @@ export class ApiClient {
   _requestConfiguration(): RequestInit {
     return {
       headers: {
-        'Authorization': `Token ${this.authenticationProvider.token}`
+        'Authorization': `Token ${this.authenticationProvider.token}`,
+        "Content-Type": "application/json"
       }
     }
   }

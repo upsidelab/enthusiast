@@ -36,25 +36,33 @@ export function Conversation(props: ConversationProps) {
     setTimeout(() => {
       lastMessageRef.current?.scrollIntoView({behavior: "smooth"});
     });
-    try {
-      const apiAnswer = await api.getAnswer(conversationId, dataSetId!, message);
-      if (!apiAnswer) {
-        setMessages((currMessages) => [
-            ...currMessages,
-            { role: "agent", text: "An error occurred. Please try again.", id: null },
-        ]);
-        return;
-      }
-      setMessages((currMessages) => [...currMessages, { role: "agent", text: apiAnswer.answer, id: apiAnswer.message_id }]);
-      setConversationId(apiAnswer.conversation_id);
-    } catch (error) {
-      console.error("Error fetching answer:", error);
-    } finally {
-      setIsLoading(false); // Ensure isLoading is reset after API call (even if api fails)
-      setTimeout(() => {
-        lastMessageRef.current?.scrollIntoView({behavior: "smooth"});
-      });
+    let currentConversationId = conversationId;
+    if (!currentConversationId) {
+      currentConversationId = await api.createConversation(dataSetId!);
+      setConversationId(currentConversationId);
     }
+    const taskHandle = await api.sendMessage(currentConversationId, dataSetId!, message);
+
+    const updateTaskStatus = async () => {
+      try {
+        const response = await api.fetchResponseMessage(currentConversationId!, taskHandle);
+        if (response) {
+          setMessages((currMessages) => [
+            ...currMessages,
+            response as MessageProps
+          ]);
+          setIsLoading(false);
+          setTimeout(() => {
+            lastMessageRef.current?.scrollIntoView({behavior: "smooth"});
+          });
+        } else {
+          setTimeout(updateTaskStatus, 2000);
+        }
+      } catch {
+        setIsLoading(false);
+      }
+    }
+    updateTaskStatus();
   };
 
   useEffect(() => {

@@ -8,9 +8,6 @@ class AskQuestionSerializer(serializers.Serializer):
     """A serializer to ask questions.
 
     Arguments:
-        conversation_id:
-            Integer, To continue an existing conversation provide ID, if you skip this attribute,
-            we will create a new conversation.
         data_set_id:
             Integer, Provide an ID of a data set to be used
         embedding_model_name:
@@ -25,13 +22,6 @@ class AskQuestionSerializer(serializers.Serializer):
         question_message:
             Str, A question message.
     """
-    conversation_id = serializers.IntegerField(
-        required=False,
-        allow_null=False,
-        error_messages={
-            'null': 'Conversation ID cannot be blank. Either skip this parameter (a new conversation will be created), or provide a valid ID of an existing conversation'
-        }
-    )
     data_set_id = serializers.IntegerField(
         required=False,
         allow_null=False,

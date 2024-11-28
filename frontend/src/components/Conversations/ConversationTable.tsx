@@ -6,12 +6,23 @@ import { ApiClient, Conversation } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
 import { useNavigate } from "react-router-dom";
+import RenderPaginationItems from "@/components/util/PaginationUtils.tsx";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const api = new ApiClient(authenticationProviderInstance);
 
 export function ConversationTable() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalConversations, setTotalConversations] = useState(0);
+  const itemsPerPage = 25;
   const { dataSetId } = useApplicationContext()!;
   const navigate = useNavigate();
 
@@ -25,16 +36,24 @@ export function ConversationTable() {
     }
 
     const loadData = async () => {
-      const apiConversations = await api.getConversations(dataSetId);
-      setConversations(apiConversations);
-      setIsLoading(false);
+      setIsLoading(true);
+        const apiConversations = await api.getConversations(dataSetId, currentPage);
+        setConversations(apiConversations.results);
+        setTotalConversations(apiConversations.count);
+        setIsLoading(false);
     };
 
     loadData();
-  }, [dataSetId]);
+  }, [dataSetId, currentPage]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const totalPages = Math.ceil(totalConversations / itemsPerPage);
 
   return (
-    <SkeletonLoader skeleton={<Skeleton className="w-full h-[100px]"/>} isLoading={isLoading}>
+    <SkeletonLoader skeleton={<Skeleton className="w-full h-[100px]" />} isLoading={isLoading}>
       <Table>
         <TableHeader>
           <TableRow>
@@ -49,6 +68,29 @@ export function ConversationTable() {
           ))}
         </TableBody>
       </Table>
+      {!isLoading && (
+        <Pagination className="my-4 text-lg">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
+              />
+            </PaginationItem>
+              <RenderPaginationItems
+                currentPage={currentPage}
+                totalPages={totalPages}
+                handlePageChange={handlePageChange}
+              />
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
     </SkeletonLoader>
   );
 }

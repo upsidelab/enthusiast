@@ -2,6 +2,7 @@ from celery.result import AsyncResult
 
 from rest_framework import status
 from rest_framework.generics import ListAPIView
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -102,6 +103,7 @@ class ConversationRetrieveView(APIView):
 class ConversationListView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ConversationSerializer
+    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         return Conversation.objects.filter(data_set_id=self.kwargs['data_set_id'])

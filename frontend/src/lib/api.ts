@@ -95,9 +95,9 @@ export class ApiClient {
     return await response.json() as Promise<PaginatedResult<Document>>;
   }
 
-  async getConversations(dataSetId: number): Promise<Conversation[]> {
-    const response = await fetch(`${this.apiBase}/api/conversations/${dataSetId}`, this._requestConfiguration());
-    return await response.json() as Promise<Conversation[]>;
+  async getConversations(dataSetId: number, page: number = 1): Promise<PaginatedResult<Conversation>> {
+    const response = await fetch(`${this.apiBase}/api/conversations/${dataSetId}/?page=${page}`, this._requestConfiguration());
+    return await response.json() as Promise<PaginatedResult<Conversation>>;
   }
 
   async createConversation(dataSetId: number): Promise<number> {

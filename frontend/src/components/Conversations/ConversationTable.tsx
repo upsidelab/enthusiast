@@ -52,6 +52,14 @@ export function ConversationTable() {
 
   const totalPages = Math.ceil(totalConversations / itemsPerPage);
 
+  if (conversations.length === 0 && !isLoading) {
+    return (
+      <div className="text-center">
+        <h2 className="font-bold">You don't have any conversations yet.</h2>
+      </div>
+    );
+  }
+
   return (
     <SkeletonLoader skeleton={<Skeleton className="w-full h-[100px]" />} isLoading={isLoading}>
       <Table>

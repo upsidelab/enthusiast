@@ -26,7 +26,7 @@ export function LoginForm({ className, ...props }: HTMLAttributes<HTMLDivElement
     try {
       const { token } = await api.login(email, password);
       authenticationProviderInstance.login(token);
-      navigate('/campaign');
+      navigate('/ask/chat');
     } catch {
       setIsError(true);
     } finally {
@@ -40,12 +40,9 @@ export function LoginForm({ className, ...props }: HTMLAttributes<HTMLDivElement
         <div className="grid gap-2">
           <div className="grid gap-1">
             {isError && <Alert variant="destructive">
-              <AlertTitle>Invalid invitation code</AlertTitle>
-              <AlertDescription>Make sure that the code you've provided is correct and try again.</AlertDescription>
+              <AlertTitle>Invalid email or password</AlertTitle>
+              <AlertDescription>Make sure that the credentials that you've provided are correct and try again.</AlertDescription>
             </Alert>}
-            <Label className="sr-only" htmlFor="invitationCode">
-              Your invitation code
-            </Label>
             <Input
               id="email"
               placeholder="user@example.com"

@@ -26,7 +26,7 @@ export default function Login() {
                 Login to continue
               </h1>
               <p className="text-sm text-muted-foreground">
-                Enter your early access token below to continue
+                Enter your email and password to get started
               </p>
             </div>
             <LoginForm />

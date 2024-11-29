@@ -41,13 +41,13 @@ class ProductRetriever:
 
     def find_products_matching_query(self, user_query: str):
         agent_where_clause = self._build_where_clause_for_query(user_query)
-        where_conditions = [f"company_code_id = {self.data_set.id}"]  # Security: access only to approved data set.
+        where_conditions = [f"data_set_id = {self.data_set.id}"]  # Security: access only to approved data set.
         if agent_where_clause:
             where_conditions.append(agent_where_clause)
         return Product.objects.extra(where=where_conditions)[:self.number_of_products]
 
     def _get_sample_products_json(self):
-        sample_products = Product.objects.filter(company_code_id__exact=self.data_set.id)[:self.max_sample_products]
+        sample_products = Product.objects.filter(data_set_id__exact=self.data_set.id)[:self.max_sample_products]
         return serializers.serialize("json", sample_products)
 
     def _build_where_clause_for_query(self, query: str):

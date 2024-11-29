@@ -21,7 +21,7 @@ class ProductListView(ListAPIView):
     pagination_class = PageNumberPagination
 
     def get_queryset(self):
-        return Product.objects.filter(company_code=self.kwargs['data_set_id'])
+        return Product.objects.filter(data_set_id=self.kwargs['data_set_id'])
 
 class DocumentListView(ListAPIView):
     serializer_class = DocumentSerializer

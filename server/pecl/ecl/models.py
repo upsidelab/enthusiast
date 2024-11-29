@@ -200,7 +200,7 @@ class DocumentChunkEmbedding(models.Model):
 
 
 class Product(models.Model):
-    company_code = models.ForeignKey(DataSet, on_delete=models.PROTECT, null=True)
+    data_set = models.ForeignKey(DataSet, on_delete=models.PROTECT)
     entry_id = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     slug = models.CharField(max_length=255)
@@ -211,5 +211,5 @@ class Product(models.Model):
     price = models.FloatField()
 
     class Meta:
-        db_table_comment = "List of a company's products."
+        db_table_comment = "List of products from a given data set."
 

@@ -37,28 +37,25 @@ class ConversationManager:
                 embedding_dimensions = EmbeddingDimension.objects.first()
 
             # Start a new conversation.
-            conversation = Conversation(started_at=datetime.now(),
-                                        model=embedding_model,
-                                        dimensions=embedding_dimensions,
-                                        user=CustomUser.objects.get(id=user_id),
-                                        system_name=system_name,
-                                        data_set=data_set)
-            conversation.save()  # Save it now to allow adding child entities such as questions (connected by foreign key).
+            conversation = Conversation.objects.create(started_at=datetime.now(),
+                                                       model=embedding_model,
+                                                       dimensions=embedding_dimensions,
+                                                       user=CustomUser.objects.get(id=user_id),
+                                                       system_name=system_name,
+                                                       data_set=data_set)
         return conversation
 
     def process_question(self, conversation, question_message):
         # Define a question.
-        question = Message(conversation=conversation,
-                           created_at=datetime.now(),
-                           role='user',
-                           text=question_message)
-        question.save()  # Save it now to allow adding child entities such as relevant documents (connected by foreign key).
+        question = Message.objects.create(conversation=conversation,
+                                          created_at=datetime.now(),
+                                          role='user',
+                                          text=question_message)
         # Define an answer.
-        answer = Message(conversation=conversation,
-                         created_at=datetime.now(),
-                         role='agent',
-                         text=self.get_answer(conversation, question.text))
-        answer.save()
+        answer = Message.objects.create(conversation=conversation,
+                                        created_at=datetime.now(),
+                                        role='agent',
+                                        text=self.get_answer(conversation, question.text))
         return answer
 
     def answer_question(self, conversation_id, data_set_id, embedding_model_name, embedding_dimensions_value,

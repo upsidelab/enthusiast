@@ -1,10 +1,10 @@
-import { Button } from "@/components/ui/button.tsx";
 import { useEffect, useState } from 'react';
 import { cn } from "@/lib/utils.ts";
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import { MessageFeedbackForm } from "@/components/MessageFeedback/MessageFeedbackForm.tsx";
-import { ChevronDownIcon, ChevronUpIcon } from "@radix-ui/react-icons";
+import { CopyToClipboardButton } from '@/components/ConversationView/CopyToClipboardButton.tsx';
+import { FeedbackButton } from '@/components/ConversationView/FeedbackButton.tsx';
 
 export interface MessageBubbleProps {
   text: string;
@@ -26,7 +26,7 @@ export function MessageBubble({ text, variant, questionId }: MessageBubbleProps)
     processText();
   }, [text]);
 
-  const shouldShowFeedbackButton = variant === 'secondary' && questionId !== null;
+  const shouldShowActionButtons = variant === 'secondary' && questionId !== null;
 
   const handleFeedbackClick = () => {
     setIsFeedbackOpen((prev) => !prev);
@@ -43,14 +43,10 @@ export function MessageBubble({ text, variant, questionId }: MessageBubbleProps)
         )}
       >
         <div className={variant} dangerouslySetInnerHTML={{ __html: sanitizedHtml }}/>
-        {shouldShowFeedbackButton &&
-          <div className="mt-4">
-            <Button onClick={handleFeedbackClick} variant="ghost">
-              Provide feedback for this response
-              <span className="ml-1">
-                {isFeedbackOpen ? <ChevronUpIcon/> : <ChevronDownIcon />}
-              </span>
-            </Button>
+        {shouldShowActionButtons &&
+          <div className="mt-4 flex items-center">
+            <FeedbackButton isOpen={isFeedbackOpen} onClick={handleFeedbackClick} />
+            <CopyToClipboardButton message={text} />
           </div>
         }
 

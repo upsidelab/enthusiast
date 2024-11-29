@@ -1,7 +1,6 @@
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import { Label } from "@/components/ui/label.tsx";
 import { HTMLAttributes, SyntheticEvent, useState } from "react";
 import { Spinner } from "@/components/util/Spinner.tsx";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";

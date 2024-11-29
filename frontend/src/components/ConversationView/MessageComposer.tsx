@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button.tsx";
 import { Loader, Send } from "lucide-react";
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
 import './MessageComposer.css';
 import { Textarea } from "@/components/ui/textarea.tsx";
 
@@ -21,9 +21,23 @@ export function MessageComposer({ onSubmit, isLoading }: MessageComposerProps) {
     element.style.height = `${Math.min(element.scrollHeight, maxHeight)}px`;
   }
 
+  const submitMessage = () => {
+    if (inputLength === 0) return;
+    onSubmit(input);
+    setInput("");
+  }
+
   const handleTextAreaInput = (event: ChangeEvent<HTMLTextAreaElement>) => {
     setInput(event.target.value);
     resizeTextArea(event.target);
+  }
+
+  const handleTextAreaKeyUp = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.shiftKey || event.key !== 'Enter')
+      return;
+
+    event.preventDefault();
+    submitMessage();
   }
 
   // Focus back to the input field after response is received.
@@ -37,9 +51,7 @@ export function MessageComposer({ onSubmit, isLoading }: MessageComposerProps) {
     <form
       onSubmit={(event) => {
         event.preventDefault();
-        if (inputLength === 0) return;
-        onSubmit(input);
-        setInput("");
+        submitMessage();
       }}
       className="flex w-full items-center space-x-2 relative"
     >
@@ -51,7 +63,8 @@ export function MessageComposer({ onSubmit, isLoading }: MessageComposerProps) {
           className="w-full resize-none"
           autoComplete="off"
           value={input}
-          onChange={(event) => handleTextAreaInput(event)}
+          onChange={handleTextAreaInput}
+          onKeyUp={handleTextAreaKeyUp}
           disabled={isLoading}
         />
       </div>

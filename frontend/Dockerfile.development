@@ -1,0 +1,12 @@
+FROM node:20
+
+WORKDIR /app
+
+COPY package.json pnpm-lock.yaml ./
+RUN npm install -g pnpm
+
+RUN pnpm install
+
+COPY . .
+
+CMD pnpm run dev --host 0.0.0.0 --port $PORT

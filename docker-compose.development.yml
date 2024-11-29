@@ -1,0 +1,57 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    environment:
+      - POSTGRES_USER=ecl
+      - POSTGRES_PASSWORD=ecl
+      - POSTGRES_DB=ecl-development
+  redis:
+    image: redis:latest
+  frontend:
+    build:
+      context: frontend/
+      dockerfile: Dockerfile.development
+    environment:
+      - PORT=10001
+      - VITE_API_BASE=http://localhost:10000
+    ports:
+      - "10001:10001"
+  api:
+    build:
+      context: server/pecl/
+      dockerfile: Dockerfile.development
+    ports:
+      - "10000:10000"
+    environment:
+      - PORT=10000
+      - RUN_MIGRATIONS=True
+      - ECL_DB_HOST=postgres
+      - ECL_DB_PORT=5432
+      - ECL_DB_USER=ecl
+      - ECL_DB_PASSWORD=ecl
+      - ECL_DB_NAME=ecl-development
+      - ECL_DJANGO_ALLOWED_HOSTS=["localhost", "127.0.0.1"]
+      - ECL_DJANGO_CORS_ALLOWED_ORIGINS=["http://localhost:10001", "http://127.0.0.1:10001"]
+      - ECL_DJANGO_SECRET_KEY=xxxxxxxxxxxxxxxxxx
+      - ECL_DJANGO_DEBUG=True
+      - ECL_CELERY_BROKER_URL=redis://redis:6379/0
+      - ECL_CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - ECL_CELERY_TIMEZONE=UTC
+  worker:
+    build:
+      context: server/pecl/
+      dockerfile: Dockerfile.development
+    environment:
+      - RUN_WORKER=True
+      - ECL_DB_HOST=postgres
+      - ECL_DB_PORT=5432
+      - ECL_DB_USER=ecl
+      - ECL_DB_PASSWORD=ecl
+      - ECL_DB_NAME=ecl-development
+      - ECL_DJANGO_ALLOWED_HOSTS=["localhost", "127.0.0.1"]
+      - ECL_DJANGO_CORS_ALLOWED_ORIGINS=["http://localhost:10001", "http://127.0.0.1:10001"]
+      - ECL_DJANGO_SECRET_KEY=xxxxxxxxxxxxxxxxxx
+      - ECL_DJANGO_DEBUG=True
+      - ECL_CELERY_BROKER_URL=redis://redis:6379/0
+      - ECL_CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - ECL_CELERY_TIMEZONE=UTC

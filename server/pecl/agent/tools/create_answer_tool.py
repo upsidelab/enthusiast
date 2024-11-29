@@ -24,21 +24,21 @@ CREATE_CONTENT_PROMPT_TEMPLATE = """
     ```
     {product_context}
     ```
-    create content for the following user request delimited by three backticks
+    respond to the following user request delimited by three backticks
     ```
     {query}
     ``` 
 """
 
 
-class CreateContentToolInput(BaseModel):
+class CreateAnswerToolInput(BaseModel):
     query: str = Field(description="user's request")
 
 
-class CreateContentTool(BaseTool):
-    name: str = "create_content_tool"
-    description: str = "use it when asked to generate content about products"
-    args_schema: Type[BaseModel] = CreateContentToolInput
+class CreateAnswerTool(BaseTool):
+    name: str = "create_answer_tool"
+    description: str = "use it when asked to generate content or answer a question about products"
+    args_schema: Type[BaseModel] = CreateAnswerToolInput
     return_direct: bool = True
     data_set: DataSet = None
     embedding_model: EmbeddingModel = None

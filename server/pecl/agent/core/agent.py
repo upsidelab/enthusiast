@@ -6,7 +6,7 @@ from langchain_core.messages import SystemMessage
 
 from ecl.models import DataSet, EmbeddingModel, EmbeddingDimension
 from agent.core.llm_provider import LlmProvider
-from agent.tools import CreateContentTool
+from agent.tools import CreateAnswerTool
 
 
 logger = logging.getLogger(__name__)
@@ -21,7 +21,7 @@ class Agent:
         ):
         logger.debug("Initialize Agent")
         self._llm = LlmProvider.provide_llm_instance()
-        self._tools = [CreateContentTool(
+        self._tools = [CreateAnswerTool(
             data_set=data_set,
             embedding_model=embedding_model,
             embedding_dimensions=embedding_dimensions,

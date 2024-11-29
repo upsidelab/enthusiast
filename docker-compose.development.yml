@@ -18,7 +18,7 @@ services:
       - "10001:10001"
   api:
     build:
-      context: server/pecl/
+      context: server/
       dockerfile: Dockerfile.development
     ports:
       - "10000:10000"
@@ -39,7 +39,7 @@ services:
       - ECL_CELERY_TIMEZONE=UTC
   worker:
     build:
-      context: server/pecl/
+      context: server/
       dockerfile: Dockerfile.development
     environment:
       - RUN_WORKER=True

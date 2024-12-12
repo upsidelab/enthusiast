@@ -1,0 +1,17 @@
+[project]
+name = "ecl_shopify_product_fetch"
+version = "0.0.1"
+authors = [
+  { name="ecl", email="ecl@example.com" },
+]
+description = "A package to fetch products from Shopify."
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -13,7 +13,7 @@ const maxHeight = 300;
 
 export function MessageComposer({ onSubmit, isLoading }: MessageComposerProps) {
   const [input, setInput] = useState("");
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const inputLength = input.trim().length;
 
   const resizeTextArea = (element: HTMLTextAreaElement) => {
@@ -25,6 +25,9 @@ export function MessageComposer({ onSubmit, isLoading }: MessageComposerProps) {
     if (inputLength === 0) return;
     onSubmit(input);
     setInput("");
+    setTimeout(() => {
+      resizeTextArea(inputRef.current!);
+    });
   }
 
   const handleTextAreaInput = (event: ChangeEvent<HTMLTextAreaElement>) => {

@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('ECL_DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('ECL_DJANGO_DEBUG', default=False)
+DEBUG = (os.environ.get('ECL_DJANGO_DEBUG', default='False') == 'True')
 
 ALLOWED_HOSTS = json.loads(os.environ.get('ECL_DJANGO_ALLOWED_HOSTS', default='[]'))
 
@@ -67,9 +67,10 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
-    'ecl',
+    'catalog',
     'agent',
     'account',
+    'sync',
     'drf_yasg'
 ]
 
@@ -117,6 +118,7 @@ DATABASES = {
         'PASSWORD': os.environ.get('ECL_DB_PASSWORD'),
         'HOST': os.environ.get('ECL_DB_HOST'),
         'PORT': os.environ.get('ECL_DB_PORT'),
+        'ATOMIC_REQUESTS': True,
     }
 }
 
@@ -201,3 +203,15 @@ SWAGGER_SETTINGS = {
 CELERY_BROKER_URL = os.environ.get('ECL_CELERY_BROKER_URL')
 CELERY_RESULT_BACKEND = os.environ.get('ECL_CELERY_RESULT_BACKEND')
 CELERY_TIMEZONE = os.environ.get('ECL_CELERY_TIMEZONE')
+
+CATALOG_EMBEDDING_PROVIDERS = {
+    "OpenAI": "catalog.embeddings.openai_embedding_provider.OpenAIEmbeddingProvider",
+}
+
+# Configuration of installed plugins {plugin_name: plugin_path}
+CATALOG_PRODUCT_SOURCE_PLUGINS = {
+    "Shopify": "ecl_shopify_product_fetch.plugin.ShopifyProductFetch",
+}
+CATALOG_DOCUMENT_SOURCE_PLUGINS = {
+    "Upside": "ecl_upside_document_fetch.plugin.UpsideDocumentFetch",
+}

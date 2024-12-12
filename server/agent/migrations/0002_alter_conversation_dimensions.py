@@ -8,13 +8,13 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('agent', '0001_initial'),
-        ('ecl', '0016_remove_conversation_model_and_more'),
+        ('catalog', '0016_remove_conversation_model_and_more'),
     ]
 
     operations = [
         migrations.AlterField(
             model_name='conversation',
             name='dimensions',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='ecl.embeddingdimension'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='catalog.embeddingdimension'),
         ),
     ]

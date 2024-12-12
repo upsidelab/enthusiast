@@ -1,4 +1,4 @@
-import { ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown, ListIcon, PlusCircleIcon } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -6,18 +6,20 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu.tsx";
-import { useEffect, useState } from "react";
-import { ApiClient, DataSet } from "@/lib/api.ts";
+import { useEffect } from "react";
+import { ApiClient } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
 import { SidebarMenuButton } from "@/components/ui/sidebar.tsx";
 import logoUrl from "@/assets/logo.png";
+import { Separator } from "@/components/ui/separator.tsx";
+import { useNavigate } from "react-router-dom";
 
 const api = new ApiClient(authenticationProviderInstance);
 
 export function DataSetSelector() {
-  const [dataSets, setDataSets] = useState<DataSet[]>([]);
-  const { dataSetId, setDataSetId } = useApplicationContext()!;
+  const { dataSets, setDataSets, dataSetId, setDataSetId, account } = useApplicationContext()!;
+  const navigate = useNavigate();
 
   const activeDataSet = () => {
     return dataSets.find((e) => e.id === dataSetId);
@@ -33,7 +35,7 @@ export function DataSetSelector() {
     };
 
     fetchData();
-  }, [dataSetId, setDataSetId]);
+  }, [dataSetId, setDataSetId, setDataSets]);
 
   return (
     <DropdownMenu>
@@ -70,7 +72,7 @@ export function DataSetSelector() {
           dataSets.map((dataSet) => (
             <DropdownMenuItem
               key={dataSet.name}
-              onClick={() => setDataSetId(dataSet.id)}
+              onClick={() => setDataSetId(dataSet.id || null)}
               className="items-start gap-2 px-1.5"
             >
               <div className="grid flex-1 leading-tight">
@@ -79,6 +81,27 @@ export function DataSetSelector() {
             </DropdownMenuItem>
           ))
         )}
+        {account && account.isStaff &&
+          <>
+            <Separator className="my-2"/>
+            <DropdownMenuItem
+              key="new"
+              onClick={() => navigate('/data-sets/new')}
+              className="gap-2 px-1.5"
+            >
+              <PlusCircleIcon className="size-4" />
+              New
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              key="manage"
+              onClick={() => navigate('/data-sets')}
+              className="gap-2 px-1.5"
+            >
+              <ListIcon className="size-4" />
+              Manage
+            </DropdownMenuItem>
+          </>
+        }
       </DropdownMenuContent>
     </DropdownMenu>
   )

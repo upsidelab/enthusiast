@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 from account.models import CustomUser
 from agent.models import EmbeddingModel, EmbeddingDimension
-from ecl.models import DataSet
+from catalog.models import DataSet
 
 
 class GetAnswerAPITestCase(APITestCase):

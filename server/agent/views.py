@@ -62,7 +62,7 @@ class ConversationRetrieveView(APIView):
     View to retrieve details of an existing conversation.
     """
     def get(self, request, conversation_id):
-        conversation = Conversation.objects.get(id=conversation_id)
+        conversation = Conversation.objects.get(id=conversation_id, user=request.user)
 
         messages = Message.objects.filter(conversation=conversation).order_by('id')
 
@@ -80,17 +80,12 @@ class ConversationRetrieveView(APIView):
             from agent.tasks import answer_question_task
             # Collect params.
             data_set_id = serializer.validated_data.get('data_set_id')
-            embedding_model_name = serializer.validated_data.get('embedding_model_name')
-
-            embedding_dimensions_value = serializer.validated_data.get('embedding_dimensions')
             system_name = serializer.validated_data.get('system_name')
             question_message = serializer.validated_data.get('question_message')
 
             # Run the task asynchronously.
             task = answer_question_task.apply_async(args=[conversation_id,
                                                           data_set_id,
-                                                          embedding_model_name,
-                                                          embedding_dimensions_value,
                                                           request.user.id,
                                                           system_name,
                                                           question_message])
@@ -106,7 +101,8 @@ class ConversationListView(ListAPIView):
     pagination_class = PageNumberPagination
 
     def get_queryset(self):
-        return Conversation.objects.filter(data_set_id=self.kwargs['data_set_id'])
+        user = self.request.user
+        return Conversation.objects.filter(data_set_id=self.kwargs['data_set_id'], user=user).order_by('-started_at')
 
 
 class MessageFeedbackView(APIView):

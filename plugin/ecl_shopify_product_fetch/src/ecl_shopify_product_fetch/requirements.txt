@@ -1,0 +1,1 @@
+ShopifyAPI~=12.7.0

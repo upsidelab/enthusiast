@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('ecl', '0016_remove_conversation_model_and_more'),
+        ('catalog', '0016_remove_conversation_model_and_more'),
     ]
 
     operations = [
@@ -22,8 +22,8 @@ class Migration(migrations.Migration):
                 ('dimensions', models.IntegerField(null=True)),
                 ('user_name', models.CharField(default='user', max_length=50, null=True)),
                 ('system_name', models.CharField(default='system', max_length=50, null=True)),
-                ('data_set', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='ecl.dataset')),
-                ('model', models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, related_name='conversation', to='ecl.embeddingmodel')),
+                ('data_set', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='catalog.dataset')),
+                ('model', models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, related_name='conversation', to='catalog.embeddingmodel')),
             ],
             options={
                 'db_table_comment': 'A conversation is a collection of various messages exchanged during one session. Messages are mostly questions and answers and have different actors such as end user asking question and ECL agent answering those questions.',
@@ -51,8 +51,8 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('document_title', models.CharField(max_length=1024)),
                 ('cosine_distance', models.FloatField(null=True)),
-                ('document', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='answer_document', to='ecl.document')),
-                ('document_embedding', models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, related_name='answer_document', to='ecl.documentembedding')),
+                ('document', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='answer_document', to='catalog.document')),
+                ('document_embedding', models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, related_name='answer_document', to='catalog.documentembedding')),
                 ('conversation', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='answer_document', to='agent.conversation')),
                 ('question', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='answer_document', to='agent.question')),
             ],

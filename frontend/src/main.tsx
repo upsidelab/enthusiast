@@ -15,6 +15,9 @@ import { Docs } from "@/pages/Docs.tsx";
 import { Billing } from "@/pages/Billing.tsx";
 import { NoDataSets } from "@/pages/NoDataSets.tsx";
 import { ApiClient } from "@/lib/api.ts";
+import CreateDataSet from "@/pages/CreateDataSet.tsx";
+import { ManageDataSets } from "@/pages/ManageDataSets.tsx";
+import { ManageDataSetUsers } from "@/pages/ManageDataSetUsers.tsx";
 
 const api = new ApiClient(authenticationProviderInstance);
 
@@ -44,6 +47,18 @@ const router = createBrowserRouter([
       {
         path: '/documents',
         element: <Documents />
+      },
+      {
+        path: '/data-sets',
+        element: <ManageDataSets />
+      },
+      {
+        path: '/data-sets/new',
+        element: <CreateDataSet />
+      },
+      {
+        path: '/data-sets/:id/users',
+        element: <ManageDataSetUsers />
       },
       {
         path: "/",

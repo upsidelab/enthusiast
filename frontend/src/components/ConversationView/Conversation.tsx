@@ -80,7 +80,7 @@ export function Conversation(props: ConversationProps) {
     setTimeout(() => {
       lastMessageRef.current?.scrollIntoView({behavior: "smooth"});
     });
-  }, []);
+  }, [conversationId]);
 
   return (
     <div className="flex flex-col h-full px-4 pt-4">

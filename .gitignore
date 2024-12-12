@@ -87,4 +87,8 @@ fabric.properties
 /.idea/vcs.xml
 
 # Redis snapshot
-/dump.rdb
+**/dump.rdb
+
+# Plugin build files
+plugin/**/build/
+plugin/**/*.egg-info

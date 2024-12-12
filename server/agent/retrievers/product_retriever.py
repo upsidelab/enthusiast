@@ -2,11 +2,11 @@ from django.core import serializers
 from langchain_core.prompts import PromptTemplate
 
 from agent.core import LlmProvider
-from ecl.models import Product, DataSet
+from catalog.models import Product, DataSet
 
 QUERY_PROMPT_TEMPLATE = """
     With the following database schema delimited by three backticks ```
-    CREATE TABLE ecl_product (
+    CREATE TABLE catalog_product (
         \"id\" int8 NOT NULL,
         \"entry_id\" varchar NOT NULL,
         \"name\" varchar NOT NULL,

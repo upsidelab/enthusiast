@@ -34,7 +34,7 @@ urlpatterns = [
     path('api/docs<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('api/docs/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('admin/', admin.site.urls),
-    path('', include('ecl.urls')),
+    path('', include('catalog.urls')),
     path('', include('agent.urls')),
     path('', include('account.urls'))
 ]

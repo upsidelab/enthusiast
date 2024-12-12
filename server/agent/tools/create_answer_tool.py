@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 from agent.core import LlmProvider
 from agent.retrievers import DocumentRetriever
 from agent.retrievers import ProductRetriever
-from ecl.models import DataSet, EmbeddingModel, EmbeddingDimension
+from catalog.models import DataSet
 
 logger = logging.getLogger(__name__)
 
@@ -41,8 +41,6 @@ class CreateAnswerTool(BaseTool):
     args_schema: Type[BaseModel] = CreateAnswerToolInput
     return_direct: bool = True
     data_set: DataSet = None
-    embedding_model: EmbeddingModel = None
-    embedding_dimensions: EmbeddingDimension = None
     encoding: tiktoken.encoding_for_model = None
     max_tokens: int = 30000
     max_retry: int = 3
@@ -50,14 +48,10 @@ class CreateAnswerTool(BaseTool):
 
     def __init__(self,
                  data_set: DataSet,
-                 embedding_model: EmbeddingModel,
-                 embedding_dimensions: EmbeddingDimension,
                  chat_model: str,
                  **kwargs: Any):
         super().__init__(**kwargs)
         self.data_set = data_set
-        self.embedding_model = embedding_model
-        self.embedding_dimensions = embedding_dimensions
         self.chat_model = chat_model
         self.encoding = tiktoken.encoding_for_model(chat_model)
 
@@ -95,9 +89,7 @@ class CreateAnswerTool(BaseTool):
         return document_context
 
     def _run(self, query: str):
-        document_retriever = DocumentRetriever(data_set=self.data_set,
-                                               embedding_model=self.embedding_model,
-                                               embedding_dimensions=self.embedding_dimensions)
+        document_retriever = DocumentRetriever(data_set=self.data_set)
         relevant_documents = document_retriever.find_documents_matching_query(query)
         relevant_products = ProductRetriever(data_set=self.data_set).find_products_matching_query(query)
 

@@ -4,27 +4,19 @@ from langchain.agents.agent_toolkits import create_conversational_retrieval_agen
 from langchain.memory import ConversationSummaryBufferMemory
 from langchain_core.messages import SystemMessage
 
-from ecl.models import DataSet, EmbeddingModel, EmbeddingDimension
 from agent.core.llm_provider import LlmProvider
 from agent.tools import CreateAnswerTool
-
+from catalog.models import DataSet
 
 logger = logging.getLogger(__name__)
 
 
 class Agent:
-    def __init__(self,
-                 data_set: DataSet,
-                 embedding_model: EmbeddingModel,
-                 embedding_dimensions: EmbeddingDimension,
-                 messages: list  # History of conversation (if we continue existing one).
-        ):
+    def __init__(self, data_set: DataSet, messages: list):
         logger.debug("Initialize Agent")
         self._llm = LlmProvider.provide_llm_instance()
         self._tools = [CreateAnswerTool(
             data_set=data_set,
-            embedding_model=embedding_model,
-            embedding_dimensions=embedding_dimensions,
             chat_model=self._llm.model_name
         )]
         self._system_message = SystemMessage(

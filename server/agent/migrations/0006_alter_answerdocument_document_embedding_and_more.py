@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('agent', '0005_message'),
-        ('ecl', '0020_remove_documentembedding_dimensions_and_more'),
+        ('catalog', '0020_remove_documentembedding_dimensions_and_more'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -17,6 +17,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='answerdocument',
             name='document_embedding',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, related_name='answer_document', to='ecl.documentchunkembedding'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, related_name='answer_document', to='catalog.documentchunkembedding'),
         )
     ]

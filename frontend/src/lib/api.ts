@@ -73,7 +73,7 @@ export type Message = {
   text: string;
 }
 
-interface PaginatedResult<T> {
+export interface PaginatedResult<T> {
   results: T[];
   count: number;
 }

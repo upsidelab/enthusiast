@@ -27,7 +27,7 @@ export function DataSetSelector() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const apiDataSets = await api.getDataSets();
+      const apiDataSets = await api.dataSets().getDataSets();
       setDataSets(apiDataSets);
       if (!apiDataSets.find((e) => e.id === dataSetId)) {
         setDataSetId(apiDataSets[0]?.id || null);

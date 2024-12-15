@@ -1,5 +1,7 @@
 import { AuthenticationProvider } from "./authentication-provider.ts";
 import { UsersApiClient } from "@/lib/api/users.ts";
+import { CatalogApiClient } from "@/lib/api/catalog.ts";
+import { DataSetsApiClient } from "@/lib/api/data-sets.ts";
 
 export type DataSet = {
   id: number | undefined;
@@ -104,68 +106,6 @@ export class ApiClient {
 
   constructor(private readonly authenticationProvider: AuthenticationProvider) {
     this.apiBase = import.meta.env.VITE_API_BASE;
-  }
-
-  async getDataSets(): Promise<DataSet[]> {
-    const response = await fetch(`${this.apiBase}/api/data_sets/`, this._requestConfiguration());
-    return (await response.json()).results as DataSet[];
-  }
-
-  async createDataSet(dataSet: DataSet): Promise<number> {
-    const body: CreateDataSetBody = {
-      id: undefined,
-      name: dataSet.name,
-      embedding_provider: dataSet.embeddingProvider,
-      embedding_model: dataSet.embeddingModel,
-      embedding_vector_dimensions: dataSet.embeddingVectorSize
-    }
-
-    const response = await fetch(`${this.apiBase}/api/data_sets/`,
-      {
-        ...this._requestConfiguration(),
-        body: JSON.stringify(body),
-        method: 'POST'
-      }
-    );
-
-    const responseJson = (await response.json()) as DataSetResponse;
-    return responseJson.id!;
-  }
-
-  async getDataSetUsers(dataSetId: number): Promise<User[]> {
-    const response = await fetch(`${this.apiBase}/api/data_sets/${dataSetId}/users`, this._requestConfiguration());
-    return (await response.json()).results as User[];
-  }
-
-  async addDataSetUser(dataSetId: number, userId: number): Promise<void> {
-    await fetch(
-      `${this.apiBase}/api/data_sets/${dataSetId}/users`,
-      {
-        ...this._requestConfiguration(),
-        method: "POST",
-        body: JSON.stringify({user_id: userId})
-      }
-    );
-  }
-
-  async removeDataSetUser(dataSetId: number, userId: number): Promise<void> {
-    await fetch(
-      `${this.apiBase}/api/data_sets/${dataSetId}/users/${userId}`,
-      {
-        ...this._requestConfiguration(),
-        method: "DELETE"
-      }
-    );
-  }
-
-  async getProducts(dataSetId: number, page: number = 1): Promise<PaginatedResult<Product>> {
-    const response = await fetch(`${this.apiBase}/api/products/${dataSetId}/?page=${page}`, this._requestConfiguration());
-    return await response.json() as Promise<PaginatedResult<Product>>;
-  }
-
-  async getDocuments(dataSetId: number, page: number = 1): Promise<PaginatedResult<Document>> {
-    const response = await fetch(`${this.apiBase}/api/documents/${dataSetId}/?page=${page}`, this._requestConfiguration());
-    return await response.json() as Promise<PaginatedResult<Document>>;
   }
 
   async getConversations(dataSetId: number, page: number = 1): Promise<PaginatedResult<Conversation>> {
@@ -285,6 +225,14 @@ export class ApiClient {
   async getAllUsers(): Promise<User[]> {
     const response = await fetch(`${this.apiBase}/api/users?page_size=1000`, this._requestConfiguration());
     return (await response.json()).results as User[];
+  }
+
+  catalog(): CatalogApiClient {
+    return new CatalogApiClient(this.apiBase, this.authenticationProvider);
+  }
+
+  dataSets(): DataSetsApiClient {
+    return new DataSetsApiClient(this.apiBase, this.authenticationProvider);
   }
 
   async updateMessageFeedback(questionId: number | null, feedbackData: FeedbackData): Promise<void> {

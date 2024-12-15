@@ -28,7 +28,7 @@ export function DocumentTable() {
     }
 
     setSelectedPreview(null);
-    return await api.getDocuments(dataSetId, page);
+    return await api.catalog().getDocuments(dataSetId, page);
   };
 
   return (

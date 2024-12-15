@@ -26,7 +26,7 @@ const protectedLoginLoader = async () => {
     return redirect("/login");
   }
 
-  const apiDataSets = await api.getDataSets();
+  const apiDataSets = await api.dataSets().getDataSets();
   if (apiDataSets.length === 0) {
     return redirect("/no-data-sets");
   }

@@ -39,8 +39,8 @@ export function CreateDataSetForm() {
   const navigate = useNavigate();
 
   const handleSubmit = async (values: CreateDataSetFormSchema) => {
-    const createdDataSetId = await api.createDataSet(values as DataSet);
-    const dataSets = await api.getDataSets();
+    const createdDataSetId = await api.dataSets().createDataSet(values as DataSet);
+    const dataSets = await api.dataSets().getDataSets();
     setDataSets(dataSets);
     setDataSetId(createdDataSetId);
     navigate(`/data-sets/${createdDataSetId}/users`);

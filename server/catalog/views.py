@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework import status
 from rest_framework.generics import ListAPIView, ListCreateAPIView, GenericAPIView
 from rest_framework.pagination import PageNumberPagination
@@ -61,6 +60,7 @@ class ProductListView(ListAPIView):
             data_set = DataSet.objects.get(id=self.kwargs['data_set_id'], users=self.request.user)
         return data_set.products.all()
 
+
 class DocumentListView(ListAPIView):
     serializer_class = DocumentSerializer
     permission_classes = [IsAuthenticated]
@@ -72,12 +72,3 @@ class DocumentListView(ListAPIView):
         else:
             data_set = DataSet.objects.get(id=self.kwargs['data_set_id'], users=self.request.user)
         return data_set.documents.all()
-
-
-def embedding_view(request):
-    if request.method == 'POST':
-        data_set = DataSet.objects.all()
-        for ds in data_set:
-            ds.reload_all_embeddings()
-
-    return render(request, 'catalog/embedding.html')

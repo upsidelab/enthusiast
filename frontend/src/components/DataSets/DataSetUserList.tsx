@@ -17,7 +17,7 @@ export function DataSetUserList({dataSetId}: DataSetUserListProps) {
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
 
   const loadUsers = useCallback(async () => {
-    const users = await api.getDataSetUsers(dataSetId);
+    const users = await api.dataSets().getDataSetUsers(dataSetId);
     setUsers(users);
     const systemUsers = await api.getAllUsers();
     const availableUsers = systemUsers.filter((systemUser) => users.find((user) => user.id === systemUser.id) === undefined);
@@ -29,12 +29,12 @@ export function DataSetUserList({dataSetId}: DataSetUserListProps) {
   }, [loadUsers, dataSetId]);
 
   const handleAddUser = async (user: User) => {
-    await api.addDataSetUser(dataSetId, user.id);
+    await api.dataSets().addDataSetUser(dataSetId, user.id);
     await loadUsers();
   }
 
   const handleRemoveUser = async (user: User) => {
-    await api.removeDataSetUser(dataSetId, user.id);
+    await api.dataSets().removeDataSetUser(dataSetId, user.id);
     await loadUsers();
   }
 

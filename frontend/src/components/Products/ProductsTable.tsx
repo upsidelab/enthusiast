@@ -14,7 +14,7 @@ export function ProductsTable() {
       return;
     }
 
-    return await api.getProducts(dataSetId, page);
+    return await api.catalog().getProducts(dataSetId, page);
   };
 
   return (

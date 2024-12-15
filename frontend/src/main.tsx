@@ -12,12 +12,12 @@ import { authenticationProviderInstance } from "@/lib/authentication-provider.ts
 import { ApiConnection } from "@/pages/ApiConnection.tsx";
 import { Settings } from "@/pages/Settings.tsx";
 import { Docs } from "@/pages/Docs.tsx";
-import { Billing } from "@/pages/Billing.tsx";
 import { NoDataSets } from "@/pages/NoDataSets.tsx";
 import { ApiClient } from "@/lib/api.ts";
 import CreateDataSet from "@/pages/CreateDataSet.tsx";
 import { ManageDataSets } from "@/pages/ManageDataSets.tsx";
 import { ManageDataSetUsers } from "@/pages/ManageDataSetUsers.tsx";
+import { UsersIndex } from "@/pages/users";
 
 const api = new ApiClient(authenticationProviderInstance);
 
@@ -85,8 +85,8 @@ const router = createBrowserRouter([
         element: <Settings />
       },
       {
-        path: '/billing',
-        element: <Billing />
+        path: '/users',
+        element: <UsersIndex />
       }
     ]
   },

@@ -1,4 +1,5 @@
 import { AuthenticationProvider } from "./authentication-provider.ts";
+import { UsersApiClient } from "@/lib/api/users.ts";
 
 export type DataSet = {
   id: number | undefined;
@@ -60,6 +61,8 @@ export type Account = {
 export type User = {
   id: number;
   email: string;
+  isActive: boolean;
+  isStaff: boolean;
 }
 
 export type FeedbackData = {
@@ -275,8 +278,12 @@ export class ApiClient {
     };
   }
 
-  async getUsers(): Promise<User[]> {
-    const response = await fetch(`${this.apiBase}/api/users`, this._requestConfiguration());
+  users(): UsersApiClient {
+    return new UsersApiClient(this.apiBase, this.authenticationProvider);
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    const response = await fetch(`${this.apiBase}/api/users?page_size=1000`, this._requestConfiguration());
     return (await response.json()).results as User[];
   }
 

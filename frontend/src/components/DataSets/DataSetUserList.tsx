@@ -19,7 +19,7 @@ export function DataSetUserList({dataSetId}: DataSetUserListProps) {
   const loadUsers = useCallback(async () => {
     const users = await api.getDataSetUsers(dataSetId);
     setUsers(users);
-    const systemUsers = await api.getUsers();
+    const systemUsers = await api.getAllUsers();
     const availableUsers = systemUsers.filter((systemUser) => users.find((user) => user.id === systemUser.id) === undefined);
     setAvailableUsers(availableUsers);
   }, [dataSetId]);

@@ -1,8 +1,17 @@
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from "@/components/ui/sidebar.tsx";
 import { DataSetSelector } from "@/components/Navigation/DataSetSelector.tsx";
 import { MainSidebarSection, SidebarSectionItemProps } from "@/components/Navigation/MainSidebarSection.tsx";
-import { BookOpenIcon, BotMessageSquareIcon, FileTextIcon, HistoryIcon, PlugZapIcon } from "lucide-react";
+import {
+  BookOpenIcon,
+  BotMessageSquareIcon,
+  DatabaseIcon,
+  FileTextIcon,
+  HistoryIcon,
+  PlugZapIcon,
+  UserIcon
+} from "lucide-react";
 import { UserMenu } from "@/components/Navigation/UserMenu.tsx";
+import { useApplicationContext } from "@/lib/use-application-context.ts";
 
 const synchronizeItems: SidebarSectionItemProps[] = [
   {
@@ -43,7 +52,24 @@ const integrateItems: SidebarSectionItemProps[] = [
   }
 ];
 
+const manageItems: SidebarSectionItemProps[] = [
+  {
+    title: "Data Sets",
+    link: "/data-sets",
+    key: "data-sets",
+    icon: <DatabaseIcon />
+  },
+  {
+    title: "Users",
+    link: "/users",
+    key: "users",
+    icon: <UserIcon />
+  }
+]
+
 export function MainSidebar() {
+  const { account } = useApplicationContext()!;
+
   return (
     <Sidebar>
       <SidebarHeader>
@@ -53,6 +79,9 @@ export function MainSidebar() {
         <MainSidebarSection title="Synchronize" items={synchronizeItems} />
         <MainSidebarSection title="Ask" items={askItems} />
         <MainSidebarSection title="Integrate" items={integrateItems} />
+        {account && account.isStaff &&
+          <MainSidebarSection title="Manage" items={manageItems} />
+        }
       </SidebarContent>
       <SidebarFooter>
         <UserMenu />

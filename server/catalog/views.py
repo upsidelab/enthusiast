@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 
 from account.models import CustomUser
-from account.serializers import CustomUserSerializer
+from account.serializers import UserSerializer
 from .models import DataSet
 from .serializers import DataSetSerializer, DocumentSerializer, ProductSerializer
 
@@ -29,7 +29,7 @@ class DataSetListView(ListCreateAPIView):
 
 
 class DataSetUserListView(ListCreateAPIView):
-    serializer_class = CustomUserSerializer
+    serializer_class = UserSerializer
     permission_classes = [IsAdminUser]
 
     def get_queryset(self):

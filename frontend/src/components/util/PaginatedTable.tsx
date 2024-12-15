@@ -14,7 +14,7 @@ import RenderPaginationItems from "@/components/util/PaginationUtils.tsx";
 
 interface PaginatedTableProps<T> {
   loadItems: (page: number) => Promise<PaginatedResult<T> | undefined>;
-  itemsReloadDependencies: unknown;
+  itemsReloadDependencies?: unknown;
   noItemsMessage: string;
   tableFooter?: string;
   tableHeaders: string[];

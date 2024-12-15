@@ -1,7 +1,6 @@
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -9,7 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu.tsx";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar.tsx";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
 import { ApiClient } from "@/lib/api.ts";
@@ -92,18 +91,6 @@ export function UserMenu() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem asChild>
-            <Link to="/billing">
-              Billing
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to="/settings">
-              Settings
-            </Link>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={logout}>
           Log out

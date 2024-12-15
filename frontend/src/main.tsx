@@ -10,14 +10,14 @@ import { Documents } from "@/pages/Documents.tsx";
 import Login from "@/pages/Login.tsx";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { ApiConnection } from "@/pages/ApiConnection.tsx";
-import { Settings } from "@/pages/Settings.tsx";
 import { Docs } from "@/pages/Docs.tsx";
-import { NoDataSets } from "@/pages/NoDataSets.tsx";
+import { NoDataSets } from "@/pages/no-data-sets.tsx";
 import { ApiClient } from "@/lib/api.ts";
-import CreateDataSet from "@/pages/CreateDataSet.tsx";
-import { ManageDataSets } from "@/pages/ManageDataSets.tsx";
-import { ManageDataSetUsers } from "@/pages/ManageDataSetUsers.tsx";
+import NewDataSet from "@/pages/data-sets/new.tsx";
+import { DataSetsIndex } from "@/pages/data-sets";
+import { IndexDataSetUsers } from "@/pages/data-sets/(id)/users.tsx";
 import { UsersIndex } from "@/pages/users";
+import { OnboardingIndex } from "@/pages/onboarding";
 
 const api = new ApiClient(authenticationProviderInstance);
 
@@ -28,7 +28,12 @@ const protectedLoginLoader = async () => {
 
   const apiDataSets = await api.dataSets().getDataSets();
   if (apiDataSets.length === 0) {
-    return redirect("/no-data-sets");
+    const accountData = await api.getAccount();
+    if (accountData.isStaff) {
+      return redirect("/onboarding");
+    } else {
+      return redirect("/no-data-sets");
+    }
   }
 
   return null;
@@ -50,15 +55,15 @@ const router = createBrowserRouter([
       },
       {
         path: '/data-sets',
-        element: <ManageDataSets />
+        element: <DataSetsIndex />
       },
       {
         path: '/data-sets/new',
-        element: <CreateDataSet />
+        element: <NewDataSet />
       },
       {
         path: '/data-sets/:id/users',
-        element: <ManageDataSetUsers />
+        element: <IndexDataSetUsers />
       },
       {
         path: "/",
@@ -81,10 +86,6 @@ const router = createBrowserRouter([
         element: <Docs />
       },
       {
-        path: '/settings',
-        element: <Settings />
-      },
-      {
         path: '/users',
         element: <UsersIndex />
       }
@@ -97,6 +98,10 @@ const router = createBrowserRouter([
   {
     path: "/no-data-sets",
     element: <NoDataSets />
+  },
+  {
+    path: "/onboarding",
+    element: <OnboardingIndex />
   }
 ]);
 

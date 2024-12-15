@@ -37,6 +37,8 @@ services:
       - ECL_CELERY_BROKER_URL=redis://redis:6379/0
       - ECL_CELERY_RESULT_BACKEND=redis://redis:6379/0
       - ECL_CELERY_TIMEZONE=UTC
+      - ECL_ADMIN_EMAIL=admin@example.com
+      - ECL_ADMIN_PASSWORD=changeme
   worker:
     build:
       context: server/

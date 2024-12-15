@@ -5,7 +5,7 @@ import { UsersList } from "@/components/users/users-list.tsx";
 export function UsersIndex() {
   return (
     <PageMain>
-      <PageHeading title="Manage Users" description="Create user accounts to give them access to data sets." />
+      <PageHeading title="Manage Users" description="Create user accounts to control access to data sets." />
       <UsersList />
     </PageMain>
   )

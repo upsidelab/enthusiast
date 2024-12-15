@@ -24,7 +24,8 @@ class DataSetListView(ListCreateAPIView):
         if not self.request.user and self.request.user.is_staff:
             self.permission_denied(self.request)
 
-        serializer.save()
+        data_set = serializer.save()
+        data_set.users.add(self.request.user)
 
 
 class DataSetUserListView(ListCreateAPIView):

@@ -1,8 +1,9 @@
 import { TableCell, TableRow } from "@/components/ui/table.tsx";
-import { ApiClient, Product } from "@/lib/api.ts";
+import { ApiClient } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
 import { PaginatedTable } from "@/components/util/PaginatedTable.tsx";
+import { Product } from "@/lib/types.ts";
 
 const api = new ApiClient(authenticationProviderInstance);
 

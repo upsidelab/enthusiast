@@ -52,7 +52,7 @@ export function MessageBubble({ text, variant, questionId }: MessageBubbleProps)
 
         {isFeedbackOpen &&
           <div className="feedback-form-modal mx-4">
-            <MessageFeedbackForm questionId={questionId} />
+            <MessageFeedbackForm messageId={questionId} />
           </div>
         }
       </div>

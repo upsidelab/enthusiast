@@ -1,6 +1,6 @@
 import { ReactNode, useState } from "react";
 import { ApplicationContext, ApplicationContextValue } from "@/lib/application-context.ts";
-import { Account, DataSet } from "@/lib/api.ts";
+import { Account, DataSet } from "@/lib/types.ts";
 
 export interface ApplicationContextProviderProps {
   children: ReactNode;

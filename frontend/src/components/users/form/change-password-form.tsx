@@ -2,10 +2,11 @@ import { Form } from "@/components/ui/form.tsx";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { ApiClient, User } from "@/lib/api.ts";
+import { ApiClient } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { Button } from "@/components/ui/button.tsx";
 import { PasswordFields } from "@/components/users/form/password-fields.tsx";
+import { User } from "@/lib/types.ts";
 
 const formSchema = z.object({
   password: z.string().min(8),

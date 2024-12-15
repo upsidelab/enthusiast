@@ -1,4 +1,4 @@
-import { ApiClient, User } from "@/lib/api.ts";
+import { ApiClient } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { PaginatedTable } from "@/components/util/PaginatedTable.tsx";
 import { TableCell, TableRow } from "@/components/ui/table.tsx";
@@ -7,6 +7,7 @@ import { NewUserModal } from "@/components/users/new-user-modal.tsx";
 import { EditUserModal } from "@/components/users/edit-user-modal.tsx";
 import { ChangePasswordModal } from "@/components/users/change-password-modal.tsx";
 import { Check } from "lucide-react";
+import { User } from "@/lib/types.ts";
 
 const api = new ApiClient(authenticationProviderInstance);
 

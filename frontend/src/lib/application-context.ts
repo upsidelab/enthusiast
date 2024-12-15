@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import { Account, DataSet } from "@/lib/api.ts";
+import { Account, DataSet } from "@/lib/types.ts";
 
 export interface ApplicationContextValue {
   dataSets: DataSet[];

@@ -38,14 +38,14 @@ export function Conversation(props: ConversationProps) {
     });
     let currentConversationId = conversationId;
     if (!currentConversationId) {
-      currentConversationId = await api.createConversation(dataSetId!);
+      currentConversationId = await api.conversations().createConversation(dataSetId!);
       setConversationId(currentConversationId);
     }
-    const taskHandle = await api.sendMessage(currentConversationId, dataSetId!, message);
+    const taskHandle = await api.conversations().sendMessage(currentConversationId, dataSetId!, message);
 
     const updateTaskStatus = async () => {
       try {
-        const response = await api.fetchResponseMessage(currentConversationId!, taskHandle);
+        const response = await api.conversations().fetchResponseMessage(currentConversationId!, taskHandle);
         if (response) {
           setMessages((currMessages) => [
             ...currMessages,
@@ -71,7 +71,7 @@ export function Conversation(props: ConversationProps) {
         return;
       }
 
-      const conversation = await api.getConversation(conversationId);
+      const conversation = await api.conversations().getConversation(conversationId);
       const initialMessages = conversation.history as MessageProps[];
       setMessages(initialMessages);
     }
@@ -80,7 +80,7 @@ export function Conversation(props: ConversationProps) {
     setTimeout(() => {
       lastMessageRef.current?.scrollIntoView({behavior: "smooth"});
     });
-  }, [conversationId]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="flex flex-col h-full px-4 pt-4">

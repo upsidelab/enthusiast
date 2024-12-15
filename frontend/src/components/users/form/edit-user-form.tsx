@@ -2,11 +2,12 @@ import { Form } from "@/components/ui/form.tsx";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { ApiClient, User } from "@/lib/api.ts";
+import { ApiClient } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { Button } from "@/components/ui/button.tsx";
 import { PermissionFields } from "@/components/users/form/permission-fields.tsx";
 import { DetailsFields } from "@/components/users/form/details-fields.tsx";
+import { User } from "@/lib/types.ts";
 
 const formSchema = z.object({
   email: z.string().trim().email(),

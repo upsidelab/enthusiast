@@ -1,16 +1,24 @@
-import { AuthenticationProvider } from "@/lib/authentication-provider.ts";
-import { CreateDataSetBody, DataSet, DataSetResponse, User } from "@/lib/api.ts";
+import { BaseApiClient } from "@/lib/api/base.ts";
+import { DataSet, User } from "@/lib/types.ts";
 
-export class DataSetsApiClient {
-  constructor(private readonly apiBase: string, private readonly authenticationProvider: AuthenticationProvider) {}
+export type DataSetResponse = {
+  id: number | undefined;
+  name: string;
+  embedding_provider: string;
+  embedding_model: string;
+  embedding_vector_dimensions: number;
+}
 
+export type CreateDataSetPayload = DataSetResponse;
+
+export class DataSetsApiClient extends BaseApiClient {
   async getDataSets(): Promise<DataSet[]> {
     const response = await fetch(`${this.apiBase}/api/data_sets`, this._requestConfiguration());
     return (await response.json()).results as DataSet[];
   }
 
   async createDataSet(dataSet: DataSet): Promise<number> {
-    const body: CreateDataSetBody = {
+    const body: CreateDataSetPayload = {
       id: undefined,
       name: dataSet.name,
       embedding_provider: dataSet.embeddingProvider,
@@ -54,14 +62,5 @@ export class DataSetsApiClient {
         method: "DELETE"
       }
     );
-  }
-
-  _requestConfiguration(): RequestInit {
-    return {
-      headers: {
-        'Authorization': `Token ${this.authenticationProvider.token}`,
-        "Content-Type": "application/json"
-      }
-    }
   }
 }

@@ -10,12 +10,12 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert.tsx";
 import { MessageFeedbackRating } from "@/components/MessageFeedback/MessageFeedbackRating.tsx";
 
 interface MessageFeedbackFormProps {
-  questionId: number | null;
+  messageId: number | null;
 }
 
 const api = new ApiClient(authenticationProviderInstance);
 
-export function MessageFeedbackForm({ questionId }: MessageFeedbackFormProps, { className, ...props }: HTMLAttributes<HTMLDivElement>) {
+export function MessageFeedbackForm({ messageId }: MessageFeedbackFormProps, { className, ...props }: HTMLAttributes<HTMLDivElement>) {
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [rating, setRating] = useState<number | null>(null);
@@ -32,7 +32,7 @@ export function MessageFeedbackForm({ questionId }: MessageFeedbackFormProps, { 
     };
 
     try {
-      await api.updateMessageFeedback(questionId, feedbackData);
+      await api.conversations().updateMessageFeedback(messageId, feedbackData);
       setIsSubmitted(true);
     } catch {
       setIsError(true);

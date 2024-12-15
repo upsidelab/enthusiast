@@ -1,6 +1,7 @@
 import { TableCell, TableRow } from "@/components/ui/table.tsx";
 import { useState } from "react";
-import { ApiClient, Document } from "@/lib/api.ts";
+import { ApiClient } from "@/lib/api.ts";
+import { Document } from '@/lib/types.ts';
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet.tsx";
 import { Button } from "@/components/ui/button.tsx";

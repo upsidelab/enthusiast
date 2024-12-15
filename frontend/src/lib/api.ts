@@ -2,49 +2,8 @@ import { AuthenticationProvider } from "./authentication-provider.ts";
 import { UsersApiClient } from "@/lib/api/users.ts";
 import { CatalogApiClient } from "@/lib/api/catalog.ts";
 import { DataSetsApiClient } from "@/lib/api/data-sets.ts";
-
-export type DataSet = {
-  id: number | undefined;
-  name: string;
-  embeddingProvider: string;
-  embeddingModel: string;
-  embeddingVectorSize: number;
-}
-
-export type DataSetResponse = {
-  id: number | undefined;
-  name: string;
-  embedding_provider: string;
-  embedding_model: string;
-  embedding_vector_dimensions: number;
-}
-
-export type CreateDataSetBody = DataSetResponse;
-
-export type Product = {
-  id: number;
-  name: string;
-  sku: string;
-  slug: string;
-  description: string;
-  categories: string;
-}
-
-export type Document = {
-  id: number;
-  url: string;
-  title: string;
-  content: string;
-}
-
-export type Conversation = {
-  id: number;
-  started_at: Date;
-  model: string;
-  dimensions: number;
-  data_set: string;
-  history?: Message[];
-}
+import { ConversationsApiClient } from "@/lib/api/conversations.ts";
+import { Account, User } from "@/lib/types.ts";
 
 export type Token = {
   token: string;
@@ -55,47 +14,13 @@ type AccountResponse = {
   is_staff: boolean;
 }
 
-export type Account = {
-  email: string;
-  isStaff: boolean;
-}
 
-export type User = {
-  id: number;
-  email: string;
-  isActive: boolean;
-  isStaff: boolean;
-}
 
 export type FeedbackData = {
   rating: number | null;
   feedback: string;
 }
 
-export type Message = {
-  id: number;
-  role: string;
-  text: string;
-}
-
-export interface PaginatedResult<T> {
-  results: T[];
-  count: number;
-}
-
-type CreateConversationRequestBody = {
-  data_set_id: number;
-}
-
-type SendMessageBody = {
-  question_message: string;
-  conversation_id: number | null;
-  data_set_id: number;
-}
-
-type TaskState = {
-  state: string;
-}
 
 export type TaskHandle = {
   task_id: string;
@@ -106,91 +31,6 @@ export class ApiClient {
 
   constructor(private readonly authenticationProvider: AuthenticationProvider) {
     this.apiBase = import.meta.env.VITE_API_BASE;
-  }
-
-  async getConversations(dataSetId: number, page: number = 1): Promise<PaginatedResult<Conversation>> {
-    const response = await fetch(`${this.apiBase}/api/conversations/${dataSetId}/?page=${page}`, this._requestConfiguration());
-    return await response.json() as Promise<PaginatedResult<Conversation>>;
-  }
-
-  async createConversation(dataSetId: number): Promise<number> {
-    const requestBody: CreateConversationRequestBody = {
-      data_set_id: dataSetId
-    };
-
-    const requestConfiguration = this._requestConfiguration();
-    requestConfiguration.method = "POST";
-    requestConfiguration.body = JSON.stringify(requestBody);
-
-    const response = await fetch(`${this.apiBase}/api/conversation/`, requestConfiguration);
-
-    if (!response.ok) {
-      throw new Error(`Failed to create conversation: ${response.statusText}`);
-    }
-
-    const { id } = await response.json();
-    return id;
-  }
-
-  async sendMessage(conversationId: number, dataSetId: number, message: string): Promise<TaskHandle> {
-    const requestBody: SendMessageBody = {
-      "question_message": message,
-      "conversation_id": conversationId,
-      "data_set_id": dataSetId
-    }
-
-    const response = await fetch(`${this.apiBase}/api/conversation/${conversationId}`, {
-      ...this._requestConfiguration(),
-      method: "POST",
-      body: JSON.stringify(requestBody)
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to enqueue task: ${response.statusText}`);
-    }
-
-    return await response.json() as TaskHandle;
-  }
-
-  async getTaskStatus(taskHandle: TaskHandle): Promise<string> {
-    const response = await fetch(`${this.apiBase}/api/task_status/${taskHandle.task_id}`, {...this._requestConfiguration()});
-    const { state } = await response.json() as TaskState;
-    return state;
-  }
-
-  async fetchResponseMessage(conversationId: number, taskHandle: TaskHandle): Promise<Message | null> {
-    const taskStatus = await this.getTaskStatus(taskHandle);
-
-    if (taskStatus === "FAILURE") {
-      throw new Error("Failed to get a response");
-    }
-
-    if (taskStatus === "SUCCESS") {
-      const conversation = await this.getConversation(conversationId);
-      return conversation.history![conversation.history!.length - 1];
-    }
-
-    return null;
-  }
-
-  async getConversation(conversation_id: number | null): Promise<Conversation> {
-    try {
-      const response = await fetch(`${this.apiBase}/api/conversation/${conversation_id}`, {
-        ...this._requestConfiguration()
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to get conversation: ${response.statusText}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(`Failed to get conversation history: ${error.message}`);
-      } else {
-        throw new Error("Failed to get conversation history: An unknown error occurred.");
-      }
-    }
   }
 
   async login(email: string, password: string): Promise<Token> {
@@ -235,18 +75,8 @@ export class ApiClient {
     return new DataSetsApiClient(this.apiBase, this.authenticationProvider);
   }
 
-  async updateMessageFeedback(questionId: number | null, feedbackData: FeedbackData): Promise<void> {
-    const response = await fetch(`${this.apiBase}/api/question/${questionId}/feedback/`, {
-      ...this._requestConfiguration(),
-      method: 'PATCH',
-      body: JSON.stringify(feedbackData),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Could not update feedback for question ID ${questionId}`);
-    }
-
-    return await response.json() as Promise<void>;
+  conversations(): ConversationsApiClient {
+    return new ConversationsApiClient(this.apiBase, this.authenticationProvider);
   }
 
   _requestConfiguration(): RequestInit {

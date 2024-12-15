@@ -20,7 +20,7 @@ export function ConversationTable() {
       return;
     }
 
-    return await api.getConversations(dataSetId, page);
+    return await api.conversations().getConversations(dataSetId, page);
   }
 
   return (

@@ -1,10 +1,11 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import { ApiClient, User } from "@/lib/api.ts";
+import { ApiClient } from "@/lib/api.ts";
 import { useCallback, useEffect, useState } from "react";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { AddUserSelector } from "@/components/DataSets/AddUserSelector.tsx";
 import { Separator } from "@/components/ui/separator.tsx";
+import { User } from "@/lib/types.ts";
 
 const api = new ApiClient(authenticationProviderInstance);
 

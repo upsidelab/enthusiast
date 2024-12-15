@@ -1,5 +1,5 @@
-import { AuthenticationProvider } from "@/lib/authentication-provider.ts";
-import { PaginatedResult, User } from "@/lib/api.ts";
+import { BaseApiClient } from "@/lib/api/base.ts";
+import { PaginatedResult, User } from "@/lib/types.ts";
 
 export type CreateUserParams = {
   email: string;
@@ -38,9 +38,7 @@ export type UserResponse = {
   is_active: boolean;
 }
 
-export class UsersApiClient {
-  constructor(private readonly apiBase: string, private readonly authenticationProvider: AuthenticationProvider) {}
-
+export class UsersApiClient extends BaseApiClient {
   async getUsers(page: number): Promise<PaginatedResult<User>> {
     const response = await fetch(`${this.apiBase}/api/users?page=${page}`, this._requestConfiguration());
     const result = await response.json() as PaginatedResult<UserResponse>;
@@ -104,14 +102,5 @@ export class UsersApiClient {
         body: JSON.stringify(payload)
       }
     )
-  }
-
-  _requestConfiguration(): RequestInit {
-    return {
-      headers: {
-        'Authorization': `Token ${this.authenticationProvider.token}`,
-        "Content-Type": "application/json"
-      }
-    }
   }
 }

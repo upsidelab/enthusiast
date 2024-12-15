@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useState } from "react";
-import { PaginatedResult } from "@/lib/api.ts";
+import { PaginatedResult } from "@/lib/types.ts";
 import { SkeletonLoader } from "@/components/util/SkeletonLoader.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { Table, TableBody, TableCaption, TableHead, TableHeader, TableRow } from "@/components/ui/table.tsx";

@@ -111,7 +111,7 @@ class CreateAnswerTool(BaseTool):
                 })
                 return llm_result.content
             except Exception as error:
-                logging.debug(f"Problem with generating an answer. Retry: {retry}/{self.max_retry}. Error msg: {error}")
+                logging.error(f"Problem with generating an answer. Retry: {retry}/{self.max_retry}. Error msg: {error}")
 
         error_msg = f"Unable to generate the answer. Total number of retries: {retry}"
         logging.error(error_msg)

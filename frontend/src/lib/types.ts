@@ -1,0 +1,55 @@
+export interface PaginatedResult<T> {
+  results: T[];
+  count: number;
+}
+
+export type DataSet = {
+  id: number | undefined;
+  name: string;
+  embeddingProvider: string;
+  embeddingModel: string;
+  embeddingVectorSize: number;
+}
+
+export type Product = {
+  id: number;
+  name: string;
+  sku: string;
+  slug: string;
+  description: string;
+  categories: string;
+}
+
+export type Document = {
+  id: number;
+  url: string;
+  title: string;
+  content: string;
+}
+
+export type Account = {
+  email: string;
+  isStaff: boolean;
+}
+
+export type User = {
+  id: number;
+  email: string;
+  isActive: boolean;
+  isStaff: boolean;
+}
+
+export type Conversation = {
+  id: number;
+  started_at: Date;
+  model: string;
+  dimensions: number;
+  data_set: string;
+  history?: Message[];
+}
+
+export type Message = {
+  id: number;
+  role: string;
+  text: string;
+}

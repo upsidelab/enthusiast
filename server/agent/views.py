@@ -1,8 +1,6 @@
 from celery.result import AsyncResult
-
 from rest_framework import status
 from rest_framework.generics import ListAPIView
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -32,35 +30,12 @@ class GetTaskStatus(APIView):
         return Response(response)
 
 
-class ConversationCreateView(APIView):
-    permission_classes = [IsAuthenticated]
-    """
-    View to initialize a new conversation.
-    """
-
-    def post(self, request):
-        manager = ConversationManager()
-        input_serializer = ConversationCreationSerializer(data=request.data)
-        if not input_serializer.is_valid():
-            return Response(input_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        conversation = manager.initialize_conversation(user_id=request.user.id,
-                                                       data_set_id=input_serializer.validated_data.get("data_set_id"))
-
-        conversation_data = ConversationSerializer(conversation).data
-
-        serializer = ConversationContentSerializer({
-            **conversation_data,  # Conversation details
-            "history": []
-        })
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-class ConversationRetrieveView(APIView):
+class ConversationView(APIView):
     permission_classes = [IsAuthenticated]
     """
     View to retrieve details of an existing conversation.
     """
+
     def get(self, request, conversation_id):
         conversation = Conversation.objects.get(id=conversation_id, user=request.user)
 
@@ -98,16 +73,37 @@ class ConversationRetrieveView(APIView):
 class ConversationListView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ConversationSerializer
-    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         user = self.request.user
-        return Conversation.objects.filter(data_set_id=self.kwargs['data_set_id'], user=user).order_by('-started_at')
+        data_set_id = self.request.query_params.get('data_set_id')
+        if data_set_id:
+            return Conversation.objects.filter(data_set_id=data_set_id, user=user).order_by('-started_at')
+        else:
+            return Conversation.objects.filter(user=user).order_by('-started_at')
+
+    def post(self, request):
+        manager = ConversationManager()
+        input_serializer = ConversationCreationSerializer(data=request.data)
+        if not input_serializer.is_valid():
+            return Response(input_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        conversation = manager.initialize_conversation(user_id=request.user.id,
+                                                       data_set_id=input_serializer.validated_data.get("data_set_id"))
+
+        conversation_data = ConversationSerializer(conversation).data
+
+        serializer = ConversationContentSerializer({
+            **conversation_data,
+            "history": []
+        })
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class MessageFeedbackView(APIView):
     permission_classes = [IsAuthenticated]
     """View to provide feedback on a message."""
+
     def patch(self, request, id):
         try:
             message = Message.objects.get(id=id)

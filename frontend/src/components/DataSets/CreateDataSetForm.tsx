@@ -8,10 +8,11 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select.tsx";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
-import { ApiClient, DataSet } from "@/lib/api.ts";
+import { ApiClient } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { useNavigate } from "react-router-dom";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
+import { DataSet } from "@/lib/types.ts";
 
 const formSchema = z.object({
   name: z.string().trim().min(1),

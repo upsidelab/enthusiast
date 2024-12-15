@@ -10,7 +10,7 @@ import {
   CommandList
 } from "@/components/ui/command.tsx";
 import { cn } from "@/lib/utils.ts";
-import { User } from "@/lib/api.ts";
+import { User } from "@/lib/types.ts";
 import { useState } from "react";
 
 export interface AddUserSelectorProps {

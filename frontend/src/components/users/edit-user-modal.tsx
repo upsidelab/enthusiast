@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import { User } from "@/lib/api.ts";
+import { User } from "@/lib/types.ts";
 import { EditUserForm } from "@/components/users/form/edit-user-form.tsx";
 
 export interface EditUserModalProps {

@@ -1,9 +1,9 @@
-import { FeatureUnavailable } from "@/components/util/FeatureUnavailable.tsx";
+import { ApiConnectionTable } from "@/components/ApiConnections/ApiConnectionTable.tsx";
 
 export function ApiConnection() {
   return (
     <div className="p-4">
-      <FeatureUnavailable />
+      <ApiConnectionTable />
     </div>
-  )
+  );
 }

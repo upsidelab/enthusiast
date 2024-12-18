@@ -16,7 +16,6 @@ export interface DataSetUserListProps {
 export function DataSetUserList({dataSetId}: DataSetUserListProps) {
   const [users, setUsers] = useState<User[]>([]);
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
-
   const loadUsers = useCallback(async () => {
     const users = await api.dataSets().getDataSetUsers(dataSetId);
     setUsers(users);

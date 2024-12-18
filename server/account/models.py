@@ -1,4 +1,3 @@
-
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -11,7 +10,10 @@ class CustomUserManager(BaseUserManager):
 
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
-        user.set_password(password)
+        if extra_fields.get('is_service_account', True):
+            user.set_unusable_password()
+        else:
+            user.set_password(password)
         user.save(using=self._db)
         return user
 
@@ -25,6 +27,10 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault("is_superuser", True)
         return self._create_user(email, password, **extra_fields)
 
+    def create_service_account(self, email, **extra_fields):
+        extra_fields.setdefault("is_service_account", True)
+        return self._create_user(email, password=None, **extra_fields)
+
 
 class CustomUser(AbstractUser):
     USERNAME_FIELD = "email"
@@ -32,6 +38,7 @@ class CustomUser(AbstractUser):
 
     email = models.EmailField(max_length=255, unique=True)
     username = None
+    is_service_account = models.BooleanField(default=False)
 
     objects = CustomUserManager()
 

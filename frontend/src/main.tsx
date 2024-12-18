@@ -18,6 +18,7 @@ import { DataSetsIndex } from "@/pages/data-sets";
 import { IndexDataSetUsers } from "@/pages/data-sets/(id)/users.tsx";
 import { UsersIndex } from "@/pages/users";
 import { OnboardingIndex } from "@/pages/onboarding";
+import { CreateServiceAccount } from "@/pages/CreateServiceAccount.tsx";
 
 const api = new ApiClient(authenticationProviderInstance);
 
@@ -80,6 +81,10 @@ const router = createBrowserRouter([
       {
         path: '/api-connection',
         element: <ApiConnection />
+      },
+      {
+        path: '/api-connection/new',
+        element: <CreateServiceAccount />
       },
       {
         path: '/docs',

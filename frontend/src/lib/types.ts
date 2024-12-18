@@ -53,3 +53,11 @@ export type Message = {
   role: string;
   text: string;
 }
+
+export type ServiceAccount = {
+  id: number;
+  email: string;
+  date_joined: string;
+  data_sets?: string[];
+  token?: string;
+};

@@ -3,6 +3,7 @@ import { UsersApiClient } from "@/lib/api/users.ts";
 import { CatalogApiClient } from "@/lib/api/catalog.ts";
 import { DataSetsApiClient } from "@/lib/api/data-sets.ts";
 import { ConversationsApiClient } from "@/lib/api/conversations.ts";
+import { ServiceAccountsApiClient } from "@/lib/api/service-accounts.ts";
 import { Account, User } from "@/lib/types.ts";
 
 export type Token = {
@@ -14,13 +15,10 @@ type AccountResponse = {
   is_staff: boolean;
 }
 
-
-
 export type FeedbackData = {
   rating: number | null;
   feedback: string;
 }
-
 
 export type TaskHandle = {
   task_id: string;
@@ -69,6 +67,10 @@ export class ApiClient {
 
   catalog(): CatalogApiClient {
     return new CatalogApiClient(this.apiBase, this.authenticationProvider);
+  }
+
+  serviceAccounts(): ServiceAccountsApiClient {
+    return new ServiceAccountsApiClient(this.apiBase, this.authenticationProvider);
   }
 
   dataSets(): DataSetsApiClient {

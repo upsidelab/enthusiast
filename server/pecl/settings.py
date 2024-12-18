@@ -26,6 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('ECL_DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
+
 DEBUG = (os.environ.get('ECL_DJANGO_DEBUG', default='False') == 'True')
 
 ALLOWED_HOSTS = json.loads(os.environ.get('ECL_DJANGO_ALLOWED_HOSTS', default='[]'))

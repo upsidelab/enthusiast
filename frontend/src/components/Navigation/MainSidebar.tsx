@@ -13,62 +13,62 @@ import {
 import { UserMenu } from "@/components/Navigation/UserMenu.tsx";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
 
-const synchronizeItems: SidebarSectionItemProps[] = [
-  {
-    title: "Products",
-    link: "/products",
-    key: "products",
-    icon: <BookOpenIcon />
-  },
-  {
-    title: "Documents",
-    link: "/documents",
-    key: "documents",
-    icon: <FileTextIcon />
-  }
-];
-
-const askItems: SidebarSectionItemProps[] = [
-  {
-    title: "Chat",
-    link: "/ask/chat",
-    key: "chat",
-    icon: <BotMessageSquareIcon />
-  },
-  {
-    title: "History",
-    link: "/ask/history",
-    key: "history",
-    icon: <HistoryIcon />
-  }
-];
-
-const integrateItems: SidebarSectionItemProps[] = [
-  {
-    title: "API Connection",
-    link: "/api-connection",
-    key: "api-connection",
-    icon: <PlugZapIcon />
-  }
-];
-
-const manageItems: SidebarSectionItemProps[] = [
-  {
-    title: "Data Sets",
-    link: "/data-sets",
-    key: "data-sets",
-    icon: <DatabaseIcon />
-  },
-  {
-    title: "Users",
-    link: "/users",
-    key: "users",
-    icon: <UserIcon />
-  }
-]
-
 export function MainSidebar() {
   const { account } = useApplicationContext()!;
+
+  const synchronizeItems: SidebarSectionItemProps[] = [
+    {
+      title: "Products",
+      link: "/products",
+      key: "products",
+      icon: <BookOpenIcon />
+    },
+    {
+      title: "Documents",
+      link: "/documents",
+      key: "documents",
+      icon: <FileTextIcon />
+    }
+  ];
+
+  const askItems: SidebarSectionItemProps[] = [
+    {
+      title: "Chat",
+      link: "/ask/chat",
+      key: "chat",
+      icon: <BotMessageSquareIcon />
+    },
+    {
+      title: "History",
+      link: "/ask/history",
+      key: "history",
+      icon: <HistoryIcon />
+    }
+  ];
+
+  const manageItems: SidebarSectionItemProps[] = [
+    {
+      title: "Data Sets",
+      link: "/data-sets",
+      key: "data-sets",
+      icon: <DatabaseIcon />
+    },
+    {
+      title: "Users",
+      link: "/users",
+      key: "users",
+      icon: <UserIcon />
+    }
+  ];
+
+  const integrateItems: SidebarSectionItemProps[] = [
+    {
+      title: "API Connection",
+      link: "/api-connection",
+      key: "api-connection",
+      icon: <PlugZapIcon />
+    }
+  ];
 
   return (
     <Sidebar>
@@ -78,14 +78,16 @@ export function MainSidebar() {
       <SidebarContent>
         <MainSidebarSection title="Synchronize" items={synchronizeItems} />
         <MainSidebarSection title="Ask" items={askItems} />
-        <MainSidebarSection title="Integrate" items={integrateItems} />
-        {account && account.isStaff &&
-          <MainSidebarSection title="Manage" items={manageItems} />
-        }
+        {account && account.isStaff && (
+          <>
+            <MainSidebarSection title="Integrate" items={integrateItems} />
+            <MainSidebarSection title="Manage" items={manageItems} />
+          </>
+        )}
       </SidebarContent>
       <SidebarFooter>
         <UserMenu />
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }

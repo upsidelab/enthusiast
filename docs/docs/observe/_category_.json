@@ -1,0 +1,8 @@
+{
+  "label": "Observe",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "description": "Learn how to connect to LLM Ops tools."
+  }
+}

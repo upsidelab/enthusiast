@@ -2,6 +2,8 @@ from rest_framework import serializers
 
 from account.models import User
 
+from .services import ServiceAccountNameService
+
 
 class AccountSerializer(serializers.Serializer):
     id = serializers.IntegerField()
@@ -34,8 +36,9 @@ class CreateServiceAccountSerializer(serializers.Serializer):
     )
 
     def create(self, validated_data):
+        service = ServiceAccountNameService()
         name = validated_data.get('name')
-        email = f"{name}@enthusiast.internal"
+        email = service.generate_service_account_email(name)
         dataset_ids = validated_data.get('datasets', [])
         user = User.objects.create_service_account(email=email)
         user.data_sets.add(*dataset_ids)

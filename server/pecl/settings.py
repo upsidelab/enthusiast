@@ -216,3 +216,5 @@ CATALOG_PRODUCT_SOURCE_PLUGINS = {
 CATALOG_DOCUMENT_SOURCE_PLUGINS = {
     "Sample Document Source": "sync.sample_data_source.SampleDocumentSource",
 }
+
+SERVICE_ACCOUNT_DOMAIN = os.environ.get('SERVICE_ACCOUNT_DOMAIN', 'enthusiast.internal')

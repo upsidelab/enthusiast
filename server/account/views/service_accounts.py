@@ -7,16 +7,18 @@ from rest_framework.authtoken.models import Token
 from account.models import User
 from account.serializers import ServiceAccountSerializer, CreateServiceAccountSerializer
 
+from account.services import ServiceAccountNameService
+
 
 class CheckServiceNameView(APIView):
     permission_classes = [IsAdminUser]
 
     def post(self, request):
         name = request.data.get('name')
-        email = f"{name}@enthusiast.internal"
-        if User.objects.filter(email=email).exists():
-            return Response({"is_available": False}, status=status.HTTP_200_OK)
-        return Response({"isAvailable": True}, status=status.HTTP_200_OK)
+        service = ServiceAccountNameService()
+        if service.is_service_account_name_available(name):
+            return Response({"is_available": True}, status=status.HTTP_200_OK)
+        return Response({"is_available": False}, status=status.HTTP_200_OK)
 
 
 class RevokeTokenView(APIView):
@@ -58,9 +60,10 @@ class ServiceAccountView(APIView):
     def patch(self, request, id):
         try:
             service_account = User.objects.get(id=id, is_service_account=True)
+            service = ServiceAccountNameService()
             name = request.data.get('name')
             if name:
-                service_account.email = f"{name}@enthusiast.internal"
+                service_account.email = service.generate_service_account_email(name)
             is_active = request.data.get('is_active')
             if is_active is not None:
                 service_account.is_active = is_active

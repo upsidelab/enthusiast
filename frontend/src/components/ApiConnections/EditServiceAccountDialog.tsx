@@ -13,9 +13,14 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ServiceAccount } from "@/lib/types.ts";
+import { checkServiceNameAvailability } from "@/components/util/CheckServiceNameAvailability.tsx";
 
 const formSchema = z.object({
-  name: z.string().trim().min(1, "Name is required")
+  name: z.string().trim().min(1, "Name is required").refine(async (name) => {
+    return await checkServiceNameAvailability(name);
+  }, {
+    message: "Service account name is already taken"
+  })
 });
 
 export interface EditServiceAccountDialogProps {

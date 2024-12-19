@@ -46,8 +46,8 @@ export class ServiceAccountsApiClient extends BaseApiClient {
       throw new Error('Failed to check service account name availability');
     }
 
-    const { isAvailable } = await response.json();
-    return isAvailable;
+    const { is_available } = await response.json();
+    return is_available;
   }
 
   async revokeServiceAccountToken(id: number): Promise<string> {

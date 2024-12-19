@@ -41,7 +41,7 @@ class BaseProductSourcePlugin(ABC):
 
 
 class BaseDocumentSourcePlugin(ABC):
-    def __init__(self, data_set_id, config: str):
+    def __init__(self, data_set_id, config: dict):
         self.config = config
         self.data_set_id = data_set_id
 

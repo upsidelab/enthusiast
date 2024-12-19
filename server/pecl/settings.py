@@ -211,8 +211,8 @@ CATALOG_EMBEDDING_PROVIDERS = {
 
 # Configuration of installed plugins {plugin_name: plugin_path}
 CATALOG_PRODUCT_SOURCE_PLUGINS = {
-    "Shopify": "ecl_shopify_product_fetch.plugin.ShopifyProductFetch",
+    "Sample Product Source": "sync.sample_data_source.SampleProductSource",
 }
 CATALOG_DOCUMENT_SOURCE_PLUGINS = {
-    "Upside": "ecl_upside_document_fetch.plugin.UpsideDocumentFetch",
+    "Sample Document Source": "sync.sample_data_source.SampleDocumentSource",
 }

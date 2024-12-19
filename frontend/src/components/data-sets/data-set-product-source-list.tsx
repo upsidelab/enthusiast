@@ -36,7 +36,7 @@ export function DataSetProductSourceList({dataSetId}: DataSetProductSourceListPr
   }
 
   const handleSyncProductSource = async (productSource: ProductSource) => {
-    console.log("Enqueue task to sync plugin: ", productSource.id)
+    await api.dataSets().syncDataSetProductSource(dataSetId, productSource.id);
   }
 
   const handleRemoveProductSource = async (productSource: ProductSource) => {

@@ -114,8 +114,37 @@ export class DataSetsApiClient extends BaseApiClient {
     );
   }
 
+  async syncAllProductSources(): Promise<void> {
+    await fetch(
+      `${this.apiBase}/api/product_sources/sync`,
+      {
+        ...this._requestConfiguration(),
+        method: "POST"
+      }
+    );
+  }
+
+  async syncDataSetProductSources(dataSetId: number | undefined): Promise<void> {
+    await fetch(
+      `${this.apiBase}/api/data_sets/${dataSetId}/product_sources/sync`,
+      {
+        ...this._requestConfiguration(),
+        method: "POST"
+      }
+    );
+  }
+
+  async syncDataSetProductSource(dataSetId: number, pluginId: number): Promise<void> {
+    await fetch(
+      `${this.apiBase}/api/data_sets/${dataSetId}/product_sources/${pluginId}/sync`,
+      {
+        ...this._requestConfiguration(),
+        method: "POST"
+      }
+    );
+  }
+
   async removeDataSetProductSource(dataSetId: number, pluginId: number): Promise<void> {
-    console.log("dataSetId:", dataSetId, "pluginId: ", pluginId);
     await fetch(
       `${this.apiBase}/api/data_sets/${dataSetId}/product_sources/${pluginId}`,
       {

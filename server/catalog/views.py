@@ -8,6 +8,7 @@ from drf_yasg import openapi
 
 from account.models import User
 from account.serializers import UserSerializer
+from sync.tasks import sync_all_product_sources, sync_data_set_product_sources, sync_product_source
 from .models import DataSet, ProductSource
 from .serializers import DataSetSerializer, DocumentSerializer, ProductSerializer, ProductSourceSerializer
 
@@ -147,6 +148,33 @@ class DataSetProductSourceView(GenericAPIView):
     def delete(self, *args, **kwargs):
         ProductSource.objects.filter(id=kwargs['product_source_id']).delete()
         return Response({}, status=status.HTTP_204_NO_CONTENT)
+
+
+class SyncAllProductSourcesView(GenericAPIView):
+    permission_classes = [IsAdminUser]
+
+    def post(self, request, *args, **kwargs):
+        task = sync_all_product_sources.apply_async()
+
+        return Response({"task_id": task.id}, status=status.HTTP_202_ACCEPTED)
+
+
+class SyncDataSetProductSourcesView(GenericAPIView):
+    permission_classes = [IsAdminUser]
+
+    def post(self, request, *args, **kwargs):
+        task = sync_data_set_product_sources.apply_async(args=[kwargs['data_set_id']])
+
+        return Response({"task_id": task.id}, status=status.HTTP_202_ACCEPTED)
+
+
+class SyncDataSetProductSourceView(GenericAPIView):
+    permission_classes = [IsAdminUser]
+
+    def post(self, request, *args, **kwargs):
+        task = sync_product_source.apply_async(args=[kwargs['product_source_id']])
+
+        return Response({"task_id": task.id}, status=status.HTTP_202_ACCEPTED)
 
 
 class ProductListView(ListAPIView):

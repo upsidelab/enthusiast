@@ -46,7 +46,7 @@ export function ConfigureProductSourceForm({ dataSetId, productSourceId }: DataS
       reset({
         id: productSource.id,
         data_set_id: productSource.data_set_id,
-        config: productSource.config,
+        config: JSON.stringify(productSource.config),
       });
     }
   }, [productSource, reset]);

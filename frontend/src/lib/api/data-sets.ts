@@ -77,7 +77,7 @@ export class DataSetsApiClient extends BaseApiClient {
     const body: ConfigureProductSourcePayload = {
       id: productSource.id,
       plugin_name: productSource.plugin_name,
-      config: productSource.config,
+      config: JSON.parse(productSource.config),
       data_set_id: productSource.data_set_id
     }
 

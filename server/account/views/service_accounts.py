@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 
-from account.models import CustomUser
+from account.models import User
 from account.serializers import ServiceAccountSerializer, CreateServiceAccountSerializer
 
 
@@ -14,7 +14,7 @@ class CheckServiceNameView(APIView):
     def post(self, request):
         name = request.data.get('name')
         email = f"{name}@enthusiast.internal"
-        if CustomUser.objects.filter(email=email).exists():
+        if User.objects.filter(email=email).exists():
             return Response({"is_available": False}, status=status.HTTP_200_OK)
         return Response({"isAvailable": True}, status=status.HTTP_200_OK)
 
@@ -24,11 +24,11 @@ class RevokeTokenView(APIView):
 
     def post(self, request, id):
         try:
-            service_account = CustomUser.objects.get(id=id, is_service_account=True)
+            service_account = User.objects.get(id=id, is_service_account=True)
             Token.objects.filter(user=service_account).delete()
             token, created = Token.objects.get_or_create(user=service_account)
             return Response({"token": token.key}, status=status.HTTP_200_OK)
-        except CustomUser.DoesNotExist:
+        except User.DoesNotExist:
             return Response({"error": "Service account not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
@@ -36,7 +36,7 @@ class ServiceAccountListView(APIView):
     permission_classes = [IsAdminUser]
 
     def get(self, request):
-        service_accounts = CustomUser.objects.filter(is_service_account=True).filter(is_active=True).order_by(
+        service_accounts = User.objects.filter(is_service_account=True).filter(is_active=True).order_by(
             '-date_joined')
         serializer = ServiceAccountSerializer(service_accounts, many=True)
         return Response(serializer.data)
@@ -57,7 +57,7 @@ class ServiceAccountView(APIView):
 
     def patch(self, request, id):
         try:
-            service_account = CustomUser.objects.get(id=id, is_service_account=True)
+            service_account = User.objects.get(id=id, is_service_account=True)
             name = request.data.get('name')
             if name:
                 service_account.email = f"{name}@enthusiast.internal"
@@ -67,5 +67,5 @@ class ServiceAccountView(APIView):
             service_account.save()
             serializer = ServiceAccountSerializer(service_account)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except CustomUser.DoesNotExist:
+        except User.DoesNotExist:
             return Response({"error": "Service account not found"}, status=status.HTTP_404_NOT_FOUND)

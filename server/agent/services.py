@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from account.models import CustomUser
+from account.models import User
 from agent.core import Agent
 from agent.models import Conversation, Message
 
@@ -20,7 +20,7 @@ class ConversationManager:
         return response["output"]
 
     def initialize_conversation(self, user_id, data_set_id, conversation_id=None, system_name=None):
-        user = CustomUser.objects.get(id=user_id)
+        user = User.objects.get(id=user_id)
         data_set = user.data_sets.get(id=data_set_id)
         # Create a new or continue an existing conversation.
         if conversation_id is not None:

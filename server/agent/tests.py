@@ -4,17 +4,17 @@ from rest_framework import status
 
 from unittest.mock import patch
 
-from account.models import CustomUser
+from account.models import User
 from agent.models import EmbeddingModel, EmbeddingDimension
 from catalog.models import DataSet
 
 
 class GetAnswerAPITestCase(APITestCase):
     def configureUser(self):
-        self.test_user = CustomUser.objects.create_user(email='dale.cooper@example.com',
-                                              password='OwlsAreNotWhatTheySeem',
-                                              first_name='Dale',
-                                              last_name='Cooper')
+        self.test_user = User.objects.create_user(email='dale.cooper@example.com',
+                                                  password='OwlsAreNotWhatTheySeem',
+                                                  first_name='Dale',
+                                                  last_name='Cooper')
         self.api_token = Token.objects.create(user=self.test_user)
 
     def setUp(self):

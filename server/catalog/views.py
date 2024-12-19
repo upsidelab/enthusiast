@@ -4,7 +4,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 
-from account.models import CustomUser
+from account.models import User
 from account.serializers import UserSerializer
 from .models import DataSet
 from .serializers import DataSetSerializer, DocumentSerializer, ProductSerializer
@@ -36,7 +36,7 @@ class DataSetUserListView(ListCreateAPIView):
         return DataSet.objects.get(id=self.kwargs['data_set_id']).users.all()
 
     def create(self, *args, **kwargs):
-        user = CustomUser.objects.get(id=self.request.data['user_id'])
+        user = User.objects.get(id=self.request.data['user_id'])
         DataSet.objects.get(id=self.kwargs['data_set_id']).users.add(user)
         return Response({}, status=status.HTTP_201_CREATED)
 

@@ -1,7 +1,7 @@
 from rest_framework.generics import ListCreateAPIView, UpdateAPIView
 from rest_framework.permissions import IsAdminUser
 
-from account.models import CustomUser
+from account.models import User
 from account.serializers import UserSerializer, UserUpdateSerializer, UserUpdatePasswordSerializer
 
 
@@ -10,10 +10,10 @@ class UserListView(ListCreateAPIView):
     serializer_class = UserSerializer
 
     def get_queryset(self):
-        return CustomUser.objects.all()
+        return User.objects.all()
 
     def perform_create(self, serializer):
-        CustomUser.objects.create_user(
+        User.objects.create_user(
             email=serializer.validated_data['email'],
             password=serializer.validated_data['password'],
             is_active=serializer.validated_data['is_active'],
@@ -26,7 +26,7 @@ class UserView(UpdateAPIView):
     serializer_class = UserUpdateSerializer
 
     def get_object(self):
-        return CustomUser.objects.get(id=self.kwargs['id'])
+        return User.objects.get(id=self.kwargs['id'])
 
     def perform_update(self, serializer):
         user = self.get_object()
@@ -41,7 +41,7 @@ class UserPasswordView(UpdateAPIView):
     serializer_class = UserUpdatePasswordSerializer
 
     def get_object(self):
-        return CustomUser.objects.get(id=self.kwargs['id'])
+        return User.objects.get(id=self.kwargs['id'])
 
     def perform_update(self, serializer):
         user = self.get_object()

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from account.models import CustomUser
+from account.models import User
 
 
 class AccountSerializer(serializers.Serializer):
@@ -37,7 +37,7 @@ class CreateServiceAccountSerializer(serializers.Serializer):
         name = validated_data.get('name')
         email = f"{name}@enthusiast.internal"
         dataset_ids = validated_data.get('datasets', [])
-        user = CustomUser.objects.create_service_account(email=email)
+        user = User.objects.create_service_account(email=email)
         user.data_sets.add(*dataset_ids)
         return user
 
@@ -45,7 +45,7 @@ class ServiceAccountSerializer(serializers.ModelSerializer):
     data_sets = serializers.SerializerMethodField()
 
     class Meta:
-        model = CustomUser
+        model = User
         fields = ['id', 'email', 'date_joined', 'data_sets']
 
     def get_data_sets(self, obj):

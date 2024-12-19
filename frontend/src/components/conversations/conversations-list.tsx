@@ -3,11 +3,11 @@ import { ApiClient } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
 import { useNavigate } from "react-router-dom";
-import { PaginatedTable } from "@/components/util/PaginatedTable.tsx";
+import { PaginatedTable } from "@/components/util/paginated-table.tsx";
 
 const api = new ApiClient(authenticationProviderInstance);
 
-export function ConversationTable() {
+export function ConversationsList() {
   const { dataSetId } = useApplicationContext()!;
   const navigate = useNavigate();
 

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { MessageComposer } from "@/components/ConversationView/MessageComposer.tsx";
-import { MessageBubble } from "@/components/ConversationView/MessageBubble.tsx";
+import { MessageComposer } from "@/components/conversation-view/message-composer.tsx";
+import { MessageBubble } from "@/components/conversation-view/message-bubble.tsx";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { ApiClient } from "@/lib/api.ts";
 import { useApplicationContext } from "@/lib/use-application-context.ts";

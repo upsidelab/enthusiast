@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { ApiClient } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { useNavigate } from "react-router-dom";
-import { checkServiceNameAvailability } from "@/components/util/CheckServiceNameAvailability.tsx";
+import { checkServiceNameAvailability } from "@/components/util/check-service-name-availability.tsx";
 
 const api = new ApiClient(authenticationProviderInstance);
 

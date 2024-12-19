@@ -1,9 +1,9 @@
-import { ProductsTable } from "@/components/Products/ProductsTable.tsx";
+import { ProductsList } from "@/components/products/products-list.tsx";
 
 export function ProductsIndex() {
   return (
     <div className="p-4">
-      <ProductsTable />
+      <ProductsList />
     </div>
   )
 }

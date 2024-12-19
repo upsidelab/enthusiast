@@ -7,11 +7,11 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Button } from "@/components/ui/button.tsx";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
-import { PaginatedTable } from "@/components/util/PaginatedTable.tsx";
+import { PaginatedTable } from "@/components/util/paginated-table.tsx";
 
 const api = new ApiClient(authenticationProviderInstance);
 
-export function DocumentTable() {
+export function DocumentsList() {
   const { dataSetId } = useApplicationContext()!;
   const [selectedPreview, setSelectedPreview] = useState<Document | null>(null);
 

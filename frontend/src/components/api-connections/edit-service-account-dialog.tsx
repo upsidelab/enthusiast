@@ -13,7 +13,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ServiceAccount } from "@/lib/types.ts";
-import { checkServiceNameAvailability } from "@/components/util/CheckServiceNameAvailability.tsx";
+import { checkServiceNameAvailability } from "@/components/util/check-service-name-availability.tsx";
 
 const formSchema = z.object({
   name: z.string().trim().min(1, "Name is required").refine(async (name) => {

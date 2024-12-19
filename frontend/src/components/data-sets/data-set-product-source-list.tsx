@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button.tsx";
 import { ApiClient } from "@/lib/api.ts";
 import { useCallback, useEffect, useState } from "react";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
-import { AddProductSourcePluginSelector } from "@/components/DataSets/AddProductSourcePluginSelector.tsx";
+import { AddProductSourcePluginSelector } from "@/components/data-sets/add-product-source-plugin-selector.tsx";
 import { Separator } from "@/components/ui/separator.tsx";
 import { ProductSourcePlugin, ProductSource } from "@/lib/types.ts";
 import { useNavigate } from "react-router-dom";

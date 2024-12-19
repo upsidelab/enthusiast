@@ -1,4 +1,4 @@
-import { LoginForm } from "@/components/Login/LoginForm.tsx";
+import { LoginForm } from "@/components/login/login-form.tsx";
 import logoUrl from '@/assets/logo.png';
 
 export function LoginPage() {

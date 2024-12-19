@@ -1,6 +1,6 @@
-import { CreateService } from "@/components/ApiConnections/CreateServiceAccount.tsx";
-import { PageHeading } from "@/components/util/PageHeading.tsx";
-import { PageMain } from "@/components/util/PageMain.tsx";
+import { CreateService } from "@/components/api-connections/create-service-account.tsx";
+import { PageHeading } from "@/components/util/page-heading.tsx";
+import { PageMain } from "@/components/util/page-main.tsx";
 
 export function ApiConnectionNew() {
   return (

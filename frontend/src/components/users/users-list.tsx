@@ -1,6 +1,6 @@
 import { ApiClient } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
-import { PaginatedTable } from "@/components/util/PaginatedTable.tsx";
+import { PaginatedTable } from "@/components/util/paginated-table.tsx";
 import { TableCell, TableRow } from "@/components/ui/table.tsx";
 import { useState } from "react";
 import { NewUserModal } from "@/components/users/new-user-modal.tsx";

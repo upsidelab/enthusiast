@@ -1,5 +1,5 @@
-import { CreateDataSetForm } from "@/components/DataSets/CreateDataSetForm.tsx";
-import { ApplicationContextProvider } from "@/components/util/ApplicationContextProvider.tsx";
+import { CreateDataSetForm } from "@/components/data-sets/create-data-set-form.tsx";
+import { ApplicationContextProvider } from "@/components/util/application-context-provider.tsx";
 
 export function OnboardingIndex() {
   return (

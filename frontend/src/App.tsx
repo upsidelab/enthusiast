@@ -1,8 +1,8 @@
 import './App.css'
 import { Outlet } from "react-router-dom";
-import { ApplicationContextProvider } from "@/components/util/ApplicationContextProvider.tsx";
+import { ApplicationContextProvider } from "@/components/util/application-context-provider.tsx";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar.tsx";
-import { MainSidebar } from "@/components/Navigation/MainSidebar.tsx";
+import { MainSidebar } from "@/components/navigation/main-sidebar.tsx";
 
 function App() {
   return (

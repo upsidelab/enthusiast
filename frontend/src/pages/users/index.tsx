@@ -1,5 +1,5 @@
-import { PageHeading } from "@/components/util/PageHeading.tsx";
-import { PageMain } from "@/components/util/PageMain.tsx";
+import { PageHeading } from "@/components/util/page-heading.tsx";
+import { PageMain } from "@/components/util/page-main.tsx";
 import { UsersList } from "@/components/users/users-list.tsx";
 
 export function UsersIndex() {

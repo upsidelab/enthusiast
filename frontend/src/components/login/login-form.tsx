@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { HTMLAttributes, SyntheticEvent, useState } from "react";
-import { Spinner } from "@/components/util/Spinner.tsx";
+import { Spinner } from "@/components/util/spinner.tsx";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { useNavigate } from "react-router-dom";
 import { ApiClient } from "@/lib/api.ts";

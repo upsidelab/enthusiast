@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button.tsx";
 import { Loader, Send } from "lucide-react";
 import { ChangeEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
-import './MessageComposer.css';
+import './message-composer.css';
 import { Textarea } from "@/components/ui/textarea.tsx";
 
 export interface MessageComposerProps {

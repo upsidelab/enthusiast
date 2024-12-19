@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useState } from "react";
 import { PaginatedResult } from "@/lib/types.ts";
-import { SkeletonLoader } from "@/components/util/SkeletonLoader.tsx";
+import { SkeletonLoader } from "@/components/util/skeleton-loader.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { Table, TableBody, TableCaption, TableHead, TableHeader, TableRow } from "@/components/ui/table.tsx";
 import {
@@ -10,7 +10,7 @@ import {
   PaginationNext,
   PaginationPrevious
 } from "@/components/ui/pagination.tsx";
-import RenderPaginationItems from "@/components/util/PaginationUtils.tsx";
+import RenderPaginationItems from "@/components/util/pagination-utils.tsx";
 
 interface PaginatedTableProps<T> {
   loadItems: (page: number) => Promise<PaginatedResult<T> | undefined>;

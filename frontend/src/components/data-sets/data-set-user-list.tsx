@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button.tsx";
 import { ApiClient } from "@/lib/api.ts";
 import { useCallback, useEffect, useState } from "react";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
-import { AddUserSelector } from "@/components/DataSets/AddUserSelector.tsx";
+import { AddUserSelector } from "@/components/data-sets/add-user-selector.tsx";
 import { Separator } from "@/components/ui/separator.tsx";
 import { User } from "@/lib/types.ts";
 

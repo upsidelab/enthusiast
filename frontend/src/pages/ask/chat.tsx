@@ -1,4 +1,4 @@
-import { Conversation } from "@/components/ConversationView/Conversation.tsx";
+import { Conversation } from "@/components/conversation-view/conversation.tsx";
 import { useParams } from "react-router-dom";
 
 export function Chat() {

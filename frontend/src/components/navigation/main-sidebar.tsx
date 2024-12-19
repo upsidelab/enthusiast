@@ -1,6 +1,6 @@
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from "@/components/ui/sidebar.tsx";
-import { DataSetSelector } from "@/components/Navigation/DataSetSelector.tsx";
-import { MainSidebarSection, SidebarSectionItemProps } from "@/components/Navigation/MainSidebarSection.tsx";
+import { DataSetSelector } from "@/components/navigation/data-set-selector.tsx";
+import { MainSidebarSection, SidebarSectionItemProps } from "@/components/navigation/main-sidebar-section.tsx";
 import {
   BookOpenIcon,
   BotMessageSquareIcon,
@@ -11,7 +11,7 @@ import {
   PlugZapIcon,
   UserIcon
 } from "lucide-react";
-import { UserMenu } from "@/components/Navigation/UserMenu.tsx";
+import { UserMenu } from "@/components/navigation/user-menu.tsx";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
 
 export function MainSidebar() {

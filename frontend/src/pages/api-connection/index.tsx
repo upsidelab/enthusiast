@@ -1,9 +1,9 @@
-import { ApiConnectionTable } from "@/components/ApiConnections/ApiConnectionTable.tsx";
+import { ApiConnectionsList } from "@/components/api-connections/api-connections-list.tsx";
 
 export function ApiConnectionIndex() {
   return (
     <div className="p-4">
-      <ApiConnectionTable />
+      <ApiConnectionsList />
     </div>
   );
 }

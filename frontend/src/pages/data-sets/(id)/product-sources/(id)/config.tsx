@@ -1,6 +1,6 @@
-import { ConfigureProductSourceForm } from "@/components/DataSets/ConfigureProductSourceForm";
-import { PageHeading } from "@/components/util/PageHeading.tsx";
-import { PageMain } from "@/components/util/PageMain.tsx";
+import { ConfigureProductSourceForm } from "@/components/data-sets/configure-product-source-form.tsx";
+import { PageHeading } from "@/components/util/page-heading.tsx";
+import { PageMain } from "@/components/util/page-main.tsx";
 import { useParams } from 'react-router-dom';
 
 export function ConfigureDataSetProductSource() {

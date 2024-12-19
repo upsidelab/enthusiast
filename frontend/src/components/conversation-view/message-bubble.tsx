@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { cn } from "@/lib/utils.ts";
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
-import { MessageFeedbackForm } from "@/components/MessageFeedback/MessageFeedbackForm.tsx";
-import { CopyToClipboardButton } from '@/components/ConversationView/CopyToClipboardButton.tsx';
-import { FeedbackButton } from '@/components/ConversationView/FeedbackButton.tsx';
+import { MessageFeedbackForm } from "@/components/message-feedback/message-feedback-form.tsx";
+import { CopyToClipboardButton } from '@/components/conversation-view/copy-to-clipboard-button.tsx';
+import { FeedbackButton } from '@/components/conversation-view/feedback-button.tsx';
 
 export interface MessageBubbleProps {
   text: string;

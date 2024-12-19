@@ -1,6 +1,6 @@
-import { DataSetList } from "@/components/DataSets/DataSetList.tsx";
-import { PageHeading } from "@/components/util/PageHeading.tsx";
-import { PageMain } from "@/components/util/PageMain.tsx";
+import { DataSetList } from "@/components/data-sets/data-set-list.tsx";
+import { PageHeading } from "@/components/util/page-heading.tsx";
+import { PageMain } from "@/components/util/page-main.tsx";
 
 export function DataSetsIndex() {
   return (

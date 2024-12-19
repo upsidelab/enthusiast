@@ -6,13 +6,13 @@ import { authenticationProviderInstance } from "@/lib/authentication-provider.ts
 import { Separator } from "@/components/ui/separator.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { useNavigate } from "react-router-dom";
-import { ServiceAccountRow } from "./ServiceAccountRow.tsx";
-import { EditServiceAccountDialog } from "./EditServiceAccountDialog.tsx";
-import { RevokeTokenDialog } from "./RevokeTokenDialog.tsx";
+import { ServiceAccountRow } from "./service-account-row.tsx";
+import { EditServiceAccountDialog } from "./edit-service-account-dialog.tsx";
+import { RevokeTokenDialog } from "./revoke-token-dialog.tsx";
 
 const api = new ApiClient(authenticationProviderInstance);
 
-export function ApiConnectionTable() {
+export function ApiConnectionsList() {
   const [serviceAccounts, setServiceAccounts] = useState<ServiceAccount[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isTokenDialogOpen, setIsTokenDialogOpen] = useState(false);

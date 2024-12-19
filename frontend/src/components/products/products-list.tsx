@@ -2,12 +2,12 @@ import { TableCell, TableRow } from "@/components/ui/table.tsx";
 import { ApiClient } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
-import { PaginatedTable } from "@/components/util/PaginatedTable.tsx";
+import { PaginatedTable } from "@/components/util/paginated-table.tsx";
 import { Product } from "@/lib/types.ts";
 
 const api = new ApiClient(authenticationProviderInstance);
 
-export function ProductsTable() {
+export function ProductsList() {
   const { dataSetId } = useApplicationContext()!;
 
   const loadProducts = async (page: number) => {

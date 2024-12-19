@@ -44,7 +44,7 @@ export function CreateDataSetForm() {
     const dataSets = await api.dataSets().getDataSets();
     setDataSets(dataSets);
     setDataSetId(createdDataSetId);
-    navigate(`/data-sets/${createdDataSetId}/users`);
+    navigate(`/data-sets/${createdDataSetId}/product-sources`);
   };
 
   return (

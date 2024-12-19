@@ -35,6 +35,10 @@ export function DataSetProductSourceList({dataSetId}: DataSetProductSourceListPr
     await loadProductSources();
   }
 
+  const handleSyncProductSource = async (productSource: ProductSource) => {
+    console.log("Enqueue task to sync plugin: ", productSource.id)
+  }
+
   const handleRemoveProductSource = async (productSource: ProductSource) => {
     await api.dataSets().removeDataSetProductSource(dataSetId, productSource.id);
     await loadProductSources();
@@ -49,7 +53,9 @@ export function DataSetProductSourceList({dataSetId}: DataSetProductSourceListPr
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Action</TableHead>
+              <TableHead>Actions</TableHead>
+              <TableHead></TableHead>
+              <TableHead></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -60,13 +66,18 @@ export function DataSetProductSourceList({dataSetId}: DataSetProductSourceListPr
                 </TableCell>
                 <TableCell className="flex space-x-4" width="25%">
                   <Button onClick={() => {
-                    handleRemoveProductSource(productSource)
-                  }} variant="secondary">Remove</Button>
+                    navigate(`/data-sets/${dataSetId}/product-sources/${productSource.id}`)
+                  }} variant="secondary">Configure</Button>
                 </TableCell>
                 <TableCell>
                   <Button onClick={() => {
-                    navigate(`/data-sets/${dataSetId}/product-sources/${productSource.id}`)
-                  }} variant="secondary">Configure</Button>
+                    handleSyncProductSource(productSource)
+                  }} variant="secondary">Sync</Button>
+                </TableCell>
+                <TableCell>
+                  <Button onClick={() => {
+                    handleRemoveProductSource(productSource)
+                  }} variant="secondary">Remove</Button>
                 </TableCell>
               </TableRow>
             ))}

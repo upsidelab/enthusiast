@@ -1,5 +1,5 @@
 from django.conf import settings
-from .models import CustomUser
+from .models import User
 
 class ServiceAccountNameService:
     def generate_service_account_email(self, name: str) -> str:
@@ -13,4 +13,4 @@ class ServiceAccountNameService:
         Check if the provided service account name is available.
         """
         email = self.generate_service_account_email(name)
-        return not CustomUser.objects.filter(email=email).exists()
+        return not User.objects.filter(email=email).exists()

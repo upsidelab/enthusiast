@@ -1,5 +1,7 @@
 from rest_framework.generics import ListCreateAPIView, UpdateAPIView
 from rest_framework.permissions import IsAdminUser
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 from account.models import User
 from account.serializers import UserSerializer, UserUpdateSerializer, UserUpdatePasswordSerializer
@@ -9,9 +11,17 @@ class UserListView(ListCreateAPIView):
     permission_classes = [IsAdminUser]
     serializer_class = UserSerializer
 
+    @swagger_auto_schema(
+        operation_description="List all users",
+        manual_parameters=[]
+    )
     def get_queryset(self):
         return User.objects.all()
 
+    @swagger_auto_schema(
+        operation_description="Create a new user",
+        request_body=UserSerializer
+    )
     def perform_create(self, serializer):
         User.objects.create_user(
             email=serializer.validated_data['email'],
@@ -25,6 +35,13 @@ class UserView(UpdateAPIView):
     permission_classes = [IsAdminUser]
     serializer_class = UserUpdateSerializer
 
+    @swagger_auto_schema(
+        operation_description="Update a user",
+        request_body=UserUpdateSerializer,
+        manual_parameters=[
+            openapi.Parameter('id', openapi.IN_PATH, description='ID of the user', type=openapi.TYPE_INTEGER)
+        ]
+    )
     def get_object(self):
         return User.objects.get(id=self.kwargs['id'])
 
@@ -40,6 +57,13 @@ class UserPasswordView(UpdateAPIView):
     permission_classes = [IsAdminUser]
     serializer_class = UserUpdatePasswordSerializer
 
+    @swagger_auto_schema(
+        operation_description="Update a user's password",
+        request_body=UserUpdatePasswordSerializer,
+        manual_parameters=[
+            openapi.Parameter('id', openapi.IN_PATH, description='ID of the user', type=openapi.TYPE_INTEGER)
+        ]
+    )
     def get_object(self):
         return User.objects.get(id=self.kwargs['id'])
 

@@ -3,6 +3,8 @@ from rest_framework.permissions import IsAdminUser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 from account.models import User
 from account.serializers import ServiceAccountSerializer, CreateServiceAccountSerializer
@@ -13,6 +15,15 @@ from account.services import ServiceAccountNameService
 class CheckServiceNameView(APIView):
     permission_classes = [IsAdminUser]
 
+    @swagger_auto_schema(
+        operation_description="Check if a service account name is available",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'name': openapi.Schema(type=openapi.TYPE_STRING, description='Service account name')
+            }
+        )
+    )
     def post(self, request):
         name = request.data.get('name')
         service = ServiceAccountNameService()
@@ -24,6 +35,12 @@ class CheckServiceNameView(APIView):
 class RevokeTokenView(APIView):
     permission_classes = [IsAdminUser]
 
+    @swagger_auto_schema(
+        operation_description="Revoke and regenerate a token for a service account",
+        manual_parameters=[
+            openapi.Parameter('id', openapi.IN_PATH, description='ID of the service account', type=openapi.TYPE_INTEGER)
+        ]
+    )
     def post(self, request, id):
         try:
             service_account = User.objects.get(id=id, is_service_account=True)
@@ -37,12 +54,20 @@ class RevokeTokenView(APIView):
 class ServiceAccountListView(APIView):
     permission_classes = [IsAdminUser]
 
+    @swagger_auto_schema(
+        operation_description="List all active service accounts",
+        manual_parameters=[]
+    )
     def get(self, request):
         service_accounts = User.objects.filter(is_service_account=True).filter(is_active=True).order_by(
             '-date_joined')
         serializer = ServiceAccountSerializer(service_accounts, many=True)
         return Response(serializer.data)
 
+    @swagger_auto_schema(
+        operation_description="Create a new service account",
+        request_body=CreateServiceAccountSerializer
+    )
     def post(self, request):
         serializer = CreateServiceAccountSerializer(data=request.data)
         if serializer.is_valid():
@@ -57,6 +82,20 @@ class ServiceAccountListView(APIView):
 class ServiceAccountView(APIView):
     permission_classes = [IsAdminUser]
 
+    @swagger_auto_schema(
+        operation_description="Update a service account",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'name': openapi.Schema(type=openapi.TYPE_STRING, description='Service account name'),
+                'is_active': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Is active')
+            },
+            required=['name', 'is_active']
+        ),
+        manual_parameters=[
+            openapi.Parameter('id', openapi.IN_PATH, description='ID of the service account', type=openapi.TYPE_INTEGER)
+        ]
+    )
     def patch(self, request, id):
         try:
             service_account = User.objects.get(id=id, is_service_account=True)

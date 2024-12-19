@@ -33,7 +33,11 @@ export function MainSidebarSection({ title, items }: SidebarSectionProps) {
             return (
               <SidebarMenuItem key={item.key}>
                 <SidebarMenuButton asChild isActive={location.pathname.startsWith(item.link)}>
-                  <Link to={item.link} reloadDocument={item.link === '/ask/chat'}>
+                  <Link
+                    to={item.link}
+                    target={item.key === 'documentation' ? "_blank" : undefined}
+                    reloadDocument={item.link === '/ask/chat'}
+                  >
                     {item.icon}
                     {item.title}
                   </Link>

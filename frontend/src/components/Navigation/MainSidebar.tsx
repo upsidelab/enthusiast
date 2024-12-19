@@ -6,6 +6,7 @@ import {
   BotMessageSquareIcon,
   DatabaseIcon,
   FileTextIcon,
+  BookTextIcon,
   HistoryIcon,
   PlugZapIcon,
   UserIcon
@@ -67,6 +68,12 @@ export function MainSidebar() {
       link: "/api-connection",
       key: "api-connection",
       icon: <PlugZapIcon />
+    },
+    {
+      title: "Documentation",
+      link: `${import.meta.env.VITE_API_BASE}/api/docs`,
+      key: "documentation",
+      icon: <BookTextIcon />
     }
   ];
 

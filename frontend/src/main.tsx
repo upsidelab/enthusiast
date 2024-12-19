@@ -3,24 +3,23 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 import { createBrowserRouter, redirect, RouterProvider } from "react-router-dom";
-import { History } from "@/pages/History.tsx";
-import { Campaign } from "@/pages/Campaign.tsx";
-import { Products } from "@/pages/Products.tsx";
-import { Documents } from "@/pages/Documents.tsx";
-import Login from "@/pages/Login.tsx";
+import { ChatHistory } from "@/pages/ask/history.tsx";
+import { Chat } from "@/pages/ask/chat.tsx";
+import { ProductsIndex } from "@/pages/products";
+import { DocumentsIndex } from "@/pages/documents";
+import { LoginPage } from "@/pages/login.tsx";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
-import { ApiConnection } from "@/pages/ApiConnection.tsx";
-import { Docs } from "@/pages/Docs.tsx";
+import { ApiConnectionIndex } from "@/pages/api-connection/index.tsx";
 import { NoDataSets } from "@/pages/no-data-sets.tsx";
 import { ApiClient } from "@/lib/api.ts";
-import NewDataSet from "@/pages/data-sets/new.tsx";
+import { NewDataSet } from "@/pages/data-sets/new.tsx";
 import { DataSetsIndex } from "@/pages/data-sets";
 import { IndexDataSetUsers } from "@/pages/data-sets/(id)/users.tsx";
-import {IndexDataSetProductSources} from "@/pages/data-sets/(id)/product-sources.tsx";
-import {ConfigureDataSetProductSource} from "@/pages/data-sets/(id)/product-sources/(id)/config.tsx";
+import { IndexDataSetProductSources } from "@/pages/data-sets/(id)/product-sources.tsx";
+import { ConfigureDataSetProductSource } from "@/pages/data-sets/(id)/product-sources/(id)/config.tsx";
 import { UsersIndex } from "@/pages/users";
 import { OnboardingIndex } from "@/pages/onboarding";
-import { CreateServiceAccount } from "@/pages/CreateServiceAccount.tsx";
+import { ApiConnectionNew } from "@/pages/api-connection/new.tsx";
 
 const api = new ApiClient(authenticationProviderInstance);
 
@@ -50,11 +49,11 @@ const router = createBrowserRouter([
     children: [
       {
         path: '/products',
-        element: <Products />
+        element: <ProductsIndex />
       },
       {
         path: '/documents',
-        element: <Documents />
+        element: <DocumentsIndex />
       },
       {
         path: '/data-sets',
@@ -78,27 +77,23 @@ const router = createBrowserRouter([
       },      
       {
         path: "/",
-        element: <Campaign />
+        element: <Chat />
       },
       {
         path: '/ask/chat/:id?',
-        element: <Campaign />
+        element: <Chat />
       },
       {
         path: '/ask/history',
-        element: <History />
+        element: <ChatHistory />
       },
       {
         path: '/api-connection',
-        element: <ApiConnection />
+        element: <ApiConnectionIndex />
       },
       {
         path: '/api-connection/new',
-        element: <CreateServiceAccount />
-      },
-      {
-        path: '/docs',
-        element: <Docs />
+        element: <ApiConnectionNew />
       },
       {
         path: '/users',
@@ -108,7 +103,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/login",
-    element: <Login />
+    element: <LoginPage />
   },
   {
     path: "/no-data-sets",

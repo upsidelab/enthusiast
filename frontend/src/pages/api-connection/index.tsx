@@ -1,6 +1,6 @@
 import { ApiConnectionTable } from "@/components/ApiConnections/ApiConnectionTable.tsx";
 
-export function ApiConnection() {
+export function ApiConnectionIndex() {
   return (
     <div className="p-4">
       <ApiConnectionTable />

@@ -16,6 +16,8 @@ import { ApiClient } from "@/lib/api.ts";
 import NewDataSet from "@/pages/data-sets/new.tsx";
 import { DataSetsIndex } from "@/pages/data-sets";
 import { IndexDataSetUsers } from "@/pages/data-sets/(id)/users.tsx";
+import {IndexDataSetProductSources} from "@/pages/data-sets/(id)/product-sources.tsx";
+import {ConfigureDataSetProductSource} from "@/pages/data-sets/(id)/product-sources/(id)/config.tsx";
 import { UsersIndex } from "@/pages/users";
 import { OnboardingIndex } from "@/pages/onboarding";
 import { CreateServiceAccount } from "@/pages/CreateServiceAccount.tsx";
@@ -66,6 +68,14 @@ const router = createBrowserRouter([
         path: '/data-sets/:id/users',
         element: <IndexDataSetUsers />
       },
+      {
+        path: '/data-sets/:id/product-sources',
+        element: <IndexDataSetProductSources />
+      },      
+      {
+        path: '/data-sets/:dataSetId/product-sources/:productSourceId',
+        element: <ConfigureDataSetProductSource />
+      },      
       {
         path: "/",
         element: <Campaign />

@@ -20,6 +20,13 @@ export type Product = {
   categories: string;
 }
 
+export type ProductSource = {
+  id: number;
+  plugin_name: string;
+  config: string;
+  data_set_id: number;
+}
+
 export type Document = {
   id: number;
   url: string;
@@ -38,6 +45,10 @@ export type User = {
   isActive: boolean;
   isStaff: boolean;
 }
+
+export type ProductSourcePlugin = {
+  plugin_name: string;
+} 
 
 export type Conversation = {
   id: number;

@@ -6,8 +6,8 @@ from rest_framework.response import Response
 
 from account.models import User
 from account.serializers import UserSerializer
-from .models import DataSet
-from .serializers import DataSetSerializer, DocumentSerializer, ProductSerializer
+from .models import DataSet, ProductSource
+from .serializers import DataSetSerializer, DocumentSerializer, ProductSerializer, ProductSourceSerializer
 
 
 class DataSetListView(ListCreateAPIView):
@@ -46,6 +46,46 @@ class DataSetUserView(GenericAPIView):
 
     def delete(self, *args, **kwargs):
         DataSet.objects.get(id=self.kwargs['data_set_id']).users.remove(self.kwargs['user_id'])
+        return Response({}, status=status.HTTP_204_NO_CONTENT)
+
+
+class DataSetProductSourceListView(ListCreateAPIView):
+    serializer_class = ProductSourceSerializer
+    permission_classes = [IsAdminUser]
+
+    def get_queryset(self):
+        return ProductSource.objects.filter(data_set_id=self.kwargs['data_set_id'])
+
+    def perform_create(self, serializer):
+        if not self.request.user and self.request.user.is_staff:
+            self.permission_denied(self.request)
+        # Get data set from URL (it's not passed via request body).
+        data_set_id = self.kwargs.get('data_set_id')
+        serializer.save(data_set_id=data_set_id)
+
+
+class DataSetProductSourceView(GenericAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = ProductSourceSerializer
+
+    def get(self, request, data_set_id, product_source_id):
+        product_source = ProductSource.objects.get(id=product_source_id)
+        serializer = self.serializer_class(product_source)
+        return Response(serializer.data)
+
+    def patch(self, request, *args, **kwargs):
+        product_source = ProductSource.objects.get(id=kwargs.get('product_source_id'))
+        product_source.plugin_name = request.data.get('plugin_name', product_source.plugin_name)
+        product_source.config = request.data.get('config', product_source.config)
+        product_source.data_set_id = request.data.get('data_set_id', product_source.data_set_id)
+        product_source.save()
+
+        serializer = self.serializer_class(product_source)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, *args, **kwargs):
+        ProductSource.objects.filter(id=kwargs['product_source_id']).delete()
         return Response({}, status=status.HTTP_204_NO_CONTENT)
 
 

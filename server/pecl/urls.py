@@ -36,5 +36,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('catalog.urls')),
     path('', include('agent.urls')),
-    path('', include('account.urls'))
+    path('', include('account.urls')),
+    path('', include('sync.urls'))
 ]

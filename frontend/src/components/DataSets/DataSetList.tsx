@@ -30,7 +30,12 @@ export function DataSetList() {
                   navigate(`/data-sets/${item.id}/users`)
                 }} variant="secondary">Manage Access</Button>
               </TableCell>
-            </TableRow>
+              <TableCell>
+                <Button onClick={() => {
+                  navigate(`/data-sets/${item.id}/product-sources`)
+                }} variant="secondary">Product Sources</Button>
+              </TableCell>
+             </TableRow>
           ))}
         </TableBody>
       </Table>

@@ -19,7 +19,7 @@ class AskQuestionSerializer(serializers.Serializer):
         required=False,
         allow_null=False,
         error_messages={
-            'null': 'Data Set ID cannot be blank. Either skip this parameter, or provide a valid ID of a data set'
+            'null': 'Data Set ID cannot be blank'
         }
     )
 

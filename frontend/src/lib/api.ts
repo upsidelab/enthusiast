@@ -4,7 +4,7 @@ import { CatalogApiClient } from "@/lib/api/catalog.ts";
 import { DataSetsApiClient } from "@/lib/api/data-sets.ts";
 import { ConversationsApiClient } from "@/lib/api/conversations.ts";
 import { ServiceAccountsApiClient } from "@/lib/api/service-accounts.ts";
-import { Account, User } from "@/lib/types.ts";
+import { Account, ProductSourcePlugin, User } from "@/lib/types.ts";
 
 export type Token = {
   token: string;
@@ -63,6 +63,11 @@ export class ApiClient {
   async getAllUsers(): Promise<User[]> {
     const response = await fetch(`${this.apiBase}/api/users?page_size=1000`, this._requestConfiguration());
     return (await response.json()).results as User[];
+  }
+
+  async getAllProductSourcePlugins(): Promise<ProductSourcePlugin[]> {
+    const response = await fetch(`${this.apiBase}/api/plugins/product_source_plugins?page_size=1000`, this._requestConfiguration());
+    return (await response.json()).results as ProductSourcePlugin[];
   }
 
   catalog(): CatalogApiClient {

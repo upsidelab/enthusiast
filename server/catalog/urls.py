@@ -9,4 +9,7 @@ urlpatterns = [
          name='data_set_user_details'),
     path("api/data_sets/<int:data_set_id>/products", views.ProductListView.as_view(), name='data_set_product_list'),
     path("api/data_sets/<int:data_set_id>/documents", views.DocumentListView.as_view(), name='data_set_document_list'),
+    path('api/data_sets/<int:data_set_id>/product_sources', views.DataSetProductSourceListView.as_view(), name='data_set_product_source_list'),
+    path('api/data_sets/<int:data_set_id>/product_sources/<int:product_source_id>', views.DataSetProductSourceView.as_view(),
+         name='data_set_product_source_details'),
 ]

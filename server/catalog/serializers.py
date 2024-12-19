@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import DataSet, Document, Product
+from .models import DataSet, Document, DocumentSource, Product, ProductSource
 
 
 class DataSetSerializer(serializers.ModelSerializer):
@@ -19,3 +19,15 @@ class DocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Document
         fields = ['url', 'title', 'content']
+
+
+class ProductSourceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductSource
+        fields = ['id', 'plugin_name', 'config', 'data_set_id']
+
+
+class DocumentSourceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DocumentSource
+        fields = ['id', 'plugin_name', 'config', 'data_set_id']

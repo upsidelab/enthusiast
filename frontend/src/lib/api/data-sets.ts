@@ -1,5 +1,5 @@
 import { BaseApiClient } from "@/lib/api/base.ts";
-import { DataSet, User } from "@/lib/types.ts";
+import { DataSet, ProductSource, User } from "@/lib/types.ts";
 
 export type DataSetResponse = {
   id: number | undefined;
@@ -10,6 +10,15 @@ export type DataSetResponse = {
 }
 
 export type CreateDataSetPayload = DataSetResponse;
+
+export type ProductSourceResponse = {
+  id: number;
+  plugin_name: string;
+  config: string;
+  data_set_id: number;
+}
+
+export type ConfigureProductSourcePayload = ProductSourceResponse;
 
 export class DataSetsApiClient extends BaseApiClient {
   async getDataSets(): Promise<DataSet[]> {
@@ -63,4 +72,57 @@ export class DataSetsApiClient extends BaseApiClient {
       }
     );
   }
+
+  async configureDataSetProductSource(productSource: ProductSource): Promise<number> {
+    const body: ConfigureProductSourcePayload = {
+      id: productSource.id,
+      plugin_name: productSource.plugin_name,
+      config: productSource.config,
+      data_set_id: productSource.data_set_id
+    }
+
+    const response = await fetch(`${this.apiBase}/api/data_sets/${productSource.data_set_id}/product_sources/${productSource.id}`,
+      {
+        ...this._requestConfiguration(),
+        body: JSON.stringify(body),
+        method: 'PATCH'
+      }
+    );
+
+    const responseJson = (await response.json()) as ProductSourceResponse;
+    return responseJson.id!;
+  }
+
+  async getDataSetProductSource(dataSetId: number, productSourceId: number): Promise<ProductSource> {
+    const response = await fetch(`${this.apiBase}/api/data_sets/${dataSetId}/product_sources/${productSourceId}`, this._requestConfiguration());
+    return await response.json() as ProductSource;
+  }
+
+  async getDataSetProductSources(dataSetId: number): Promise<ProductSource[]> {
+    const response = await fetch(`${this.apiBase}/api/data_sets/${dataSetId}/product_sources`, this._requestConfiguration());
+    return (await response.json()).results as ProductSource[];
+  }
+
+  async addDataSetProductSource(dataSetId: number, pluginName: string): Promise<void> {
+    await fetch(
+      `${this.apiBase}/api/data_sets/${dataSetId}/product_sources`,
+      {
+        ...this._requestConfiguration(),
+        method: "POST",
+        body: JSON.stringify({plugin_name: pluginName})
+      }
+    );
+  }
+
+  async removeDataSetProductSource(dataSetId: number, pluginId: number): Promise<void> {
+    console.log("dataSetId:", dataSetId, "pluginId: ", pluginId);
+    await fetch(
+      `${this.apiBase}/api/data_sets/${dataSetId}/product_sources/${pluginId}`,
+      {
+        ...this._requestConfiguration(),
+        method: "DELETE"
+      }
+    );
+  }
+
 }

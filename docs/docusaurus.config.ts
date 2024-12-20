@@ -1,8 +1,19 @@
 import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
+import type { Options as GtagPluginOptions } from "@docusaurus/plugin-google-gtag/lib/options";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
+
+function getGTagConfig() : GtagPluginOptions | undefined {
+  if (process.env.GTAG_ID) {
+    return {
+      trackingID: process.env.GTAG_ID,
+      anonymizeIP: true
+    }
+  }
+  return undefined;
+}
 
 const config: Config = {
   title: 'Enthusiast',
@@ -30,6 +41,7 @@ const config: Config = {
         theme: {
           customCss: './src/css/custom.css',
         },
+        gtag: getGTagConfig(),
       } satisfies Preset.Options,
     ],
   ],

@@ -7,13 +7,13 @@ Enthusiast is your open-source AI agent for e-commerce. Connect it to your produ
 
 ## Example use cases
 
-- **Content Creation:** Generate newsletters, blog posts, and ads. Enthusiast acts as a marketer, creating content at scale from day one.
+- **Internal Knowledge Base** For companies with complex catalogs, Enthusiast supports sales teams with detailed product knowledge.
 
 - **Customer Support:** (Semi-)automate responses to customer questions. Enthusiast can find answers from your product data.
 
-- **Product Recommendations:** Ask free-form questions about products that meet specific criteria, and Enthusiast will suggest suitable options.
+- **Content Creation:** Generate newsletters, blog posts, and ads. Enthusiast acts as a marketer, creating content at scale from day one.
 
-- **Internal Knowledge Base** For companies with complex catalogs, Enthusiast supports sales teams with detailed product knowledge.
+- **Product Recommendations:** Ask free-form questions about products that meet specific criteria, and Enthusiast will suggest suitable options.
 
 - **Content Moderation and Validation** Automatically validate new content or customer reviews to ensure accuracy.
 

@@ -27,7 +27,7 @@ $ OPENAI_API_KEY=<yourkey> docker compose -f docker-compose.development.yml up -
 
 Once the setup is complete, you can access the application UI at [http://localhost:10001](http://localhost:10001).
 
-! TODO: SCREENSHOT HERE
+![Login using the default credentials](./img/installation-login.png)
 
 Sign in using the default admin account:
 

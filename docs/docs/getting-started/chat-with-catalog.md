@@ -8,7 +8,7 @@ Once the test data set has been imported and indexed, you can start querying it.
 
 In the left sidebar, go to “Ask” → “Chat”. This will open the chat interface, where you can interact with the AI agent.
 
-! TODO A Screenshot of the chat UI
+![Chat with your product catalog](./img/chat-with-product-catalog.png)
 
 **Here are a few sample requests to try:**
 

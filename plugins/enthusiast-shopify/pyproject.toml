@@ -1,5 +1,5 @@
 [project]
-name = "ecl_shopify_product_fetch"
+name = "enthusiast-shopify"
 version = "0.0.1"
 authors = [
   { name="ecl", email="ecl@example.com" },

@@ -49,7 +49,7 @@ export function DataSetSelector() {
             <img src={logoUrl} alt="Upside" className="size-8 rounded-lg"/>
           </div>
           <div className="flex flex-col gap-0.5 leading-none">
-            <span className="font-semibold">Data Set</span>
+            <span className="font-semibold">Enthusiast</span>
             <span className="">{activeDataSet()?.name}</span>
           </div>
           <ChevronsUpDown className="ml-auto" />

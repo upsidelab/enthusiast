@@ -1,4 +1,5 @@
 from rest_framework import status
+from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAdminUser
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -7,7 +8,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 from account.models import User
-from account.serializers import ServiceAccountSerializer, CreateServiceAccountSerializer
+from account.serializers import ServiceAccountSerializer, CreateUpdateServiceAccountSerializer
 
 from account.services import ServiceAccountNameService
 
@@ -32,7 +33,7 @@ class CheckServiceNameView(APIView):
         return Response({"is_available": False}, status=status.HTTP_200_OK)
 
 
-class RevokeTokenView(APIView):
+class ResetTokenView(APIView):
     permission_classes = [IsAdminUser]
 
     @swagger_auto_schema(
@@ -42,34 +43,23 @@ class RevokeTokenView(APIView):
         ]
     )
     def post(self, request, id):
-        try:
-            service_account = User.objects.get(id=id, is_service_account=True)
-            Token.objects.filter(user=service_account).delete()
-            token, created = Token.objects.get_or_create(user=service_account)
-            return Response({"token": token.key}, status=status.HTTP_200_OK)
-        except User.DoesNotExist:
-            return Response({"error": "Service account not found"}, status=status.HTTP_404_NOT_FOUND)
+        service_account = User.objects.get(id=id, is_service_account=True)
+        Token.objects.filter(user=service_account).delete()
+        token, created = Token.objects.get_or_create(user=service_account)
+        return Response({"token": token.key}, status=status.HTTP_200_OK)
 
 
-class ServiceAccountListView(APIView):
+class ServiceAccountListView(ListAPIView):
     permission_classes = [IsAdminUser]
-
-    @swagger_auto_schema(
-        operation_description="List all active service accounts",
-        manual_parameters=[]
-    )
-    def get(self, request):
-        service_accounts = User.objects.filter(is_service_account=True).filter(is_active=True).order_by(
-            '-date_joined')
-        serializer = ServiceAccountSerializer(service_accounts, many=True)
-        return Response(serializer.data)
+    serializer_class = ServiceAccountSerializer
+    queryset = User.objects.filter(is_service_account=True).order_by('-date_joined')
 
     @swagger_auto_schema(
         operation_description="Create a new service account",
-        request_body=CreateServiceAccountSerializer
+        request_body=CreateUpdateServiceAccountSerializer
     )
     def post(self, request):
-        serializer = CreateServiceAccountSerializer(data=request.data)
+        serializer = CreateUpdateServiceAccountSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
             token, created = Token.objects.get_or_create(user=user)
@@ -84,30 +74,14 @@ class ServiceAccountView(APIView):
 
     @swagger_auto_schema(
         operation_description="Update a service account",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'name': openapi.Schema(type=openapi.TYPE_STRING, description='Service account name'),
-                'is_active': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Is active')
-            },
-            required=['name', 'is_active']
-        ),
+        request_body=CreateUpdateServiceAccountSerializer,
         manual_parameters=[
             openapi.Parameter('id', openapi.IN_PATH, description='ID of the service account', type=openapi.TYPE_INTEGER)
         ]
     )
     def patch(self, request, id):
-        try:
-            service_account = User.objects.get(id=id, is_service_account=True)
-            service = ServiceAccountNameService()
-            name = request.data.get('name')
-            if name:
-                service_account.email = service.generate_service_account_email(name)
-            is_active = request.data.get('is_active')
-            if is_active is not None:
-                service_account.is_active = is_active
-            service_account.save()
-            serializer = ServiceAccountSerializer(service_account)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except User.DoesNotExist:
-            return Response({"error": "Service account not found"}, status=status.HTTP_404_NOT_FOUND)
+        service_account = User.objects.get(id=id, is_service_account=True)
+        serializer = CreateUpdateServiceAccountSerializer(service_account, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)

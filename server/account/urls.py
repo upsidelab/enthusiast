@@ -14,8 +14,8 @@ urlpatterns = [
     path("api/service_accounts/", account.views.service_accounts.ServiceAccountListView.as_view(),
          name="service_account_list"),
     path("api/service_accounts/<int:id>", account.views.service_accounts.ServiceAccountView.as_view()),
-    path("api/service_accounts/<int:id>/revoke_token", account.views.service_accounts.RevokeTokenView.as_view(),
-         name="revoke_token"),
+    path("api/service_accounts/<int:id>/reset_token", account.views.service_accounts.ResetTokenView.as_view(),
+         name="reset_token"),
     path("api/service_accounts/check_name", account.views.service_accounts.CheckServiceNameView.as_view(),
          name="check_service_name"),
 ]

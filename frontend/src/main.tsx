@@ -9,7 +9,7 @@ import { ProductsIndex } from "@/pages/products";
 import { DocumentsIndex } from "@/pages/documents";
 import { LoginPage } from "@/pages/login.tsx";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
-import { ApiConnectionIndex } from "@/pages/api-connection/index.tsx";
+import { ApiConnectionIndex } from "@/pages/service-accounts/index.tsx";
 import { NoDataSets } from "@/pages/no-data-sets.tsx";
 import { ApiClient } from "@/lib/api.ts";
 import { NewDataSet } from "@/pages/data-sets/new.tsx";
@@ -19,7 +19,6 @@ import { IndexDataSetProductSources } from "@/pages/data-sets/(id)/product-sourc
 import { ConfigureDataSetProductSource } from "@/pages/data-sets/(id)/product-sources/(id)/config.tsx";
 import { UsersIndex } from "@/pages/users";
 import { OnboardingIndex } from "@/pages/onboarding";
-import { ApiConnectionNew } from "@/pages/api-connection/new.tsx";
 
 const api = new ApiClient(authenticationProviderInstance);
 
@@ -88,12 +87,8 @@ const router = createBrowserRouter([
         element: <ChatHistory />
       },
       {
-        path: '/api-connection',
+        path: '/service-accounts',
         element: <ApiConnectionIndex />
-      },
-      {
-        path: '/api-connection/new',
-        element: <ApiConnectionNew />
       },
       {
         path: '/users',

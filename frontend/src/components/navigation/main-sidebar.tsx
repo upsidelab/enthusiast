@@ -47,6 +47,15 @@ export function MainSidebar() {
     }
   ];
 
+  const integrateItems: SidebarSectionItemProps[] = [
+    {
+      title: "API Documentation",
+      link: `${import.meta.env.VITE_API_BASE}/api/docs`,
+      key: "api-documentation",
+      icon: <BookTextIcon />
+    }
+  ];
+
   const manageItems: SidebarSectionItemProps[] = [
     {
       title: "Data Sets",
@@ -59,21 +68,12 @@ export function MainSidebar() {
       link: "/users",
       key: "users",
       icon: <UserIcon />
-    }
-  ];
-
-  const integrateItems: SidebarSectionItemProps[] = [
-    {
-      title: "API Connection",
-      link: "/api-connection",
-      key: "api-connection",
-      icon: <PlugZapIcon />
     },
     {
-      title: "Documentation",
-      link: `${import.meta.env.VITE_API_BASE}/api/docs`,
-      key: "documentation",
-      icon: <BookTextIcon />
+      title: "Service Accounts",
+      link: "/service-accounts",
+      key: "service-accounts",
+      icon: <PlugZapIcon />
     }
   ];
 
@@ -85,9 +85,9 @@ export function MainSidebar() {
       <SidebarContent>
         <MainSidebarSection title="Synchronize" items={synchronizeItems} />
         <MainSidebarSection title="Ask" items={askItems} />
+        <MainSidebarSection title="Integrate" items={integrateItems} />
         {account && account.isStaff && (
           <>
-            <MainSidebarSection title="Integrate" items={integrateItems} />
             <MainSidebarSection title="Manage" items={manageItems} />
           </>
         )}

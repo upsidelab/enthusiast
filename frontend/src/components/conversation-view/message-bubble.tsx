@@ -46,7 +46,7 @@ export function MessageBubble({ text, variant, questionId }: MessageBubbleProps)
         {shouldShowActionButtons &&
           <div className="mt-4 flex items-center">
             <FeedbackButton isOpen={isFeedbackOpen} onClick={handleFeedbackClick} />
-            <CopyToClipboardButton message={text} />
+            <CopyToClipboardButton message={text} variant="ghost" />
           </div>
         }
 

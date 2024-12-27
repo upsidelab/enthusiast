@@ -4,9 +4,10 @@ import { CopyIcon } from 'lucide-react';
 
 export interface CopyToClipboardButtonProps {
   message: string;
+  variant: "default" | "ghost"
 }
 
-export function CopyToClipboardButton({message}: CopyToClipboardButtonProps) {
+export function CopyToClipboardButton({ message, variant }: CopyToClipboardButtonProps) {
   const [isCopied, setIsCopied] = useState(false);
 
   const handleCopyClick = async () => {
@@ -19,7 +20,7 @@ export function CopyToClipboardButton({message}: CopyToClipboardButtonProps) {
   };
 
   return (
-    <Button onClick={handleCopyClick} variant="ghost">
+    <Button onClick={handleCopyClick} variant={variant}>
       <CopyIcon />
       {isCopied ? 'Copied!' : 'Copy'}
     </Button>

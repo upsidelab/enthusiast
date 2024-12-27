@@ -1,38 +1,76 @@
 import { BaseApiClient } from "@/lib/api/base.ts";
-import { ServiceAccount } from "@/lib/types.ts";
+import { PaginatedResult, ServiceAccount } from "@/lib/types.ts";
+import { Token } from "@/lib/api.ts";
+
+export type ServiceAccountResponse = {
+  id: number;
+  email: string;
+  date_joined: string;
+  is_active: boolean;
+  data_set_ids: number[];
+}
+
+export type CreateServiceAccountParams = {
+  name: string;
+  dataSetIds: number[];
+  isActive: boolean;
+}
+
+export type UpdateServiceAccountParams = CreateServiceAccountParams;
+
+export type CreateServiceAccountPayload = {
+  name: string;
+  data_set_ids: number[];
+  is_active: boolean;
+}
+
+export type UpdateServiceAccountPayload = CreateServiceAccountPayload;
 
 export class ServiceAccountsApiClient extends BaseApiClient {
-  async getServiceAccounts(): Promise<ServiceAccount[]> {
-    const response = await fetch(`${this.apiBase}/api/service_accounts/`, this._requestConfiguration());
-    return (await response.json()) as ServiceAccount[];
+  async getServiceAccounts(page: number): Promise<PaginatedResult<ServiceAccount>> {
+    const response = await fetch(`${this.apiBase}/api/service_accounts?page=${page}`, this._requestConfiguration());
+    const result = await response.json() as PaginatedResult<ServiceAccountResponse>;
+
+    return {
+      count: result.count,
+      results: result.results.map((item) => ({
+        id: item.id,
+        email: item.email,
+        dateCreated: item.date_joined,
+        dataSetIds: item.data_set_ids,
+        isActive: item.is_active
+      }))
+    };
   }
 
-  async createServiceAccount(name: string, datasets: string[]): Promise<ServiceAccount> {
+  async createServiceAccount(serviceAccount: CreateServiceAccountParams): Promise<Token> {
+    const payload: CreateServiceAccountPayload = {
+      name: serviceAccount.name,
+      data_set_ids: serviceAccount.dataSetIds,
+      is_active: serviceAccount.isActive
+    };
+
     const response = await fetch(`${this.apiBase}/api/service_accounts/`, {
       ...this._requestConfiguration(),
       method: 'POST',
-      body: JSON.stringify({ name, datasets })
+      body: JSON.stringify(payload)
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Failed to create service account:', errorText);
-      throw new Error('Failed to create service account');
-    }
-
-    return await response.json() as ServiceAccount;
+    return await response.json() as Token;
   }
 
-  async updateServiceAccount(id: number, data: { name?: string; is_active?: boolean }): Promise<void> {
-    const response = await fetch(`${this.apiBase}/api/service_accounts/${id}`, {
+  async updateServiceAccount(id: number, serviceAccount: UpdateServiceAccountParams): Promise<Response> {
+    const payload: UpdateServiceAccountPayload = {
+      name: serviceAccount.name,
+      data_set_ids: serviceAccount.dataSetIds,
+      is_active: serviceAccount.isActive
+    };
+
+    return await fetch(`${this.apiBase}/api/service_accounts/${id}`, {
       ...this._requestConfiguration(),
       method: 'PATCH',
-      body: JSON.stringify(data)
+      body: JSON.stringify(payload)
     });
-
-    if (!response.ok) {
-      throw new Error('Failed to update service account');
-    }
   }
 
   async checkServiceNameAvailability(name: string): Promise<boolean> {
@@ -42,16 +80,12 @@ export class ServiceAccountsApiClient extends BaseApiClient {
       body: JSON.stringify({ name })
     });
 
-    if (!response.ok) {
-      throw new Error('Failed to check service account name availability');
-    }
-
     const { is_available } = await response.json();
     return is_available;
   }
 
-  async revokeServiceAccountToken(id: number): Promise<string> {
-    const response = await fetch(`${this.apiBase}/api/service_accounts/${id}/revoke_token`, {
+  async resetServiceAccountToken(id: number): Promise<Token> {
+    const response = await fetch(`${this.apiBase}/api/service_accounts/${id}/reset_token`, {
       ...this._requestConfiguration(),
       method: 'POST'
     });
@@ -60,7 +94,6 @@ export class ServiceAccountsApiClient extends BaseApiClient {
       throw new Error('Failed to revoke service account token');
     }
 
-    const { token } = await response.json();
-    return token;
+    return await response.json() as Token;
   }
 }

@@ -68,7 +68,7 @@ export type Message = {
 export type ServiceAccount = {
   id: number;
   email: string;
-  date_joined: string;
-  data_sets?: string[];
-  token?: string;
+  isActive: boolean;
+  dateCreated: string;
+  dataSetIds: number[];
 };

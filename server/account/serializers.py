@@ -29,27 +29,39 @@ class UserUpdatePasswordSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
 
-class CreateServiceAccountSerializer(serializers.Serializer):
-    name = serializers.CharField()
-    datasets = serializers.ListField(
+class CreateUpdateServiceAccountSerializer(serializers.Serializer):
+    name = serializers.CharField(write_only=True)
+    is_active = serializers.BooleanField(default=True)
+    data_set_ids = serializers.ListField(
         child=serializers.IntegerField(), required=False
     )
 
     def create(self, validated_data):
+        email = self._build_service_account_email(validated_data.get('name'))
+        is_active = validated_data.get('is_active')
+        dataset_ids = validated_data.get('data_set_ids', [])
+        service_account = User.objects.create_service_account(email=email, is_active=is_active)
+        service_account.data_sets.add(*dataset_ids)
+        return service_account
+
+    def update(self, instance, validated_data):
+        instance.email = self._build_service_account_email(validated_data.get('name'))
+        instance.is_active = validated_data.get('is_active')
+        instance.save()
+        data_set_ids = validated_data.get('data_set_ids', [])
+        instance.data_sets.set(data_set_ids)
+        return instance
+
+    def _build_service_account_email(self, name):
         service = ServiceAccountNameService()
-        name = validated_data.get('name')
-        email = service.generate_service_account_email(name)
-        dataset_ids = validated_data.get('datasets', [])
-        user = User.objects.create_service_account(email=email)
-        user.data_sets.add(*dataset_ids)
-        return user
+        return service.generate_service_account_email(name)
 
 class ServiceAccountSerializer(serializers.ModelSerializer):
-    data_sets = serializers.SerializerMethodField()
+    data_set_ids = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'date_joined', 'data_sets']
+        fields = ['id', 'email', 'date_joined', 'data_set_ids', 'is_active']
 
-    def get_data_sets(self, obj):
-        return list(obj.data_sets.values_list('name', flat=True))
+    def get_data_set_ids(self, obj):
+        return list(obj.data_sets.values_list('id', flat=True))

@@ -16,7 +16,7 @@ class UserListView(ListCreateAPIView):
         manual_parameters=[]
     )
     def get_queryset(self):
-        return User.objects.all()
+        return User.objects.filter(is_service_account=False)
 
     @swagger_auto_schema(
         operation_description="Create a new user",
@@ -43,7 +43,7 @@ class UserView(UpdateAPIView):
         ]
     )
     def get_object(self):
-        return User.objects.get(id=self.kwargs['id'])
+        return User.objects.get(id=self.kwargs['id'], is_service_account=False)
 
     def perform_update(self, serializer):
         user = self.get_object()
@@ -65,7 +65,7 @@ class UserPasswordView(UpdateAPIView):
         ]
     )
     def get_object(self):
-        return User.objects.get(id=self.kwargs['id'])
+        return User.objects.get(id=self.kwargs['id'], is_service_account=False)
 
     def perform_update(self, serializer):
         user = self.get_object()

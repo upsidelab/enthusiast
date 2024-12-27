@@ -1,4 +1,4 @@
 from rest_framework import serializers
 
-class ProductSourcePluginSerializer(serializers.Serializer):
+class SourcePluginSerializer(serializers.Serializer):
     plugin_name = serializers.CharField()

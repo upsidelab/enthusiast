@@ -5,9 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Textarea } from "@/components/ui/textarea.tsx"
 import { Button } from "@/components/ui/button.tsx";
-import { ApiClient } from "@/lib/api.ts";
-import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
-import { ProductSource } from "@/lib/types.ts";
+import { CatalogSource } from "@/lib/types.ts";
 
 const formSchema = z.object({
   id: z.number().min(1),
@@ -15,44 +13,45 @@ const formSchema = z.object({
   data_set_id: z.number().min(1),
 });
 
-type ConfigureProductSourceFormSchema = z.infer<typeof formSchema>;
-const api = new ApiClient(authenticationProviderInstance);
+type ConfigureDataSetSourceFormSchema = z.infer<typeof formSchema>;
 
-export interface DataSetProductSourceProps {
+export interface ConfigureDataSetSourceProps {
   dataSetId: number;
-  productSourceId: number;
+  sourceId: number;
+  getDataSetSource: (dataSetId: number, sourceId: number) => Promise<CatalogSource>;
+  configureDataSetSource: (source: CatalogSource) => Promise<number>;
 }
 
-export function ConfigureProductSourceForm({ dataSetId, productSourceId }: DataSetProductSourceProps) {
-  const [productSource, setProductSource] = useState<ProductSource>();
+export function ConfigureDataSetSourceForm({ dataSetId, sourceId, getDataSetSource, configureDataSetSource }: ConfigureDataSetSourceProps) {
+  const [source, setSource] = useState<CatalogSource>();
 
-  const fetchProductSource = useCallback(async () => {
-    const response = await api.dataSets().getDataSetProductSource(dataSetId, productSourceId);
-    setProductSource(response);
-  }, [dataSetId, productSourceId]);
+  const fetchSource = useCallback(async () => {
+    const response = await getDataSetSource(dataSetId, sourceId);
+    setSource(response);
+  }, [dataSetId, sourceId]);
 
   useEffect(() => {
-    fetchProductSource();
-  }, [fetchProductSource, dataSetId, productSourceId]);
+    fetchSource();
+  }, [fetchSource, dataSetId, sourceId]);
 
-  const form = useForm<ConfigureProductSourceFormSchema>({
+  const form = useForm<ConfigureDataSetSourceFormSchema>({
     resolver: zodResolver(formSchema),
   });
 
   const { reset } = form;
 
   useEffect(() => {
-    if (productSource) {
+    if (source) {
       reset({
-        id: productSource.id,
-        data_set_id: productSource.data_set_id,
-        config: JSON.stringify(productSource.config),
+        id: source.id,
+        data_set_id: source.data_set_id,
+        config: JSON.stringify(source.config),
       });
     }
-  }, [productSource, reset]);
+  }, [source, reset]);
 
-  const handleSubmit = async (values: ConfigureProductSourceFormSchema) => {
-    await api.dataSets().configureDataSetProductSource(values as ProductSource);
+  const handleSubmit = async (values: ConfigureDataSetSourceFormSchema) => {
+    await configureDataSetSource(values as CatalogSource);
   };
 
   return (
@@ -63,7 +62,7 @@ export function ConfigureProductSourceForm({ dataSetId, productSourceId }: DataS
           name="config"
           render={({field}) => (
             <FormItem>
-              <FormLabel>Product Source Config</FormLabel>
+              <FormLabel>Source Config</FormLabel>
               <FormControl>
                 <Textarea placeholder="Your plugin config" {...field}/>
               </FormControl>

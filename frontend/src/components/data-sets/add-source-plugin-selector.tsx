@@ -10,17 +10,17 @@ import {
   CommandList
 } from "@/components/ui/command.tsx";
 import { cn } from "@/lib/utils.ts";
-import { ProductSourcePlugin } from "@/lib/types.ts";
+import { SourcePlugin } from "@/lib/types.ts";
 import { useState } from "react";
 
-export interface AddProductSourcePluginSelectorProps {
-  productSourcePlugins: ProductSourcePlugin[];
-  onSubmit: (newProductSourcePlugin: ProductSourcePlugin) => void;
+export interface AddSourcePluginSelectorProps {
+  sourcePlugins: SourcePlugin[];
+  onSubmit: (newSourcePlugin: SourcePlugin) => void;
 }
 
-export function AddProductSourcePluginSelector({ productSourcePlugins, onSubmit }: AddProductSourcePluginSelectorProps) {
+export function AddSourcePluginSelector({ sourcePlugins, onSubmit }: AddSourcePluginSelectorProps) {
   const [open, setOpen] = useState(false);
-  const [selectedPlugin, setSelectedPlugin] = useState<ProductSourcePlugin | undefined>(undefined);
+  const [selectedPlugin, setSelectedPlugin] = useState<SourcePlugin | undefined>(undefined);
 
   const handleSubmit = () => {
     if (!selectedPlugin) {
@@ -53,7 +53,7 @@ export function AddProductSourcePluginSelector({ productSourcePlugins, onSubmit 
             <CommandList>
               <CommandEmpty>No plugins found.</CommandEmpty>
               <CommandGroup>
-                {productSourcePlugins.map((plugin) => (
+                {sourcePlugins.map((plugin) => (
                   <CommandItem
                     key={plugin.plugin_name}
                     value={plugin.plugin_name}

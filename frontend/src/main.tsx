@@ -15,8 +15,9 @@ import { ApiClient } from "@/lib/api.ts";
 import { NewDataSet } from "@/pages/data-sets/new.tsx";
 import { DataSetsIndex } from "@/pages/data-sets";
 import { IndexDataSetUsers } from "@/pages/data-sets/(id)/users.tsx";
-import { IndexDataSetProductSources } from "@/pages/data-sets/(id)/product-sources.tsx";
+import { IndexDataSetCatalogSources } from "@/pages/data-sets/(id)/product-sources.tsx";
 import { ConfigureDataSetProductSource } from "@/pages/data-sets/(id)/product-sources/(id)/config.tsx";
+import { ConfigureDataSetDocumentSource } from "@/pages/data-sets/(id)/document-sources/(id)/config.tsx";
 import { UsersIndex } from "@/pages/users";
 import { OnboardingIndex } from "@/pages/onboarding";
 
@@ -67,13 +68,17 @@ const router = createBrowserRouter([
         element: <IndexDataSetUsers />
       },
       {
-        path: '/data-sets/:id/product-sources',
-        element: <IndexDataSetProductSources />
+        path: '/data-sets/:id/catalog-sources',
+        element: <IndexDataSetCatalogSources />
       },      
       {
         path: '/data-sets/:dataSetId/product-sources/:productSourceId',
         element: <ConfigureDataSetProductSource />
       },      
+      {
+        path: '/data-sets/:dataSetId/document-sources/:documentSourceId',
+        element: <ConfigureDataSetDocumentSource />
+      },    
       {
         path: "/",
         element: <Chat />

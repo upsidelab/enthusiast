@@ -20,7 +20,7 @@ export type Product = {
   categories: string;
 }
 
-export type ProductSource = {
+export type CatalogSource = {
   id: number;
   plugin_name: string;
   config: string;
@@ -46,7 +46,7 @@ export type User = {
   isStaff: boolean;
 }
 
-export type ProductSourcePlugin = {
+export type SourcePlugin = {
   plugin_name: string;
 } 
 

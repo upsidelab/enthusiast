@@ -1,5 +1,5 @@
 import { BaseApiClient } from "@/lib/api/base.ts";
-import { DataSet, ProductSource, User } from "@/lib/types.ts";
+import { DataSet, CatalogSource, User } from "@/lib/types.ts";
 
 export type DataSetResponse = {
   id: number | undefined;
@@ -19,6 +19,15 @@ export type ProductSourceResponse = {
 }
 
 export type ConfigureProductSourcePayload = ProductSourceResponse;
+
+export type DocumentSourceResponse = {
+  id: number;
+  plugin_name: string;
+  config: string;
+  data_set_id: number;
+}
+
+export type ConfigureDocumentSourcePayload = DocumentSourceResponse;
 
 export class DataSetsApiClient extends BaseApiClient {
   async getDataSets(): Promise<DataSet[]> {
@@ -73,7 +82,7 @@ export class DataSetsApiClient extends BaseApiClient {
     );
   }
 
-  async configureDataSetProductSource(productSource: ProductSource): Promise<number> {
+  async configureDataSetProductSource(productSource: CatalogSource): Promise<number> {
     const body: ConfigureProductSourcePayload = {
       id: productSource.id,
       plugin_name: productSource.plugin_name,
@@ -93,14 +102,14 @@ export class DataSetsApiClient extends BaseApiClient {
     return responseJson.id!;
   }
 
-  async getDataSetProductSource(dataSetId: number, productSourceId: number): Promise<ProductSource> {
+  async getDataSetProductSource(dataSetId: number, productSourceId: number): Promise<CatalogSource> {
     const response = await fetch(`${this.apiBase}/api/data_sets/${dataSetId}/product_sources/${productSourceId}`, this._requestConfiguration());
-    return await response.json() as ProductSource;
+    return await response.json() as CatalogSource;
   }
 
-  async getDataSetProductSources(dataSetId: number): Promise<ProductSource[]> {
+  async getDataSetProductSources(dataSetId: number): Promise<CatalogSource[]> {
     const response = await fetch(`${this.apiBase}/api/data_sets/${dataSetId}/product_sources`, this._requestConfiguration());
-    return (await response.json()).results as ProductSource[];
+    return (await response.json()).results as CatalogSource[];
   }
 
   async addDataSetProductSource(dataSetId: number, pluginName: string): Promise<void> {
@@ -154,4 +163,104 @@ export class DataSetsApiClient extends BaseApiClient {
     );
   }
 
+  async configureDataSetDocumentSource(documentSource: CatalogSource): Promise<number> {
+    const body: ConfigureDocumentSourcePayload = {
+      id: documentSource.id,
+      plugin_name: documentSource.plugin_name,
+      config: JSON.parse(documentSource.config),
+      data_set_id: documentSource.data_set_id
+    }
+
+    const response = await fetch(`${this.apiBase}/api/data_sets/${documentSource.data_set_id}/document_sources/${documentSource.id}`,
+      {
+        ...this._requestConfiguration(),
+        body: JSON.stringify(body),
+        method: 'PATCH'
+      }
+    );
+
+    const responseJson = (await response.json()) as DocumentSourceResponse;
+    return responseJson.id!;
+  }
+
+  async getDataSetDocumentSource(dataSetId: number, documentSourceId: number): Promise<CatalogSource> {
+    const response = await fetch(`${this.apiBase}/api/data_sets/${dataSetId}/document_sources/${documentSourceId}`, this._requestConfiguration());
+    return await response.json() as CatalogSource;
+  }
+
+  async getDataSetDocumentSources(dataSetId: number): Promise<CatalogSource[]> {
+    const response = await fetch(`${this.apiBase}/api/data_sets/${dataSetId}/document_sources`, this._requestConfiguration());
+    return (await response.json()).results as CatalogSource[];
+  }
+
+  async addDataSetDocumentSource(dataSetId: number, pluginName: string): Promise<void> {
+    await fetch(
+      `${this.apiBase}/api/data_sets/${dataSetId}/document_sources`,
+      {
+        ...this._requestConfiguration(),
+        method: "POST",
+        body: JSON.stringify({plugin_name: pluginName})
+      }
+    );
+  }
+
+  async syncAllDocumentSources(): Promise<void> {
+    await fetch(
+      `${this.apiBase}/api/document_sources/sync`,
+      {
+        ...this._requestConfiguration(),
+        method: "POST"
+      }
+    );
+  }
+
+  async syncDataSetDocumentSources(dataSetId: number | undefined): Promise<void> {
+    await fetch(
+      `${this.apiBase}/api/data_sets/${dataSetId}/document_sources/sync`,
+      {
+        ...this._requestConfiguration(),
+        method: "POST"
+      }
+    );
+  }
+
+  async syncDataSetDocumentSource(dataSetId: number, pluginId: number): Promise<void> {
+    await fetch(
+      `${this.apiBase}/api/data_sets/${dataSetId}/document_sources/${pluginId}/sync`,
+      {
+        ...this._requestConfiguration(),
+        method: "POST"
+      }
+    );
+  }
+
+  async removeDataSetDocumentSource(dataSetId: number, pluginId: number): Promise<void> {
+    await fetch(
+      `${this.apiBase}/api/data_sets/${dataSetId}/document_sources/${pluginId}`,
+      {
+        ...this._requestConfiguration(),
+        method: "DELETE"
+      }
+    );
+  }
+
+  async syncDataSetAllSources(dataSetId: number | undefined): Promise<void> {
+    await fetch(
+      `${this.apiBase}/api/data_sets/${dataSetId}/sync`,
+      {
+        ...this._requestConfiguration(),
+        method: "POST"
+      }
+    );
+  }
+
+  async syncAllSources(): Promise<void> {
+    await fetch(
+      `${this.apiBase}/api/sync`,
+      {
+        ...this._requestConfiguration(),
+        method: "POST"
+      }
+    );
+  }
 }

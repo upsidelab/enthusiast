@@ -12,19 +12,19 @@ export function DataSetList() {
   const {dataSets} = useApplicationContext()!;
   const navigate = useNavigate();
 
-  const handleSyncAllProductSources = async () => {
-    await api.dataSets().syncAllProductSources();
+  const handleSyncAllSources = async () => {
+    await api.dataSets().syncAllSources();
   }
 
-  const handleSyncDataSetProductSources = async (dataSet: DataSet) => {
-    await api.dataSets().syncDataSetProductSources(dataSet.id);
+  const handleSyncDataSetAllSources = async (dataSet: DataSet) => {
+    await api.dataSets().syncDataSetAllSources(dataSet.id);
   }
 
   return (
     <>
       <div className="flex flex-row justify-end items-center space-x-4 mb-4">
         <Button variant="default" onClick={() => navigate('/data-sets/new') }>New Data Set</Button>
-        <Button variant="default" onClick={() => handleSyncAllProductSources() }>Sync All</Button>
+        <Button variant="default" onClick={() => handleSyncAllSources() }>Sync All</Button>
       </div>
       <Table>
         <TableHeader>
@@ -46,12 +46,12 @@ export function DataSetList() {
               </TableCell>
               <TableCell>
                 <Button onClick={() => {
-                  navigate(`/data-sets/${item.id}/product-sources`)
-                }} variant="secondary">Product Sources</Button>
+                  navigate(`/data-sets/${item.id}/catalog-sources`)
+                }} variant="secondary">Sources</Button>
               </TableCell>
               <TableCell>
                 <Button onClick={() => {
-                  handleSyncDataSetProductSources(item)
+                  handleSyncDataSetAllSources(item)
                 }} variant="secondary">Sync</Button>
               </TableCell>
              </TableRow>

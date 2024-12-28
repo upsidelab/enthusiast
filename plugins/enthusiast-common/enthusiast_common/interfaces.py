@@ -1,28 +1,6 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from typing import TypeVar
 
-
-@dataclass
-class ProductDetails:
-    entry_id: str
-    name: str
-    slug: str
-    description: str
-    sku: str
-    properties: str
-    categories: str
-    price: float
-
-
-@dataclass
-class DocumentDetails:
-    url: str
-    title: str
-    content: str
-
-
-ItemData = TypeVar("ItemData", ProductDetails, DocumentDetails)
+from enthusiast_common.structures import ProductDetails, DocumentDetails
 
 
 class BaseProductSourcePlugin(ABC):
@@ -35,7 +13,7 @@ class BaseProductSourcePlugin(ABC):
         """Fetches products from an external source.
 
         Returns:
-            list[ProductDetails]: Each dict represents a product item.
+            list[ProductDetails]: A list of products to be imported to the database
         """
         pass
 
@@ -50,6 +28,6 @@ class BaseDocumentSourcePlugin(ABC):
         """Fetches documents from an external system.
 
         Returns:
-            list[DocumentDetails]: Each dict represents a document.
+            list[DocumentDetails]: A list of documents to be imported to the database
         """
         pass

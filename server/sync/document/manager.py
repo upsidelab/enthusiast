@@ -1,10 +1,11 @@
+from enthusiast_common import DocumentDetails
+
 from catalog.models import Document, DocumentSource
-from common.plugin.interface import ItemData
 from sync.base import DataSetSource, SyncManager
 from sync.document.registry import DocumentSourcePluginRegistry
 
 
-class DocumentSyncManager(SyncManager):
+class DocumentSyncManager(SyncManager[DocumentDetails]):
     """Orchestrates synchronisation activities for document sync plugins."""
 
     def _build_registry(self):
@@ -30,7 +31,7 @@ class DocumentSyncManager(SyncManager):
                              data_set_id=source.data_set_id,
                              config=source.config)
 
-    def _sync_item(self, data_set_id: int, item_data: ItemData):
+    def _sync_item(self, data_set_id: int, item_data: DocumentDetails):
         """Creates a document in the database.
 
         Args:

@@ -1,9 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from importlib import import_module
-
-from common.plugin.interface import ItemData
-
+from typing import Generic, TypeVar
 
 @dataclass
 class DataSetSource:
@@ -12,6 +10,7 @@ class DataSetSource:
     data_set_id: int
     config: dict
 
+T = TypeVar("T")
 
 class SourcePluginRegistry(ABC):
     """Registry of available source plugins registered in ECL system."""
@@ -45,7 +44,7 @@ class SourcePluginRegistry(ABC):
         pass
 
 
-class SyncManager(ABC):
+class SyncManager(ABC, Generic[T]):
     """Orchestrates synchronisation activities of registered plugins."""
 
     def __init__(self):
@@ -85,11 +84,11 @@ class SyncManager(ABC):
         pass
 
     @abstractmethod
-    def _sync_item(self, data_set_id: int, item_data: ItemData):
+    def _sync_item(self, data_set_id: int, item_data: T):
         """Creates an item in the database.
 
         Args:
             data_set_id (int): obligatory, a data set to which imported data belongs to.
-            item_data (ItemData): item details.
+            item_data (T): item details.
         """
         pass

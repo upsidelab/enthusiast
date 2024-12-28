@@ -1,10 +1,11 @@
+from enthusiast_common import ProductDetails
+
 from catalog.models import Product, ProductSource
-from common.plugin.interface import ItemData
 from sync.base import DataSetSource, SyncManager
 from sync.product.registry import ProductSourcePluginRegistry
 
 
-class ProductSyncManager(SyncManager):
+class ProductSyncManager(SyncManager[ProductDetails]):
     """Orchestrates synchronisation activities of registered product plugins."""
 
     def _build_registry(self):
@@ -30,7 +31,7 @@ class ProductSyncManager(SyncManager):
                              data_set_id=source.data_set_id,
                              config=source.config)
 
-    def _sync_item(self, data_set_id: int, item_data: ItemData):
+    def _sync_item(self, data_set_id: int, item_data: ProductDetails):
         """Creates a product in the database.
 
         Args:

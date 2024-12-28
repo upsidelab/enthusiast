@@ -20,7 +20,8 @@ Django==5.1.1
 django-cors-headers==4.4.0
 djangorestframework==3.15.2
 drf-yasg==1.21.8
-enthusiast-common==0.1.0
+enthusiast-common==0.2.0
+enthusiast-model-openai==0.1.0
 frozenlist==1.4.1
 gunicorn==23.0.0
 h11==0.14.0
@@ -39,7 +40,7 @@ langchain-text-splitters==0.3.0
 langsmith==0.1.131
 multidict==6.1.0
 numpy==1.26.4
-openai==1.46.0
+openai==1.58.1
 orjson==3.10.7
 packaging==24.1
 pgvector==0.3.4

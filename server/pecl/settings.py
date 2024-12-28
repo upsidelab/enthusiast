@@ -206,7 +206,7 @@ CELERY_RESULT_BACKEND = os.environ.get('ECL_CELERY_RESULT_BACKEND')
 CELERY_TIMEZONE = os.environ.get('ECL_CELERY_TIMEZONE')
 
 CATALOG_EMBEDDING_PROVIDERS = {
-    "OpenAI": "catalog.embeddings.openai_embedding_provider.OpenAIEmbeddingProvider",
+    "OpenAI": "enthusiast_model_openai.OpenAIEmbeddingProvider",
 }
 
 # Configuration of installed plugins {plugin_name: plugin_path}

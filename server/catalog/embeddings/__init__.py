@@ -1,3 +1,1 @@
-from .embedding_provider import EmbeddingProvider as EmbeddingProvider
 from .embedding_provider_registry import EmbeddingProviderRegistry as EmbeddingProviderRegistry
-from .openai_embedding_provider import OpenAIEmbeddingProvider as OpenAIEmbeddingProvider

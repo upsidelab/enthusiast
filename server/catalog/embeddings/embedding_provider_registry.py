@@ -1,6 +1,6 @@
 from importlib import import_module
 
-from catalog.embeddings import EmbeddingProvider
+from enthusiast_common import EmbeddingProvider
 from catalog.models import DataSet
 from pecl import settings
 

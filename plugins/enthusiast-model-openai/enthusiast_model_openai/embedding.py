@@ -1,6 +1,6 @@
 from openai import OpenAI
 
-from catalog.embeddings.embedding_provider import EmbeddingProvider
+from enthusiast_common import EmbeddingProvider
 
 
 class OpenAIEmbeddingProvider(EmbeddingProvider):

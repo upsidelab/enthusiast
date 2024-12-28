@@ -2,13 +2,13 @@
 
 [[package]]
 name = "enthusiast-common"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
 optional = false
 python-versions = "<4.0,>=3.9"
 files = [
-    {file = "enthusiast_common-0.1.0-py3-none-any.whl", hash = "sha256:f4e7ecc11eb2f0b7288b06978633b714fb8bc23871283bc734db8da74001081b"},
-    {file = "enthusiast_common-0.1.0.tar.gz", hash = "sha256:9e415bea11287f3fffa2c2f9b926ed88d7eaf0cd624bef55c120d58ce3aa8a52"},
+    {file = "enthusiast_common-0.2.0-py3-none-any.whl", hash = "sha256:b44ef07324418385fef4d11dcdb089c7e2ce20a4a69e55b2cfa9b789502d9e08"},
+    {file = "enthusiast_common-0.2.0.tar.gz", hash = "sha256:8d977f0de50b1011956b27b0891851a58d104dfb8992f762504b7779e0b2a761"},
 ]
 
 [[package]]
@@ -116,7 +116,10 @@ files = [
 [package.dependencies]
 pyactiveresource = ">=2.2.2"
 PyJWT = ">=2.0.0"
-PyYAML = {version = ">=6.0.1", markers = "python_version >= \"3.12\""}
+PyYAML = [
+    {version = ">=6.0.1", markers = "python_version >= \"3.12\""},
+    {version = "*", markers = "python_version < \"3.12\""},
+]
 six = "*"
 
 [[package]]
@@ -132,5 +135,5 @@ files = [
 
 [metadata]
 lock-version = "2.0"
-python-versions = "^3.12"
-content-hash = "a9cf2d8116ef7556d7e2bd5dbe95b073ef0711c77f80aa8389b5c939f1da8dc6"
+python-versions = "^3.9"
+content-hash = "6870bc92604d4e3a10709c0033b712c606dde421a30dd4b61b8a391a60f15ac9"

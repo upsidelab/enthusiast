@@ -1,10 +1,10 @@
 import csv
 from pathlib import Path
 
-from enthusiast_common import BaseDocumentSourcePlugin, DocumentDetails
+from enthusiast_common import DocumentSourcePlugin, DocumentDetails
 
 
-class SampleDocumentSource(BaseDocumentSourcePlugin):
+class SampleDocumentSource(DocumentSourcePlugin):
     def __init__(self, data_set_id: int, config: dict):
         super().__init__(data_set_id, config)
         self.sample_file_path = Path(__file__).parent / "sample_documents.csv"

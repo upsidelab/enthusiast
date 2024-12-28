@@ -1,10 +1,10 @@
 import json
 import shopify
 
-from common.plugin.interface import ProductDetails, BaseProductSourcePlugin
+from enthusiast_common import ProductDetails, BaseProductSourcePlugin
 
 
-class ShopifyProductFetch(BaseProductSourcePlugin):
+class ShopifyProductSource(BaseProductSourcePlugin):
     def __init__(self, data_set_id, config: dict):
         """
         Initialize the plugin with the parameters to access shop.

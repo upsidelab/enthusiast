@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "enthusiast-source-shopify"
+version = "0.1.0"
+description = ""
+authors = ["Rafal Cymerys <rafal@upsidelab.io>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+enthusiast-common = "^0.1.0"
+shopifyapi = "^12.7.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

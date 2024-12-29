@@ -16,9 +16,7 @@ Then, enable the plugin by adding it to the `settings.py`:
 ```python title="server/pecl/settings.py"
 CATALOG_PRODUCT_SOURCE_PLUGINS = {
     ...
-    // highlight-start
     "Shopify": "enthusiast_source_shopify.ShopifyProductSource"
-    // highlight-end
 }
 ```
 

@@ -214,10 +214,10 @@ CATALOG_EMBEDDING_PROVIDERS = {
 
 # Configuration of installed plugins {plugin_name: plugin_path}
 CATALOG_PRODUCT_SOURCE_PLUGINS = {
-    "Sample Product Source": "sync.sample_data_source.SampleProductSource",
+    "Sample Product Source": "enthusiast_source_sample.SampleProductSource",
 }
 CATALOG_DOCUMENT_SOURCE_PLUGINS = {
-    "Sample Document Source": "sync.sample_data_source.SampleDocumentSource",
+    "Sample Document Source": "enthusiast_source_sample.SampleDocumentSource",
 }
 
 SERVICE_ACCOUNT_DOMAIN = os.environ.get('SERVICE_ACCOUNT_DOMAIN', 'enthusiast.internal')

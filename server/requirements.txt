@@ -22,6 +22,7 @@ djangorestframework==3.15.2
 drf-yasg==1.21.8
 enthusiast-common==0.2.0
 enthusiast-model-openai==0.1.1
+enthusiast-source-sample==0.1.0
 frozenlist==1.4.1
 gunicorn==23.0.0
 h11==0.14.0

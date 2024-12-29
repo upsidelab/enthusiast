@@ -1,2 +1,0 @@
-from .sample_document_source import SampleDocumentSource as SampleDocumentSource
-from .sample_product_source import SampleProductSource as SampleProductSource

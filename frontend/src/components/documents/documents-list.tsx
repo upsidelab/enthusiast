@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button.tsx";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
 import { PaginatedTable } from "@/components/util/paginated-table.tsx";
-import { CheckCircle2, CircleFadingArrowUp } from "lucide-react";
+import { IndexingStatusIcon } from "@/components/util/indexing-status-icon.tsx";
 
 const api = new ApiClient(authenticationProviderInstance);
 
@@ -45,7 +45,7 @@ export function DocumentsList() {
           return (
             <TableRow key={index}>
               <TableCell width="1%">
-                {item.isIndexed ? <CheckCircle2 size={16} /> : <CircleFadingArrowUp size={16} />}
+                <IndexingStatusIcon isIndexed={item.isIndexed} />
               </TableCell>
               <TableCell>
                 <Button variant="link" asChild>

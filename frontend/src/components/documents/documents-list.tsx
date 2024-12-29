@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button.tsx";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
 import { PaginatedTable } from "@/components/util/paginated-table.tsx";
+import { CheckCircle2, CircleFadingArrowUp } from "lucide-react";
 
 const api = new ApiClient(authenticationProviderInstance);
 
@@ -39,10 +40,13 @@ export function DocumentsList() {
         itemsReloadDependencies={dataSetId}
         noItemsMessage="No documents available"
         tableFooter="Sync Status: Manual"
-        tableHeaders={["URL", "Title", "Content"]}
+        tableHeaders={["", "URL", "Title", "Content"]}
         tableRow={(item, index) => {
           return (
             <TableRow key={index}>
+              <TableCell width="1%">
+                {item.isIndexed ? <CheckCircle2 size={16} /> : <CircleFadingArrowUp size={16} />}
+              </TableCell>
               <TableCell>
                 <Button variant="link" asChild>
                   <a href={item.url} target="_blank">{extractSlug(item.url)}</a>

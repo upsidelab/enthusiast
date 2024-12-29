@@ -1,3 +1,4 @@
+from django.db.models import Count
 from rest_framework import status
 from rest_framework.generics import ListAPIView, ListCreateAPIView, GenericAPIView
 from rest_framework.pagination import PageNumberPagination
@@ -229,7 +230,7 @@ class DocumentListView(ListAPIView):
             data_set = DataSet.objects.get(id=self.kwargs['data_set_id'])
         else:
             data_set = DataSet.objects.get(id=self.kwargs['data_set_id'], users=self.request.user)
-        return data_set.documents.all()
+        return data_set.documents.annotate(chunks_count=Count('chunks')).all()
 
 
 class DataSetDocumentSourceListView(ListCreateAPIView):

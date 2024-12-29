@@ -28,7 +28,7 @@ export function ConfigureDataSetSourceForm({ dataSetId, sourceId, getDataSetSour
   const fetchSource = useCallback(async () => {
     const response = await getDataSetSource(dataSetId, sourceId);
     setSource(response);
-  }, [dataSetId, sourceId]);
+  }, [dataSetId, sourceId, getDataSetSource]);
 
   useEffect(() => {
     fetchSource();

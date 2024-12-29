@@ -47,12 +47,15 @@ LOGGING = {
            'formatter': 'verbose'
        },
    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
    'loggers': {
-       '': {
-           'handlers': ['console'],
+       'django': {
            'level': 'INFO',
-           'propagate': True,
-       },
+           'handlers': ['console'],
+       }
    },
 }
 

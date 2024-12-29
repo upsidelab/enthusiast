@@ -32,6 +32,7 @@ export type Document = {
   url: string;
   title: string;
   content: string;
+  isIndexed: boolean;
 }
 
 export type Account = {

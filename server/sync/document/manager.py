@@ -1,6 +1,7 @@
 from enthusiast_common import DocumentDetails
 
 from catalog.models import Document, DocumentSource
+from catalog.tasks import index_document_task
 from sync.base import DataSetSource, SyncManager
 from sync.document.registry import DocumentSourcePluginRegistry
 
@@ -47,4 +48,4 @@ class DocumentSyncManager(SyncManager[DocumentDetails]):
                 "content": item_data.content,
             }
         )
-
+        index_document_task.apply_async([item.id])

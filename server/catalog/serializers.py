@@ -16,9 +16,14 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class DocumentSerializer(serializers.ModelSerializer):
+    is_indexed = serializers.SerializerMethodField()
+
     class Meta:
         model = Document
-        fields = ['url', 'title', 'content']
+        fields = ['url', 'title', 'content', 'is_indexed']
+
+    def get_is_indexed(self, obj):
+        return obj.chunks_count > 0
 
 
 class ProductSourceSerializer(serializers.ModelSerializer):

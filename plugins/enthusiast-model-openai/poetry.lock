@@ -23,6 +23,7 @@ files = [
 ]
 
 [package.dependencies]
+exceptiongroup = {version = ">=1.0.2", markers = "python_version < \"3.11\""}
 idna = ">=2.8"
 sniffio = ">=1.1"
 typing_extensions = {version = ">=4.5", markers = "python_version < \"3.13\""}
@@ -75,6 +76,20 @@ files = [
     {file = "enthusiast_common-0.2.0-py3-none-any.whl", hash = "sha256:b44ef07324418385fef4d11dcdb089c7e2ce20a4a69e55b2cfa9b789502d9e08"},
     {file = "enthusiast_common-0.2.0.tar.gz", hash = "sha256:8d977f0de50b1011956b27b0891851a58d104dfb8992f762504b7779e0b2a761"},
 ]
+
+[[package]]
+name = "exceptiongroup"
+version = "1.2.2"
+description = "Backport of PEP 654 (exception groups)"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "exceptiongroup-1.2.2-py3-none-any.whl", hash = "sha256:3111b9d131c238bec2f8f516e123e14ba243563fb135d3fe885990585aa7795b"},
+    {file = "exceptiongroup-1.2.2.tar.gz", hash = "sha256:47c2edf7c6738fafb49fd34290706d1a1a2f4d1c6df275526b62cbb4aa5393cc"},
+]
+
+[package.extras]
+test = ["pytest (>=6)"]
 
 [[package]]
 name = "h11"
@@ -433,5 +448,5 @@ files = [
 
 [metadata]
 lock-version = "2.0"
-python-versions = "^3.12"
-content-hash = "b2ad6de69d1f5fea160c96ceab66efdbf3f41ee7b5397d83b0a283ed82652389"
+python-versions = "^3.9"
+content-hash = "79f90acd309c52a153f557ae65e29d04f45170c10e32a9913f7adadd2eeec956"

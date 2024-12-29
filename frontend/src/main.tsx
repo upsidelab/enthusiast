@@ -29,6 +29,10 @@ const protectedLoginLoader = async () => {
   }
 
   const apiDataSets = await api.dataSets().getDataSets();
+  if (!apiDataSets) {
+    return redirect("/login");
+  }
+
   if (apiDataSets.length === 0) {
     const accountData = await api.getAccount();
     if (accountData.isStaff) {

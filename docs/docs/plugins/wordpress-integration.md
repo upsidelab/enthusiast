@@ -1,3 +1,7 @@
+---
+sidebar_position: 3
+---
+
 # WordPress Integration
 
 The WordPress plugin for Enthusiast enables you to automatically import blog posts from WordPress.

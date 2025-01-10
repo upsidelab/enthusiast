@@ -25,3 +25,4 @@ In the left sidebar, go to “Ask” → “Chat”. This will open the chat int
 - [Learn more about data sets](/tools/enthusiast/docs/synchronize/manage-data-sets)
 - [See how to manage users](/tools/enthusiast/docs/manage/manage-users)
 - [Add custom tools for the AI agent](/tools/enthusiast/docs/chat/add-custom-tools)
+- [Create a custom plugin](/tools/enthusiast/docs/plugins/create-custom-plugin)

@@ -1,3 +1,7 @@
+---
+sidebar_position: 2
+---
+
 # Shopify Integration
 
 The Shopify plugin for Enthusiast enables you to automatically import product information from Shopify.

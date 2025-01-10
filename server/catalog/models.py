@@ -38,7 +38,7 @@ class DocumentSource(models.Model):
 
 class Document(models.Model):
     data_set = models.ForeignKey(DataSet, related_name="documents", on_delete=models.PROTECT)
-    url = models.CharField(max_length=255, unique=True)
+    url = models.CharField(max_length=255)
     title = models.CharField(max_length=1024)
     content = models.TextField()
 
@@ -46,6 +46,10 @@ class Document(models.Model):
         db_table_comment = ("List of documents being part of a larger data set. A document may be for instance a blog "
                             "post. This is the main entity being analysed by ECL engine when user asks questions "
                             "regarding company's offer.")
+        constraints = [
+            models.UniqueConstraint(fields=['data_set', 'url'], name='uq_document')
+        ]
+
 
     def split(self, chunk_size, chunk_overlap):
         """
@@ -86,7 +90,7 @@ class DocumentChunk(models.Model):
 
 class Product(models.Model):
     data_set = models.ForeignKey(DataSet, on_delete=models.PROTECT, related_name="products")
-    entry_id = models.CharField(max_length=255, unique=True)
+    entry_id = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     slug = models.CharField(max_length=255)
     description = models.TextField()
@@ -97,4 +101,7 @@ class Product(models.Model):
 
     class Meta:
         db_table_comment = "List of products from a given data set."
+        constraints = [
+            models.UniqueConstraint(fields=['data_set', 'entry_id'], name='uq_product')
+        ]
 

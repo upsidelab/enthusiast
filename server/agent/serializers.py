@@ -62,12 +62,19 @@ class ConversationSerializer(serializers.ModelSerializer):
 
 
 class MessageFeedbackSerializer(serializers.ModelSerializer):
+    rating = serializers.IntegerField(min_value=1, max_value=5, required=True)
+    feedback = serializers.CharField(
+        required=True,
+        allow_blank=False,
+        error_messages={
+            'blank': 'Feedback cannot be blank.',
+            'required': 'Feedback is required.'
+        }
+    )
+
     class Meta:
         model = Message
         fields = ['rating', 'feedback']
-        extra_kwargs = {
-            'rating': {'required': True},
-        }
 
 
 class MessagesSerializer(serializers.ModelSerializer):

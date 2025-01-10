@@ -25,7 +25,7 @@ export function ProductsList() {
       itemsReloadDependencies={dataSetId}
       noItemsMessage="No products avialable"
       tableFooter="Sync Status: Manual"
-      tableHeaders={["", "Slug", "SKU", "Name", "Description", "Categories"]}
+      tableHeaders={["", "Slug", "SKU", "Name", "Description", "Categories", "Properties"]}
       tableRow={(product, index) => {
         return (
           <TableRow key={index}>
@@ -37,6 +37,7 @@ export function ProductsList() {
             <TableCell>{product.name}</TableCell>
             <TableCell>{product.description}</TableCell>
             <TableCell>{product.categories}</TableCell>
+            <TableCell>{product.properties}</TableCell>
           </TableRow>
         )
       }}

@@ -18,6 +18,7 @@ export type Product = {
   slug: string;
   description: string;
   categories: string;
+  properties: string;
 }
 
 export type CatalogSource = {

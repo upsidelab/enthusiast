@@ -12,7 +12,7 @@ class DataSetSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ['name', 'slug', 'sku', 'description', 'categories']
+        fields = ['name', 'slug', 'sku', 'description', 'categories', 'properties']
 
 
 class DocumentSerializer(serializers.ModelSerializer):

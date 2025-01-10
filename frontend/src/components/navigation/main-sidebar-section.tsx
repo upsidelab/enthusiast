@@ -36,7 +36,6 @@ export function MainSidebarSection({ title, items }: SidebarSectionProps) {
                   <Link
                     to={item.link}
                     target={item.key === 'documentation' ? "_blank" : undefined}
-                    reloadDocument={item.link === '/ask/chat'}
                   >
                     {item.icon}
                     {item.title}

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { MessageComposer } from "@/components/conversation-view/message-composer.tsx";
 import { MessageBubble } from "@/components/conversation-view/message-bubble.tsx";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
@@ -17,15 +18,14 @@ export interface MessageProps {
 
 const api = new ApiClient(authenticationProviderInstance);
 
-export function Conversation(props: ConversationProps) {
-  const [conversationId, setConversationId] = useState<number | null>(props.conversationId);
+export function Conversation({ conversationId: initialConversationId }: ConversationProps) {
+  const [conversationId, setConversationId] = useState<number | null>(initialConversationId);
   const [isLoading, setIsLoading] = useState(false);
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
   const { dataSetId } = useApplicationContext()!;
+  const location = useLocation();
 
-  const [messages, setMessages] = useState<MessageProps[]>([
-    { role: "agent", text: "How can I help you today?", id: null },
-  ]);
+  const [messages, setMessages] = useState<MessageProps[]>([]);
 
   const onMessageComposerSubmit = async (message: string) => {
     setIsLoading(true);
@@ -67,7 +67,7 @@ export function Conversation(props: ConversationProps) {
 
   useEffect(() => {
     const loadInitialMessages = async () => {
-      if (!conversationId) {
+      if (!conversationId || messages.length > 0) {
         return;
       }
 
@@ -81,6 +81,12 @@ export function Conversation(props: ConversationProps) {
       lastMessageRef.current?.scrollIntoView({behavior: "smooth"});
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (initialConversationId !== conversationId) {
+      setConversationId(initialConversationId);
+    }
+  }, [initialConversationId, dataSetId]);
 
   return (
     <div className="flex flex-col h-full px-4 pt-4">

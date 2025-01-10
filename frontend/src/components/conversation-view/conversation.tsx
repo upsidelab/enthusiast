@@ -88,6 +88,13 @@ export function Conversation({ conversationId: initialConversationId }: Conversa
     }
   }, [initialConversationId, dataSetId]);
 
+  useEffect(() => {
+    if (location.pathname.includes("/chat")) {
+      setConversationId(null);
+      setMessages([]);
+    }
+  }, [location.pathname]);
+
   return (
     <div className="flex flex-col h-full px-4 pt-4">
       <div className="grow flex-1 space-y-4">

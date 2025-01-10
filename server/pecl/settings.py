@@ -209,6 +209,10 @@ CELERY_RESULT_BACKEND = os.environ.get('ECL_CELERY_RESULT_BACKEND')
 CELERY_TIMEZONE = os.environ.get('ECL_CELERY_TIMEZONE')
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
+CATALOG_LANGUAGE_MODEL_PROVIDERS = {
+    "OpenAI": "enthusiast_model_openai.OpenAILanguageModelProvider",
+}
+
 CATALOG_EMBEDDING_PROVIDERS = {
     "OpenAI": "enthusiast_model_openai.OpenAIEmbeddingProvider",
 }

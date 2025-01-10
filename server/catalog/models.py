@@ -10,6 +10,8 @@ logger = logging.getLogger(__name__)
 
 class DataSet(models.Model):
     name = models.CharField(max_length=30)
+    language_model_provider = models.CharField(default="OpenAI")
+    language_model_name = models.CharField(default="gpt-4o")
     embedding_provider = models.CharField(max_length=255, default="OpenAI")
     embedding_model = models.CharField(max_length=255, default="text-embedding-3-large")
     embedding_vector_dimensions = models.IntegerField(default=512)

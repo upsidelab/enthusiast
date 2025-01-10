@@ -8,9 +8,9 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel, Field
 
-from agent.core import LlmProvider
 from agent.retrievers import DocumentRetriever
 from agent.retrievers import ProductRetriever
+from catalog.language_models import LanguageModelRegistry
 from catalog.models import DataSet
 
 logger = logging.getLogger(__name__)
@@ -95,7 +95,9 @@ class CreateAnswerTool(BaseTool):
 
         product_context = serializers.serialize("json", relevant_products)
 
-        chain = PromptTemplate.from_template(CREATE_CONTENT_PROMPT_TEMPLATE) | LlmProvider.provide_llm_instance()
+        prompt = PromptTemplate.from_template(CREATE_CONTENT_PROMPT_TEMPLATE)
+        llm = LanguageModelRegistry().provider_for_dataset(self.data_set).provide_language_model()
+        chain = prompt | llm
 
         retry = -1
         while retry < self.max_retry:

@@ -1,7 +1,7 @@
 from django.core import serializers
 from langchain_core.prompts import PromptTemplate
 
-from agent.core import LlmProvider
+from catalog.language_models import LanguageModelRegistry
 from catalog.models import Product, DataSet
 
 QUERY_PROMPT_TEMPLATE = """
@@ -51,7 +51,8 @@ class ProductRetriever:
         return serializers.serialize("json", sample_products)
 
     def _build_where_clause_for_query(self, query: str):
-        chain = PromptTemplate.from_template(QUERY_PROMPT_TEMPLATE) | LlmProvider.provide_llm_instance()
+        llm = LanguageModelRegistry().provider_for_dataset(self.data_set).provide_language_model()
+        chain = PromptTemplate.from_template(QUERY_PROMPT_TEMPLATE) | llm
         llm_result = chain.invoke({"sample_products_json": self._get_sample_products_json(), "query": query})
         sanitized_result = llm_result.content.strip("`").removeprefix("sql").strip("\n").replace("%", "%%")
         return sanitized_result

@@ -39,6 +39,7 @@ services:
       - ECL_CELERY_TIMEZONE=UTC
       - ECL_ADMIN_EMAIL=${ECL_ADMIN_EMAIL:-admin@example.com}
       - ECL_ADMIN_PASSWORD=${ECL_ADMIN_PASSWORD:-changeme}
+      - OPENAI_API_KEY=$OPENAI_API_KEY
   worker:
     build:
       context: server/

@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "enthusiast-source-shopify"
-version = "0.1.1"
+version = "0.1.2"
 description = ""
 authors = ["Rafal Cymerys <rafal@upsidelab.io>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-enthusiast-common = "^0.2.0"
+enthusiast-common = ">=0.2,<1"
 shopifyapi = "^12.7.0"
 
 

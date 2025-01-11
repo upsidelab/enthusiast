@@ -49,6 +49,14 @@ class LanguageModelProvider(ABC):
         """
         pass
 
+    @staticmethod
+    @abstractmethod
+    def available_models() -> list[str]:
+        """Returns a list of available models.
+        Returns:
+            A list of available model names.
+        """
+
 
 class EmbeddingProvider(ABC):
     def __init__(self, model: str, dimensions: int):
@@ -64,3 +72,12 @@ class EmbeddingProvider(ABC):
             content (str): The input content for which the embedding vector is generated.
         """
         pass
+
+    @staticmethod
+    @abstractmethod
+    def available_models() -> list[str]:
+        """Returns a list of available models.
+
+        Returns:
+            A list of supported model names.
+        """

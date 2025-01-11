@@ -4,6 +4,8 @@ import { DataSet, CatalogSource, User } from "@/lib/types.ts";
 export type DataSetResponse = {
   id: number | undefined;
   name: string;
+  language_model_provider: string;
+  language_model: string;
   embedding_provider: string;
   embedding_model: string;
   embedding_vector_dimensions: number;
@@ -39,9 +41,11 @@ export class DataSetsApiClient extends BaseApiClient {
     const body: CreateDataSetPayload = {
       id: undefined,
       name: dataSet.name,
+      language_model_provider: dataSet.languageModelProvider,
+      language_model: dataSet.languageModel,
       embedding_provider: dataSet.embeddingProvider,
       embedding_model: dataSet.embeddingModel,
-      embedding_vector_dimensions: dataSet.embeddingVectorSize
+      embedding_vector_dimensions: dataSet.embeddingVectorSize,
     }
 
     const response = await fetch(`${this.apiBase}/api/data_sets`,

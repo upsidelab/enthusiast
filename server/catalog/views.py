@@ -1,17 +1,23 @@
 from django.db.models import Count
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.generics import ListAPIView, ListCreateAPIView, GenericAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
 
 from account.models import User
 from account.serializers import UserSerializer
-from sync.tasks import sync_all_sources, sync_all_document_sources, sync_data_set_all_sources, sync_data_set_document_sources, sync_document_source, sync_all_product_sources, sync_data_set_product_sources, sync_product_source
+from pecl import settings
+from sync.tasks import sync_all_sources, sync_all_document_sources, sync_data_set_all_sources, \
+    sync_data_set_document_sources, sync_document_source, sync_all_product_sources, sync_data_set_product_sources, \
+    sync_product_source
+from .embeddings import EmbeddingProviderRegistry
+from .language_models import LanguageModelRegistry
 from .models import DataSet, DocumentSource, ProductSource
-from .serializers import DataSetSerializer, DocumentSerializer, DocumentSourceSerializer, ProductSerializer, ProductSourceSerializer
+from .serializers import DataSetSerializer, DocumentSerializer, DocumentSourceSerializer, ProductSerializer, \
+    ProductSourceSerializer
 
 
 class SyncAllSourcesView(GenericAPIView):
@@ -326,3 +332,33 @@ class SyncDataSetDocumentSourceView(GenericAPIView):
         task = sync_document_source.apply_async(args=[kwargs['document_source_id']])
 
         return Response({"task_id": task.id}, status=status.HTTP_202_ACCEPTED)
+
+
+class ConfigView(GenericAPIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request, *args, **kwargs):
+        response_body = {
+            "language_model_providers": settings.CATALOG_LANGUAGE_MODEL_PROVIDERS.keys(),
+            "embedding_providers": settings.CATALOG_EMBEDDING_PROVIDERS.keys(),
+        }
+
+        return Response(response_body)
+
+class ConfigLanguageModelView(GenericAPIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request, *args, **kwargs):
+        provider_name = kwargs.get("provider_name")
+        response_body = LanguageModelRegistry().provider_class_by_name(provider_name).available_models()
+
+        return Response(response_body)
+
+class ConfigEmbeddingModelView(GenericAPIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request, *args, **kwargs):
+        provider_name = kwargs.get("provider_name")
+        response_body = EmbeddingProviderRegistry().provider_class_by_name(provider_name).available_models()
+
+        return Response(response_body)

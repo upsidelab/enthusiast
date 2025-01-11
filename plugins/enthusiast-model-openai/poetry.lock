@@ -169,13 +169,13 @@ files = [
 
 [[package]]
 name = "enthusiast-common"
-version = "0.3.0"
+version = "0.4.0"
 description = ""
 optional = false
 python-versions = "<4.0,>=3.9"
 files = [
-    {file = "enthusiast_common-0.3.0-py3-none-any.whl", hash = "sha256:a4dae97bc1e901c473004bfd20465fa492427a014261cd8da4d72fa76e04bdc8"},
-    {file = "enthusiast_common-0.3.0.tar.gz", hash = "sha256:cb5069bdfcd1aa19f6b83d8a1293d07bc9cab8eacc272632f71c2adb8e41c8e2"},
+    {file = "enthusiast_common-0.4.0-py3-none-any.whl", hash = "sha256:5f7dca549fac34d75239a6b2dd171bf1d1a418ed0c4f9ffbfd335fe9a4a952fe"},
+    {file = "enthusiast_common-0.4.0.tar.gz", hash = "sha256:e63465ac6f175d3bf6f8dce472ea2a88361a3052041cfb20762ee2f53a17c629"},
 ]
 
 [package.dependencies]
@@ -1016,4 +1016,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "7e9ec0831f844813a9845c6245ba2f95f35fc03b4e41553e9749f5e7ac6703e6"
+content-hash = "14d9c46186ffa08a612820150744a043d12c4865ed8e4add28d2cad79b9c9bc6"

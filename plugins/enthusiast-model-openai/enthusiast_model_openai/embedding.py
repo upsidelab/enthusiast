@@ -7,10 +7,6 @@ from enthusiast_model_openai import utils
 PRIORITIZED_MODELS = ["text-embedding-3-large", "text-embedding-3-small"]
 
 class OpenAIEmbeddingProvider(EmbeddingProvider):
-    def __init__(self):
-        super(EmbeddingProvider, self).__init__()
-        self._client = OpenAI()
-
     def generate_embeddings(self, content: str) -> list[float]:
         """
         Generates and returns an embedding vector for the given content using OpenAI's embeddings API.
@@ -18,9 +14,9 @@ class OpenAIEmbeddingProvider(EmbeddingProvider):
         Args:
             content (str): The input text for which the embedding vector is to be generated.
         """
-        openai_embedding = self._client.embeddings.create(model=self._model,
-                                                          dimensions=self._dimensions,
-                                                          input=content)
+        openai_embedding = OpenAI().embeddings.create(model=self._model,
+                                                      dimensions=self._dimensions,
+                                                      input=content)
 
         return openai_embedding.data[0].embedding
 

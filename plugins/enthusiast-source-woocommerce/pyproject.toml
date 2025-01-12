@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-enthusiast-common = "^0.2.0"
+enthusiast-common = "^0.4.0"
 woocommerce = "^3.0.0"
 
 

@@ -7,43 +7,43 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu.tsx";
 import { useEffect } from "react";
-import { ApiClient } from "@/lib/api.ts";
-import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
 import { SidebarMenuButton } from "@/components/ui/sidebar.tsx";
 import logoUrl from "@/assets/logo.png";
 import { Separator } from "@/components/ui/separator.tsx";
 import { useNavigate, useLocation } from "react-router-dom";
 
-const api = new ApiClient(authenticationProviderInstance);
-
 export function DataSetSelector() {
-  const { dataSets, setDataSets, dataSetId, setDataSetId, account } = useApplicationContext()!;
+  const { dataSets, dataSetId, setDataSetId, account } = useApplicationContext()!;
   const navigate = useNavigate();
   const location = useLocation();
 
   const activeDataSet = () => {
+    if (dataSetId === null && dataSets.length > 0) {
+      setDataSetId(dataSets[0].id!);
+      return dataSets[0];
+    }
     return dataSets.find((e) => e.id === dataSetId);
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      const apiDataSets = await api.dataSets().getDataSets();
-      setDataSets(apiDataSets);
-      if (apiDataSets.length > 0 && !dataSetId) {
-        setDataSetId(apiDataSets[0].id);
-      }
-    };
-
-    fetchData();
-  }, [dataSetId, setDataSetId, setDataSets]);
+    if (dataSetId === null && dataSets.length > 0) {
+      setDataSetId(dataSets[0].id!);
+    }
+  }, [dataSetId, dataSets]);
 
   useEffect(() => {
-    if (dataSetId !== null) {
-      const newUrl = location.pathname.replace(/\/data-sets\/\d+/, `/data-sets/${dataSetId}`);
-      navigate(newUrl, { replace: true });
+    const pathParts = location.pathname.split('/');
+    const dataSetIndex = pathParts.indexOf('data-sets');
+    const hasDataSetId = dataSetIndex !== -1 && !isNaN(Number(pathParts[dataSetIndex + 1]));
+
+    if (hasDataSetId) {
+      const currentDataSetId = Number(pathParts[dataSetIndex + 1]);
+      if (currentDataSetId !== dataSetId) {
+        setDataSetId(currentDataSetId);
+      }
     }
-  }, [dataSetId, navigate, location.pathname]);
+  }, [dataSetId, location.pathname, setDataSetId]);
 
   const handleDataSetChange = (id: number) => {
     setDataSetId(id);
@@ -86,7 +86,7 @@ export function DataSetSelector() {
           dataSets.map((dataSet) => (
             <DropdownMenuItem
               key={dataSet.name}
-              onClick={() => handleDataSetChange(dataSet.id)}
+              onClick={() => handleDataSetChange(dataSet.id!)}
               className="items-start gap-2 px-1.5"
             >
               <div className="grid flex-1 leading-tight">

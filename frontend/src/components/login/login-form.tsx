@@ -25,7 +25,9 @@ export function LoginForm({ className, ...props }: HTMLAttributes<HTMLDivElement
     try {
       const { token } = await api.login(email, password);
       authenticationProviderInstance.login(token);
-      navigate(`/`);
+
+      const dataSets = await api.dataSets().getDataSets();
+      navigate(`/data-sets/${dataSets[0].id}/chat`);
     } catch {
       setIsError(true);
     } finally {

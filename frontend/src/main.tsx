@@ -3,10 +3,10 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 import { createBrowserRouter, redirect, RouterProvider } from "react-router-dom";
-import { ChatHistory } from "@/pages/ask/history.tsx";
-import { Chat } from "@/pages/ask/chat.tsx";
-import { ProductsIndex } from "@/pages/products";
-import { DocumentsIndex } from "@/pages/documents";
+import { ChatHistory } from "@/pages/data-sets/(id)/history.tsx";
+import { Chat } from "@/pages/data-sets/(id)/chat.tsx";
+import { ProductsIndex } from "@/pages/data-sets/(id)/products/index.tsx";
+import { DocumentsIndex } from "@/pages/data-sets/(id)/documents/index.tsx";
 import { LoginPage } from "@/pages/login.tsx";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { ApiConnectionIndex } from "@/pages/service-accounts/index.tsx";
@@ -52,12 +52,24 @@ const router = createBrowserRouter([
     loader: protectedLoginLoader,
     children: [
       {
-        path: '/products',
+        path: '/data-sets/:id/products',
         element: <ProductsIndex />
       },
       {
-        path: '/documents',
+        path: '/data-sets/:id/documents',
         element: <DocumentsIndex />
+      },
+      {
+        path: "/",
+        element: <Chat />
+      },
+      {
+        path: '/data-sets/:id/chat/:chatId?',
+        element: <Chat />
+      },
+      {
+        path: '/data-sets/:id/history',
+        element: <ChatHistory />
       },
       {
         path: '/data-sets',
@@ -82,18 +94,6 @@ const router = createBrowserRouter([
       {
         path: '/data-sets/:dataSetId/document-sources/:documentSourceId',
         element: <ConfigureDataSetDocumentSource />
-      },    
-      {
-        path: "/",
-        element: <Chat />
-      },
-      {
-        path: '/ask/chat/:id?',
-        element: <Chat />
-      },
-      {
-        path: '/ask/history',
-        element: <ChatHistory />
       },
       {
         path: '/service-accounts',

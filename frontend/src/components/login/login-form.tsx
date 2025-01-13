@@ -25,7 +25,7 @@ export function LoginForm({ className, ...props }: HTMLAttributes<HTMLDivElement
     try {
       const { token } = await api.login(email, password);
       authenticationProviderInstance.login(token);
-      navigate('/ask/chat');
+      navigate(`/`);
     } catch {
       setIsError(true);
     } finally {

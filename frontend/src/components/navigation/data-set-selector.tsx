@@ -13,13 +13,14 @@ import { useApplicationContext } from "@/lib/use-application-context.ts";
 import { SidebarMenuButton } from "@/components/ui/sidebar.tsx";
 import logoUrl from "@/assets/logo.png";
 import { Separator } from "@/components/ui/separator.tsx";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const api = new ApiClient(authenticationProviderInstance);
 
 export function DataSetSelector() {
   const { dataSets, setDataSets, dataSetId, setDataSetId, account } = useApplicationContext()!;
   const navigate = useNavigate();
+  const location = useLocation();
 
   const activeDataSet = () => {
     return dataSets.find((e) => e.id === dataSetId);
@@ -29,13 +30,23 @@ export function DataSetSelector() {
     const fetchData = async () => {
       const apiDataSets = await api.dataSets().getDataSets();
       setDataSets(apiDataSets);
-      if (!apiDataSets.find((e) => e.id === dataSetId)) {
+      const storedDataSetId = sessionStorage.getItem('selectedDataSetId');
+      if (storedDataSetId) {
+        setDataSetId(parseInt(storedDataSetId));
+      } else if (!apiDataSets.find((e) => e.id === dataSetId)) {
         setDataSetId(apiDataSets[0]?.id || null);
       }
     };
 
     fetchData();
   }, [dataSetId, setDataSetId, setDataSets]);
+
+  useEffect(() => {
+    if (dataSetId !== null) {
+      const newUrl = location.pathname.replace(/\/data-sets\/\d+/, `/data-sets/${dataSetId}`);
+      navigate(newUrl, { replace: true });
+    }
+  }, [dataSetId, navigate, location .pathname]);
 
   return (
     <DropdownMenu>
@@ -49,7 +60,7 @@ export function DataSetSelector() {
             <img src={logoUrl} alt="Upside" className="size-8 rounded-lg"/>
           </div>
           <div className="flex flex-col gap-0.5 leading-none">
-            <span className="font-semibold">Enthusiast</span>
+            <span className="font-semibold">Data Set</span>
             <span className="">{activeDataSet()?.name}</span>
           </div>
           <ChevronsUpDown className="ml-auto" />

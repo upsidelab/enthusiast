@@ -20,6 +20,7 @@ export function UserMenu() {
   const navigate = useNavigate();
   const logout = () => {
     authenticationProviderInstance.logout();
+    sessionStorage.removeItem('selectedDataSetId');
     navigate("/login");
   };
   const { account, setAccount } = useApplicationContext()!;

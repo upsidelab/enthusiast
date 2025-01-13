@@ -12,7 +12,7 @@ export function ConversationsList() {
   const navigate = useNavigate();
 
   const navigateToConversation = (id: number) => {
-    navigate(`/ask/chat/${id}`);
+    navigate(`/data-sets/${dataSetId}/chat/${id}`);
   };
 
   const loadConversations = async (page: number) => {

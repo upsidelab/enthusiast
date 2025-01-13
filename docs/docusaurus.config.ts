@@ -50,9 +50,9 @@ const config: Config = {
     navbar: {
       title: 'Enthusiast',
       logo: {
-        alt: 'Upside Logo',
+        alt: 'Enthusiast',
         src: 'img/logo.png',
-        href: 'https://upsidelab.io'
+        href: '/tools/enthusiast'
       },
       items: [
         {
@@ -76,7 +76,7 @@ const config: Config = {
           items: [
             {
               label: 'Docs',
-              to: '/docs/introduction',
+              to: '/docs',
             },
           ],
         },

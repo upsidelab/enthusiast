@@ -30,11 +30,8 @@ export function DataSetSelector() {
     const fetchData = async () => {
       const apiDataSets = await api.dataSets().getDataSets();
       setDataSets(apiDataSets);
-      const storedDataSetId = sessionStorage.getItem('selectedDataSetId');
-      if (storedDataSetId) {
-        setDataSetId(parseInt(storedDataSetId));
-      } else if (!apiDataSets.find((e) => e.id === dataSetId)) {
-        setDataSetId(apiDataSets[0]?.id || null);
+      if (apiDataSets.length > 0 && !dataSetId) {
+        setDataSetId(apiDataSets[0].id);
       }
     };
 
@@ -46,7 +43,13 @@ export function DataSetSelector() {
       const newUrl = location.pathname.replace(/\/data-sets\/\d+/, `/data-sets/${dataSetId}`);
       navigate(newUrl, { replace: true });
     }
-  }, [dataSetId, navigate, location .pathname]);
+  }, [dataSetId, navigate, location.pathname]);
+
+  const handleDataSetChange = (id: number) => {
+    setDataSetId(id);
+    const newUrl = location.pathname.replace(/\/data-sets\/\d+/, `/data-sets/${id}`);
+    navigate(newUrl, { replace: true });
+  };
 
   return (
     <DropdownMenu>
@@ -83,7 +86,7 @@ export function DataSetSelector() {
           dataSets.map((dataSet) => (
             <DropdownMenuItem
               key={dataSet.name}
-              onClick={() => setDataSetId(dataSet.id || null)}
+              onClick={() => handleDataSetChange(dataSet.id)}
               className="items-start gap-2 px-1.5"
             >
               <div className="grid flex-1 leading-tight">

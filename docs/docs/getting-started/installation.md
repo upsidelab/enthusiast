@@ -15,8 +15,8 @@ $ git clone https://github.com/upsidelab/enthusiast
 ```
 
 :::info
-The default configuration uses the OpenAI API for generating document embeddings and for the large language model. 
-You need to provide your OpenAI API key via the OPENAI_API_KEY environment variable. Additionally, make sure that your OpenAI account has access to 'gpt-4o', as this model is required.
+The default configuration uses the OpenAI API for generating document embeddings and for the large language model. Make sure that your OpenAI has access to gpt-4o it is default recommended model if not - at least gpt-4o-mini to ensure proper work of the application.
+You need to provide your OpenAI API key via the OPENAI_API_KEY environment variable.
 :::
 
 Next, run Docker Compose to start the environment:

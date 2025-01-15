@@ -15,18 +15,18 @@ import { UserMenu } from "@/components/navigation/user-menu.tsx";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
 
 export function MainSidebar() {
-  const { account } = useApplicationContext()!;
+  const { account, dataSetId } = useApplicationContext()!;
 
   const synchronizeItems: SidebarSectionItemProps[] = [
     {
       title: "Products",
-      link: "/products",
+      link: `/data-sets/${dataSetId}/products`,
       key: "products",
       icon: <BookOpenIcon />
     },
     {
       title: "Documents",
-      link: "/documents",
+      link: `/data-sets/${dataSetId}/documents`,
       key: "documents",
       icon: <FileTextIcon />
     }
@@ -35,13 +35,13 @@ export function MainSidebar() {
   const askItems: SidebarSectionItemProps[] = [
     {
       title: "Chat",
-      link: "/ask/chat",
+      link: `/data-sets/${dataSetId}/chat`,
       key: "chat",
       icon: <BotMessageSquareIcon />
     },
     {
       title: "History",
-      link: "/ask/history",
+      link: `/data-sets/${dataSetId}/history`,
       key: "history",
       icon: <HistoryIcon />
     }

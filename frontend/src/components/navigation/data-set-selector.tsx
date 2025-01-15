@@ -6,37 +6,31 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu.tsx";
-import { useEffect } from "react";
-import { ApiClient } from "@/lib/api.ts";
-import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
 import { SidebarMenuButton } from "@/components/ui/sidebar.tsx";
 import logoUrl from "@/assets/logo.png";
 import logoSvgUrl from '@/assets/logo.svg';
 import { Separator } from "@/components/ui/separator.tsx";
-import { useNavigate } from "react-router-dom";
-
-const api = new ApiClient(authenticationProviderInstance);
+import { useNavigate, useLocation } from "react-router-dom";
 
 export function DataSetSelector() {
-  const { dataSets, setDataSets, dataSetId, setDataSetId, account } = useApplicationContext()!;
+  const { dataSets, dataSetId, setDataSetId, account } = useApplicationContext()!;
   const navigate = useNavigate();
+  const location = useLocation();
 
   const activeDataSet = () => {
+    if (dataSetId === null && dataSets.length > 0) {
+      setDataSetId(dataSets[0].id!);
+      return dataSets[0];
+    }
     return dataSets.find((e) => e.id === dataSetId);
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const apiDataSets = await api.dataSets().getDataSets();
-      setDataSets(apiDataSets);
-      if (!apiDataSets.find((e) => e.id === dataSetId)) {
-        setDataSetId(apiDataSets[0]?.id || null);
-      }
-    };
-
-    fetchData();
-  }, [dataSetId, setDataSetId, setDataSets]);
+  const handleDataSetChange = (id: number) => {
+    setDataSetId(id);
+    const newUrl = location.pathname.replace(/\/data-sets\/\d+/, `/data-sets/${id}`);
+    navigate(newUrl, { replace: true });
+  };
 
   return (
     <DropdownMenu>
@@ -73,7 +67,7 @@ export function DataSetSelector() {
           dataSets.map((dataSet) => (
             <DropdownMenuItem
               key={dataSet.name}
-              onClick={() => setDataSetId(dataSet.id || null)}
+              onClick={() => handleDataSetChange(dataSet.id!)}
               className="items-start gap-2 px-1.5"
             >
               <div className="grid flex-1 leading-tight">

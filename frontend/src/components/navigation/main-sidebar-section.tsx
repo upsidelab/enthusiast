@@ -8,6 +8,7 @@ import {
   SidebarMenuItem
 } from "@/components/ui/sidebar.tsx";
 import { ReactNode } from "react";
+import { useApplicationContext } from "@/lib/use-application-context.ts";
 
 export interface SidebarSectionItemProps {
   title: string;
@@ -23,6 +24,7 @@ export interface SidebarSectionProps {
 
 export function MainSidebarSection({ title, items }: SidebarSectionProps) {
   const location = useLocation();
+  const { dataSetId } = useApplicationContext()!;
 
   return (
     <SidebarGroup>
@@ -32,11 +34,11 @@ export function MainSidebarSection({ title, items }: SidebarSectionProps) {
           {items.map((item) => {
             return (
               <SidebarMenuItem key={item.key}>
-                <SidebarMenuButton asChild isActive={location.pathname.startsWith(item.link)}>
+                <SidebarMenuButton asChild isActive={location.pathname === item.link}>
                   <Link
                     to={item.link}
                     target={item.key === 'documentation' ? "_blank" : undefined}
-                    reloadDocument={item.link === '/ask/chat'}
+                    reloadDocument={item.link === `/data-sets/${dataSetId}/chat`}
                   >
                     {item.icon}
                     {item.title}

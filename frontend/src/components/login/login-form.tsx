@@ -25,7 +25,13 @@ export function LoginForm({ className, ...props }: HTMLAttributes<HTMLDivElement
     try {
       const { token } = await api.login(email, password);
       authenticationProviderInstance.login(token);
-      navigate('/ask/chat');
+
+      const dataSets = await api.dataSets().getDataSets();
+      if (dataSets.length === 0) {
+        navigate('/no-datasets');
+      } else {
+        navigate(`/data-sets/${dataSets[0].id}/chat`);
+      }
     } catch {
       setIsError(true);
     } finally {

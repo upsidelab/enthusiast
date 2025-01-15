@@ -15,7 +15,7 @@ $ git clone https://github.com/upsidelab/enthusiast
 ```
 
 :::info
-The default configuration uses the OpenAI API for generating document embeddings and for the large language model.
+The default configuration uses the OpenAI API for generating document embeddings and for the large language model. Make sure that your OpenAI has access to gpt-4o it is default recommended model if not - at least gpt-4o-mini to ensure proper work of the application.
 You need to provide your OpenAI API key via the OPENAI_API_KEY environment variable.
 :::
 

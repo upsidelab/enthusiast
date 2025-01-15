@@ -5,17 +5,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible.tsx";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select.tsx";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { ApiClient } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { useNavigate } from "react-router-dom";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
-import { DataSet } from "@/lib/types.ts";
+import { DataSet, ProvidersConfig } from "@/lib/types.ts";
 
 const formSchema = z.object({
   name: z.string().trim().min(1),
+  languageModelProvider: z.string().min(1),
+  languageModel: z.string().min(1),
   embeddingProvider: z.string().min(1),
   embeddingModel: z.string().min(1),
   embeddingVectorSize: z.number().min(1).max(3072)
@@ -26,21 +28,69 @@ const api = new ApiClient(authenticationProviderInstance);
 
 export function CreateDataSetForm() {
   const { setDataSets, setDataSetId } = useApplicationContext()!;
+  const [providersConfig, setProvidersConfig] = useState<ProvidersConfig | undefined>(undefined);
+  const [languageModelNames, setLanguageModelNames] = useState<string[] | undefined>(undefined);
+  const [embeddingModels, setEmbeddingModels] = useState<string[] | undefined>(undefined);
+
   const form = useForm<CreateDataSetFormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      embeddingProvider: "OpenAI",
-      embeddingModel: "text-embedding-3-large",
+      languageModelProvider: undefined,
+      languageModel: undefined,
+      embeddingProvider: undefined,
+      embeddingModel: undefined,
       embeddingVectorSize: 512,
     }
   });
+
+  useEffect(() => {
+    const loadProvidersConfig = async () => {
+      const result = await api.config().getAvailableProviders();
+      setProvidersConfig(result);
+      form.setValue("languageModelProvider", result.languageModelProviders[0], {});
+      form.setValue("embeddingProvider", result.embeddingProviders[0], {});
+    }
+
+    loadProvidersConfig();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const languageModelProvider = form.watch('languageModelProvider');
+
+  useEffect(() => {
+    const loadLanguageModels = async () => {
+      if (languageModelProvider) {
+        setLanguageModelNames(undefined);
+        const result = await api.config().getLanguageModelsForProvider(languageModelProvider);
+        setLanguageModelNames(result);
+        form.setValue("languageModel", result[0], {});
+      }
+    }
+    loadLanguageModels();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [languageModelProvider]);
+
+  const embeddingProvider = form.watch('embeddingProvider');
+
+  useEffect(() => {
+    const loadEmbeddingModels = async () => {
+      if (embeddingProvider) {
+        setEmbeddingModels(undefined);
+        const result = await api.config().getEmbeddingModelsForProvider(embeddingProvider);
+        setEmbeddingModels(result);
+        form.setValue("embeddingModel", result[0], {});
+      }
+    }
+    loadEmbeddingModels();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [embeddingProvider]);
 
   const [advancedOpen, setAdvancedOpen] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (values: CreateDataSetFormSchema) => {
-    const createdDataSetId = await api.dataSets().createDataSet(values as DataSet);
+    const createdDataSetId = await api.dataSets().createDataSet({ ...values, id: undefined } as DataSet);
     const dataSets = await api.dataSets().getDataSets();
     setDataSets(dataSets);
     setDataSetId(createdDataSetId);
@@ -76,18 +126,84 @@ export function CreateDataSetForm() {
             <div className="space-y-6">
               <FormField
                 control={form.control}
-                name="embeddingProvider"
+                disabled={!providersConfig}
+                name="languageModelProvider"
                 render={({field}) => (
                   <FormItem>
-                    <FormLabel>Provider</FormLabel>
-                    <Select {...field}>
+                    <FormLabel>Language Model Provider</FormLabel>
+                    <Select value={field.value} onValueChange={field.onChange} defaultValue={field.value}>
+                      <SelectTrigger>
+                        <FormControl>
+                          <SelectValue placeholder="Select a language model provider"/>
+                        </FormControl>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {
+                          providersConfig?.languageModelProviders &&
+                          <>
+                            {providersConfig.languageModelProviders.map((provider) => (
+                              <SelectItem key={provider} value={provider}>{provider}</SelectItem>
+                            ))}
+                          </>
+                        }
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>The plugin used to provide a language model</FormDescription>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="languageModel"
+                disabled={!languageModelNames}
+                render={({field}) => (
+                  <FormItem>
+                    <FormLabel>Language Model</FormLabel>
+                    <Select value={field.value} onValueChange={field.onChange} defaultValue={field.value}>
+                      <SelectTrigger>
+                        <FormControl>
+                          <SelectValue placeholder="Select a language model to use"/>
+                        </FormControl>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {
+                          languageModelNames &&
+                          <>
+                            {languageModelNames.map((modelName) => (
+                              <SelectItem key={modelName} value={modelName}>{modelName}</SelectItem>
+                            ))}
+                          </>
+                        }
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>The language model to be used by the agent</FormDescription>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="embeddingProvider"
+                disabled={!providersConfig}
+                render={({field}) => (
+                  <FormItem>
+                    <FormLabel>Embedding Provider</FormLabel>
+                    <Select value={field.value} onValueChange={field.onChange} defaultValue={field.value}>
                       <SelectTrigger>
                         <FormControl>
                           <SelectValue placeholder="Select a provider for embeddings"/>
                         </FormControl>
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="OpenAI">OpenAI</SelectItem>
+                        {
+                          providersConfig?.embeddingProviders &&
+                          <>
+                          {providersConfig.embeddingProviders.map((provider) => (
+                            <SelectItem key={provider} value={provider}>{provider}</SelectItem>
+                          ))}
+                          </>
+                        }
                       </SelectContent>
                     </Select>
                     <FormDescription>The plugin used to create embeddings</FormDescription>
@@ -96,18 +212,26 @@ export function CreateDataSetForm() {
               />
               <FormField
                 control={form.control}
+                disabled={!embeddingModels}
                 name="embeddingModel"
                 render={({field}) => (
                   <FormItem>
-                    <FormLabel>Model</FormLabel>
-                    <Select {...field}>
+                    <FormLabel>Embedding Model</FormLabel>
+                    <Select value={field.value} onValueChange={field.onChange} defaultValue={field.value}>
                       <SelectTrigger>
                         <FormControl>
                           <SelectValue placeholder="Select a model for embeddings"/>
                         </FormControl>
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="text-embedding-3-large">text-embedding-3-large</SelectItem>
+                        {
+                          embeddingModels &&
+                          <>
+                            {embeddingModels.map((modelName) => (
+                              <SelectItem key={modelName} value={modelName}>{modelName}</SelectItem>
+                            ))}
+                          </>
+                        }
                       </SelectContent>
                     </Select>
                     <FormDescription>The model provided by the plugin</FormDescription>

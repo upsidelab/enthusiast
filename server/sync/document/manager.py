@@ -41,9 +41,9 @@ class DocumentSyncManager(SyncManager[DocumentDetails]):
         """
 
         item, created = Document.objects.update_or_create(
+            data_set_id = data_set_id,
             url=item_data.url,
             defaults={
-                "data_set_id": data_set_id,
                 "title": item_data.title,
                 "content": item_data.content,
             }

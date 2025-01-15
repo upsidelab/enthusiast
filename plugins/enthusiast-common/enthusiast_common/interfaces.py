@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+from langchain_core.language_models import BaseLanguageModel
+
 from enthusiast_common.structures import ProductDetails, DocumentDetails
 
 
@@ -33,8 +35,31 @@ class DocumentSourcePlugin(ABC):
         pass
 
 
+class LanguageModelProvider(ABC):
+    def __init__(self, model: str):
+        super(LanguageModelProvider, self).__init__()
+        self._model = model
+
+    @abstractmethod
+    def provide_language_model(self) -> BaseLanguageModel:
+        """Initializes and returns an instance of the language model.
+
+        Returns:
+            An instance of the language model for the agent.
+        """
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def available_models() -> list[str]:
+        """Returns a list of available models.
+        Returns:
+            A list of available model names.
+        """
+
+
 class EmbeddingProvider(ABC):
-    def __init__(self, model, dimensions):
+    def __init__(self, model: str, dimensions: int):
         super(EmbeddingProvider, self).__init__()
         self._model = model
         self._dimensions = dimensions
@@ -47,3 +72,12 @@ class EmbeddingProvider(ABC):
             content (str): The input content for which the embedding vector is generated.
         """
         pass
+
+    @staticmethod
+    @abstractmethod
+    def available_models() -> list[str]:
+        """Returns a list of available models.
+
+        Returns:
+            A list of supported model names.
+        """

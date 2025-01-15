@@ -1,1 +1,2 @@
 from .embedding import OpenAIEmbeddingProvider as OpenAIEmbeddingProvider
+from .language_model import OpenAILanguageModelProvider as OpenAILanguageModelProvider

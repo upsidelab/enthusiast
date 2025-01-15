@@ -6,13 +6,14 @@ from .models import DataSet, Document, DocumentSource, Product, ProductSource
 class DataSetSerializer(serializers.ModelSerializer):
     class Meta:
         model = DataSet
-        fields = ['id', 'name', 'embedding_provider', 'embedding_model', 'embedding_vector_dimensions']
+        fields = ['id', 'name', 'language_model_provider', 'language_model', 'embedding_provider', 'embedding_model',
+                  'embedding_vector_dimensions']
 
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ['name', 'slug', 'sku', 'description', 'categories']
+        fields = ['name', 'slug', 'sku', 'description', 'categories', 'properties']
 
 
 class DocumentSerializer(serializers.ModelSerializer):

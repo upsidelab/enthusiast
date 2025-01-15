@@ -4,8 +4,8 @@ from langchain.agents.agent_toolkits import create_conversational_retrieval_agen
 from langchain.memory import ConversationSummaryBufferMemory
 from langchain_core.messages import SystemMessage
 
-from agent.core.llm_provider import LlmProvider
 from agent.tools import CreateAnswerTool
+from catalog.language_models import LanguageModelRegistry
 from catalog.models import DataSet
 
 logger = logging.getLogger(__name__)
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class Agent:
     def __init__(self, data_set: DataSet, messages: list):
         logger.debug("Initialize Agent")
-        self._llm = LlmProvider.provide_llm_instance()
+        self._llm = LanguageModelRegistry().provider_for_dataset(data_set).provide_language_model()
         self._tools = [CreateAnswerTool(
             data_set=data_set,
             chat_model=self._llm.model_name

@@ -23,9 +23,7 @@ export function Conversation(props: ConversationProps) {
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
   const { dataSetId } = useApplicationContext()!;
 
-  const [messages, setMessages] = useState<MessageProps[]>([
-    { role: "agent", text: "How can I help you today?", id: null },
-  ]);
+  const [messages, setMessages] = useState<MessageProps[]>([]);
 
   const onMessageComposerSubmit = async (message: string) => {
     setIsLoading(true);

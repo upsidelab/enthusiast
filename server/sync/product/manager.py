@@ -39,9 +39,9 @@ class ProductSyncManager(SyncManager[ProductDetails]):
             item_data (dict): item details.
         """
         item, created = Product.objects.update_or_create(
+            data_set_id=data_set_id,
             entry_id=item_data.entry_id,
             defaults={
-                "data_set_id": data_set_id,
                 "name": item_data.name,
                 "slug": item_data.slug,
                 "description": item_data.description,

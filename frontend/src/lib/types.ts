@@ -6,6 +6,8 @@ export interface PaginatedResult<T> {
 export type DataSet = {
   id: number | undefined;
   name: string;
+  languageModelProvider: string;
+  languageModel: string;
   embeddingProvider: string;
   embeddingModel: string;
   embeddingVectorSize: number;
@@ -18,6 +20,7 @@ export type Product = {
   slug: string;
   description: string;
   categories: string;
+  properties: string;
 }
 
 export type CatalogSource = {
@@ -73,3 +76,8 @@ export type ServiceAccount = {
   dateCreated: string;
   dataSetIds: number[];
 };
+
+export type ProvidersConfig = {
+  languageModelProviders: string[];
+  embeddingProviders: string[];
+}

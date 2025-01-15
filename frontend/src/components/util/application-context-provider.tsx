@@ -11,6 +11,19 @@ export interface ApplicationContextProviderProps {
   children: ReactNode;
 }
 
+function extractDataSetIdFromPath(path: string): number | null {
+  const match = path.match(/\/data-sets\/(\d+)/);
+  return match ? parseInt(match[1]) : null;
+}
+
+function buildNewUrl(path: string, newDataSetId: number): string {
+  const pathParts = path.split("/data-sets/");
+  const dataSetPath = pathParts[1] || "";
+  const pathSegments = dataSetPath.split("/");
+  const remainingPath = pathSegments.slice(1).join("/") || "";
+  return `/data-sets/${newDataSetId}/${remainingPath}`;
+}
+
 export function ApplicationContextProvider({ children }: ApplicationContextProviderProps) {
   const [dataSets, setDataSets] = useState<DataSet[]>([]);
   const [dataSetId, setDataSetId] = useState<number | null>(null);
@@ -24,7 +37,7 @@ export function ApplicationContextProvider({ children }: ApplicationContextProvi
       setDataSets(apiDataSets);
 
       if (location.pathname.includes("/data-sets/")) {
-        const urlDataSetId = parseInt(location.pathname.split("/data-sets/")[1]?.split("/")[0]);
+        const urlDataSetId = extractDataSetIdFromPath(location.pathname);
 
         if (apiDataSets.length > 0) {
           if (urlDataSetId && apiDataSets.some(ds => ds.id === urlDataSetId)) {
@@ -32,7 +45,8 @@ export function ApplicationContextProvider({ children }: ApplicationContextProvi
           } else {
             const defaultId = apiDataSets[0].id!;
             setDataSetId(defaultId);
-            navigate(`/data-sets/${defaultId}${location.pathname.split("/data-sets/")[1]?.split("/").slice(1).join("/") || ""}`, { replace: true });
+            const newUrl = buildNewUrl(location.pathname, defaultId);
+            navigate(newUrl, { replace: true });
           }
         }
       }

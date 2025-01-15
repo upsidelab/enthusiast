@@ -6,7 +6,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu.tsx";
-import { useEffect } from "react";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
 import { SidebarMenuButton } from "@/components/ui/sidebar.tsx";
 import logoUrl from "@/assets/logo.png";
@@ -25,25 +24,6 @@ export function DataSetSelector() {
     }
     return dataSets.find((e) => e.id === dataSetId);
   };
-
-  useEffect(() => {
-    if (dataSetId === null && dataSets.length > 0) {
-      setDataSetId(dataSets[0].id!);
-    }
-  }, [dataSetId, dataSets]);
-
-  useEffect(() => {
-    const pathParts = location.pathname.split('/');
-    const dataSetIndex = pathParts.indexOf('data-sets');
-    const hasDataSetId = dataSetIndex !== -1 && !isNaN(Number(pathParts[dataSetIndex + 1]));
-
-    if (hasDataSetId) {
-      const currentDataSetId = Number(pathParts[dataSetIndex + 1]);
-      if (currentDataSetId !== dataSetId) {
-        setDataSetId(currentDataSetId);
-      }
-    }
-  }, [dataSetId, location.pathname, setDataSetId]);
 
   const handleDataSetChange = (id: number) => {
     setDataSetId(id);

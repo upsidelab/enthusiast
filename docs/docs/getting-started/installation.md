@@ -21,9 +21,22 @@ You need to provide your OpenAI API key via the OPENAI_API_KEY environment varia
 
 Next, run Docker Compose to start the environment:
 
-```shell
-$ OPENAI_API_KEY=<yourkey> docker compose -f docker-compose.development.yml up -d 
-```
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs>
+  <TabItem value="macos-linux" label="macOS/Linux" default>
+    ```bash
+    $ OPENAI_API_KEY=<yourkey> docker compose -f docker-compose.development.yml up -d
+    ```
+  </TabItem>
+  <TabItem value="windows" label="Windows">
+    ```powershell
+    $ $env:OPENAI_API_KEY="<yourkey>"; docker-compose -f docker-compose.development.yml up -d
+    ```
+  </TabItem>
+</Tabs>
+
 
 Once the setup is complete, you can access the application UI at [http://localhost:10001](http://localhost:10001).
 

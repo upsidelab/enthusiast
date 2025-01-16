@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "enthusiast-source-medusa"
+version = "0.1.1"
+description = ""
+authors = ["Kuba Szczęśniak <kuba.szczęśniak@upsidelab.io>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+enthusiast-common = ">=0.2,<1"
+requests = "^2.32.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

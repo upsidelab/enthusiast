@@ -2,12 +2,13 @@
 name = "enthusiast-source-sanitycms"
 version = "0.1.1"
 description = "This Enthusiast plugin enables the import of document data from Sanity CMS."
-authors = ["Rafal Cymerys <rafal@upsidelab.io>"]
+authors = ["Kuba Szczęśniak <kuba.szczesniak@upsidelab.io>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
 enthusiast-common = ">=0.2,<1"
+requests = "^2.32.3"
 
 
 [build-system]

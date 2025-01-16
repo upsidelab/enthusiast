@@ -20,19 +20,42 @@ class SanityCMSDocumentSource(DocumentSourcePlugin):
         self._schema_type = config.get('schema_type')
         self._title_field_name = config.get('title_field_name')
         self._content_field_name = config.get('content_field_name')
-        self._url = f'https://{self._project_id}.api.sanity.io/v1/data/query/{self._dataset}'
+        self._base_url = f'https://{self._project_id}.api.sanity.io/v1/data/query/{self._dataset}'
+        self._api_key = config.get('api_key')
 
     def fetch(self) -> list[DocumentDetails]:
         results = []
-        query = f'*[_type == "{self._schema_type}"] {{ {self._title_field_name}, {self._content_field_name}, "url": _type + "/" + _id }}'
-        response = requests.get(self._url, params={'query': query})
-        response.raise_for_status()
-        data = response.json()
+        offset = 0  # Starting point for product list pagination.
+        limit = 100  # Page size.
 
-        # Loop through each blog post in the response
-        for sanity_post in data.get("result", []):
-            document = self._get_document(sanity_post)
-            results.append(document)
+        headers = {
+            "Authorization": f"Bearer {self._api_key}"
+        } if self._api_key else {}
+
+        while True:
+            query = (
+                f'*[_type == "{self._schema_type}"] | order(_createdAt asc) '
+                f'[{offset}...{offset + limit}] {{'
+                f' "content": {self._content_field_name},'
+                f' "title": {self._title_field_name},'
+                f' "url": _type + "/" + _id'
+                f' }}'
+            )
+            response = requests.get(self._base_url, headers=headers, params={'query': query})
+            response.raise_for_status()
+            data = response.json()
+
+            sanity_posts = data.get("result", [])
+
+            # Loop through each blog post in the response
+            for sanity_post in sanity_posts:
+                document = self._get_document(sanity_post)
+                results.append(document)
+
+            if len(sanity_posts) < limit:
+                break
+
+            offset += limit
 
         return results
 

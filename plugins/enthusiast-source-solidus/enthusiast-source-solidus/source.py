@@ -65,8 +65,6 @@ class SolidusProductSource(ProductSourcePlugin):
             elif response.status_code != 200:
                 raise Exception(f"Failed to fetch products: {response.status_code} - {response.text}")
 
-            print(response)
-
             data = response.json()
             solidus_products = data.get("products", [])
             for solidus_product in solidus_products:

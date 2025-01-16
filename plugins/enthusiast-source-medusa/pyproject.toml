@@ -8,8 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.9"
 enthusiast-common = ">=0.2,<1"
-shopifyapi = "^12.7.0"
-
+requests = "^2.32.3"
 
 [build-system]
 requires = ["poetry-core"]

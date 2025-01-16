@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "enthusiast-source-solidus"
+name = "enthusiast-source-medusa"
 version = "0.1.1"
 description = ""
 authors = ["Kuba Szczęśniak <kuba.szczęśniak@upsidelab.io>"]

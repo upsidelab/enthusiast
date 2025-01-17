@@ -47,18 +47,15 @@ class SolidusProductSource(ProductSourcePlugin):
         """
 
         endpoint = f"{self._base_url}/api/products"
-        print(endpoint)
 
         products = []
-        offset = 0  # Starting point for product list pagination.
-        limit = 100  # Page size.
-
+        page = 1
         headers = {
             "Authorization": f"Bearer {self._api_key}"
         }
 
         while True:
-            response = requests.get(endpoint, headers=headers)
+            response = requests.get(endpoint, headers=headers, params={'page': page})
 
             if response.status_code == 404:
                 raise Exception("The endpoint was not found. Please verify the URL.")
@@ -69,9 +66,9 @@ class SolidusProductSource(ProductSourcePlugin):
             solidus_products = data.get("products", [])
             for solidus_product in solidus_products:
                 products.append(self.get_product(solidus_product))
-            if len(solidus_products) < limit:
+            if page >= data["pages"]:
                 break
 
-            offset += limit
+            page += 1
 
         return products

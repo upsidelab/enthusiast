@@ -4,13 +4,14 @@ import { MessageBubble } from "@/components/conversation-view/message-bubble.tsx
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { ApiClient } from "@/lib/api.ts";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
+import { MessageError } from "@/components/conversation-view/message-error.tsx";
 
 export interface ConversationProps {
   conversationId: number | null;
 }
 
 export interface MessageProps {
-  role: "user" | "agent";
+  role: "user" | "agent" | "agent_error";
   text: string;
   id: number | null;
 }
@@ -84,7 +85,9 @@ export function Conversation(props: ConversationProps) {
     <div className="flex flex-col h-full px-4 pt-4">
       <div className="grow flex-1 space-y-4">
         {messages.map((message, index) => (
-          <MessageBubble key={index} text={message.text} variant={message.role === "user" ? "primary" : "secondary"} questionId={message.id}/>
+          message.role == "agent_error" ?
+            <MessageError key={index} text={message.text} /> :
+            <MessageBubble key={index} text={message.text} variant={message.role === "user" ? "primary" : "secondary"} questionId={message.id}/>
         ))}
         <div className="mb-4" />
         <div ref={lastMessageRef} />

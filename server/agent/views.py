@@ -27,13 +27,7 @@ class GetTaskStatus(APIView):
     )
     def get(self, request, task_id):
         task_result = AsyncResult(task_id)
-        if task_result.state == 'FAILURE':
-            response = {
-                "state": task_result.state,
-                "status": str(task_result.info)
-            }
-        else:
-            response = {"state": task_result.state}
+        response = {"state": task_result.state}
 
         return Response(response)
 

@@ -71,11 +71,7 @@ export class ConversationsApiClient extends BaseApiClient {
   async fetchResponseMessage(conversationId: number, taskHandle: TaskHandle): Promise<Message | null> {
     const taskStatus = await this.getTaskStatus(taskHandle);
 
-    if (taskStatus === "FAILURE") {
-      throw new Error("Failed to get a response");
-    }
-
-    if (taskStatus === "SUCCESS") {
+    if (taskStatus === "SUCCESS" || taskStatus === "FAILURE") {
       const conversation = await this.getConversation(conversationId);
       return conversation.history![conversation.history!.length - 1];
     }

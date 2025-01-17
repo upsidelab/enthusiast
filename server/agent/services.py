@@ -56,3 +56,12 @@ class ConversationManager:
 
         # Get the answer.
         return self.process_question(conversation, question_message)
+
+    def record_error(self, conversation_id: int, user_id: int, data_set_id: int, error: Exception):
+        error_message = "We couldn't process your request at this time"
+
+        conversation = self.initialize_conversation(user_id=user_id, data_set_id=data_set_id, conversation_id=conversation_id)
+        Message.objects.create(conversation=conversation,
+                               created_at=datetime.now(),
+                               role="agent_error",
+                               text=error_message)

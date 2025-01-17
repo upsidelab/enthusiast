@@ -2,18 +2,23 @@ from celery import shared_task
 from agent.services import ConversationManager
 
 
-@shared_task()
-def answer_question_task(conversation_id,
+@shared_task(bind=True, max_retries=3)
+def answer_question_task(self,
+                         conversation_id,
                          data_set_id,
                          user_id,
                          system_name,
                          question_message):
     manager = ConversationManager()
-    answer = manager.answer_question(conversation_id,
-                                     data_set_id,
-                                     user_id,
-                                     system_name,
-                                     question_message)
+    try:
+        answer = manager.answer_question(conversation_id,
+                                         data_set_id,
+                                         user_id,
+                                         system_name,
+                                         question_message)
 
-    return {'conversation_id': conversation_id,
-            'message_id': answer.id}
+        return {'conversation_id': conversation_id,
+                'message_id': answer.id}
+    except Exception as e:
+        manager.record_error(conversation_id, user_id, data_set_id, e)
+        self.retry(countdown=1)

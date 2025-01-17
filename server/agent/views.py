@@ -64,7 +64,6 @@ class ConversationView(APIView):
             type=openapi.TYPE_OBJECT,
             properties={
                 'data_set_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID of the data set'),
-                'system_name': openapi.Schema(type=openapi.TYPE_STRING, description='System name'),
                 'question_message': openapi.Schema(type=openapi.TYPE_STRING, description='Question message')
             }
         )
@@ -75,14 +74,12 @@ class ConversationView(APIView):
             from agent.tasks import answer_question_task
             # Collect params.
             data_set_id = serializer.validated_data.get('data_set_id')
-            system_name = serializer.validated_data.get('system_name')
             question_message = serializer.validated_data.get('question_message')
 
             # Run the task asynchronously.
             task = answer_question_task.apply_async(args=[conversation_id,
                                                           data_set_id,
                                                           request.user.id,
-                                                          system_name,
                                                           question_message])
 
             return Response({"task_id": task.id}, status=status.HTTP_202_ACCEPTED)

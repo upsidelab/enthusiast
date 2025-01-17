@@ -7,14 +7,12 @@ def answer_question_task(self,
                          conversation_id,
                          data_set_id,
                          user_id,
-                         system_name,
                          question_message):
     manager = ConversationManager()
     try:
         answer = manager.answer_question(conversation_id,
                                          data_set_id,
                                          user_id,
-                                         system_name,
                                          question_message)
 
         return {'conversation_id': conversation_id,

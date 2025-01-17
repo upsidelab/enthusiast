@@ -9,9 +9,6 @@ class AskQuestionSerializer(serializers.Serializer):
     Arguments:
         data_set_id:
             Integer, Provide an ID of a data set to be used
-        system_name:
-            Str, Name of a system user that is answering questions to be displayed on the Conversation page.
-            You may skip this attribute.
         question_message:
             Str, A question message.
     """
@@ -23,14 +20,6 @@ class AskQuestionSerializer(serializers.Serializer):
         }
     )
 
-    system_name = serializers.CharField(
-        required=False,
-        default='APISystem',
-        allow_blank=False,
-        error_messages={
-            'blank': 'System name cannot be blank. Provide valid user name or skip this param (default value will be used)'
-        }
-    )
     question_message = serializers.CharField(
         required=True,
         allow_blank=False,

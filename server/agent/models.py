@@ -8,7 +8,6 @@ from catalog.models import DataSet
 class Conversation(models.Model):
     user = models.ForeignKey(get_user_model(), on_delete=models.PROTECT)
     started_at = models.DateTimeField(auto_now_add=True)
-    system_name = models.CharField(max_length=50, default="system", null=True)  # Who answers.
     data_set = models.ForeignKey(DataSet, on_delete=models.PROTECT, null=False)
 
     class Meta:

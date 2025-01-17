@@ -19,7 +19,7 @@ class ConversationManager:
 
         return response["output"]
 
-    def initialize_conversation(self, user_id, data_set_id, conversation_id=None, system_name=None):
+    def initialize_conversation(self, user_id, data_set_id, conversation_id=None):
         user = User.objects.get(id=user_id)
         data_set = user.data_sets.get(id=data_set_id)
         # Create a new or continue an existing conversation.
@@ -29,7 +29,6 @@ class ConversationManager:
             # Start a new conversation.
             conversation = Conversation.objects.create(started_at=datetime.now(),
                                                        user=user,
-                                                       system_name=system_name,
                                                        data_set=data_set)
         return conversation
 
@@ -46,13 +45,12 @@ class ConversationManager:
                                         text=self.get_answer(conversation, question.text))
         return answer
 
-    def answer_question(self, conversation_id, data_set_id, user_id, system_name, question_message):
+    def answer_question(self, conversation_id, data_set_id, user_id, question_message):
 
         # Get conversation.
         conversation = self.initialize_conversation(user_id=user_id,
                                                     data_set_id=data_set_id,
-                                                    conversation_id=conversation_id,
-                                                    system_name=system_name)
+                                                    conversation_id=conversation_id)
 
         # Get the answer.
         return self.process_question(conversation, question_message)

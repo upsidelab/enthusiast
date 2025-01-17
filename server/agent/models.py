@@ -20,7 +20,7 @@ class Conversation(models.Model):
         """Return list of messages exchanged during a conversation.
         """
         history = []
-        for message in self.message.all().order_by('id'):
+        for message in self.messages.all().order_by('id'):
             if message.role == 'user':
                 history.append(HumanMessage(content=message.text or ""))
             elif message.role == 'agent':
@@ -30,7 +30,7 @@ class Conversation(models.Model):
 
 
 class Message(models.Model):
-    conversation = models.ForeignKey(Conversation, related_name="message", on_delete=models.PROTECT)
+    conversation = models.ForeignKey(Conversation, related_name="messages", on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True)
     role = models.CharField(max_length=15)
     text = models.TextField()

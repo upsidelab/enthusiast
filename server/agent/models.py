@@ -25,8 +25,7 @@ class Conversation(models.Model):
                 history.append(HumanMessage(content=message.text or ""))
             elif message.role == 'agent':
                 history.append(AIMessage(content=message.text or ""))
-            else:
-                raise Exception(f"Unregistered role: '{message.role}'. Unable to retrieve conversation history.")
+
         return history
 
 

@@ -10,7 +10,7 @@ from drf_yasg import openapi
 from agent.models import Conversation, Message
 from agent.serializers import AskQuestionSerializer, ConversationSerializer, ConversationContentSerializer, \
     MessageFeedbackSerializer, ConversationCreationSerializer
-from agent.services import ConversationManager
+from agent.conversation import ConversationManager
 
 
 class GetTaskStatus(APIView):
@@ -71,13 +71,11 @@ class ConversationView(APIView):
     def post(self, request, conversation_id):
         serializer = AskQuestionSerializer(data=request.data)
         if serializer.is_valid():
-            from agent.tasks import answer_question_task
-            # Collect params.
+            from agent.tasks import respond_to_user_message_task
             data_set_id = serializer.validated_data.get('data_set_id')
             question_message = serializer.validated_data.get('question_message')
 
-            # Run the task asynchronously.
-            task = answer_question_task.apply_async(args=[conversation_id,
+            task = respond_to_user_message_task.apply_async(args=[conversation_id,
                                                           data_set_id,
                                                           request.user.id,
                                                           question_message])
@@ -121,8 +119,8 @@ class ConversationListView(ListAPIView):
         if not input_serializer.is_valid():
             return Response(input_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        conversation = manager.initialize_conversation(user_id=request.user.id,
-                                                       data_set_id=input_serializer.validated_data.get("data_set_id"))
+        conversation = manager.create_conversation(user_id=request.user.id,
+                                                   data_set_id=input_serializer.validated_data.get("data_set_id"))
 
         conversation_data = ConversationSerializer(conversation).data
 

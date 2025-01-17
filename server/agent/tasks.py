@@ -1,19 +1,15 @@
 from celery import shared_task
-from agent.services import ConversationManager
+from agent.conversation import ConversationManager
 
 
 @shared_task(bind=True, max_retries=3)
-def answer_question_task(self,
-                         conversation_id,
-                         data_set_id,
-                         user_id,
-                         question_message):
+def respond_to_user_message_task(self, conversation_id: int, data_set_id: int, user_id: int, message: str):
     manager = ConversationManager()
     try:
-        answer = manager.answer_question(conversation_id,
-                                         data_set_id,
-                                         user_id,
-                                         question_message)
+        answer = manager.respond_to_user_message(conversation_id,
+                                                 data_set_id,
+                                                 user_id,
+                                                 message)
 
         return {'conversation_id': conversation_id,
                 'message_id': answer.id}

@@ -18,6 +18,11 @@ class SolidusProductSource(ProductSourcePlugin):
         self._base_url = config.get("base_url")
         self._api_key = config.get("api_key")
 
+    @staticmethod
+    def get_properties(solidus_properties):
+        properties = [f"{item['property_name']} -> {item['value']}" for item in solidus_properties]
+        return "|".join(properties)
+
     def get_product(self, solidus_product) -> ProductDetails:
         """Translates product definition received from Solidus into Enthusiast product.
 
@@ -31,10 +36,10 @@ class SolidusProductSource(ProductSourcePlugin):
             name=solidus_product.get("name"),
             slug=solidus_product.get("slug"),
             description=solidus_product.get("description"),
-            sku=solidus_product.get("variants", [{}])[0].get("sku") if solidus_product.get("variants") else None,
-            price=solidus_product.get("variants", [{}])[0].get("prices", [{}])[0].get("amount") if solidus_product.get("variants") else None,
-            properties=solidus_product.get("product_properties"),
-            categories=[taxon.get("name") for taxon in solidus_product.get("classifications", {}).get("taxon", [])] if solidus_product.get("collection") else []
+            sku=solidus_product.get("master", [{}]).get("sku") if solidus_product.get("master") else None,
+            price=solidus_product.get("display_price"),
+            properties=self.get_properties(solidus_product.get("product_properties")),
+            categories=str([taxon.get("name") for taxon in solidus_product.get("classifications", {}).get("taxon", [])] if solidus_product.get("collection") else [])
         )
 
         return product

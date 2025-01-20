@@ -37,11 +37,11 @@ export function LoginForm({ className, ...props }: HTMLAttributes<HTMLDivElement
       } else {
         navigate(`/data-sets/${dataSets[0].id}/chat`);
       }
-      } catch {
-        setIsError(true);
-      } finally {
-        setIsLoading(false);
-      }
+    } catch {
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (

@@ -36,7 +36,7 @@ export function ApplicationContextProvider({ children }: ApplicationContextProvi
       const apiDataSets = await api.dataSets().getDataSets();
       setDataSets(apiDataSets);
 
-      if (location.pathname.includes("/data-sets/")) {
+      if (location.pathname.includes("/data-sets/") && !location.pathname.endsWith("/data-sets/new")) {
         const urlDataSetId = extractDataSetIdFromPath(location.pathname);
 
         if (apiDataSets.length > 0) {

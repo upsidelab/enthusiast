@@ -1,0 +1,11 @@
+.integration {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.integrationImage {
+    padding-left: 64px;
+    padding-right: 64px;
+}

@@ -3,6 +3,13 @@
  * and scoped locally.
  */
 
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .heroBanner {
   padding: 4rem 0;
   text-align: center;
@@ -11,7 +18,8 @@
 }
 
 .heroLogo {
-  max-width: 600px;
+  max-width: 800px;
+  width: 100%;
 }
 
 @media screen and (max-width: 996px) {

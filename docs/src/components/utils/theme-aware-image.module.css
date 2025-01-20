@@ -1,0 +1,11 @@
+[data-theme='dark'] {
+    .imageLight {
+        display: none;
+    }
+}
+
+[data-theme='light'] {
+    .imageDark {
+        display: none;
+    }
+}

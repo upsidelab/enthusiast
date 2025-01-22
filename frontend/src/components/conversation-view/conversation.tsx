@@ -5,6 +5,7 @@ import { authenticationProviderInstance } from "@/lib/authentication-provider.ts
 import { ApiClient } from "@/lib/api.ts";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
 import { MessageError } from "@/components/conversation-view/message-error.tsx";
+import { useNavigate } from "react-router-dom";
 
 export interface ConversationProps {
   conversationId: number | null;
@@ -18,13 +19,14 @@ export interface MessageProps {
 
 const api = new ApiClient(authenticationProviderInstance);
 
-export function Conversation(props: ConversationProps) {
-  const [conversationId, setConversationId] = useState<number | null>(props.conversationId);
+export function Conversation({ conversationId }: ConversationProps) {
   const [isLoading, setIsLoading] = useState(false);
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
   const { dataSetId } = useApplicationContext()!;
+  const navigate = useNavigate();
 
   const [messages, setMessages] = useState<MessageProps[]>([]);
+  const [skipConversationReload, setSkipConversationReload] = useState(false);
 
   const onMessageComposerSubmit = async (message: string) => {
     setIsLoading(true);
@@ -38,7 +40,8 @@ export function Conversation(props: ConversationProps) {
     let currentConversationId = conversationId;
     if (!currentConversationId) {
       currentConversationId = await api.conversations().createConversation(dataSetId!);
-      setConversationId(currentConversationId);
+      setSkipConversationReload(true);
+      navigate(`/data-sets/${dataSetId}/chat/${currentConversationId}`);
     }
     const taskHandle = await api.conversations().sendMessage(currentConversationId, dataSetId!, message);
 
@@ -66,7 +69,13 @@ export function Conversation(props: ConversationProps) {
 
   useEffect(() => {
     const loadInitialMessages = async () => {
+      if (skipConversationReload) {
+        setSkipConversationReload(false);
+        return;
+      }
+
       if (!conversationId) {
+        setMessages([]);
         return;
       }
 
@@ -79,7 +88,7 @@ export function Conversation(props: ConversationProps) {
     setTimeout(() => {
       lastMessageRef.current?.scrollIntoView({behavior: "smooth"});
     });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [conversationId]);
 
   return (
     <div className="flex flex-col h-full px-4 pt-4">

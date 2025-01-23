@@ -4,9 +4,9 @@ from langchain.agents.agent_toolkits import create_conversational_retrieval_agen
 from langchain.memory import ConversationSummaryBufferMemory
 from langchain_core.messages import SystemMessage
 
-from agent.tools import CreateAnswerTool
 from catalog.language_models import LanguageModelRegistry
 from catalog.models import DataSet
+from .tool_manager import ToolManager
 
 logger = logging.getLogger(__name__)
 
@@ -15,10 +15,7 @@ class Agent:
     def __init__(self, data_set: DataSet, messages: list):
         logger.debug("Initialize Agent")
         self._llm = LanguageModelRegistry().provider_for_dataset(data_set).provide_language_model()
-        self._tools = [CreateAnswerTool(
-            data_set=data_set,
-            chat_model=self._llm.model_name
-        )]
+        self._tools = ToolManager(data_set=data_set, chat_model=self._llm.model_name).tools
         self._system_message = SystemMessage(
             "You are an agent that knows everything about company\'s product catalog and content")
         self._agent = create_conversational_retrieval_agent(

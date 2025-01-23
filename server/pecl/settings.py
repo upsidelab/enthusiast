@@ -224,5 +224,8 @@ CATALOG_PRODUCT_SOURCE_PLUGINS = {
 CATALOG_DOCUMENT_SOURCE_PLUGINS = {
     "Sample Document Source": "enthusiast_source_sample.SampleDocumentSource",
 }
+AGENT_TOOLS = {
+    "Create Answer Tool": "enthusiast_tool_create_answer.CreateAnswerTool",
+}
 
 SERVICE_ACCOUNT_DOMAIN = os.environ.get('SERVICE_ACCOUNT_DOMAIN', 'enthusiast.internal')

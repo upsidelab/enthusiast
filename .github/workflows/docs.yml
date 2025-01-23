@@ -29,4 +29,6 @@ jobs:
           run: pnpm install
 
         - name: Build docs
+          env:
+            GTAG_ID: ${{ vars.GTAG_ID }}
           run: pnpm build

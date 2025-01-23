@@ -35,9 +35,9 @@ class SolidusProductSource(ProductSourcePlugin):
             entry_id=solidus_product.get("id"),
             name=solidus_product.get("name"),
             slug=solidus_product.get("slug"),
-            description=solidus_product.get("description"),
+            description=solidus_product.get("description") or "-",
             sku=solidus_product.get("master", [{}]).get("sku") if solidus_product.get("master") else None,
-            price=solidus_product.get("display_price"),
+            price=float(solidus_product.get("price")),
             properties=self.get_properties(solidus_product.get("product_properties")),
             categories=str([taxon.get("name") for taxon in solidus_product.get("classifications", {}).get("taxon", [])] if solidus_product.get("collection") else [])
         )

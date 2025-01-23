@@ -1,0 +1,32 @@
+name: Upload docs
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  upload-docs:
+      runs-on: ubuntu-latest
+
+      defaults:
+        run:
+          working-directory: docs
+
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@v3
+
+        - name: Set up Node.js
+          uses: actions/setup-node@v3
+          with:
+            node-version: '20'
+
+        - name: Install pnpm
+          run: npm install -g pnpm
+
+        - name: Install dependencies
+          run: pnpm install
+
+        - name: Build docs
+          run: pnpm build

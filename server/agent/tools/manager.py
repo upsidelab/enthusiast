@@ -1,6 +1,6 @@
 import importlib
 import logging
-from .tool_registry import ToolRegistry
+from .registry import ToolRegistry
 
 logger = logging.getLogger(__name__)
 

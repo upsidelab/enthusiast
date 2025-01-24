@@ -6,7 +6,7 @@ from langchain_core.messages import SystemMessage
 
 from catalog.language_models import LanguageModelRegistry
 from catalog.models import DataSet
-from .tool_manager import ToolManager
+from agent.tools.manager import ToolManager
 
 logger = logging.getLogger(__name__)
 

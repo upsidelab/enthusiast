@@ -32,7 +32,7 @@ Follow Shopify's [custom app creation guide](https://help.shopify.com/en/manual/
 
 ## Syncing Shopify Products to a Data Set
 
-Log in as an admin user and go to Manage → Data Sets from the left-hand menu. Them. click on "Sources" next to the desired data set.
+Log in as an admin user and go to Manage → Data Sets from the left-hand menu. Then, click on "Sources" next to the desired data set.
 Add a source using “Shopify” as the plugin and provide a JSON configuration with the following attributes:
 ```json
 {

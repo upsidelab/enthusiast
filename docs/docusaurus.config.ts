@@ -48,7 +48,7 @@ const config: Config = {
 
   themeConfig: {
     navbar: {
-      title: 'Enthusiast',
+      title: 'enthusiast.',
       logo: {
         alt: 'Enthusiast',
         src: 'img/logo.png',

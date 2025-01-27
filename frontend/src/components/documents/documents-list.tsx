@@ -1,5 +1,5 @@
 import { TableCell, TableRow } from "@/components/ui/table.tsx";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { ApiClient } from "@/lib/api.ts";
 import { Document } from '@/lib/types.ts';
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
@@ -24,14 +24,14 @@ export function DocumentsList() {
     return new URL(url).pathname;
   };
 
-  const loadDocuments = async (page: number) => {
+  const loadDocuments = useCallback(async (page: number) => {
     if (dataSetId === null) {
       return;
     }
 
     setSelectedPreview(null);
     return await api.catalog().getDocuments(dataSetId, page);
-  };
+  }, [dataSetId]);
 
   return (
     <>

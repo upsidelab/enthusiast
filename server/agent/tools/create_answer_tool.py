@@ -5,13 +5,14 @@ from typing import Type, Any
 
 from django.core import serializers
 from langchain_core.prompts import PromptTemplate
-from langchain_core.tools import BaseTool
 from pydantic import BaseModel, Field
 
 from agent.retrievers import DocumentRetriever
 from agent.retrievers import ProductRetriever
 from catalog.language_models import LanguageModelRegistry
 from catalog.models import DataSet
+
+from enthusiast_common.interfaces import CustomTool
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +36,7 @@ class CreateAnswerToolInput(BaseModel):
     query: str = Field(description="user's request")
 
 
-class CreateAnswerTool(BaseTool):
+class CreateAnswerTool(CustomTool):
     name: str = "create_answer_tool"
     description: str = "use it when asked to generate content or answer a question about products"
     args_schema: Type[BaseModel] = CreateAnswerToolInput
@@ -50,9 +51,7 @@ class CreateAnswerTool(BaseTool):
                  data_set: DataSet,
                  chat_model: str,
                  **kwargs: Any):
-        super().__init__(**kwargs)
-        self.data_set = data_set
-        self.chat_model = chat_model
+        super().__init__(data_set=data_set, chat_model=chat_model, **kwargs)
         self.encoding = tiktoken.encoding_for_model(chat_model)
 
     def _get_document_context(self, relevant_documents, cut_off_cnt):

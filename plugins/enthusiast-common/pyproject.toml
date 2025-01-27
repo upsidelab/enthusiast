@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "enthusiast-common"
-version = "0.4.0"
+version = "0.5.0"
 description = ""
 authors = ["Rafal Cymerys <rafal@upsidelab.io>"]
 readme = "README.md"

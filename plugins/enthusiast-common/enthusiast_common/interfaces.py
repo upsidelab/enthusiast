@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
 
 from langchain_core.language_models import BaseLanguageModel
+from langchain_core.tools import BaseTool
+from pydantic import BaseModel
+from typing import Type, Any
 
 from enthusiast_common.structures import ProductDetails, DocumentDetails
 
@@ -81,3 +84,32 @@ class EmbeddingProvider(ABC):
         Returns:
             A list of supported model names.
         """
+
+
+class CustomTool(BaseTool):
+    name: str
+    description: str
+    args_schema: Type[BaseModel]
+    return_direct: bool
+
+    def __init__(self, data_set, chat_model, **kwargs):
+        """Initialize the ToolInterface.
+
+        Args:
+            data_set (Any): The dataset used by the tool.
+            chat_model (str): The chat model used by the tool.
+            **kwargs: Additional keyword arguments.
+        """
+        super(CustomTool, self).__init__(**kwargs)
+        self.data_set = data_set
+        self.chat_model = chat_model
+
+    @abstractmethod
+    def _run(self, *args, **kwargs):
+        """ Abstract method to run the tool.
+
+        Args:
+            *args: Positional arguments.
+            **kwargs: Keyword arguments.
+        """
+        pass

@@ -43,6 +43,11 @@ class ConversationManager:
                                               role='user',
                                               text=message)
 
+        # Set the conversation summary if it's the first message
+        if not conversation.summary:
+            conversation.summary = user_message.text
+            conversation.save()
+
         response_text = self.get_answer(conversation, user_message.text)
         response = Message.objects.create(conversation=conversation,
                                           created_at=datetime.now(),

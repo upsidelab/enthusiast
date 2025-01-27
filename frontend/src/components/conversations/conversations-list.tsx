@@ -23,15 +23,23 @@ export function ConversationsList() {
     return await api.conversations().getConversations(dataSetId, page);
   }
 
+  const truncateText = (text: string, maxLength: number): string => {
+    if (text.length <= maxLength) {
+      return text;
+    }
+    return text.substring(0, maxLength - 3) + '...';
+  }
+
   return (
     <PaginatedTable
       loadItems={loadConversations}
       itemsReloadDependencies={dataSetId}
       noItemsMessage="You don't have any conversations yet"
-      tableHeaders={["Time"]}
+      tableHeaders={["Name", "Time"]}
       tableRow={(item, index) => {
         return (
           <TableRow key={index} onClick={() => navigateToConversation(item.id)} className="cursor-pointer">
+            <TableCell>{truncateText(item.summary || "Unnamed Conversation", 180)}</TableCell>
             <TableCell>{new Date(item.started_at).toLocaleString('en-US')}</TableCell>
           </TableRow>
         )

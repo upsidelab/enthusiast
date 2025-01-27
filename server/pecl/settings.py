@@ -211,6 +211,7 @@ CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 CATALOG_LANGUAGE_MODEL_PROVIDERS = {
     "OpenAI": "enthusiast_model_openai.OpenAILanguageModelProvider",
+    "Ollama": "enthusiast_model_ollama.OllamaLanguageModelProvider",
 }
 
 CATALOG_EMBEDDING_PROVIDERS = {

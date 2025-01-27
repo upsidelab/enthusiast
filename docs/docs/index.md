@@ -5,6 +5,8 @@ sidebar_position: 1
 # Introduction
 Enthusiast is your open-source AI agent for e-commerce. Connect it to your product catalog, add content that describes your products and brand, and scale your team’s capabilities.
 
+![Enthusiast's chat interface](./img/enthusiast-ui.png)
+
 ## Example use cases
 
 - **Internal Knowledge Base** For companies with complex catalogs, Enthusiast supports sales teams with detailed product knowledge.

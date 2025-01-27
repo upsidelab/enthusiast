@@ -46,7 +46,7 @@ orjson==3.10.7
 packaging==24.1
 pgvector==0.3.4
 prompt_toolkit==3.0.48
-psycopg2==2.9.9
+psycopg2==2.9.10
 pydantic==2.9.2
 pydantic_core==2.23.4
 python-dateutil==2.9.0.post0

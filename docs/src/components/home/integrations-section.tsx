@@ -2,6 +2,7 @@ import Heading from "@theme/Heading";
 import Link from "@docusaurus/Link";
 import { Integration } from "@site/src/components/home/integration";
 import { Section } from "@site/src/components/layout/section";
+import styles from './integrations-section.module.css';
 
 export function IntegrationsSection() {
   return (
@@ -16,7 +17,11 @@ export function IntegrationsSection() {
         <Integration name="Sanity" logo="integrations/sanity" />
         <Integration name="Solidus" logo="integrations/solidus" />
       </div>
-      <Link to="/tools/enthusiast/docs/category/plugins">See all integrations</Link>
+      <div className="row">
+        <div className={styles.integrationsSectionButtons}>
+          <Link className="button button--secondary button--lg" to="/tools/enthusiast/docs/category/plugins">See all integrations</Link>
+        </div>
+      </div>
     </Section>
   )
 }

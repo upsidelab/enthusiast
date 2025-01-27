@@ -9,6 +9,7 @@ import { IntegrationsSection } from "@site/src/components/home/integrations-sect
 import { FeaturesSection } from "@site/src/components/home/features-section";
 import { OpenSourceSection } from "@site/src/components/home/open-source-section";
 import { ThemeAwareImage } from "@site/src/components/utils/theme-aware-image";
+import { RagSection } from "@site/src/components/home/rag-section";
 
 function HomepageHeader() {
   const {siteConfig} = useDocusaurusContext();
@@ -45,6 +46,7 @@ export default function Home(): JSX.Element {
       <div className={styles.container}>
         <FeaturesSection />
         <IntegrationsSection />
+        <RagSection />
         <OpenSourceSection />
       </div>
     </Layout>

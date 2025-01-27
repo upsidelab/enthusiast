@@ -8,4 +8,9 @@
 .integrationImage {
     padding-left: 64px;
     padding-right: 64px;
+    filter: grayscale(1);
+}
+
+.integrationImage:hover {
+    filter: unset;
 }

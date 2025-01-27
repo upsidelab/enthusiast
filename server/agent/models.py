@@ -9,7 +9,7 @@ class Conversation(models.Model):
     user = models.ForeignKey(get_user_model(), on_delete=models.PROTECT)
     started_at = models.DateTimeField(auto_now_add=True)
     data_set = models.ForeignKey(DataSet, on_delete=models.PROTECT, null=False)
-    name = models.CharField(max_length=255, blank=True)
+    summary = models.CharField(null=True)
 
     class Meta:
         db_table_comment = ("A conversation is a collection of various messages exchanged during one session. Messages "

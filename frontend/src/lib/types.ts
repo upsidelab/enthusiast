@@ -60,7 +60,7 @@ export type Conversation = {
   model: string;
   dimensions: number;
   data_set: string;
-  name?: string;
+  summary?: string;
   history?: Message[];
 }
 

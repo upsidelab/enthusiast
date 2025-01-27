@@ -43,9 +43,9 @@ class ConversationManager:
                                               role='user',
                                               text=message)
 
-        # Set the conversation name if it's the first message
-        if not conversation.name:
-            conversation.name = user_message.text[:255]
+        # Set the conversation summary if it's the first message
+        if not conversation.summary:
+            conversation.summary = user_message.text
             conversation.save()
 
         response_text = self.get_answer(conversation, user_message.text)

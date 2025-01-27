@@ -39,7 +39,7 @@ export function ConversationsList() {
       tableRow={(item, index) => {
         return (
           <TableRow key={index} onClick={() => navigateToConversation(item.id)} className="cursor-pointer">
-            <TableCell>{truncateText(item.name || "Unnamed Conversation", 180)}</TableCell>
+            <TableCell>{truncateText(item.summary || "Unnamed Conversation", 180)}</TableCell>
             <TableCell>{new Date(item.started_at).toLocaleString('en-US')}</TableCell>
           </TableRow>
         )

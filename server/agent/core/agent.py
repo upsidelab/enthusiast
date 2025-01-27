@@ -17,7 +17,7 @@ class Agent:
         self._llm = LanguageModelRegistry().provider_for_dataset(data_set).provide_language_model()
         self._tools = ToolManager(data_set=data_set, chat_model=self._llm.model_name).tools
         self._system_message = SystemMessage(
-            "You are an agent that knows everything about company's product catalog and content")
+            "You are an agent that knows everything about company\'s product catalog and content")
         self._agent = create_conversational_retrieval_agent(
             llm=self._llm,
             tools=self._tools,

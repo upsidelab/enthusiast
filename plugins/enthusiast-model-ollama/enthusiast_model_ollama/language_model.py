@@ -8,6 +8,9 @@ class OllamaLanguageModelProvider(LanguageModelProvider):
     def provide_language_model(self) -> BaseLanguageModel:
         return ChatOllama(model=self._model)
 
+    def model_name(self) -> str:
+        return self._model
+
     @staticmethod
     def available_models() -> list[str]:
         ollama_client = Client()

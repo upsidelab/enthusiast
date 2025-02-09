@@ -1,11 +1,13 @@
 import logging
+
+from enthusiast_common.interfaces import LanguageModelProvider
+
+from catalog.models import DataSet
 from .registry import ToolRegistry
 
 logger = logging.getLogger(__name__)
 
 class ToolManager:
-    def __init__(self, data_set, chat_model):
-        self.data_set = data_set
-        self.chat_model = chat_model
+    def __init__(self, data_set: DataSet, language_model_provider: LanguageModelProvider):
         self.registry = ToolRegistry()
-        self.tools = self.registry.get_tools(data_set=self.data_set, chat_model=self.chat_model)
+        self.tools = self.registry.get_tools(data_set=data_set, language_model_provider=language_model_provider)

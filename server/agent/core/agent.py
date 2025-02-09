@@ -14,8 +14,9 @@ logger = logging.getLogger(__name__)
 class Agent:
     def __init__(self, data_set: DataSet, messages: list):
         logger.debug("Initialize Agent")
-        self._llm = LanguageModelRegistry().provider_for_dataset(data_set).provide_language_model()
-        self._tools = ToolManager(data_set=data_set, chat_model=self._llm.model_name).tools
+        language_model_provider = LanguageModelRegistry().provider_for_dataset(data_set)
+        self._llm = language_model_provider.provide_language_model()
+        self._tools = ToolManager(data_set=data_set, language_model_provider=language_model_provider).tools
         self._system_message = SystemMessage(
             "You are an agent that knows everything about company\'s product catalog and content")
         self._agent = create_conversational_retrieval_agent(

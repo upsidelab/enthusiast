@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel
-from typing import Type, Any
+from typing import Type, Optional
 
 from enthusiast_common.structures import ProductDetails, DocumentDetails
 
@@ -52,6 +52,14 @@ class LanguageModelProvider(ABC):
         """
         pass
 
+    @abstractmethod
+    def model_name(self) -> str:
+        """Returns the name of the model that will be provided.
+
+        Returns:
+            The name of the model that will be provided by this object.
+        """
+
     @staticmethod
     @abstractmethod
     def available_models() -> list[str]:
@@ -91,18 +99,22 @@ class CustomTool(BaseTool):
     description: str
     args_schema: Type[BaseModel]
     return_direct: bool
+    data_set: any # TODO use a proper type definition
+    chat_model: Optional[str]
 
-    def __init__(self, data_set, chat_model, **kwargs):
+    def __init__(self, data_set, chat_model, language_model_provider: LanguageModelProvider, **kwargs):
         """Initialize the ToolInterface.
 
         Args:
             data_set (Any): The dataset used by the tool.
-            chat_model (str): The chat model used by the tool.
+            chat_model (str, deprecated): This param is deprecated and will be removed in future versions. Use `language_model_provider.model_name()` instead.
+            language_model_provider (LanguageModelProvider): A language model provider that the tool can use.
             **kwargs: Additional keyword arguments.
         """
         super(CustomTool, self).__init__(**kwargs)
         self.data_set = data_set
         self.chat_model = chat_model
+        self._language_model_provider = language_model_provider
 
     @abstractmethod
     def _run(self, *args, **kwargs):

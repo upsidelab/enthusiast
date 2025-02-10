@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "enthusiast-source-shopware"
+version = "0.1.0"
+description = ""
+authors = ["Mateusz Porebski <mateusz.porebski@upsidelab.io>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+enthusiast-common = ">=0.2,<1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -28,6 +28,27 @@ export function Conversation({ conversationId }: ConversationProps) {
   const [messages, setMessages] = useState<MessageProps[]>([]);
   const [skipConversationReload, setSkipConversationReload] = useState(false);
 
+  useEffect(() => {
+    if (conversationId) {
+      const ws = new WebSocket(`ws://localhost:8000/ws/chat/${conversationId}/`);
+
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        setMessages((currMessages) => [
+          ...currMessages,
+          { role: "agent", text: data.message, id: null }
+        ]);
+        setTimeout(() => {
+          lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
+        });
+      };
+
+      return () => {
+        ws.close();
+      };
+    }
+  }, [conversationId]);
+
   const onMessageComposerSubmit = async (message: string) => {
     setIsLoading(true);
     setMessages((currMessages) => [
@@ -35,7 +56,7 @@ export function Conversation({ conversationId }: ConversationProps) {
       { role: "user", text: message, id: null }
     ]);
     setTimeout(() => {
-      lastMessageRef.current?.scrollIntoView({behavior: "smooth"});
+      lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
     });
     let currentConversationId = conversationId;
     if (!currentConversationId) {
@@ -55,7 +76,7 @@ export function Conversation({ conversationId }: ConversationProps) {
           ]);
           setIsLoading(false);
           setTimeout(() => {
-            lastMessageRef.current?.scrollIntoView({behavior: "smooth"});
+            lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
           });
         } else {
           setTimeout(updateTaskStatus, 2000);
@@ -86,7 +107,7 @@ export function Conversation({ conversationId }: ConversationProps) {
 
     loadInitialMessages();
     setTimeout(() => {
-      lastMessageRef.current?.scrollIntoView({behavior: "smooth"});
+      lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
     });
   }, [conversationId]);
 

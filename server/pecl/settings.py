@@ -62,11 +62,13 @@ LOGGING = {
 # Application definition
 
 INSTALLED_APPS = [
+    # 'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'daphne',
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
@@ -108,8 +110,16 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'pecl.wsgi.application'
+ASGI_APPLICATION = 'pecl.asgi.application'
 
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases

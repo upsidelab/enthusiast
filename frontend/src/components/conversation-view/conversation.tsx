@@ -6,6 +6,7 @@ import { ApiClient } from "@/lib/api.ts";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
 import { MessageError } from "@/components/conversation-view/message-error.tsx";
 import { useNavigate } from "react-router-dom";
+import { WelcomePanel } from "@/components/conversation-view/welcome-panel.tsx";
 
 export interface ConversationProps {
   conversationId: number | null;
@@ -89,6 +90,10 @@ export function Conversation({ conversationId }: ConversationProps) {
       lastMessageRef.current?.scrollIntoView({behavior: "smooth"});
     });
   }, [conversationId]);
+
+  if (!conversationId) {
+    return <WelcomePanel onSendMessage={onMessageComposerSubmit} />;
+  }
 
   return (
     <div className="flex flex-col h-full px-4 pt-4">

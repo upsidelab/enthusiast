@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button.tsx";
-import { cn } from "@/lib/utils.ts";
 import Logo from "@/assets/logo.svg";
 import { MessageComposer } from "@/components/conversation-view/message-composer.tsx";
 import { samplePrompts } from "@/constants/prompts.ts";

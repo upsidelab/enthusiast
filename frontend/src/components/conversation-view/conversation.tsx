@@ -87,6 +87,28 @@ export function Conversation({ conversationId }: ConversationProps) {
       setSkipConversationReload(true);
       navigate(`/data-sets/${dataSetId}/chat/${currentConversationId}`);
     }
+    const taskHandle = await api.conversations().sendMessage(currentConversationId, dataSetId!, message);
+
+    const updateTaskStatus = async () => {
+      try {
+        const response = await api.conversations().fetchResponseMessage(currentConversationId!, taskHandle);
+        if (response) {
+          setMessages((currMessages) => [
+            ...currMessages,
+            response as MessageProps
+          ]);
+          setIsLoading(false);
+          setTimeout(() => {
+            lastMessageRef.current?.scrollIntoView({behavior: "smooth"});
+          });
+        } else {
+          setTimeout(updateTaskStatus, 2000);
+        }
+      } catch {
+        setIsLoading(false);
+      }
+    }
+    updateTaskStatus();
     ws.current?.send(JSON.stringify({ message }));
   };
 

@@ -8,8 +8,13 @@ from enthusiast_model_openai import utils
 PRIORITIZED_MODELS = ["gpt-4o", "gpt-4o-mini"]
 
 class OpenAILanguageModelProvider(LanguageModelProvider):
-    def provide_language_model(self) -> BaseLanguageModel:
-        return ChatOpenAI(name=self._model)
+    def provide_language_model(self, callbacks=None) -> BaseLanguageModel:
+        return ChatOpenAI(
+            name=self._model,
+            temperature=0,
+            streaming=True,
+            callbacks = callbacks
+        )
 
     @staticmethod
     def available_models() -> list[str]:

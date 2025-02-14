@@ -8,13 +8,21 @@ from catalog.language_models import LanguageModelRegistry
 from catalog.models import DataSet
 from agent.tools.manager import ToolManager
 
+from agent.callbacks import WebSocketCallbackHandler
+
 logger = logging.getLogger(__name__)
 
 
 class Agent:
-    def __init__(self, data_set: DataSet, messages: list):
+    def __init__(self, data_set: DataSet, messages: list, conversation_id: int):
         logger.debug("Initialize Agent")
-        self._llm = LanguageModelRegistry().provider_for_dataset(data_set).provide_language_model()
+        callback_handler = WebSocketCallbackHandler(f"conversation_{conversation_id}")
+        self._llm = (
+            LanguageModelRegistry()
+            .provider_for_dataset(data_set)
+            .provide_language_model(callbacks=[callback_handler])
+        )
+
         self._tools = ToolManager(data_set=data_set, chat_model=self._llm.model_name).tools
         self._system_message = SystemMessage(
             "You are an agent that knows everything about company\'s product catalog and content")

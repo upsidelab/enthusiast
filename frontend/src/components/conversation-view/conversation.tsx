@@ -27,6 +27,50 @@ export function Conversation({ conversationId }: ConversationProps) {
 
   const [messages, setMessages] = useState<MessageProps[]>([]);
   const [skipConversationReload, setSkipConversationReload] = useState(false);
+  const ws = useRef<WebSocket | null>(null);
+
+  useEffect(() => {
+    if (conversationId) {
+      ws.current = new WebSocket(`ws://${window.location.hostname}:8000/ws/chat/${conversationId}/`);
+
+      ws.current.onopen = () => {
+        console.log("WebSocket connected.");
+      };
+
+      ws.current.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log("Received message:", data);
+        if (data.event === "on_parser_start") {
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            { role: "agent", text: "", id: data.run_id }
+          ]);
+        } else if (data.event === "on_parser_stream") {
+          setMessages((prevMessages) => {
+            const lastMessage = prevMessages[prevMessages.length - 1];
+            if (lastMessage && lastMessage.role === "agent" && lastMessage.id === data.run_id) {
+              return [
+                ...prevMessages.slice(0, -1),
+                { ...lastMessage, text: lastMessage.text + data.data.chunk }
+              ];
+            } else {
+              return [...prevMessages, { role: "agent", text: data.data.chunk, id: data.run_id }];
+            }
+          });
+        } else if (data.error) {
+          console.error("Error from server:", data.error);
+        }
+      };
+
+      ws.current.onclose = () => {
+        console.log("WebSocket disconnected.");
+      };
+
+      return () => {
+        ws.current?.close();
+      };
+    }
+  }, [conversationId]);
 
   const onMessageComposerSubmit = async (message: string) => {
     setIsLoading(true);
@@ -43,28 +87,7 @@ export function Conversation({ conversationId }: ConversationProps) {
       setSkipConversationReload(true);
       navigate(`/data-sets/${dataSetId}/chat/${currentConversationId}`);
     }
-    const taskHandle = await api.conversations().sendMessage(currentConversationId, dataSetId!, message);
-
-    const updateTaskStatus = async () => {
-      try {
-        const response = await api.conversations().fetchResponseMessage(currentConversationId!, taskHandle);
-        if (response) {
-          setMessages((currMessages) => [
-            ...currMessages,
-            response as MessageProps
-          ]);
-          setIsLoading(false);
-          setTimeout(() => {
-            lastMessageRef.current?.scrollIntoView({behavior: "smooth"});
-          });
-        } else {
-          setTimeout(updateTaskStatus, 2000);
-        }
-      } catch {
-        setIsLoading(false);
-      }
-    }
-    updateTaskStatus();
+    ws.current?.send(JSON.stringify({ message }));
   };
 
   useEffect(() => {

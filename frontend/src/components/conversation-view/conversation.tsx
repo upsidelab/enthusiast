@@ -7,6 +7,7 @@ import { useApplicationContext } from "@/lib/use-application-context.ts";
 import { MessageError } from "@/components/conversation-view/message-error.tsx";
 import { useNavigate } from "react-router-dom";
 import { MessageBubbleTyping } from "@/components/conversation-view/message-bubble-typing.tsx";
+import { MessageSuggestions } from "@/components/conversation-view/message-suggestions.tsx";
 
 export interface ConversationProps {
   conversationId: number | null;
@@ -104,6 +105,7 @@ export function Conversation({ conversationId }: ConversationProps) {
         <div ref={lastMessageRef} />
       </div>
       <div className="bottom-0 sticky flex-shrink-0 bg-white pb-4">
+        <MessageSuggestions onClick={onMessageComposerSubmit} hidden={messages.length > 0}/>
         <MessageComposer onSubmit={onMessageComposerSubmit} isLoading={isLoading} />
       </div>
     </div>

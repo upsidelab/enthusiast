@@ -7,6 +7,9 @@ from rest_framework.views import APIView
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+
 from agent.models import Conversation, Message
 from agent.serializers import AskQuestionSerializer, ConversationSerializer, ConversationContentSerializer, \
     MessageFeedbackSerializer, ConversationCreationSerializer
@@ -79,6 +82,18 @@ class ConversationView(APIView):
                                                           data_set_id,
                                                           request.user.id,
                                                           question_message])
+
+            # Wait for WebSocket response
+            channel_layer = get_channel_layer()
+            group_name = f"conversation_{conversation_id}"
+            async_to_sync(channel_layer.group_send)(
+                group_name,
+                {
+                    "type": "chat_message",
+                    "event": "start",
+                    "run_id": task.id,
+                }
+            )
 
             return Response({"task_id": task.id}, status=status.HTTP_202_ACCEPTED)
         else:

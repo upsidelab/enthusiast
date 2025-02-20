@@ -14,17 +14,10 @@ class ConversationManager:
         relevant content.
         """
         agent = Agent(data_set=conversation.data_set,
-                      messages=conversation.get_messages())
-        response = agent.process_user_request(question_message)
-
-        return response["output"]
-
-
-    def get_answer_stream(self, conversation: Conversation, question_message: str):
-        agent = Agent(data_set=conversation.data_set,
                       messages=conversation.get_messages(),
                       conversation_id=conversation.id)
         response = agent.process_user_request(question_message)
+
         return response.get("output", "")
 
 
@@ -57,7 +50,7 @@ class ConversationManager:
             conversation.summary = user_message.text
             conversation.save()
 
-        response_text = self.get_answer_stream(conversation, user_message.text)
+        response_text = self.get_answer(conversation, user_message.text)
         response = Message.objects.create(conversation=conversation,
                                           created_at=datetime.now(),
                                           role='agent',

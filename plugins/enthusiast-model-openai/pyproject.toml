@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "enthusiast-model-openai"
-version = "0.3.3"
+version = "0.3.4"
 description = ""
 authors = ["Rafal Cymerys <rafal@upsidelab.io>"]
 readme = "README.md"

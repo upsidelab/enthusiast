@@ -31,15 +31,10 @@ export function Conversation({ conversationId }: ConversationProps) {
 
   useEffect(() => {
     if (conversationId) {
-      ws.current = new WebSocket(`ws://${window.location.hostname}:8000/ws/chat/${conversationId}/`);
-
-      ws.current.onopen = () => {
-        console.log("WebSocket connected.");
-      };
+      ws.current = new WebSocket(`${import.meta.env.VITE_WS_BASE}/ws/chat/${conversationId}/`);
 
       ws.current.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        console.log("Received message:", data);
         if (data.event === "on_parser_start") {
           setMessages((prevMessages) => [
             ...prevMessages,
@@ -60,10 +55,6 @@ export function Conversation({ conversationId }: ConversationProps) {
         } else if (data.error) {
           console.error("Error from server:", data.error);
         }
-      };
-
-      ws.current.onclose = () => {
-        console.log("WebSocket disconnected.");
       };
 
       return () => {

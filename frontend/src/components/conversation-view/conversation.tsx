@@ -52,6 +52,23 @@ export function Conversation({ conversationId }: ConversationProps) {
               return [...prevMessages, { role: "agent", text: data.data.chunk, id: data.run_id }];
             }
           });
+          setTimeout(() => {
+            lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
+          });
+        } else if (data.event === "on_parser_end") {
+          setMessages((prevMessages) => {
+            const lastMessage = prevMessages[prevMessages.length - 1];
+            if (lastMessage && lastMessage.role === "agent" && lastMessage.id === data.run_id) {
+              return prevMessages.map((msg) =>
+                msg.id === data.run_id ? { ...msg, text: data.data.output } : msg
+              );
+            } else {
+              return [...prevMessages, { role: "agent", text: data.data.output, id: data.run_id }];
+            }
+          });
+          setTimeout(() => {
+            lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
+          });
         } else if (data.error) {
           console.error("Error from server:", data.error);
         }
@@ -78,29 +95,9 @@ export function Conversation({ conversationId }: ConversationProps) {
       setSkipConversationReload(true);
       navigate(`/data-sets/${dataSetId}/chat/${currentConversationId}`);
     }
-    const taskHandle = await api.conversations().sendMessage(currentConversationId, dataSetId!, message);
-
-    const updateTaskStatus = async () => {
-      try {
-        const response = await api.conversations().fetchResponseMessage(currentConversationId!, taskHandle);
-        if (response) {
-          setMessages((currMessages) => [
-            ...currMessages,
-            response as MessageProps
-          ]);
-          setIsLoading(false);
-          setTimeout(() => {
-            lastMessageRef.current?.scrollIntoView({behavior: "smooth"});
-          });
-        } else {
-          setTimeout(updateTaskStatus, 2000);
-        }
-      } catch {
-        setIsLoading(false);
-      }
-    }
-    updateTaskStatus();
+    await api.conversations().sendMessage(currentConversationId, dataSetId!, message);
     ws.current?.send(JSON.stringify({ message }));
+    setIsLoading(false);
   };
 
   useEffect(() => {

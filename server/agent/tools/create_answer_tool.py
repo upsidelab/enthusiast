@@ -5,7 +5,7 @@ from typing import Type, Any
 
 from django.core import serializers
 from langchain_core.prompts import PromptTemplate
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PrivateAttr
 
 from agent.retrievers import DocumentRetriever
 from agent.retrievers import ProductRetriever
@@ -13,6 +13,9 @@ from catalog.language_models import LanguageModelRegistry
 from catalog.models import DataSet
 
 from enthusiast_common.interfaces import CustomTool
+from channels.layers import get_channel_layer
+
+from agent.callbacks import WebSocketCallbackHandler
 
 logger = logging.getLogger(__name__)
 
@@ -46,13 +49,18 @@ class CreateAnswerTool(CustomTool):
     max_tokens: int = 30000
     max_retry: int = 3
     chat_model: str = None
+    group_name: str = None
+    _channel_layer: Any = PrivateAttr()
 
     def __init__(self,
                  data_set: DataSet,
                  chat_model: str,
+                 group_name: str,
                  **kwargs: Any):
         super().__init__(data_set=data_set, chat_model=chat_model, **kwargs)
         self.encoding = tiktoken.encoding_for_model(chat_model)
+        self.group_name = group_name
+        self._channel_layer = get_channel_layer()
 
     def _get_document_context(self, relevant_documents, cut_off_cnt):
         """ Identify document context for a query.
@@ -95,7 +103,10 @@ class CreateAnswerTool(CustomTool):
         product_context = serializers.serialize("json", relevant_products)
 
         prompt = PromptTemplate.from_template(CREATE_CONTENT_PROMPT_TEMPLATE)
-        llm = LanguageModelRegistry().provider_for_dataset(self.data_set).provide_language_model()
+        callback_handler = WebSocketCallbackHandler(self.group_name)
+        llm = LanguageModelRegistry() \
+            .provider_for_dataset(self.data_set) \
+            .provide_language_model(callbacks=[callback_handler])
         chain = prompt | llm
 
         retry = -1

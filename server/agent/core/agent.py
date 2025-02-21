@@ -23,7 +23,7 @@ class Agent:
             .provide_language_model(callbacks=[callback_handler])
         )
 
-        self._tools = ToolManager(data_set=data_set, chat_model=self._llm.model_name).tools
+        self._tools = ToolManager(data_set=data_set, chat_model=self._llm.model_name, group_name=f"conversation_{conversation_id}").tools
         self._system_message = SystemMessage(
             "You are an agent that knows everything about company\'s product catalog and content")
         self._agent = create_conversational_retrieval_agent(

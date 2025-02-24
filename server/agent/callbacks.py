@@ -40,4 +40,3 @@ class WebSocketCallbackHandler(BaseCallbackHandler):
                 "output": outputs.get("output", "")
             }
         )
-

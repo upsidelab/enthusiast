@@ -42,13 +42,13 @@ export function Conversation({ conversationId }: ConversationProps) {
         } else if (data.event === "on_parser_stream") {
           setMessages((prevMessages) => {
             const lastMessage = prevMessages[prevMessages.length - 1];
-            if (lastMessage && lastMessage.role === "agent" && lastMessage.id === data.data.run_id) {
+            if (lastMessage && lastMessage.role === "agent" && lastMessage.id === null) {
               return [
                 ...prevMessages.slice(0, -1),
                 { ...lastMessage, text: lastMessage.text + data.data.chunk }
               ];
             } else {
-              return [...prevMessages, { role: "agent", text: data.data.chunk, id: data.data.run_id }];
+              return [...prevMessages, { role: "agent", text: data.data.chunk, id: null }];
             }
           });
           setTimeout(() => {
@@ -94,14 +94,11 @@ export function Conversation({ conversationId }: ConversationProps) {
         if (response) {
           setIsAgentLoading(false);
           setMessages((prevMessages) => {
-            const lastMessage = prevMessages[prevMessages.length - 1];
-            if (lastMessage && lastMessage.role === "agent" && lastMessage.id === null) {
-              return [
-                ...prevMessages.slice(0, -1),
-                { ...lastMessage, id: response.id, text: response.text }
-              ];
-            }
-            return prevMessages;
+            return prevMessages.map((msg) =>
+              msg.id === null && msg.role === "agent"
+                ? { ...msg, id: response.id, text: response.text }
+                : msg
+            );
           });
           setIsLoading(false);
           setTimeout(() => {

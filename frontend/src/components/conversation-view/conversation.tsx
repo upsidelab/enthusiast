@@ -20,19 +20,22 @@ export interface MessageProps {
 
 const api = new ApiClient(authenticationProviderInstance);
 
+// Toggle streaming based on the presence of the env variable.
+const streamingEnabled = Boolean(import.meta.env.VITE_WS_BASE);
+
 export function Conversation({ conversationId }: ConversationProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [isAgentLoading, setIsAgentLoading] = useState(false);
+  const [messages, setMessages] = useState<MessageProps[]>([]);
+  const [skipConversationReload, setSkipConversationReload] = useState(false);
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
   const { dataSetId } = useApplicationContext()!;
   const navigate = useNavigate();
-
-  const [messages, setMessages] = useState<MessageProps[]>([]);
-  const [skipConversationReload, setSkipConversationReload] = useState(false);
-  const [isAgentLoading, setIsAgentLoading] = useState(false);
   const ws = useRef<WebSocket | null>(null);
 
+  // If streaming is enabled, set up a websocket for partial responses.
   useEffect(() => {
-    if (conversationId) {
+    if (conversationId && streamingEnabled) {
       ws.current = new WebSocket(`${import.meta.env.VITE_WS_BASE}/ws/chat/${conversationId}/`);
 
       ws.current.onmessage = (event) => {
@@ -56,8 +59,8 @@ export function Conversation({ conversationId }: ConversationProps) {
           });
         } else if (data.error) {
           console.error("Error from server:", data.error);
-          setMessages((prevMessages) => [
-            ...prevMessages,
+          setMessages((prev) => [
+            ...prev,
             { role: "agent_error", text: "An error occurred", id: null }
           ]);
           setIsLoading(false);
@@ -72,8 +75,8 @@ export function Conversation({ conversationId }: ConversationProps) {
 
   const onMessageComposerSubmit = async (message: string) => {
     setIsLoading(true);
-    setMessages((currMessages) => [
-      ...currMessages,
+    setMessages((prev) => [
+      ...prev,
       { role: "user", text: message, id: null }
     ]);
     setTimeout(() => {
@@ -85,33 +88,76 @@ export function Conversation({ conversationId }: ConversationProps) {
       setSkipConversationReload(true);
       navigate(`/data-sets/${dataSetId}/chat/${currentConversationId}`);
     }
-    const taskHandle = await api.conversations().sendMessage(currentConversationId, dataSetId!, message);
-    ws.current?.send(JSON.stringify({ message }));
 
-    const updateTaskStatus = async () => {
-      try {
-        const response = await api.conversations().fetchResponseMessage(currentConversationId!, taskHandle);
-        if (response) {
-          setIsAgentLoading(false);
-          setMessages((prevMessages) => {
-            return prevMessages.map((msg) =>
-              msg.id === null && msg.role === "agent"
-                ? { ...msg, id: response.id, text: response.text }
-                : msg
+    if (streamingEnabled) {
+      // Streaming branch:
+      const taskHandle = await api.conversations().sendMessage(currentConversationId, dataSetId!, message);
+      ws.current?.send(JSON.stringify({ message }));
+
+      const updateTaskStatus = async () => {
+        try {
+          const response = await api.conversations().fetchResponseMessage(currentConversationId!, taskHandle);
+          if (response) {
+            setIsAgentLoading(false);
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.role === "agent" && msg.id === null
+                  ? { ...msg, id: response.id, text: response.text }
+                  : msg
+              )
             );
-          });
+
+            setIsLoading(false);
+            setTimeout(() => {
+              lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
+            });
+          } else {
+            setTimeout(updateTaskStatus, 2000);
+          }
+        } catch (error) {
+          console.error("Error fetching response:", error);
           setIsLoading(false);
-          setTimeout(() => {
-            lastMessageRef.current?.scrollIntoView({behavior: "smooth"});
-          });
-        } else {
-          setTimeout(updateTaskStatus, 2000);
         }
-      } catch {
+      };
+      updateTaskStatus();
+    } else {
+      // Non-streaming branch: Poll until a full response is available.
+      try {
+        const taskHandle = await api.conversations().sendMessage(currentConversationId, dataSetId!, message);
+        setIsAgentLoading(true);
+        const updateTaskStatus = async () => {
+          try {
+            const response = await api.conversations().fetchResponseMessage(currentConversationId!, taskHandle);
+            if (response) {
+              setMessages((prev) => [
+                ...prev,
+                { role: "agent", text: response.text, id: response.id }
+              ]);
+              setIsAgentLoading(false);
+              setIsLoading(false);
+              setTimeout(() => {
+                lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
+              });
+            } else {
+              setTimeout(updateTaskStatus, 2000);
+            }
+          } catch (error) {
+            console.error("Error fetching response:", error);
+            setIsLoading(false);
+            setIsAgentLoading(false);
+          }
+        };
+        updateTaskStatus();
+      } catch (error) {
+        console.error("Error sending message:", error);
+        setMessages((prev) => [
+          ...prev,
+          { role: "agent_error", text: "An error occurred", id: null }
+        ]);
         setIsLoading(false);
+        setIsAgentLoading(false);
       }
     }
-    updateTaskStatus();
   };
 
   useEffect(() => {
@@ -145,7 +191,7 @@ export function Conversation({ conversationId }: ConversationProps) {
             <MessageError key={index} text={message.text} /> :
             <MessageBubble key={index} text={message.text} variant={message.role === "user" ? "primary" : "secondary"} questionId={message.id}/>
         ))}
-        {isAgentLoading && messages[messages.length - 1]?.role !== "agent" && <MessageBubbleTyping />}
+        {isAgentLoading && (streamingEnabled ? messages[messages.length - 1]?.role !== "agent" : true) && <MessageBubbleTyping />}
         <div className="mb-4" />
         <div ref={lastMessageRef} />
       </div>

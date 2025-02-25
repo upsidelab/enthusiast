@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { MessageComposer } from "@/components/conversation-view/message-composer.tsx";
 import { MessageBubble } from "@/components/conversation-view/message-bubble.tsx";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { ApiClient } from "@/lib/api.ts";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
 import { MessageError } from "@/components/conversation-view/message-error.tsx";
-import { useNavigate } from "react-router-dom";
+import { MessageBubbleTyping } from "@/components/conversation-view/message-bubble-typing.tsx";
 
 export interface ConversationProps {
   conversationId: number | null;
@@ -27,6 +28,7 @@ export function Conversation({ conversationId }: ConversationProps) {
 
   const [messages, setMessages] = useState<MessageProps[]>([]);
   const [skipConversationReload, setSkipConversationReload] = useState(false);
+  const [isAgentLoading, setIsAgentLoading] = useState(false);
   const ws = useRef<WebSocket | null>(null);
 
   useEffect(() => {
@@ -36,20 +38,17 @@ export function Conversation({ conversationId }: ConversationProps) {
       ws.current.onmessage = (event) => {
         const data = JSON.parse(event.data);
         if (data.event === "on_parser_start") {
-          setMessages((prevMessages) => [
-            ...prevMessages,
-            { role: "agent", text: "", id: data.run_id }
-          ]);
+          setIsAgentLoading(true);
         } else if (data.event === "on_parser_stream") {
           setMessages((prevMessages) => {
             const lastMessage = prevMessages[prevMessages.length - 1];
-            if (lastMessage && lastMessage.role === "agent" && lastMessage.id === data.run_id) {
+            if (lastMessage && lastMessage.role === "agent" && lastMessage.id === data.data.run_id) {
               return [
                 ...prevMessages.slice(0, -1),
                 { ...lastMessage, text: lastMessage.text + data.data.chunk }
               ];
             } else {
-              return [...prevMessages, { role: "agent", text: data.data.chunk, id: data.run_id }];
+              return [...prevMessages, { role: "agent", text: data.data.chunk, id: data.data.run_id }];
             }
           });
           setTimeout(() => {
@@ -93,12 +92,13 @@ export function Conversation({ conversationId }: ConversationProps) {
       try {
         const response = await api.conversations().fetchResponseMessage(currentConversationId!, taskHandle);
         if (response) {
+          setIsAgentLoading(false);
           setMessages((prevMessages) => {
             const lastMessage = prevMessages[prevMessages.length - 1];
             if (lastMessage && lastMessage.role === "agent" && lastMessage.id === null) {
               return [
                 ...prevMessages.slice(0, -1),
-                { ...lastMessage, id: response.id }
+                { ...lastMessage, id: response.id, text: response.text }
               ];
             }
             return prevMessages;
@@ -148,6 +148,7 @@ export function Conversation({ conversationId }: ConversationProps) {
             <MessageError key={index} text={message.text} /> :
             <MessageBubble key={index} text={message.text} variant={message.role === "user" ? "primary" : "secondary"} questionId={message.id}/>
         ))}
+        {isAgentLoading && messages[messages.length - 1]?.role !== "agent" && <MessageBubbleTyping />}
         <div className="mb-4" />
         <div ref={lastMessageRef} />
       </div>

@@ -6,6 +6,7 @@ import { ApiClient } from "@/lib/api.ts";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
 import { MessageError } from "@/components/conversation-view/message-error.tsx";
 import { useNavigate } from "react-router-dom";
+import { MessageBubbleTyping } from "@/components/conversation-view/message-bubble-typing.tsx";
 
 export interface ConversationProps {
   conversationId: number | null;
@@ -98,6 +99,7 @@ export function Conversation({ conversationId }: ConversationProps) {
             <MessageError key={index} text={message.text} /> :
             <MessageBubble key={index} text={message.text} variant={message.role === "user" ? "primary" : "secondary"} questionId={message.id}/>
         ))}
+        {isLoading && <MessageBubbleTyping />}
         <div className="mb-4" />
         <div ref={lastMessageRef} />
       </div>

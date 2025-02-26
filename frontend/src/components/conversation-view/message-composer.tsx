@@ -35,7 +35,7 @@ export function MessageComposer({ onSubmit, isLoading }: MessageComposerProps) {
     resizeTextArea(event.target);
   }
 
-  const handleTextAreaKeyUp = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleTextAreaKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.shiftKey || event.key !== 'Enter')
       return;
 
@@ -67,7 +67,7 @@ export function MessageComposer({ onSubmit, isLoading }: MessageComposerProps) {
           autoComplete="off"
           value={input}
           onChange={handleTextAreaInput}
-          onKeyUp={handleTextAreaKeyUp}
+          onKeyDown={handleTextAreaKeyDown}
           disabled={isLoading}
         />
       </div>

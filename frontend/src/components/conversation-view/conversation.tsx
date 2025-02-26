@@ -105,7 +105,7 @@ export function Conversation({ conversationId }: ConversationProps) {
         <div ref={lastMessageRef} />
       </div>
       <div className="bottom-0 sticky flex-shrink-0 bg-white pb-4">
-        <MessageSuggestions onClick={onMessageComposerSubmit} hidden={messages.length > 0}/>
+        <MessageSuggestions onClick={onMessageComposerSubmit} hidden={messages.length > 0 || (dataSetId !== null && dataSetId !== 3)}/>
         <MessageComposer onSubmit={onMessageComposerSubmit} isLoading={isLoading} />
       </div>
     </div>

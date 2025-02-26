@@ -16,6 +16,8 @@ from enthusiast_common.interfaces import CustomTool, LanguageModelProvider
 logger = logging.getLogger(__name__)
 
 CREATE_CONTENT_PROMPT_TEMPLATE = """
+    You're supporting a sales agent or a customer support representative, in answering questions they get from the customers.
+    
     Based on the following documents delimited by three backticks
     ```
     {document_context}
@@ -28,6 +30,7 @@ CREATE_CONTENT_PROMPT_TEMPLATE = """
     ```
     {query}
     ``` 
+    Be concise and make sure that the response is to the point. Don't include unnecessary information.
 """
 
 

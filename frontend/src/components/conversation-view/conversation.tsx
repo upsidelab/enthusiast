@@ -75,6 +75,7 @@ export function Conversation({ conversationId }: ConversationProps) {
 
   const onMessageComposerSubmit = async (message: string) => {
     setIsLoading(true);
+    setIsAgentLoading(true);
     setMessages((prev) => [
       ...prev,
       { role: "user", text: message, id: null }

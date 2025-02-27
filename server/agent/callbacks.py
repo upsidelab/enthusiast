@@ -2,9 +2,9 @@ from langchain_core.callbacks import BaseCallbackHandler
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
-class WebSocketCallbackHandler(BaseCallbackHandler):
-    def __init__(self, group_name):
-        self.group_name = group_name
+class ConversationWebSocketCallbackHandler(BaseCallbackHandler):
+    def __init__(self, conversation):
+        self.group_name = f"conversation_{conversation.id}"
         self.channel_layer = get_channel_layer()
         self.run_id = None
 
@@ -37,6 +37,6 @@ class WebSocketCallbackHandler(BaseCallbackHandler):
                 "type": "chat_message",
                 "event": "end",
                 "run_id": self.run_id,
-                "output": outputs.get("output", "")
+                "output": outputs.get("output")
             }
         )

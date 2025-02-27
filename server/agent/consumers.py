@@ -15,7 +15,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Join the conversation group
         await self.channel_layer.group_add(self.group_name, self.channel_name)
         await self.accept()
-        print(f"WebSocket connected for conversation {self.conversation_id}")
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(self.group_name, self.channel_name)

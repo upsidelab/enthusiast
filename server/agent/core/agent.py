@@ -5,25 +5,25 @@ from langchain.memory import ConversationSummaryBufferMemory
 from langchain_core.messages import SystemMessage
 
 from catalog.language_models import LanguageModelRegistry
-from catalog.models import DataSet
 from agent.tools.manager import ToolManager
+from agent.models import Conversation
 
-from agent.callbacks import WebSocketCallbackHandler
+from agent.callbacks import ConversationWebSocketCallbackHandler
 
 logger = logging.getLogger(__name__)
 
 
 class Agent:
-    def __init__(self, data_set: DataSet, messages: list, conversation_id: int):
+    def __init__(self, conversation: Conversation):
         logger.debug("Initialize Agent")
-        callback_handler = WebSocketCallbackHandler(f"conversation_{conversation_id}")
+        callback_handler = ConversationWebSocketCallbackHandler(conversation)
         self._llm = (
             LanguageModelRegistry()
-            .provider_for_dataset(data_set)
+            .provider_for_dataset(conversation.data_set)
             .provide_language_model(callbacks=[callback_handler])
         )
 
-        self._tools = ToolManager(data_set=data_set, chat_model=self._llm.model_name, group_name=f"conversation_{conversation_id}").tools
+        self._tools = ToolManager(chat_model=self._llm.model_name, conversation=conversation).tools
         self._system_message = SystemMessage(
             "You are an agent that knows everything about company\'s product catalog and content")
         self._agent = create_conversational_retrieval_agent(
@@ -33,8 +33,8 @@ class Agent:
             verbose=True
         )
         # Populate memory with history of conversation.
-        logger.debug(f"Populate memory. Number of messages in conversation history: {len(messages)}")
-        self._populate_agent_memory(messages)
+        logger.debug(f"Populate memory. Number of messages in conversation history: {len(conversation.get_messages())}")
+        self._populate_agent_memory(conversation.get_messages())
 
     def _populate_agent_memory(self, messages):
         self._agent.memory = ConversationSummaryBufferMemory(llm=self._llm,

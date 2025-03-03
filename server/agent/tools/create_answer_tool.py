@@ -9,7 +9,6 @@ from pydantic import BaseModel, Field
 
 from agent.retrievers import DocumentRetriever
 from agent.retrievers import ProductRetriever
-from catalog.models import DataSet
 
 from enthusiast_common.interfaces import CustomTool, LanguageModelProvider
 

@@ -4,8 +4,6 @@ from django.conf import settings
 from enthusiast_common.interfaces import LanguageModelProvider
 from agent.models import Conversation
 
-from catalog.models import DataSet
-
 logger = logging.getLogger(__name__)
 
 class ToolRegistry:

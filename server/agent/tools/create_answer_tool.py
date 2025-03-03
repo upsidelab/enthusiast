@@ -1,7 +1,7 @@
 import logging
 import tiktoken
 
-from typing import Type, Any
+from typing import Type, Any, Optional
 
 from django.core import serializers
 from langchain_core.prompts import PromptTemplate
@@ -9,10 +9,9 @@ from pydantic import BaseModel, Field
 
 from agent.retrievers import DocumentRetriever
 from agent.retrievers import ProductRetriever
-from catalog.language_models import LanguageModelRegistry
 from catalog.models import DataSet
 
-from enthusiast_common.interfaces import CustomTool
+from enthusiast_common.interfaces import CustomTool, LanguageModelProvider
 
 from agent.callbacks import ConversationWebSocketCallbackHandler
 
@@ -21,6 +20,8 @@ from agent.models import Conversation
 logger = logging.getLogger(__name__)
 
 CREATE_CONTENT_PROMPT_TEMPLATE = """
+    You're supporting a sales agent or a customer support representative, in answering questions they get from the customers.
+    
     Based on the following documents delimited by three backticks
     ```
     {document_context}
@@ -33,6 +34,7 @@ CREATE_CONTENT_PROMPT_TEMPLATE = """
     ```
     {query}
     ``` 
+    Be concise and make sure that the response is to the point. Don't include unnecessary information.
 """
 
 
@@ -45,20 +47,27 @@ class CreateAnswerTool(CustomTool):
     description: str = "use it when asked to generate content or answer a question about products"
     args_schema: Type[BaseModel] = CreateAnswerToolInput
     return_direct: bool = True
-    data_set: DataSet = None
+    data_set: any = None
+    chat_model: Optional[str] = None
     encoding: tiktoken.encoding_for_model = None
     max_tokens: int = 30000
     max_retry: int = 3
-    chat_model: str = None
     conversation: Conversation = None
 
     def __init__(self,
                  chat_model: str,
                  conversation: Conversation,
+                 language_model_provider: LanguageModelProvider,
                  **kwargs: Any):
-        super().__init__(data_set=conversation.data_set, chat_model=chat_model, **kwargs)
-        self.encoding = tiktoken.encoding_for_model(chat_model)
+        super().__init__(data_set=conversation.data_set, chat_model=chat_model, 
+                         language_model_provider=language_model_provider,
+                         **kwargs)
+        if language_model_provider.model_name() in tiktoken.model.MODEL_TO_ENCODING:
+            self.encoding = tiktoken.encoding_for_model(language_model_provider.model_name())
+        else:
+            self.encoding = tiktoken.encoding_for_model("gpt-4o")
         self.conversation = conversation
+
 
     def _get_document_context(self, relevant_documents, cut_off_cnt):
         """ Identify document context for a query.
@@ -102,9 +111,7 @@ class CreateAnswerTool(CustomTool):
 
         prompt = PromptTemplate.from_template(CREATE_CONTENT_PROMPT_TEMPLATE)
         callback_handler = ConversationWebSocketCallbackHandler(self.conversation)
-        llm = LanguageModelRegistry() \
-            .provider_for_dataset(self.data_set) \
-            .provide_language_model(callbacks=[callback_handler])
+        llm = self._language_model_provider.provide_language_model(callbacks=[callback_handler])
         chain = prompt | llm
 
         retry = -1

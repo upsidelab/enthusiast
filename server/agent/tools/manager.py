@@ -1,12 +1,14 @@
 import logging
+
+from enthusiast_common.interfaces import LanguageModelProvider
+
+from agent.models import Conversation
 from .registry import ToolRegistry
 
 logger = logging.getLogger(__name__)
 
 class ToolManager:
-    def __init__(self, chat_model, conversation):
+    def __init__(self, language_model_provider: LanguageModelProvider, conversation: Conversation):
         self.conversation = conversation
-        self.data_set = conversation.data_set
-        self.chat_model = chat_model
         self.registry = ToolRegistry()
-        self.tools = self.registry.get_tools(chat_model=self.chat_model, conversation=self.conversation)
+        self.tools = self.registry.get_tools(language_model_provider=language_model_provider, conversation=conversation)

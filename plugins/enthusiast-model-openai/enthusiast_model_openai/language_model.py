@@ -16,6 +16,9 @@ class OpenAILanguageModelProvider(LanguageModelProvider):
             callbacks = callbacks
         )
 
+    def model_name(self) -> str:
+        return self._model
+
     @staticmethod
     def available_models() -> list[str]:
         all_models = OpenAI().models.list().data

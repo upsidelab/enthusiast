@@ -61,12 +61,12 @@ export function DocumentsList() {
         }}
       />
       <Sheet open={!!selectedPreview} onOpenChange={() => setSelectedPreview(null)}>
-        <SheetContent>
+        <SheetContent className="sm:max-w-xl w-[800px]">
           <SheetHeader>
             <SheetTitle>Preview {selectedPreview?.title}</SheetTitle>
           </SheetHeader>
           <ScrollArea className="h-full w-full pt-4">
-            <div>
+            <div className="whitespace-pre-wrap">
               {selectedPreview?.content}
             </div>
           </ScrollArea>

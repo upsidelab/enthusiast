@@ -1,6 +1,10 @@
 import importlib
 import logging
 from django.conf import settings
+from enthusiast_common.interfaces import LanguageModelProvider
+from agent.models import Conversation
+
+from catalog.models import DataSet
 
 logger = logging.getLogger(__name__)
 
@@ -24,21 +28,19 @@ class ToolRegistry:
             tool_classes[tool_name] = tool_class
         return tool_classes
 
-    def get_tools(self, chat_model, conversation):
+    def get_tools(self, language_model_provider: LanguageModelProvider, conversation: Conversation):
         """
         Instantiate tool classes with the provided data_set and chat_model.
 
         Args:
-            chat_model (str): The chat model used by the tools.
-            conversation (Conversation): The conversation object.
+            language_model_provider (LanguageModelProvider): The chat model used by the tools.
+            conversation (Conversation): The conversation object used by tools.
 
         Returns:
             list: A list of instantiated tool objects.
         """
         tools = []
         for tool_name, tool_class in self.tool_classes.items():
-            # Instantiate the tool class with the provided arguments
-            tool_instance = tool_class(chat_model=chat_model, conversation=conversation)
-            # Add the instantiated tool to the list
+            tool_instance = tool_class(chat_model=None, language_model_provider=language_model_provider, conversation=conversation)
             tools.append(tool_instance)
         return tools

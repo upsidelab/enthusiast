@@ -20,19 +20,59 @@ export interface MessageProps {
 
 const api = new ApiClient(authenticationProviderInstance);
 
+// Toggle streaming based on the presence of the env variable.
+const streamingEnabled = Boolean(import.meta.env.VITE_WS_BASE);
+
 export function Conversation({ conversationId }: ConversationProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [isAgentLoading, setIsAgentLoading] = useState(false);
+  const [messages, setMessages] = useState<MessageProps[]>([]);
+  const [skipConversationReload, setSkipConversationReload] = useState(false);
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
   const { dataSetId } = useApplicationContext()!;
   const navigate = useNavigate();
+  const ws = useRef<WebSocket | null>(null);
 
-  const [messages, setMessages] = useState<MessageProps[]>([]);
-  const [skipConversationReload, setSkipConversationReload] = useState(false);
+  // If streaming is enabled, set up a websocket for partial responses.
+  useEffect(() => {
+    if (conversationId && streamingEnabled) {
+      ws.current = new WebSocket(`${import.meta.env.VITE_WS_BASE}/ws/chat/${conversationId}/`);
+
+      ws.current.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.event === "on_parser_start") {
+          setIsAgentLoading(true);
+        } else if (data.event === "on_parser_stream") {
+          setMessages((prevMessages) => {
+            const lastMessage = prevMessages[prevMessages.length - 1];
+            if (lastMessage && lastMessage.role === "agent" && lastMessage.id === null) {
+              return [
+                ...prevMessages.slice(0, -1),
+                { ...lastMessage, text: lastMessage.text + data.data.chunk }
+              ];
+            } else {
+              return [...prevMessages, { role: "agent", text: data.data.chunk, id: null }];
+            }
+          });
+          setTimeout(() => {
+            lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
+          });
+        } else if (data.error) {
+          setIsLoading(false);
+        }
+      };
+
+      return () => {
+        ws.current?.close();
+      };
+    }
+  }, [conversationId]);
 
   const onMessageComposerSubmit = async (message: string) => {
     setIsLoading(true);
-    setMessages((currMessages) => [
-      ...currMessages,
+    setIsAgentLoading(true);
+    setMessages((prev) => [
+      ...prev,
       { role: "user", text: message, id: null }
     ]);
     setTimeout(() => {
@@ -44,28 +84,69 @@ export function Conversation({ conversationId }: ConversationProps) {
       setSkipConversationReload(true);
       navigate(`/data-sets/${dataSetId}/chat/${currentConversationId}`);
     }
-    const taskHandle = await api.conversations().sendMessage(currentConversationId, dataSetId!, message);
 
-    const updateTaskStatus = async () => {
-      try {
-        const response = await api.conversations().fetchResponseMessage(currentConversationId!, taskHandle);
-        if (response) {
-          setMessages((currMessages) => [
-            ...currMessages,
-            response as MessageProps
-          ]);
+    if (streamingEnabled) {
+      // Streaming branch:
+      const taskHandle = await api.conversations().sendMessage(currentConversationId, dataSetId!, message);
+      ws.current?.send(JSON.stringify({ message }));
+
+      const updateTaskStatus = async () => {
+        try {
+          const response = await api.conversations().fetchResponseMessage(currentConversationId!, taskHandle);
+          if (response) {
+            setIsAgentLoading(false);
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.role === "agent" && msg.id === null
+                  ? { ...msg, id: response.id, text: response.text }
+                  : msg
+              )
+            );
+
+            setIsLoading(false);
+            setTimeout(() => {
+              lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
+            });
+          } else {
+            setTimeout(updateTaskStatus, 2000);
+          }
+        } catch (error) {
           setIsLoading(false);
-          setTimeout(() => {
-            lastMessageRef.current?.scrollIntoView({behavior: "smooth"});
-          });
-        } else {
-          setTimeout(updateTaskStatus, 2000);
         }
-      } catch {
+      };
+      updateTaskStatus();
+    } else {
+      // Non-streaming branch: Poll until a full response is available.
+      try {
+        const taskHandle = await api.conversations().sendMessage(currentConversationId, dataSetId!, message);
+        setIsAgentLoading(true);
+        const updateTaskStatus = async () => {
+          try {
+            const response = await api.conversations().fetchResponseMessage(currentConversationId!, taskHandle);
+            if (response) {
+              setMessages((prev) => [
+                ...prev,
+                { role: "agent", text: response.text, id: response.id }
+              ]);
+              setIsAgentLoading(false);
+              setIsLoading(false);
+              setTimeout(() => {
+                lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
+              });
+            } else {
+              setTimeout(updateTaskStatus, 2000);
+            }
+          } catch (error) {
+            setIsLoading(false);
+            setIsAgentLoading(false);
+          }
+        };
+        updateTaskStatus();
+      } catch (error) {
         setIsLoading(false);
+        setIsAgentLoading(false);
       }
     }
-    updateTaskStatus();
   };
 
   useEffect(() => {
@@ -99,7 +180,7 @@ export function Conversation({ conversationId }: ConversationProps) {
             <MessageError key={index} text={message.text} /> :
             <MessageBubble key={index} text={message.text} variant={message.role === "user" ? "primary" : "secondary"} questionId={message.id}/>
         ))}
-        {isLoading && <MessageBubbleTyping />}
+        {isAgentLoading && (streamingEnabled ? messages[messages.length - 1]?.role !== "agent" : true) && <MessageBubbleTyping />}
         <div className="mb-4" />
         <div ref={lastMessageRef} />
       </div>

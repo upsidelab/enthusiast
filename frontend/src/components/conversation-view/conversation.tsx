@@ -58,11 +58,6 @@ export function Conversation({ conversationId }: ConversationProps) {
             lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
           });
         } else if (data.error) {
-          console.error("Error from server:", data.error);
-          setMessages((prev) => [
-            ...prev,
-            { role: "agent_error", text: "An error occurred", id: null }
-          ]);
           setIsLoading(false);
         }
       };
@@ -116,7 +111,6 @@ export function Conversation({ conversationId }: ConversationProps) {
             setTimeout(updateTaskStatus, 2000);
           }
         } catch (error) {
-          console.error("Error fetching response:", error);
           setIsLoading(false);
         }
       };
@@ -143,18 +137,12 @@ export function Conversation({ conversationId }: ConversationProps) {
               setTimeout(updateTaskStatus, 2000);
             }
           } catch (error) {
-            console.error("Error fetching response:", error);
             setIsLoading(false);
             setIsAgentLoading(false);
           }
         };
         updateTaskStatus();
       } catch (error) {
-        console.error("Error sending message:", error);
-        setMessages((prev) => [
-          ...prev,
-          { role: "agent_error", text: "An error occurred", id: null }
-        ]);
         setIsLoading(false);
         setIsAgentLoading(false);
       }

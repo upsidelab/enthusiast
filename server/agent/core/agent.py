@@ -5,18 +5,21 @@ from langchain.memory import ConversationSummaryBufferMemory
 from langchain_core.messages import SystemMessage
 
 from catalog.language_models import LanguageModelRegistry
-from catalog.models import DataSet
 from agent.tools.manager import ToolManager
+from agent.models import Conversation
+
+from agent.callbacks import ConversationWebSocketCallbackHandler
 
 logger = logging.getLogger(__name__)
 
 
 class Agent:
-    def __init__(self, data_set: DataSet, messages: list):
+    def __init__(self, conversation: Conversation):
         logger.debug("Initialize Agent")
-        language_model_provider = LanguageModelRegistry().provider_for_dataset(data_set)
-        self._llm = language_model_provider.provide_language_model()
-        self._tools = ToolManager(data_set=data_set, language_model_provider=language_model_provider).tools
+        callback_handler = ConversationWebSocketCallbackHandler(conversation)
+        language_model_provider = LanguageModelRegistry().provider_for_dataset(conversation.data_set)
+        self._llm = language_model_provider.provide_language_model(callbacks=[callback_handler])
+        self._tools = ToolManager(language_model_provider=language_model_provider, conversation=conversation).tools
         self._system_message = SystemMessage(
             "You are a sales support agent, and you know everything about a company and their products.")
         self._agent = create_conversational_retrieval_agent(
@@ -26,8 +29,8 @@ class Agent:
             verbose=True
         )
         # Populate memory with history of conversation.
-        logger.debug(f"Populate memory. Number of messages in conversation history: {len(messages)}")
-        self._populate_agent_memory(messages)
+        logger.debug(f"Populate memory. Number of messages in conversation history: {len(conversation.get_messages())}")
+        self._populate_agent_memory(conversation.get_messages())
 
     def _populate_agent_memory(self, messages):
         self._agent.memory = ConversationSummaryBufferMemory(llm=self._llm,

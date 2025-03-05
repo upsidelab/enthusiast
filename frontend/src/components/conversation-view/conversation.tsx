@@ -28,6 +28,7 @@ export function Conversation({ conversationId }: ConversationProps) {
   const [isAgentLoading, setIsAgentLoading] = useState(false);
   const [messages, setMessages] = useState<MessageProps[]>([]);
   const [skipConversationReload, setSkipConversationReload] = useState(false);
+  const [usePolling, setUsePolling] = useState(!streamingEnabled);
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
   const { dataSetId } = useApplicationContext()!;
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ export function Conversation({ conversationId }: ConversationProps) {
 
   // If streaming is enabled, set up a websocket for partial responses.
   useEffect(() => {
-    if (conversationId && streamingEnabled) {
+    if (conversationId && streamingEnabled && !usePolling) {
       ws.current = new WebSocket(`${import.meta.env.VITE_WS_BASE}/ws/chat/${conversationId}/`);
 
       ws.current.onmessage = (event) => {
@@ -62,11 +63,34 @@ export function Conversation({ conversationId }: ConversationProps) {
         }
       };
 
+      ws.current.onerror = () => {
+        setUsePolling(true);
+      };
+
+      ws.current.onclose = (event) => {
+        if (!event.wasClean) {
+          setUsePolling(true);
+        }
+      };
+
       return () => {
         ws.current?.close();
       };
     }
-  }, [conversationId]);
+  }, [conversationId, usePolling]);
+
+  const testWebSocketConnection = async (url: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const testWs = new WebSocket(url);
+      testWs.onopen = () => {
+        testWs.close();
+        resolve(true);
+      };
+      testWs.onerror = () => {
+        resolve(false);
+      };
+    });
+  };
 
   const onMessageComposerSubmit = async (message: string) => {
     setIsLoading(true);
@@ -85,50 +109,31 @@ export function Conversation({ conversationId }: ConversationProps) {
       navigate(`/data-sets/${dataSetId}/chat/${currentConversationId}`);
     }
 
+    const taskHandle = await api.conversations().sendMessage(currentConversationId, dataSetId!, message);
+
     if (streamingEnabled) {
-      // Streaming branch:
-      const taskHandle = await api.conversations().sendMessage(currentConversationId, dataSetId!, message);
-      ws.current?.send(JSON.stringify({ message }));
+      const wsUrl = `${import.meta.env.VITE_WS_BASE}/ws/chat/${currentConversationId}/`;
+      const isWebSocketAvailable = await testWebSocketConnection(wsUrl);
 
-      const updateTaskStatus = async () => {
-        try {
-          const response = await api.conversations().fetchResponseMessage(currentConversationId!, taskHandle);
-          if (response) {
-            setIsAgentLoading(false);
-            setMessages((prev) =>
-              prev.map((msg) =>
-                msg.role === "agent" && msg.id === null
-                  ? { ...msg, id: response.id, text: response.text }
-                  : msg
-              )
-            );
-
-            setIsLoading(false);
-            setTimeout(() => {
-              lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
-            });
-          } else {
-            setTimeout(updateTaskStatus, 2000);
-          }
-        } catch (error) {
-          setIsLoading(false);
+      if (!usePolling && isWebSocketAvailable) {
+        if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+          ws.current.send(JSON.stringify({ message }));
+        } else {
+          setUsePolling(true);
         }
-      };
-      updateTaskStatus();
-    } else {
-      // Non-streaming branch: Poll until a full response is available.
-      try {
-        const taskHandle = await api.conversations().sendMessage(currentConversationId, dataSetId!, message);
-        setIsAgentLoading(true);
+
         const updateTaskStatus = async () => {
           try {
             const response = await api.conversations().fetchResponseMessage(currentConversationId!, taskHandle);
             if (response) {
-              setMessages((prev) => [
-                ...prev,
-                { role: "agent", text: response.text, id: response.id }
-              ]);
               setIsAgentLoading(false);
+              setMessages((prev) =>
+                prev.map((msg) =>
+                  msg.role === "agent" && msg.id === null
+                    ? { ...msg, id: response.id, text: response.text }
+                    : msg
+                )
+              );
               setIsLoading(false);
               setTimeout(() => {
                 lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -136,16 +141,43 @@ export function Conversation({ conversationId }: ConversationProps) {
             } else {
               setTimeout(updateTaskStatus, 2000);
             }
-          } catch (error) {
+          } catch {
             setIsLoading(false);
             setIsAgentLoading(false);
           }
         };
         updateTaskStatus();
-      } catch (error) {
-        setIsLoading(false);
-        setIsAgentLoading(false);
+        return;
       }
+    }
+
+    // Non-streaming branch: Poll until a full response is available.
+    try {
+      const updateTaskStatus = async () => {
+        try {
+          const response = await api.conversations().fetchResponseMessage(currentConversationId!, taskHandle);
+          if (response) {
+            setMessages((prev) => [
+              ...prev,
+              { role: "agent", text: response.text, id: response.id }
+            ]);
+            setIsAgentLoading(false);
+            setIsLoading(false);
+            setTimeout(() => {
+              lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
+            });
+          } else {
+            setTimeout(updateTaskStatus, 2000);
+          }
+        } catch {
+          setIsLoading(false);
+          setIsAgentLoading(false);
+        }
+      };
+      updateTaskStatus();
+    } catch {
+      setIsLoading(false);
+      setIsAgentLoading(false);
     }
   };
 

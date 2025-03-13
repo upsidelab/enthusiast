@@ -20,7 +20,8 @@ const formSchema = z.object({
   languageModel: z.string().min(1),
   embeddingProvider: z.string().min(1),
   embeddingModel: z.string().min(1),
-  embeddingVectorSize: z.number().min(1).max(3072)
+  embeddingVectorSize: z.number().min(1).max(3072),
+  systemMessage: z.string().min(1)
 });
 
 type CreateDataSetFormSchema = z.infer<typeof formSchema>;
@@ -41,6 +42,7 @@ export function CreateDataSetForm() {
       embeddingProvider: undefined,
       embeddingModel: undefined,
       embeddingVectorSize: 512,
+      systemMessage: "You are a sales support agent, and you know everything about a company and their products."
     }
   });
 
@@ -248,6 +250,21 @@ export function CreateDataSetForm() {
                       <Input {...field} />
                     </FormControl>
                     <FormDescription>The size of the embedding vector to use</FormDescription>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="systemMessage"
+                render={({field}) => (
+                  <FormItem>
+                    <FormLabel>System Message</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      This message will be used by the agent as the system prompt.
+                    </FormDescription>
                   </FormItem>
                 )}
               />

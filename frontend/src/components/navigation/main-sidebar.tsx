@@ -9,7 +9,8 @@ import {
   BookTextIcon,
   HistoryIcon,
   PlugZapIcon,
-  UserIcon
+  UserIcon,
+  FolderSyncIcon
 } from "lucide-react";
 import { UserMenu } from "@/components/navigation/user-menu.tsx";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
@@ -29,8 +30,14 @@ export function MainSidebar() {
       link: `/data-sets/${dataSetId}/documents`,
       key: "documents",
       icon: <FileTextIcon />
+    },
+    account && account.isStaff && {
+      title: "Sync History",
+      link: `/data-sets/${dataSetId}/sync-history`,
+      key: "sync-history",
+      icon: <FolderSyncIcon />
     }
-  ];
+  ].filter(Boolean);
 
   const askItems: SidebarSectionItemProps[] = [
     {

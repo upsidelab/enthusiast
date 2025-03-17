@@ -1,5 +1,5 @@
 import { BaseApiClient } from "@/lib/api/base.ts";
-import { DataSet, CatalogSource, User } from "@/lib/types.ts";
+import { DataSet, CatalogSource, User, SyncStatus } from "@/lib/types.ts";
 
 export type DataSetResponse = {
   id: number | undefined;
@@ -266,5 +266,27 @@ export class DataSetsApiClient extends BaseApiClient {
         method: "POST"
       }
     );
+  }
+
+  async getLastSynchronization(): Promise<SyncStatus> {
+    const response = await fetch(
+      `${this.apiBase}/api/data_sets/sync_status/last`,
+      {
+        ...this._requestConfiguration(),
+        method: "GET"
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch last synchronization status");
+    }
+    return await response.json() as SyncStatus;
+  }
+
+  async getSynchronizations(dataSetId: number, page: number = 1): Promise<PaginatedResult<SyncStatus>> {
+    const response = await fetch(
+      `${this.apiBase}/api/data_sets/${dataSetId}/sync-history?page=${page}`,
+      this._requestConfiguration()
+    );
+    return await response.json() as Promise<PaginatedResult<SyncStatus>>;
   }
 }

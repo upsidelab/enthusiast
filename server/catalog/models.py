@@ -107,3 +107,16 @@ class Product(models.Model):
             models.UniqueConstraint(fields=['data_set', 'entry_id'], name='uq_product')
         ]
 
+
+class SyncStatus(models.Model):
+    data_set = models.ForeignKey(DataSet, related_name="sync_statuses", on_delete=models.CASCADE)
+    document_source = models.ForeignKey(DocumentSource, related_name="sync_statuses", on_delete=models.CASCADE,
+                                        null=True, blank=True)
+    product_source = models.ForeignKey(ProductSource, related_name="sync_statuses", on_delete=models.CASCADE, null=True,
+                                       blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=10)
+    error_message = models.TextField(blank=True)
+
+    class Meta:
+        db_table_comment = "Tracks the synchronization status of plugins for datasets."

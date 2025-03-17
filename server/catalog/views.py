@@ -2,7 +2,7 @@ from django.db.models import Count
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.generics import ListAPIView, ListCreateAPIView, GenericAPIView
+from rest_framework.generics import ListAPIView, ListCreateAPIView, GenericAPIView, RetrieveAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
@@ -15,9 +15,9 @@ from sync.tasks import sync_all_sources, sync_all_document_sources, sync_data_se
     sync_product_source
 from .embeddings import EmbeddingProviderRegistry
 from .language_models import LanguageModelRegistry
-from .models import DataSet, DocumentSource, ProductSource
+from .models import DataSet, DocumentSource, ProductSource, SyncStatus
 from .serializers import DataSetSerializer, DocumentSerializer, DocumentSourceSerializer, ProductSerializer, \
-    ProductSourceSerializer
+    ProductSourceSerializer, SyncStatusSerializer
 
 
 class SyncAllSourcesView(GenericAPIView):
@@ -362,3 +362,37 @@ class ConfigEmbeddingModelView(GenericAPIView):
         response_body = EmbeddingProviderRegistry().provider_class_by_name(provider_name).available_models()
 
         return Response(response_body)
+
+
+class LastSyncStatusView(RetrieveAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = SyncStatusSerializer
+
+    @swagger_auto_schema(
+        operation_description="Retrieve the last synchronization status"
+    )
+
+    def get(self, request, *args, **kwargs):
+        last_sync_status = SyncStatus.objects.order_by('-timestamp').first()
+        if last_sync_status:
+            serializer = self.serializer_class(last_sync_status)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({"detail": "No synchronization status found."}, status=status.HTTP_404_NOT_FOUND)
+
+
+class AllSyncStatusView(ListAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = SyncStatusSerializer
+    pagination_class = PageNumberPagination
+
+    @swagger_auto_schema(
+        operation_description="List all synchronization statuses for a data set",
+        manual_parameters=[
+            openapi.Parameter('data_set_id', openapi.IN_PATH, description="ID of the data set",
+                              type=openapi.TYPE_INTEGER)
+        ]
+    )
+
+    def get_queryset(self):
+        data_set_id = self.kwargs.get('data_set_id')
+        return SyncStatus.objects.filter(data_set_id=data_set_id).order_by('-timestamp')

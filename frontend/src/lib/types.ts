@@ -82,3 +82,13 @@ export type ProvidersConfig = {
   languageModelProviders: string[];
   embeddingProviders: string[];
 }
+
+export type SyncStatus = {
+  id: number;
+  data_set_id: number;
+  product_source_id?: number;
+  document_source_id?: number;
+  timestamp: string;
+  status: string;
+  error_message?: string;
+};

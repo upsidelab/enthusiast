@@ -8,7 +8,8 @@ import { DataSet } from "@/lib/types.ts";
 import { useState, useEffect } from "react";
 import { CheckCircle, XCircle, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner"
+import { toast } from "sonner";
+import { NewScheduleModal } from "@/components/data-sets/sync-schedule/new-schedule-modal.tsx";
 
 const api = new ApiClient(authenticationProviderInstance);
 
@@ -65,7 +66,7 @@ export function DataSetList() {
 
   const handleSyncDataSetAllSources = async (dataSet: DataSet) => {
     try {
-      setSyncInfo((prev) => ({ ...prev, s1tatus: "syncing" }));
+      setSyncInfo((prev) => ({ ...prev, status: "syncing" }));
       await api.dataSets().syncDataSetAllSources(dataSet.id);
       setSyncInfo({
         lastSyncTime: new Date(),
@@ -153,6 +154,9 @@ export function DataSetList() {
                 <Button onClick={() => {
                   handleSyncDataSetAllSources(item)
                 }} variant="secondary">Sync</Button>
+              </TableCell>
+              <TableCell>
+                <NewScheduleModal dataSetName={item.name} onScheduleCreated={() => { /* handle schedule creation */ }} />
               </TableCell>
              </TableRow>
           ))}

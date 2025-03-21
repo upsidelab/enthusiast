@@ -13,8 +13,7 @@ class ConversationManager:
         Engine calculates embedding for a question and using similarity search collects documents that may contain
         relevant content.
         """
-        agent = Agent(data_set=conversation.data_set,
-                      messages=conversation.get_messages())
+        agent = Agent(conversation=conversation)
         response = agent.process_user_request(question_message)
 
         return response["output"]

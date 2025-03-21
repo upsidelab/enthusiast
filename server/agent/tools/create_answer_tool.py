@@ -35,7 +35,7 @@ CREATE_CONTENT_PROMPT_TEMPLATE = """
 
 
 class CreateAnswerToolInput(BaseModel):
-    query: str = Field(description="user's request")
+    full_user_request: str = Field(description="user's full request")
 
 
 class CreateAnswerTool(CustomTool):
@@ -94,10 +94,10 @@ class CreateAnswerTool(CustomTool):
             document_context = ' '.join(words)
         return document_context
 
-    def _run(self, query: str):
+    def _run(self, full_user_request: str):
         document_retriever = DocumentRetriever(data_set=self.data_set)
-        relevant_documents = document_retriever.find_documents_matching_query(query)
-        relevant_products = ProductRetriever(data_set=self.data_set).find_products_matching_query(query)
+        relevant_documents = document_retriever.find_documents_matching_query(full_user_request)
+        relevant_products = ProductRetriever(data_set=self.data_set).find_products_matching_query(full_user_request)
 
         product_context = serializers.serialize("json", relevant_products)
 
@@ -113,7 +113,7 @@ class CreateAnswerTool(CustomTool):
                 document_context = self._get_document_context(relevant_documents, retry)
 
                 llm_result = chain.invoke({
-                    "query": query,
+                    "query": full_user_request,
                     "document_context": document_context,
                     "product_context": product_context
                 })

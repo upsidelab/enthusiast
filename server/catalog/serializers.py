@@ -7,7 +7,7 @@ class DataSetSerializer(serializers.ModelSerializer):
     class Meta:
         model = DataSet
         fields = ['id', 'name', 'language_model_provider', 'language_model', 'embedding_provider', 'embedding_model',
-                  'embedding_vector_dimensions']
+                  'embedding_vector_dimensions', 'system_message']
 
 
 class ProductSerializer(serializers.ModelSerializer):

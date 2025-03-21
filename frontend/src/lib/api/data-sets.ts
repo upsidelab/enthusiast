@@ -9,6 +9,7 @@ export type DataSetResponse = {
   embedding_provider: string;
   embedding_model: string;
   embedding_vector_dimensions: number;
+  system_message: string;
 }
 
 export type CreateDataSetPayload = DataSetResponse;
@@ -46,6 +47,7 @@ export class DataSetsApiClient extends BaseApiClient {
       embedding_provider: dataSet.embeddingProvider,
       embedding_model: dataSet.embeddingModel,
       embedding_vector_dimensions: dataSet.embeddingVectorSize,
+      system_message: dataSet.systemMessage
     }
 
     const response = await fetch(`${this.apiBase}/api/data_sets`,

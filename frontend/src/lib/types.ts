@@ -11,6 +11,7 @@ export type DataSet = {
   embeddingProvider: string;
   embeddingModel: string;
   embeddingVectorSize: number;
+  systemMessage: string;
 }
 
 export type Product = {

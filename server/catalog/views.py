@@ -1,3 +1,6 @@
+import json
+
+from django_celery_beat.models import PeriodicTask, CrontabSchedule
 from django.db.models import Count
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -396,3 +399,56 @@ class AllSyncStatusView(ListAPIView):
     def get_queryset(self):
         data_set_id = self.kwargs.get('data_set_id')
         return SyncStatus.objects.filter(data_set_id=data_set_id).order_by('-timestamp')
+
+
+class SyncScheduleView(GenericAPIView):
+    permission_classes = [IsAdminUser]
+
+    def post(self, request, *args, **kwargs):
+        data_set_id = kwargs['data_set_id']
+        schedule_data = request.data
+        time = schedule_data.get('time')
+        frequency = schedule_data.get('frequency')
+        day_of_week = schedule_data.get('day_of_week')[:3].lower()
+        enabled = schedule_data.get('enabled', True)
+
+        hour, minute = self._parse_time(time)
+
+        if frequency == 'daily':
+            day_of_week = '*'
+        elif frequency == 'monthly':
+            day_of_week = '*'
+            day_of_month = '1'
+
+        schedule, created = CrontabSchedule.objects.get_or_create(
+            minute=minute,
+            hour=hour,
+            day_of_week=day_of_week,
+            day_of_month=day_of_month if frequency == 'monthly' else '*',
+            month_of_year='*'
+        )
+
+        task_name = f'sync_data_set_{data_set_id}_all_sources'
+        task, created = PeriodicTask.objects.get_or_create(
+            crontab=schedule,
+            name=task_name,
+            task='sync.tasks.sync_data_set_all_sources',
+            args=json.dumps([data_set_id]),
+            defaults={'enabled': enabled}
+        )
+
+        if not created:
+            task.enabled = enabled
+            task.save()
+
+        return Response({"detail": "Sync schedule created/updated successfully."}, status=status.HTTP_200_OK)
+
+    def _parse_time(self, time_str):
+        time_parts = time_str.split(':')
+        hour = int(time_parts[0])
+        minute = int(time_parts[1].split(' ')[0])
+        if 'PM' in time_str and hour != 12:
+            hour += 12
+        elif 'AM' in time_str and hour == 12:
+            hour = 0
+        return hour, minute

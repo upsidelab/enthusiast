@@ -7,9 +7,10 @@ import { Calendar } from "lucide-react";
 export interface NewScheduleModalProps {
   onScheduleCreated: () => void;
   dataSetName: string;
+  dataSetId: number;
 }
 
-export function NewScheduleModal({ onScheduleCreated, dataSetName }: NewScheduleModalProps) {
+export function NewScheduleModal({ onScheduleCreated, dataSetName, dataSetId }: NewScheduleModalProps) {
   const [open, setOpen] = useState(false);
 
   const handleScheduleCreated = () => {
@@ -28,7 +29,7 @@ export function NewScheduleModal({ onScheduleCreated, dataSetName }: NewSchedule
         <DialogHeader>
           <DialogTitle>Sync schedule for {dataSetName}</DialogTitle>
         </DialogHeader>
-        <NewScheduleForm onScheduleCreated={handleScheduleCreated} />
+        <NewScheduleForm dataSetId={dataSetId} onScheduleCreated={handleScheduleCreated} />
       </DialogContent>
     </Dialog>
   );

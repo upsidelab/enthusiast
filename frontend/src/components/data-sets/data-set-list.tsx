@@ -156,7 +156,10 @@ export function DataSetList() {
                 }} variant="secondary">Sync</Button>
               </TableCell>
               <TableCell>
-                <NewScheduleModal dataSetName={item.name} onScheduleCreated={() => { /* handle schedule creation */ }} />
+                <NewScheduleModal
+                  dataSetName={item.name}
+                  dataSetId={item.id}
+                />
               </TableCell>
              </TableRow>
           ))}

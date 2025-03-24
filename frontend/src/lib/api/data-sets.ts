@@ -289,4 +289,26 @@ export class DataSetsApiClient extends BaseApiClient {
     );
     return await response.json() as Promise<PaginatedResult<SyncStatus>>;
   }
+
+  async createSyncSchedule(
+    dataSetId: number,
+    schedule: CreateSyncSchedulePayload
+  ): Promise<SyncSchedule> {
+    const response = await fetch(
+      `${this.apiBase}/api/data_sets/${dataSetId}/sync_schedule`,
+      {
+        ...this._requestConfiguration(),
+        method: "POST",
+        body: JSON.stringify(schedule),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Error ${response.status}: ${errorText}`);
+    }
+
+    return await response.json();
+  }
+
 }

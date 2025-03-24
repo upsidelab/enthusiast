@@ -3,45 +3,55 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button.tsx";
-import { DataSetsFields } from "./data-sets-fields.tsx";
-import { DetailsFields } from "./details-fields.tsx";
+import { TimePickerField } from "./time-picker-field.tsx";
+import { ScheduleFrequencyFields } from "./schedule-frequency-field.tsx";
 import { ApiClient } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
-import { ScheduleFrequencyFields } from "./schedule-frequency-field.tsx";
-import { TimePickerField } from "./time-picker-field.tsx";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible.tsx";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { useState } from "react";
 import { Switch } from "@/components/ui/switch.tsx";
+import { toast } from "sonner";
 
 const api = new ApiClient(authenticationProviderInstance);
 
-const formSchema = z.object({
-  time: z.string().trim().min(1, { message: "Please select a schedule time." }),
+const formSchema = (isScheduleEnabled: boolean) => z.object({
+  time: isScheduleEnabled ? z.string().trim().min(1, { message: "Please select a schedule time." }) : z.string().optional(),
+  frequency: z.string().optional(),
+  day_of_week: z.string().optional(),
+  enabled: z.boolean(),
 });
 
-type CreateScheduleFormSchema = z.infer<typeof formSchema>;
+type CreateScheduleFormSchema = z.infer<ReturnType<typeof formSchema>>;
 
 export interface NewScheduleFormProps {
+  dataSetId: number;
   onScheduleCreated: () => void;
 }
 
-export function NewScheduleForm({ onScheduleCreated }: NewScheduleFormProps) {
+export function NewScheduleForm({ dataSetId, onScheduleCreated }: NewScheduleFormProps) {
+  const [isScheduleEnabled, setIsScheduleEnabled] = useState<boolean>(true);
+
   const form = useForm<CreateScheduleFormSchema>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema(isScheduleEnabled)),
     defaultValues: {
       time: "",
+      frequency: "weekly",
+      day_of_week: "sunday",
+      enabled: true,
     }
   });
 
   const [advancedOpen, setAdvancedOpen] = useState<boolean>(false);
-  const [isScheduleEnabled, setIsScheduleEnabled] = useState<boolean>(true);
 
   const handleSubmit = async (values: CreateScheduleFormSchema) => {
-    if (isScheduleEnabled) {
-      await api.schedules().createSchedule(values);
-      onScheduleCreated();
-    }
+    const payload = {
+      ...values,
+      enabled: isScheduleEnabled,
+    };
+    await api.dataSets().createSyncSchedule(dataSetId, payload);
+    toast.success("Sync schedule applied successfully.");
+    onScheduleCreated();
   };
 
   return (

@@ -20,7 +20,7 @@ export function ScheduleFrequencyFields({ form }: ScheduleFrequencyFieldsProps) 
     setSelectedDay(day);
   };
 
-  const showDaySelection = frequency !== "daily";
+  const showDaySelection = frequency == "weekly";
 
   return (
     <>
@@ -43,7 +43,6 @@ export function ScheduleFrequencyFields({ form }: ScheduleFrequencyFieldsProps) 
                     <SelectContent>
                       <SelectItem value="daily">Daily</SelectItem>
                       <SelectItem value="weekly">Once a week</SelectItem>
-                      <SelectItem value="biweekly">Every two weeks</SelectItem>
                       <SelectItem value="monthly">Monthly</SelectItem>
                     </SelectContent>
                   </Select>

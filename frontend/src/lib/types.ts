@@ -92,3 +92,11 @@ export type SyncStatus = {
   status: string;
   error_message?: string;
 };
+
+export type SyncSchedule = {
+  id: number;
+  time: string;
+  frequency: string;
+  day_of_week?: string;
+  enabled: boolean;
+};

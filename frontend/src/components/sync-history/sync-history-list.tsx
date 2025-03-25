@@ -3,21 +3,22 @@ import { ApiClient } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
 import { PaginatedTable } from "@/components/util/paginated-table.tsx";
-import { SyncStatus, PaginatedResult } from "@/lib/types.ts";
+import { SyncStatus } from "@/lib/types.ts";
 import { CheckCircle, XCircle } from "lucide-react";
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog.tsx";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog.tsx";
 import { Button } from "@/components/ui/button.tsx";
 
 const api = new ApiClient(authenticationProviderInstance);
 
 export function SyncHistoryList() {
-  const { dataSetId } = useApplicationContext();
+  const context = useApplicationContext();
+  const dataSetId = context?.dataSetId;
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const loadSyncHistory = async (page: number) => {
-    if (dataSetId === null) {
+    if (dataSetId === null || dataSetId === undefined) {
       return;
     }
 

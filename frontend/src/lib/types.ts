@@ -52,7 +52,7 @@ export type User = {
 
 export type SourcePlugin = {
   plugin_name: string;
-} 
+}
 
 export type Conversation = {
   id: number;
@@ -95,6 +95,13 @@ export type SyncStatus = {
 
 export type SyncSchedule = {
   id: number;
+  time: string;
+  frequency: string;
+  day_of_week?: string;
+  enabled: boolean;
+};
+
+export type SyncSchedulePayload = {
   time: string;
   frequency: string;
   day_of_week?: string;

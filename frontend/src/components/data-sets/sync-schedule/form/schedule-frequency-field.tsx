@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 export interface ScheduleFrequencyFieldsProps {
-  form: UseFormReturn<any, any, any>; // Adjust types if needed
+  form: UseFormReturn<any, any, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export function ScheduleFrequencyFields({ form }: ScheduleFrequencyFieldsProps) {

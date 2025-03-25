@@ -24,13 +24,13 @@ const formSchema = (isScheduleEnabled: boolean) => z.object({
 
 type CreateScheduleFormSchema = z.infer<ReturnType<typeof formSchema>>;
 
-export interface NewScheduleFormProps {
+export interface SyncScheduleFormProps {
   dataSetId: number;
   onScheduleCreated: () => void;
   initialValues: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
-export function NewScheduleForm({ dataSetId, onScheduleCreated, initialValues }: NewScheduleFormProps) {
+export function SyncScheduleForm({ dataSetId, onScheduleCreated, initialValues }: SyncScheduleFormProps) {
   const [isScheduleEnabled, setIsScheduleEnabled] = useState<boolean>(false);
   const resetDone = useRef(false);
 
@@ -57,6 +57,8 @@ export function NewScheduleForm({ dataSetId, onScheduleCreated, initialValues }:
   const handleSubmit = async (values: CreateScheduleFormSchema) => {
     const payload = {
       ...values,
+      time: values.time || "",
+      frequency: values.frequency || "weekly",
       enabled: isScheduleEnabled,
     };
 
@@ -69,7 +71,7 @@ export function NewScheduleForm({ dataSetId, onScheduleCreated, initialValues }:
         toast.success("Sync schedule applied successfully.");
       }
       onScheduleCreated();
-    } catch (error) {
+    } catch {
       toast.error("An error occurred while saving the schedule.");
     }
   };

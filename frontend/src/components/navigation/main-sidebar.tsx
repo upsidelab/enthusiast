@@ -31,13 +31,13 @@ export function MainSidebar() {
       key: "documents",
       icon: <FileTextIcon />
     },
-    account && account.isStaff && {
+    account && account.isStaff ? {
       title: "Sync History",
       link: `/data-sets/${dataSetId}/sync-history`,
       key: "sync-history",
       icon: <FolderSyncIcon />
-    }
-  ].filter(Boolean);
+    } : null
+  ].filter(Boolean) as SidebarSectionItemProps[];
 
   const askItems: SidebarSectionItemProps[] = [
     {

@@ -1,5 +1,5 @@
 import { BaseApiClient } from "@/lib/api/base.ts";
-import { DataSet, CatalogSource, User, SyncStatus } from "@/lib/types.ts";
+import { DataSet, CatalogSource, User, SyncStatus, PaginatedResult, SyncSchedule, SyncSchedulePayload } from "@/lib/types.ts";
 
 export type DataSetResponse = {
   id: number | undefined;
@@ -287,7 +287,7 @@ export class DataSetsApiClient extends BaseApiClient {
       `${this.apiBase}/api/data_sets/${dataSetId}/sync-history?page=${page}`,
       this._requestConfiguration()
     );
-    return await response.json() as Promise<PaginatedResult<SyncStatus>>;
+    return await response.json() as PaginatedResult<SyncStatus>;
   }
 
   async getSyncSchedule(dataSetId: number): Promise<SyncSchedule> {
@@ -295,15 +295,12 @@ export class DataSetsApiClient extends BaseApiClient {
       `${this.apiBase}/api/data_sets/${dataSetId}/sync_schedule`,
       this._requestConfiguration()
     );
-    if (!response.ok) {
-      throw new Error("Failed to fetch sync schedule");
-    }
     return await response.json() as SyncSchedule;
   }
 
   async createSyncSchedule(
     dataSetId: number,
-    schedule: CreateSyncSchedulePayload
+    schedule: SyncSchedulePayload
   ): Promise<SyncSchedule> {
     const response = await fetch(
       `${this.apiBase}/api/data_sets/${dataSetId}/sync_schedule`,
@@ -319,12 +316,12 @@ export class DataSetsApiClient extends BaseApiClient {
       throw new Error(`Error ${response.status}: ${errorText}`);
     }
 
-    return await response.json();
+    return await response.json() as SyncSchedule;
   }
 
   async updateSyncSchedule(
     dataSetId: number,
-    schedule: CreateSyncSchedulePayload
+    schedule: SyncSchedulePayload
   ): Promise<SyncSchedule> {
     const response = await fetch(
       `${this.apiBase}/api/data_sets/${dataSetId}/sync_schedule`,

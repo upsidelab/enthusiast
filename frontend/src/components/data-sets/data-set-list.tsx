@@ -4,20 +4,18 @@ import { ApiClient } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
 import { useNavigate } from "react-router-dom";
-import { DataSet } from "@/lib/types.ts";
+import { DataSet, SyncStatus } from "@/lib/types.ts";
 import { useState, useEffect } from "react";
 import { CheckCircle, XCircle, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { NewScheduleModal } from "@/components/data-sets/sync-schedule/new-schedule-modal.tsx";
+import { SyncScheduleModal } from "@/components/data-sets/sync-schedule/sync-schedule-modal.tsx";
 
 const api = new ApiClient(authenticationProviderInstance);
 
-const SyncStatus = "success" | "error" | "idle" | "syncing";
-
 interface SyncInfo {
   lastSyncTime: Date | null;
-  status: SyncStatus;
+  status: string;
   errorMessage?: string;
 }
 
@@ -33,13 +31,13 @@ export function DataSetList() {
   useEffect(() => {
     const fetchLastSyncInfo = async () => {
       try {
-        const lastSyncData = await api.dataSets().getLastSynchronization();
+        const lastSyncData: SyncStatus = await api.dataSets().getLastSynchronization();
         setSyncInfo({
           lastSyncTime: new Date(lastSyncData.timestamp),
           status: lastSyncData.status,
           errorMessage: lastSyncData.error_message,
         });
-      } catch (error) {
+      } catch {
         setSyncInfo({
           lastSyncTime: null,
           status: "idle",
@@ -74,7 +72,7 @@ export function DataSetList() {
   const handleSyncDataSetAllSources = async (dataSet: DataSet) => {
     try {
       setSyncInfo((prev) => ({ ...prev, status: "syncing" }));
-      await api.dataSets().syncDataSetAllSources(dataSet.id);
+      await api.dataSets().syncDataSetAllSources(dataSet.id!);
       setSyncInfo({
         lastSyncTime: new Date(),
         status: "success",
@@ -116,7 +114,7 @@ export function DataSetList() {
                 <CheckCircle className="h-3.5 w-3.5" />
                 <span>{formatSyncTime(syncInfo.lastSyncTime)}</span>
               </Badge>
-            ) : syncInfo.status === "failure" ? (
+            ) : syncInfo.status === "error" ? (
               <Badge
                 variant="outline"
                 className="flex items-center gap-1 bg-red-50 text-red-700 border-red-200"
@@ -168,9 +166,9 @@ export function DataSetList() {
                 }} variant="secondary">Sync</Button>
               </TableCell>
               <TableCell>
-                <NewScheduleModal
+                <SyncScheduleModal
                   dataSetName={item.name}
-                  dataSetId={item.id}
+                  dataSetId={item.id!}
                 />
               </TableCell>
              </TableRow>

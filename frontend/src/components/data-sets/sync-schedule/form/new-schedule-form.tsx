@@ -9,7 +9,7 @@ import { ApiClient } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible.tsx";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Switch } from "@/components/ui/switch.tsx";
 import { toast } from "sonner";
 
@@ -27,22 +27,32 @@ type CreateScheduleFormSchema = z.infer<ReturnType<typeof formSchema>>;
 export interface NewScheduleFormProps {
   dataSetId: number;
   onScheduleCreated: () => void;
+  initialValues: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
-export function NewScheduleForm({ dataSetId, onScheduleCreated }: NewScheduleFormProps) {
-  const [isScheduleEnabled, setIsScheduleEnabled] = useState<boolean>(true);
+export function NewScheduleForm({ dataSetId, onScheduleCreated, initialValues }: NewScheduleFormProps) {
+  const [isScheduleEnabled, setIsScheduleEnabled] = useState<boolean>(false);
+  const resetDone = useRef(false);
 
   const form = useForm<CreateScheduleFormSchema>({
     resolver: zodResolver(formSchema(isScheduleEnabled)),
     defaultValues: {
-      time: "",
-      frequency: "weekly",
-      day_of_week: "sunday",
-      enabled: true,
+      time: initialValues?.time || "",
+      frequency: initialValues?.frequency || "weekly",
+      day_of_week: initialValues?.day_of_week || "sun",
+      enabled: initialValues?.enabled || false,
     }
   });
 
   const [advancedOpen, setAdvancedOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (initialValues && !resetDone.current) {
+      form.reset(initialValues);
+      setIsScheduleEnabled(initialValues.enabled);
+      resetDone.current = true;
+    }
+  }, [initialValues, form]);
 
   const handleSubmit = async (values: CreateScheduleFormSchema) => {
     const payload = {

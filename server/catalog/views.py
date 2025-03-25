@@ -404,6 +404,19 @@ class AllSyncStatusView(ListAPIView):
 class SyncScheduleView(GenericAPIView):
     permission_classes = [IsAdminUser]
 
+    @swagger_auto_schema(
+        operation_description="Create a new sync schedule",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'time': openapi.Schema(type=openapi.TYPE_STRING, description='Time for the schedule'),
+                'frequency': openapi.Schema(type=openapi.TYPE_STRING, description='Frequency of the schedule'),
+                'day_of_week': openapi.Schema(type=openapi.TYPE_STRING, description='Day of the week for weekly schedule'),
+                'enabled': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Whether the schedule is enabled'),
+            },
+            required=['time', 'frequency', 'enabled']
+        )
+    )
     def post(self, request, *args, **kwargs):
         data_set_id = kwargs['data_set_id']
         schedule_data = request.data
@@ -442,6 +455,76 @@ class SyncScheduleView(GenericAPIView):
             task.save()
 
         return Response({"detail": "Sync schedule created/updated successfully."}, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        operation_description="Update an existing sync schedule",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'time': openapi.Schema(type=openapi.TYPE_STRING, description='Time for the schedule'),
+                'frequency': openapi.Schema(type=openapi.TYPE_STRING, description='Frequency of the schedule'),
+                'day_of_week': openapi.Schema(type=openapi.TYPE_STRING,
+                                              description='Day of the week for weekly schedule'),
+                'enabled': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Whether the schedule is enabled'),
+            },
+            required=['time', 'frequency', 'enabled']
+        )
+    )
+
+    def patch(self, request, *args, **kwargs):
+        data_set_id = kwargs['data_set_id']
+        schedule_data = request.data
+        time = schedule_data.get('time')
+        frequency = schedule_data.get('frequency')
+        day_of_week = schedule_data.get('day_of_week')[:3].lower()
+        enabled = schedule_data.get('enabled', True)
+
+        hour, minute = self._parse_time(time)
+
+        if frequency == 'daily':
+            day_of_week = '*'
+        elif frequency == 'monthly':
+            day_of_week = '*'
+            day_of_month = '1'
+
+        try:
+            task = PeriodicTask.objects.get(name__contains=f'sync_data_set_{data_set_id}_all_sources')
+            schedule = task.crontab
+            schedule.minute = minute
+            schedule.hour = hour
+            schedule.day_of_week = day_of_week
+            schedule.day_of_month = day_of_month if frequency == 'monthly' else '*'
+            schedule.save()
+
+            task.enabled = enabled
+            task.save()
+
+            return Response({"detail": "Sync schedule updated successfully."}, status=status.HTTP_200_OK)
+        except PeriodicTask.DoesNotExist:
+            return Response({"detail": "Sync schedule not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    def get(self, request, *args, **kwargs):
+        data_set_id = kwargs['data_set_id']
+        try:
+            task = PeriodicTask.objects.get(name__contains=f'sync_data_set_{data_set_id}_all_sources')
+            schedule = task.crontab
+            hour = int(schedule.hour)
+            minute = int(schedule.minute)
+            period = 'PM' if hour >= 12 else 'AM'
+            if hour > 12:
+                hour -= 12
+            elif hour == 0:
+                hour = 12
+            time_str = f"{hour}:{minute:02d} {period}"
+            schedule_data = {
+                "time": time_str,
+                "frequency": "monthly" if schedule.day_of_month != '*' else "daily" if schedule.day_of_week == '*' else "weekly",
+                "day_of_week": schedule.day_of_week,
+                "enabled": task.enabled,
+            }
+            return Response(schedule_data, status=status.HTTP_200_OK)
+        except PeriodicTask.DoesNotExist:
+            return Response({"detail": "Sync schedule not found."}, status=status.HTTP_404_NOT_FOUND)
 
     def _parse_time(self, time_str):
         time_parts = time_str.split(':')

@@ -290,6 +290,17 @@ export class DataSetsApiClient extends BaseApiClient {
     return await response.json() as Promise<PaginatedResult<SyncStatus>>;
   }
 
+  async getSyncSchedule(dataSetId: number): Promise<SyncSchedule> {
+    const response = await fetch(
+      `${this.apiBase}/api/data_sets/${dataSetId}/sync_schedule`,
+      this._requestConfiguration()
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch sync schedule");
+    }
+    return await response.json() as SyncSchedule;
+  }
+
   async createSyncSchedule(
     dataSetId: number,
     schedule: CreateSyncSchedulePayload

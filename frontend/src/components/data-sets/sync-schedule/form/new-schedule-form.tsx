@@ -59,9 +59,19 @@ export function NewScheduleForm({ dataSetId, onScheduleCreated, initialValues }:
       ...values,
       enabled: isScheduleEnabled,
     };
-    await api.dataSets().createSyncSchedule(dataSetId, payload);
-    toast.success("Sync schedule applied successfully.");
-    onScheduleCreated();
+
+    try {
+      if (initialValues) {
+        await api.dataSets().updateSyncSchedule(dataSetId, payload);
+        toast.success("Sync schedule updated successfully.");
+      } else {
+        await api.dataSets().createSyncSchedule(dataSetId, payload);
+        toast.success("Sync schedule applied successfully.");
+      }
+      onScheduleCreated();
+    } catch (error) {
+      toast.error("An error occurred while saving the schedule.");
+    }
   };
 
   return (

@@ -28,6 +28,7 @@ export function DataSetList() {
     lastSyncTime: null,
     status: "idle",
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchLastSyncInfo = async () => {
@@ -39,11 +40,17 @@ export function DataSetList() {
           errorMessage: lastSyncData.error_message,
         });
       } catch (error) {
+        setSyncInfo({
+          lastSyncTime: null,
+          status: "idle",
+        });
+      } finally {
+        setLoading(false);
       }
-  };
+    };
 
-  fetchLastSyncInfo();
-}, []);
+    fetchLastSyncInfo();
+  }, []);
 
   const handleSyncAllSources = async () => {
     try {
@@ -94,7 +101,12 @@ export function DataSetList() {
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">Last synchronization:</span>
-            {syncInfo.status === "syncing" ? (
+            {loading ? (
+              <Badge variant="outline" className="flex items-center gap-1 bg-gray-50 text-gray-700 border-gray-200">
+                <Clock className="h-3.5 w-3.5" />
+                <span>Loading...</span>
+              </Badge>
+            ) : syncInfo.status === "syncing" ? (
               <Badge variant="outline" className="flex items-center gap-1 bg-blue-50 text-blue-700 border-blue-200">
                 <Clock className="h-3.5 w-3.5" />
                 <span>Syncing...</span>

@@ -2,19 +2,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button.tsx";
 import { useState, useEffect } from "react";
 import { NewScheduleForm } from "./form/new-schedule-form.tsx";
-import { Calendar } from "lucide-react";
 import { ApiClient } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 
 const api = new ApiClient(authenticationProviderInstance);
 
 export interface NewScheduleModalProps {
-  onScheduleCreated: () => void;
   dataSetName: string;
   dataSetId: number;
 }
 
-export function NewScheduleModal({ onScheduleCreated, dataSetName, dataSetId }: NewScheduleModalProps) {
+export function NewScheduleModal({ dataSetName, dataSetId }: NewScheduleModalProps) {
   const [open, setOpen] = useState(false);
   const [initialValues, setInitialValues] = useState(null);
 
@@ -32,23 +30,18 @@ export function NewScheduleModal({ onScheduleCreated, dataSetName, dataSetId }: 
     }
   }, [open, dataSetId]);
 
-  const handleScheduleCreated = () => {
-    setOpen(false);
-    onScheduleCreated();
-  };
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="secondary">
-          <Calendar className="h-4 w-4" />
+          Schedule
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Sync schedule for {dataSetName}</DialogTitle>
         </DialogHeader>
-        <NewScheduleForm dataSetId={dataSetId} onScheduleCreated={handleScheduleCreated} initialValues={initialValues} />
+        <NewScheduleForm dataSetId={dataSetId} onScheduleCreated={() => setOpen(false)} initialValues={initialValues} />
       </DialogContent>
     </Dialog>
   );

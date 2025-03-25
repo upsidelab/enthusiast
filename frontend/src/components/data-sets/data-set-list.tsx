@@ -116,14 +116,14 @@ export function DataSetList() {
                 <CheckCircle className="h-3.5 w-3.5" />
                 <span>{formatSyncTime(syncInfo.lastSyncTime)}</span>
               </Badge>
-            ) : syncInfo.status === "error" ? (
+            ) : syncInfo.status === "failure" ? (
               <Badge
                 variant="outline"
                 className="flex items-center gap-1 bg-red-50 text-red-700 border-red-200"
                 title={syncInfo.errorMessage}
               >
                 <XCircle className="h-3.5 w-3.5" />
-                <span>{formatSyncTime(syncInfo.lastSyncTime)} - Failed</span>
+                <span>{formatSyncTime(syncInfo.lastSyncTime)}</span>
               </Badge>
             ) : (
               <Badge variant="outline" className="flex items-center gap-1">

@@ -9,7 +9,7 @@ import { useState, useEffect } from "react";
 import { CheckCircle, XCircle, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { SyncScheduleModal } from "@/components/data-sets/sync-schedule/sync-schedule-modal.tsx";
+import { SyncScheduleModal } from "@/components/data-sets/sync-schedule-modal.tsx";
 
 const api = new ApiClient(authenticationProviderInstance);
 

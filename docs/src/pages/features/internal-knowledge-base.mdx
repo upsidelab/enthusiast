@@ -1,0 +1,106 @@
+import { FeaturePageLayout } from '@site/src/components/feature/feature-page-layout';
+
+export const content = {
+  meta: {
+    title: "AI-Powered Internal Knowledge Base for E-Commerce | Enthusiast by Upside",
+    description: "Discover how Enthusiast, an open-source AI agent, transforms your internal product knowledge base. Boost sales team productivity and streamline access to complex catalog info."
+  },
+  hero: {
+    title: "Internal Knowledge Base AI for E-Commerce Teams",
+    subtitle: "Enthusiast helps e-commerce companies surface accurate product knowledge instantly. Open-source, customizable, and ready to deploy."
+  },
+  problem: {
+    title: "The Challenge with Internal Knowledge Bases",
+    points: [
+      "Slow onboarding for new team members",
+      "Repeated questions drain time from product or support teams",
+      "Product info scattered across PDFs, spreadsheets, and internal docs",
+      "Inconsistent answers due to outdated or siloed data"
+    ]
+  },
+  solution: {
+    title: "Enthusiast Solves Knowledge Sharing with AI",
+    description: "Enthusiast transforms your existing product data into a dynamic, searchable knowledge base. By connecting to your catalog and ingesting internal documentation, it can answer product-related questions in natural language—without requiring manual updates.\n\nBuilt for developers who want control, Enthusiast is open-source, works with multiple LLMs, and can be self-hosted for full data ownership."
+  },
+  howItWorks: {
+    title: "How It Works",
+    subtitle: "AI That Understands Your Products",
+    steps: [
+      "Connect your product catalog and internal documents",
+      "Configure or customize prompt templates for common queries",
+      "Embed Enthusiast into your internal tools or chat workflows",
+      "Let your team ask questions and get reliable, AI-generated answers",
+      "Adjust prompts or models over time to improve precision"
+    ]
+  },
+  benefits: {
+    title: "Why Enthusiast for Internal Knowledge Bases",
+    items: [
+      {
+        title: "Fast deployment with built-in integrations",
+        description: "Pre-built integrations for popular e-commerce platforms"
+      },
+      {
+        title: "Fully self-hosted",
+        description: "Including LLM support, for full control over your data"
+      },
+      {
+        title: "Open-source and developer-friendly",
+        description: "Built on a familiar Python/Django/PostgreSQL/React stack"
+      },
+      {
+        title: "Customizable prompts and workflows",
+        description: "So your knowledge base fits your exact business logic"
+      }
+    ]
+  },
+  useCase: {
+    title: "Use Case in Action",
+    subtitle: "Real-World Example: B2B Electronics Supplier",
+    description: "A large electronics distributor uses Enthusiast to support its internal sales team. With over 20,000 SKUs and complex technical specs, the team struggled to keep answers consistent. After deploying Enthusiast, reps can now ask product questions in natural language and get answers grounded in up-to-date catalog data and internal training materials—all without pinging the product team."
+  },
+  technical: {
+    title: "Technical Flexibility",
+    subtitle: "Built for Developers and Teams That Need Control",
+    features: [
+      "Open-source license: fork, audit, and adapt as needed",
+      "Runs on a Python/Django/PostgreSQL/React stack",
+      "Works with OpenAI APIs or fully self-hosted models like Mistral or Llama",
+      "Design your own prompt workflows or swap in your preferred LLM infrastructure"
+    ]
+  },
+  cta: {
+    title: "Build a smarter internal knowledge base—on your terms.",
+    description: "Get started with Enthusiast today and transform how your team accesses product knowledge."
+  },
+  faq: {
+    title: "Frequently Asked Questions",
+    questions: [
+      {
+        question: "How does Enthusiast integrate with my e-commerce platform?",
+        answer: "It supports pre-built connectors for common platforms like Shopify and Magento. You can also use the API to integrate with custom systems."
+      },
+      {
+        question: "Can it be trained on internal documents?",
+        answer: "Yes. You can ingest internal PDFs, manuals, or spreadsheets. Customize how content is parsed and used in responses."
+      },
+      {
+        question: "Is it secure and self-hosted?",
+        answer: "Absolutely. Enthusiast can run entirely on your infrastructure, including using a self-hosted LLM. No data needs to leave your servers."
+      },
+      {
+        question: "What LLMs can I use with Enthusiast?",
+        answer: "It supports OpenAI, Mistral, Llama, and other models via API or local deployment. You choose the model that fits your needs."
+      },
+      {
+        question: "Can I customize the behavior of the AI?",
+        answer: "Yes. Modify prompts, build new workflows, or add business logic—it's all transparent and configurable."
+      }
+    ]
+  },
+  footerCta: {
+    title: "Open-source, customizable, and developer-ready."
+  }
+};
+
+<FeaturePageLayout content={content} />

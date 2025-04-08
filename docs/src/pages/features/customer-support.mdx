@@ -1,0 +1,103 @@
+import { FeaturePageLayout } from '@site/src/components/feature/feature-page-layout';
+
+export const content = {
+  meta: {
+    title: "AI Customer Support for E-Commerce | Enthusiast by Upside",
+    description: "Automate and streamline customer support with Enthusiast — an open-source AI agent for e-commerce. Integrate with your catalog, host it yourself, and tailor responses to your brand."
+  },
+  hero: {
+    title: "AI-Powered Customer Support for E-Commerce",
+    subtitle: "Enthusiast helps e-commerce companies respond faster and more accurately to customer inquiries. Fully customizable, self-hosted, and built to fit your needs."
+  },
+  problem: {
+    title: "The Challenge with Customer Support in E-Commerce",
+    points: [
+      "High ticket volume, especially during peak seasons",
+      "Difficulty accessing accurate product information",
+      "Repetitive questions eating up agent time",
+      "Risk of inconsistent or off-brand responses",
+      "Concerns about data privacy with third-party AI tools"
+    ]
+  },
+  solution: {
+    title: "Enthusiast Solves Customer Support with AI",
+    description: "Enthusiast connects directly to your product catalog and support content to intelligently respond to customer questions. Whether used to assist human agents or automate answers, it's built for developers who want full control—from hosting to prompt logic."
+  },
+  howItWorks: {
+    title: "How It Works",
+    subtitle: "AI That Understands Your Products and Customers",
+    steps: [
+      "Connect your product catalog, FAQs, and support docs",
+      "Choose your preferred LLM: OpenAI or a self-hosted model like Mistral",
+      "Customize prompts to reflect your support tone and policies",
+      "Deploy as a chatbot, internal tool, or agent copilot",
+      "Continuously refine based on real conversations and feedback"
+    ]
+  },
+  benefits: {
+    title: "Why Enthusiast for Customer Support",
+    items: [
+      {
+        title: "Faster Response Times",
+        description: "Automatically draft or send accurate replies based on your real product data"
+      },
+      {
+        title: "Open-Source and Fully Customizable",
+        description: "Adapt prompts, workflows, and integrations to your exact support setup"
+      },
+      {
+        title: "Private and Secure",
+        description: "Deploy entirely on your own infrastructure, including LLMs, for full data control"
+      },
+      {
+        title: "Developer-Friendly Stack",
+        description: "Built with Python, Django, React, and Postgres—easy to audit, extend, and deploy"
+      }
+    ]
+  },
+  technical: {
+    title: "Technical Flexibility",
+    subtitle: "Built for Developers and Teams That Need Control",
+    features: [
+      "Standard Python/Django/PostgreSQL/React stack",
+      "Self-hostable, including LLMs like Mistral or Llama",
+      "Integrates with major e-commerce platforms",
+      "Open-source license: fork it, extend it, make it yours",
+      "Customizable prompt workflows and API endpoints"
+    ]
+  },
+  cta: {
+    title: "Ready to Power Smarter Customer Support?",
+    description: "Deploy AI that actually knows your products—and works the way your team does."
+  },
+  faq: {
+    title: "Frequently Asked Questions",
+    questions: [
+      {
+        question: "How does Enthusiast integrate with my e-commerce platform?",
+        answer: "Enthusiast includes pre-built integrations for popular platforms like Shopify and custom APIs for headless setups."
+      },
+      {
+        question: "Can it be trained on internal documents like support guides or manuals?",
+        answer: "Yes. You can feed it internal content to build a complete knowledge base for customer-facing or internal use."
+      },
+      {
+        question: "Is it secure and self-hosted?",
+        answer: "Absolutely. You can run both Enthusiast and your chosen LLM fully on your own infrastructure—no external API calls required."
+      },
+      {
+        question: "What LLMs can I use with Enthusiast?",
+        answer: "Enthusiast works with OpenAI APIs and open models like Mistral and Llama via local deployments."
+      },
+      {
+        question: "Can I customize how it responds?",
+        answer: "Yes. Prompt logic, workflow behavior, and even tone of voice are all fully editable in the open-source version."
+      }
+    ]
+  },
+  footerCta: {
+    title: "Start building smarter support today — your open-source AI agent is waiting."
+  }
+};
+
+<FeaturePageLayout content={content} />

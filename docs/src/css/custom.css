@@ -32,3 +32,24 @@
   --ifm-color-primary-lightest: #ffd54d;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
+
+/* Global Markdown Styles */
+.markdown h2 {
+  margin-top: 2.5rem;
+}
+
+.markdown h3 {
+  margin-top: 2rem;
+}
+
+.markdown ul {
+  margin-bottom: 1.5rem;
+}
+
+.markdown li {
+  margin: 0.5rem 0;
+}
+
+.markdown strong:first-child {
+  margin-right: 0.5rem;
+}

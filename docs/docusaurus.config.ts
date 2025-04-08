@@ -56,6 +56,41 @@ const config: Config = {
       },
       items: [
         {
+          type: 'dropdown',
+          label: 'Features',
+          position: 'left',
+          items: [
+            {
+              label: 'Internal Knowledge Base',
+              to: '/features/internal-knowledge-base',
+            },
+            {
+              label: 'Customer Support',
+              to: '/features/customer-support',
+            },
+            {
+              label: 'Content Creation',
+              to: '/features/content-creation',
+            },
+            {
+              label: 'Product Recommendations',
+              to: '/features/product-recommendations',
+            },
+            {
+              label: 'Content Validation',
+              to: '/features/content-validation',
+            },
+            {
+              label: 'Open Source AI for E-Commerce',
+              to: '/features/open-source-ai-for-ecommerce',
+            },
+            {
+              label: 'RAG for E-Commerce',
+              to: '/features/rag-for-ecommerce',
+            },
+          ],
+        },
+        {
           type: 'docSidebar',
           sidebarId: 'docsSidebar',
           position: 'left',

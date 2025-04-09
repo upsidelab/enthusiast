@@ -51,4 +51,4 @@ Sign in using the default admin account:
 :::note
 To customize the default email and password, set the ECL_ADMIN_EMAIL and ECL_ADMIN_PASSWORD environment variables when running Docker Compose for the first time.
 :::
-You can now [import test data](import-test-data).
+You can now [import test data](/tools/enthusiast/docs/getting-started/import-test-data).

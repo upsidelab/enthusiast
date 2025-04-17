@@ -1,4 +1,4 @@
-from catalog.models import DocumentSource, ProductSource
+from catalog.models import DocumentSource, ProductSource, SyncStatus
 from celery import shared_task
 
 from sync.document.manager import DocumentSyncManager
@@ -6,8 +6,16 @@ from sync.product.manager import ProductSyncManager
 
 @shared_task
 def sync_product_source(source_id: int):
+    source = ProductSource.objects.get(id=source_id)
     manager = ProductSyncManager()
-    manager.sync(source_id=source_id)
+    sync_status = SyncStatus.objects.create(data_set=source.data_set, product_source=source, status='pending')
+    try:
+        manager.sync(source_id=source_id)
+        sync_status.status = 'success'
+    except Exception as e:
+        sync_status.status = 'failure'
+        sync_status.error_message = str(e)
+    sync_status.save()
 
 @shared_task
 def sync_data_set_product_sources(data_set_id: int):
@@ -21,8 +29,16 @@ def sync_all_product_sources():
 
 @shared_task
 def sync_document_source(source_id: int):
+    source = DocumentSource.objects.get(id=source_id)
     manager = DocumentSyncManager()
-    manager.sync(source_id=source_id)
+    sync_status = SyncStatus.objects.create(data_set=source.data_set, document_source=source, status='pending')
+    try:
+        manager.sync(source_id=source_id)
+        sync_status.status = 'success'
+    except Exception as e:
+        sync_status.status = 'failure'
+        sync_status.error_message = str(e)
+    sync_status.save()
 
 @shared_task
 def sync_data_set_document_sources(data_set_id: int):

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import DataSet, Document, DocumentSource, Product, ProductSource
+from .models import DataSet, Document, DocumentSource, Product, ProductSource, SyncStatus
 
 
 class DataSetSerializer(serializers.ModelSerializer):
@@ -37,3 +37,9 @@ class DocumentSourceSerializer(serializers.ModelSerializer):
     class Meta:
         model = DocumentSource
         fields = ['id', 'plugin_name', 'config', 'data_set_id']
+
+
+class SyncStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SyncStatus
+        fields = ['id', 'data_set_id', 'product_source_id', 'document_source_id', 'timestamp', 'status', 'error_message']

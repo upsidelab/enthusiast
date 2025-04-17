@@ -179,9 +179,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = json.loads(os.environ.get('ECL_DJANGO_CORS_ALLOWED_ORIGINS', default='[]'))
 
-BASICAUTH_USERNAME = os.environ.get('ECL_BASICAUTH_USERNAME')
-BASICAUTH_PASSWORD = os.environ.get('ECL_BASICAUTH_PASSWORD')
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication'

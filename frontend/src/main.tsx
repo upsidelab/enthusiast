@@ -18,6 +18,7 @@ import { IndexDataSetUsers } from "@/pages/data-sets/(id)/users.tsx";
 import { IndexDataSetCatalogSources } from "@/pages/data-sets/(id)/product-sources.tsx";
 import { ConfigureDataSetProductSource } from "@/pages/data-sets/(id)/product-sources/(id)/config.tsx";
 import { ConfigureDataSetDocumentSource } from "@/pages/data-sets/(id)/document-sources/(id)/config.tsx";
+import { SyncHistoryIndex } from "@/pages/data-sets/(id)/sync-history/index.tsx";
 import { UsersIndex } from "@/pages/users";
 import { OnboardingIndex } from "@/pages/onboarding";
 
@@ -70,6 +71,10 @@ const router = createBrowserRouter([
       {
         path: '/data-sets/:id/history',
         element: <ChatHistory />
+      },
+      {
+        path: 'data-sets/:dataSetId/sync-history',
+        element: <SyncHistoryIndex />
       },
       {
         path: '/data-sets',

@@ -92,3 +92,5 @@ fabric.properties
 # Plugin build files
 plugin/**/build/
 plugin/**/*.egg-info
+
+.env

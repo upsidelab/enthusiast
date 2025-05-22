@@ -15,19 +15,24 @@ import os
 import sys
 from pathlib import Path
 
+from environ import Env
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+env = Env()
+if env.str("ECL_DJANGO_SECRET_KEY", None) is None:
+    env.read_env(BASE_DIR / ".env")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('ECL_DJANGO_SECRET_KEY')
+SECRET_KEY = env.str('ECL_DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-DEBUG = (os.environ.get('ECL_DJANGO_DEBUG', default='False') == 'True')
+DEBUG = env.bool("ECL_DJANGO_DEBUG", False)
 
 ALLOWED_HOSTS = json.loads(os.environ.get('ECL_DJANGO_ALLOWED_HOSTS', default='[]'))
 
@@ -117,11 +122,11 @@ WSGI_APPLICATION = 'pecl.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ.get('ECL_DB_NAME'),
-        'USER': os.environ.get('ECL_DB_USER'),
-        'PASSWORD': os.environ.get('ECL_DB_PASSWORD'),
-        'HOST': os.environ.get('ECL_DB_HOST'),
-        'PORT': os.environ.get('ECL_DB_PORT'),
+        'NAME': env.str('ECL_DB_NAME'),
+        'USER': env.str('ECL_DB_USER'),
+        'PASSWORD': env.str('ECL_DB_PASSWORD'),
+        'HOST': env.str('ECL_DB_HOST'),
+        'PORT': env.str('ECL_DB_PORT'),
         'ATOMIC_REQUESTS': True,
     }
 }
@@ -201,9 +206,9 @@ SWAGGER_SETTINGS = {
 }
 
 # CELERY
-CELERY_BROKER_URL = os.environ.get('ECL_CELERY_BROKER_URL')
-CELERY_RESULT_BACKEND = os.environ.get('ECL_CELERY_RESULT_BACKEND')
-CELERY_TIMEZONE = os.environ.get('ECL_CELERY_TIMEZONE')
+CELERY_BROKER_URL = env.str('ECL_CELERY_BROKER_URL')
+CELERY_RESULT_BACKEND = env.str('ECL_CELERY_RESULT_BACKEND')
+CELERY_TIMEZONE = env.str('ECL_CELERY_TIMEZONE')
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 CATALOG_LANGUAGE_MODEL_PROVIDERS = {
@@ -225,4 +230,4 @@ AGENT_TOOLS = {
     "Create Answer Tool": "agent.tools.create_answer_tool.CreateAnswerTool",
 }
 
-SERVICE_ACCOUNT_DOMAIN = os.environ.get('SERVICE_ACCOUNT_DOMAIN', 'enthusiast.internal')
+SERVICE_ACCOUNT_DOMAIN = env.str('SERVICE_ACCOUNT_DOMAIN', 'enthusiast.internal')

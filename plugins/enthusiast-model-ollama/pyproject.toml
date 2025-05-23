@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "enthusiast-model-ollama"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
 authors = ["Rafal Cymerys <rafal@upsidelab.io>"]
 readme = "README.md"
@@ -8,7 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.12"
 enthusiast-common = "^0.5.0"
-langchain-ollama = "^0.2.2"
+langchain-ollama = "^0.3.3"
 
 
 [build-system]

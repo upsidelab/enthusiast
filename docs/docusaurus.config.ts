@@ -54,7 +54,7 @@ const config: Config = {
       logo: {
         alt: 'Enthusiast',
         src: 'img/logo.png',
-        href: '/tools/enthusiast'
+        href: 'https://upsidelab.io/tools/enthusiast'
       },
       items: [
         {

@@ -20,8 +20,12 @@ services:
     build:
       context: server/
       dockerfile: Dockerfile.development
+    volumes:
+      - ./server:/app
     ports:
       - "10000:10000"
+    env_file:
+      - ./server/.env
     environment:
       - PORT=10000
       - RUN_MIGRATIONS=True
@@ -44,6 +48,8 @@ services:
     build:
       context: server/
       dockerfile: Dockerfile.development
+    env_file:
+      - ./server/.env
     environment:
       - RUN_WORKER=True
       - ECL_DB_HOST=postgres

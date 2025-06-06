@@ -38,7 +38,7 @@ CREATE_CONTENT_PROMPT_TEMPLATE = """
 
 
 class CreateAnswerToolInput(BaseModel):
-    query: str = Field(description="user's request")
+    full_user_request: str = Field(description="user's full request")
 
 
 class CreateAnswerTool(CustomTool):
@@ -53,23 +53,23 @@ class CreateAnswerTool(CustomTool):
     max_retry: int = 3
     conversation: Conversation = None
 
-    def __init__(self,
-                 chat_model: str,
-                 conversation: Conversation,
-                 language_model_provider: LanguageModelProvider,
-                 **kwargs: Any):
-        super().__init__(data_set=conversation.data_set, chat_model=chat_model, 
-                         language_model_provider=language_model_provider,
-                         **kwargs)
+    def __init__(
+        self, chat_model: str, conversation: Conversation, language_model_provider: LanguageModelProvider, **kwargs: Any
+    ):
+        super().__init__(
+            data_set=conversation.data_set,
+            chat_model=chat_model,
+            language_model_provider=language_model_provider,
+            **kwargs,
+        )
         if language_model_provider.model_name() in tiktoken.model.MODEL_TO_ENCODING:
             self.encoding = tiktoken.encoding_for_model(language_model_provider.model_name())
         else:
             self.encoding = tiktoken.encoding_for_model("gpt-4o")
         self.conversation = conversation
 
-
     def _get_document_context(self, relevant_documents, cut_off_cnt):
-        """ Identify document context for a query.
+        """Identify document context for a query.
 
         We need to prepare a document context for GPT to provide an answer. If the context is too big, we risk
         exceeding GPT token limit.
@@ -91,20 +91,22 @@ class CreateAnswerTool(CustomTool):
             cut_off_cnt: Int, how many documents to remove from the end of the full list.
         """
         offset = 0.8  # Used as an estimated 'exchange rate' between a word and a token.
-        document_context = ' '.join(map(lambda x: x.content, relevant_documents[:len(relevant_documents) - cut_off_cnt]))
+        document_context = " ".join(
+            map(lambda x: x.content, relevant_documents[: len(relevant_documents) - cut_off_cnt])
+        )
         tokens_cnt = len(self.encoding.encode(document_context))
         if tokens_cnt > self.max_tokens:
             words_to_remove = round(offset * (tokens_cnt - self.max_tokens))
             # Remove last words from the context to stay within a given limit.
             words = document_context.split()
-            words = words[:len(words) - words_to_remove]
-            document_context = ' '.join(words)
+            words = words[: len(words) - words_to_remove]
+            document_context = " ".join(words)
         return document_context
 
-    def _run(self, query: str):
+    def _run(self, full_user_request: str):
         document_retriever = DocumentRetriever(data_set=self.data_set)
-        relevant_documents = document_retriever.find_documents_matching_query(query)
-        relevant_products = ProductRetriever(data_set=self.data_set).find_products_matching_query(query)
+        relevant_documents = document_retriever.find_documents_matching_query(full_user_request)
+        relevant_products = ProductRetriever(data_set=self.data_set).find_products_matching_query(full_user_request)
 
         product_context = serializers.serialize("json", relevant_products)
 
@@ -120,11 +122,13 @@ class CreateAnswerTool(CustomTool):
 
                 document_context = self._get_document_context(relevant_documents, retry)
 
-                llm_result = chain.invoke({
-                    "query": query,
-                    "document_context": document_context,
-                    "product_context": product_context
-                })
+                llm_result = chain.invoke(
+                    {
+                        "query": full_user_request,
+                        "document_context": document_context,
+                        "product_context": product_context,
+                    }
+                )
                 return llm_result.content
             except Exception as error:
                 logging.error(f"Problem with generating an answer. Retry: {retry}/{self.max_retry}. Error msg: {error}")

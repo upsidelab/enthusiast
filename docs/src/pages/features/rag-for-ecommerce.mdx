@@ -1,0 +1,106 @@
+import { FeaturePageLayout } from '@site/src/components/feature/feature-page-layout';
+
+export const content = {
+  meta: {
+    title: "RAG-Powered AI for E-Commerce Teams | Enthusiast by Upside",
+    description: "Bring retrieval-augmented generation (RAG) to your e-commerce stack. Use Enthusiast, an open-source AI agent, to deliver accurate product answers, content, and insights—fully self-hosted and customizable."
+  },
+  hero: {
+    title: "RAG for E-Commerce",
+    subtitle: "Enthusiast brings retrieval-augmented generation to your e-commerce data. Deliver fast, accurate, context-aware answers—fully customizable, self-hosted, and open source."
+  },
+  problem: {
+    title: "The Challenge with Delivering Accurate Product Info",
+    points: [
+      "Inconsistent or outdated answers in customer support",
+      "Time-consuming content creation workflows",
+      "Sales teams lacking quick access to complex product data",
+      "Difficulties enforcing brand tone and factual accuracy across channels"
+    ]
+  },
+  solution: {
+    title: "Enthusiast Solves These Challenges with RAG",
+    description: "Enthusiast brings retrieval-augmented generation to your e-commerce stack. It connects to your product catalog and knowledge base, retrieves relevant context in real-time, and uses that context to generate accurate, human-like responses, content, or recommendations.\n\nYou stay in control with open-source infrastructure, self-hosted deployments, and customizable prompts or workflows."
+  },
+  howItWorks: {
+    title: "How It Works",
+    subtitle: "AI That Understands Your Products",
+    steps: [
+      "Connect your product catalog and knowledge sources (CSV, CMS, docs, FAQs)",
+      "Configure your RAG pipeline with customizable prompts and retrieval strategies",
+      "Deploy the agent for use cases like support, content, and recommendations",
+      "Choose your model—OpenAI, Mistral, Llama, or others",
+      "Iterate and adapt as your catalog and workflows evolve"
+    ]
+  },
+  benefits: {
+    title: "Why Enthusiast for RAG in E-Commerce",
+    items: [
+      {
+        title: "Accurate, up-to-date answers",
+        description: "Real-time retrieval ensures responses are always current"
+      },
+      {
+        title: "Open-source and self-hosted",
+        description: "Keep control of your data and logic"
+      },
+      {
+        title: "Customizable workflows",
+        description: "Tune prompts and retrieval logic to match your use case"
+      },
+      {
+        title: "Works with your stack",
+        description: "Django, Python, React, PostgreSQL"
+      },
+      {
+        title: "Compatible with multiple LLMs",
+        description: "Works with OpenAI or local models like Mistral and Llama"
+      }
+    ]
+  },
+  technical: {
+    title: "Technical Flexibility",
+    subtitle: "Built for Developers and Teams That Need Control",
+    features: [
+      "Built on a modern Python/Django/PostgreSQL/React stack",
+      "Open-source license (no vendor lock-in, no API cost surprises)",
+      "Bring your own LLM: supports OpenAI, Mistral, Llama, and more",
+      "Customize RAG pipelines, prompt templates, and retrieval logic",
+      "Ready for local or cloud deployment"
+    ]
+  },
+  cta: {
+    title: "Ready to Build with RAG?",
+    description: "Bring accuracy and scale to your e-commerce content and support with full control."
+  },
+  faq: {
+    title: "Frequently Asked Questions",
+    questions: [
+      {
+        question: "How does Enthusiast integrate with my e-commerce platform?",
+        answer: "It includes pre-built integrations for popular platforms. You can also connect via API or import product data manually."
+      },
+      {
+        question: "Can it be trained on internal documents?",
+        answer: "Yes. You can ingest product docs, manuals, PDFs, and FAQs as part of the retrieval layer."
+      },
+      {
+        question: "Is it secure and self-hosted?",
+        answer: "Absolutely. You can deploy Enthusiast and the LLM locally—no data ever needs to leave your servers."
+      },
+      {
+        question: "What LLMs can I use with Enthusiast?",
+        answer: "It supports OpenAI models out of the box, and you can also use open-source models like Mistral, Llama, and others."
+      },
+      {
+        question: "Can I customize the prompts or workflows?",
+        answer: "Yes—everything is configurable. Modify prompts, retrieval logic, and user-facing workflows to fit your exact needs."
+      }
+    ]
+  },
+  footerCta: {
+    title: "Start building with RAG today."
+  }
+};
+
+<FeaturePageLayout content={content} />

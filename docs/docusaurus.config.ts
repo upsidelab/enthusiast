@@ -26,6 +26,8 @@ const config: Config = {
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
 
+  trailingSlash: true,
+
   i18n: {
     defaultLocale: 'en',
     locales: ['en'],
@@ -52,9 +54,44 @@ const config: Config = {
       logo: {
         alt: 'Enthusiast',
         src: 'img/logo.png',
-        href: '/tools/enthusiast'
+        href: 'https://upsidelab.io/tools/enthusiast'
       },
       items: [
+        {
+          type: 'dropdown',
+          label: 'Features',
+          position: 'left',
+          items: [
+            {
+              label: 'Internal Knowledge Base',
+              to: '/features/internal-knowledge-base',
+            },
+            {
+              label: 'Customer Support',
+              to: '/features/customer-support',
+            },
+            {
+              label: 'Content Creation',
+              to: '/features/content-creation',
+            },
+            {
+              label: 'Product Recommendations',
+              to: '/features/product-recommendations',
+            },
+            {
+              label: 'Content Validation',
+              to: '/features/content-validation',
+            },
+            {
+              label: 'Open Source AI for E-Commerce',
+              to: '/features/open-source-ai-for-ecommerce',
+            },
+            {
+              label: 'RAG for E-Commerce',
+              to: '/features/rag-for-ecommerce',
+            },
+          ],
+        },
         {
           type: 'docSidebar',
           sidebarId: 'docsSidebar',

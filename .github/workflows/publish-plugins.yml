@@ -1,0 +1,60 @@
+name: Publish plugins
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.changed.outputs.changed_plugins }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed plugin directories
+        id: changed
+        run: |
+          CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^plugins/' | cut -d/ -f2 | sort -u | uniq)
+          
+          JSON_ARRAY=$(printf '%s\n' $CHANGED | jq -R . | jq -s -c .)
+
+          echo "Changed plugins: $CHANGED"
+          echo "changed_plugins=${JSON_ARRAY}" >> "$GITHUB_OUTPUT"
+        
+
+  publish:
+    environment: production
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    if: ${{ needs.detect-changes.outputs.changed != '[""]' }}
+    strategy:
+      matrix:
+        plugin: ${{ fromJson(needs.detect-changes.outputs.changed) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Configure Poetry
+        run: |
+          poetry config pypi-token.pypi ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Build and publish ${{ matrix.plugin }}
+        working-directory: plugins/${{ matrix.plugin }}
+        run: |
+          poetry build
+          poetry publish

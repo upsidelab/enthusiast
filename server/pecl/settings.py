@@ -15,107 +15,107 @@ import os
 import sys
 from pathlib import Path
 
+from environ import Env
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+env = Env()
+if env.str("ECL_DJANGO_SECRET_KEY", None) is None:
+    env.read_env(BASE_DIR / ".env")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('ECL_DJANGO_SECRET_KEY')
+SECRET_KEY = env.str("ECL_DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-DEBUG = (os.environ.get('ECL_DJANGO_DEBUG', default='False') == 'True')
+DEBUG = env.bool("ECL_DJANGO_DEBUG", False)
 
-ALLOWED_HOSTS = json.loads(os.environ.get('ECL_DJANGO_ALLOWED_HOSTS', default='[]'))
+ALLOWED_HOSTS = json.loads(os.environ.get("ECL_DJANGO_ALLOWED_HOSTS", default="[]"))
 
 LOGGING = {
-   'version': 1,
-   'disable_existing_loggers': False,
-   'formatters': {
-       'verbose': {
-           'format': '%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
-       },
-   },
-   'handlers': {
-       'console': {
-           'level': 'INFO',
-           'class': 'logging.StreamHandler',
-           'stream': sys.stdout,
-           'formatter': 'verbose'
-       },
-   },
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
+        },
+    },
+    "handlers": {
+        "console": {"level": "INFO", "class": "logging.StreamHandler", "stream": sys.stdout, "formatter": "verbose"},
+    },
     "root": {
         "handlers": ["console"],
         "level": "INFO",
     },
-   'loggers': {
-       'django': {
-           'level': 'INFO',
-           'handlers': ['console'],
-       }
-   },
+    "loggers": {
+        "django": {
+            "level": "INFO",
+            "handlers": ["console"],
+        }
+    },
 }
 
 # Application definition
 
 INSTALLED_APPS = [
-    'channels',
-    'daphne',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'rest_framework',
-    'rest_framework.authtoken',
-    'corsheaders',
-    'catalog',
-    'agent',
-    'account',
-    'sync',
-    'drf_yasg'
+    "channels",
+    "daphne",
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "rest_framework",
+    "rest_framework.authtoken",
+    "corsheaders",
+    "catalog",
+    "agent",
+    "account",
+    "sync",
+    "drf_yasg",
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'pecl.urls'
+ROOT_URLCONF = "pecl.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-ASGI_APPLICATION = 'pecl.asgi.application'
+ASGI_APPLICATION = "pecl.asgi.application"
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [os.environ.get('ECL_CELERY_BROKER_URL')],
+            "hosts": [os.environ.get("ECL_CELERY_BROKER_URL")],
         },
     },
 }
@@ -125,14 +125,14 @@ CHANNEL_LAYERS = {
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ.get('ECL_DB_NAME'),
-        'USER': os.environ.get('ECL_DB_USER'),
-        'PASSWORD': os.environ.get('ECL_DB_PASSWORD'),
-        'HOST': os.environ.get('ECL_DB_HOST'),
-        'PORT': os.environ.get('ECL_DB_PORT'),
-        'ATOMIC_REQUESTS': True,
+    "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": env.str("ECL_DB_NAME"),
+        "USER": env.str("ECL_DB_USER"),
+        "PASSWORD": env.str("ECL_DB_PASSWORD"),
+        "HOST": env.str("ECL_DB_HOST"),
+        "PORT": env.str("ECL_DB_PORT"),
+        "ATOMIC_REQUESTS": True,
     }
 }
 
@@ -142,27 +142,27 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
-AUTH_USER_MODEL = 'account.User'
+AUTH_USER_MODEL = "account.User"
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -172,51 +172,40 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "static/"
 
 STATICFILES_DIRS = [
-    BASE_DIR / 'static',
+    BASE_DIR / "static",
 ]
 
 if not DEBUG:
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-CORS_ALLOWED_ORIGINS = json.loads(os.environ.get('ECL_DJANGO_CORS_ALLOWED_ORIGINS', default='[]'))
-
-BASICAUTH_USERNAME = os.environ.get('ECL_BASICAUTH_USERNAME')
-BASICAUTH_PASSWORD = os.environ.get('ECL_BASICAUTH_PASSWORD')
+CORS_ALLOWED_ORIGINS = json.loads(os.environ.get("ECL_DJANGO_CORS_ALLOWED_ORIGINS", default="[]"))
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication'
-    ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 25
+    "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework.authentication.TokenAuthentication"],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 25,
 }
 
 # SWAGGER
 
 SWAGGER_SETTINGS = {
-    'SECURITY_DEFINITIONS': {
-        'Token': {
-            'type': 'apiKey',
-            'name': 'Authorization',
-            'in': 'header'
-        }
-    },
-    'USE_SESSION_AUTH': False,
+    "SECURITY_DEFINITIONS": {"Token": {"type": "apiKey", "name": "Authorization", "in": "header"}},
+    "USE_SESSION_AUTH": False,
 }
 
 # CELERY
-CELERY_BROKER_URL = os.environ.get('ECL_CELERY_BROKER_URL')
-CELERY_RESULT_BACKEND = os.environ.get('ECL_CELERY_RESULT_BACKEND')
-CELERY_TIMEZONE = os.environ.get('ECL_CELERY_TIMEZONE')
+CELERY_BROKER_URL = env.str("ECL_CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = env.str("ECL_CELERY_RESULT_BACKEND")
+CELERY_TIMEZONE = env.str("ECL_CELERY_TIMEZONE")
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 CATALOG_LANGUAGE_MODEL_PROVIDERS = {
@@ -238,4 +227,4 @@ AGENT_TOOLS = {
     "Create Answer Tool": "agent.tools.create_answer_tool.CreateAnswerTool",
 }
 
-SERVICE_ACCOUNT_DOMAIN = os.environ.get('SERVICE_ACCOUNT_DOMAIN', 'enthusiast.internal')
+SERVICE_ACCOUNT_DOMAIN = env.str("SERVICE_ACCOUNT_DOMAIN", "enthusiast.internal")

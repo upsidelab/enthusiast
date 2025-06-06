@@ -1,0 +1,103 @@
+import { FeaturePageLayout } from '@site/src/components/feature/feature-page-layout';
+
+export const content = {
+  meta: {
+    title: "Validate Product Content at Scale with AI | Enthusiast by Upside",
+    description: "Ensure product content is accurate and aligned with your catalog data. Enthusiast is an open-source AI agent that helps e-commerce teams validate content before it goes live."
+  },
+  hero: {
+    title: "AI-Powered Content Verification for E-Commerce Teams",
+    subtitle: "Enthusiast helps e-commerce teams validate product descriptions, reviews, and marketing copy—fast, reliably, and on your terms."
+  },
+  problem: {
+    title: "The Challenge with Content Verification",
+    points: [
+      "Product descriptions don't match catalog data",
+      "Marketing teams unknowingly publish outdated or incorrect specs",
+      "Reviews contain claims that violate policy or mislead customers",
+      "Internal QA relies on manual review and tribal knowledge",
+      "No clear audit trail for how decisions are made"
+    ]
+  },
+  solution: {
+    title: "Enthusiast Solves Content Verification with AI",
+    description: "Enthusiast helps your team validate content automatically by comparing it against your product catalog and internal documentation. Whether you're reviewing a blog post, ad copy, or a new batch of customer reviews, Enthusiast flags inconsistencies and highlights areas that need attention.\n\nBuilt on an open stack and designed for flexibility, it fits into your workflow—no black box required."
+  },
+  howItWorks: {
+    title: "How It Works",
+    subtitle: "AI That Understands Your Products",
+    steps: [
+      "Connect your product catalog and content sources (e.g., CMS, review platform, internal docs)",
+      "Configure validation prompts to reflect your tone, rules, and brand language",
+      "Run automatic or on-demand checks on new content",
+      "Review flagged issues with traceable, explainable output",
+      "Fine-tune rules or prompts as your business evolves"
+    ]
+  },
+  benefits: {
+    title: "Why Enthusiast for Content Verification",
+    items: [
+      {
+        title: "Open-source and customizable",
+        description: "Define your own rules, validation prompts, and review workflows. No vendor lock-in"
+      },
+      {
+        title: "Works with your stack",
+        description: "Easily integrates with existing tools via API or direct data connections"
+      },
+      {
+        title: "Secure and self-hosted",
+        description: "Run everything—including the LLM—on your infrastructure for complete data control"
+      },
+      {
+        title: "Built for e-commerce content",
+        description: "Understands product data, variants, specs, and context—right out of the box"
+      }
+    ]
+  },
+  technical: {
+    title: "Technical Flexibility",
+    subtitle: "Built for Developers and Teams That Need Control",
+    features: [
+      "Full Python/Django/PostgreSQL/React stack",
+      "Open-source license for full transparency",
+      "Supports OpenAI, Mistral, Llama, and other LLMs",
+      "Customizable prompt chains and validation logic",
+      "Integrates with e-commerce platforms, CMSs, and review systems"
+    ]
+  },
+  cta: {
+    title: "Validate faster, catch more issues, and control the process end-to-end.",
+    description: "Choose how deep you want to go—custom prompts, custom models, and custom workflows."
+  },
+  faq: {
+    title: "Frequently Asked Questions",
+    questions: [
+      {
+        question: "How does Enthusiast integrate with my e-commerce platform?",
+        answer: "Pre-built integrations are available for most platforms. You can also connect directly to your database or API."
+      },
+      {
+        question: "Can it be trained on internal documents?",
+        answer: "Yes—just add your docs as a knowledge source and update prompts to reflect your content standards."
+      },
+      {
+        question: "Is it secure and self-hosted?",
+        answer: "Enthusiast is fully self-hostable, including LLMs. Keep everything behind your firewall if needed."
+      },
+      {
+        question: "What LLMs can I use with Enthusiast?",
+        answer: "It supports OpenAI, Mistral, Llama, and other API-accessible or self-hosted LLMs."
+      },
+      {
+        question: "Can I customize how content is validated?",
+        answer: "Absolutely. You can define prompt templates, decision logic, and how output is surfaced."
+      }
+    ]
+  },
+  footerCta: {
+    title: "Open-source, customizable, and developer-ready."
+  }
+};
+
+<FeaturePageLayout content={content} />

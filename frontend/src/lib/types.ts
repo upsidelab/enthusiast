@@ -53,7 +53,7 @@ export type User = {
 
 export type SourcePlugin = {
   plugin_name: string;
-} 
+}
 
 export type Conversation = {
   id: number;
@@ -83,3 +83,28 @@ export type ProvidersConfig = {
   languageModelProviders: string[];
   embeddingProviders: string[];
 }
+
+export type SyncStatus = {
+  id: number;
+  data_set_id: number;
+  product_source_id?: number;
+  document_source_id?: number;
+  timestamp: string;
+  status: string;
+  error_message?: string;
+};
+
+export type SyncSchedule = {
+  id: number;
+  time: string;
+  frequency: string;
+  day_of_week?: string;
+  enabled: boolean;
+};
+
+export type SyncSchedulePayload = {
+  time: string;
+  frequency: string;
+  day_of_week?: string;
+  enabled: boolean;
+};

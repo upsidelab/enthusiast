@@ -1,8 +1,11 @@
+import json
+
+from django_celery_beat.models import PeriodicTask, CrontabSchedule
 from django.db.models import Count
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.generics import ListAPIView, ListCreateAPIView, GenericAPIView
+from rest_framework.generics import ListAPIView, ListCreateAPIView, GenericAPIView, RetrieveAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
@@ -15,9 +18,9 @@ from sync.tasks import sync_all_sources, sync_all_document_sources, sync_data_se
     sync_product_source
 from .embeddings import EmbeddingProviderRegistry
 from .language_models import LanguageModelRegistry
-from .models import DataSet, DocumentSource, ProductSource
+from .models import DataSet, DocumentSource, ProductSource, SyncStatus
 from .serializers import DataSetSerializer, DocumentSerializer, DocumentSourceSerializer, ProductSerializer, \
-    ProductSourceSerializer
+    ProductSourceSerializer, SyncStatusSerializer
 
 
 class SyncAllSourcesView(GenericAPIView):
@@ -362,3 +365,173 @@ class ConfigEmbeddingModelView(GenericAPIView):
         response_body = EmbeddingProviderRegistry().provider_class_by_name(provider_name).available_models()
 
         return Response(response_body)
+
+
+class LastSyncStatusView(RetrieveAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = SyncStatusSerializer
+
+    @swagger_auto_schema(
+        operation_description="Retrieve the last synchronization status"
+    )
+
+    def get(self, request, *args, **kwargs):
+        last_sync_status = SyncStatus.objects.order_by('-timestamp').first()
+        if last_sync_status:
+            serializer = self.serializer_class(last_sync_status)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({"detail": "No synchronization status found."}, status=status.HTTP_404_NOT_FOUND)
+
+
+class AllSyncStatusView(ListAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = SyncStatusSerializer
+    pagination_class = PageNumberPagination
+
+    @swagger_auto_schema(
+        operation_description="List all synchronization statuses for a data set",
+        manual_parameters=[
+            openapi.Parameter('data_set_id', openapi.IN_PATH, description="ID of the data set",
+                              type=openapi.TYPE_INTEGER)
+        ]
+    )
+
+    def get_queryset(self):
+        data_set_id = self.kwargs.get('data_set_id')
+        return SyncStatus.objects.filter(data_set_id=data_set_id).order_by('-timestamp')
+
+
+class SyncScheduleView(GenericAPIView):
+    permission_classes = [IsAdminUser]
+
+    @swagger_auto_schema(
+        operation_description="Create a new sync schedule",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'time': openapi.Schema(type=openapi.TYPE_STRING, description='Time for the schedule'),
+                'frequency': openapi.Schema(type=openapi.TYPE_STRING, description='Frequency of the schedule'),
+                'day_of_week': openapi.Schema(type=openapi.TYPE_STRING, description='Day of the week for weekly schedule'),
+                'enabled': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Whether the schedule is enabled'),
+            },
+            required=['time', 'frequency', 'enabled']
+        )
+    )
+    def post(self, request, *args, **kwargs):
+        data_set_id = kwargs['data_set_id']
+        schedule_data = request.data
+        time = schedule_data.get('time')
+        frequency = schedule_data.get('frequency')
+        day_of_week = schedule_data.get('day_of_week')[:3].lower()
+        enabled = schedule_data.get('enabled', True)
+
+        hour, minute = self._parse_time(time)
+
+        if frequency == 'daily':
+            day_of_week = '*'
+        elif frequency == 'monthly':
+            day_of_week = '*'
+            day_of_month = '1'
+
+        schedule, created = CrontabSchedule.objects.get_or_create(
+            minute=minute,
+            hour=hour,
+            day_of_week=day_of_week,
+            day_of_month=day_of_month if frequency == 'monthly' else '*',
+            month_of_year='*'
+        )
+
+        task_name = f'sync_data_set_{data_set_id}_all_sources'
+        task, created = PeriodicTask.objects.get_or_create(
+            crontab=schedule,
+            name=task_name,
+            task='sync.tasks.sync_data_set_all_sources',
+            args=json.dumps([data_set_id]),
+            defaults={'enabled': enabled}
+        )
+
+        if not created:
+            task.enabled = enabled
+            task.save()
+
+        return Response({"detail": "Sync schedule created/updated successfully."}, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        operation_description="Update an existing sync schedule",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'time': openapi.Schema(type=openapi.TYPE_STRING, description='Time for the schedule'),
+                'frequency': openapi.Schema(type=openapi.TYPE_STRING, description='Frequency of the schedule'),
+                'day_of_week': openapi.Schema(type=openapi.TYPE_STRING,
+                                              description='Day of the week for weekly schedule'),
+                'enabled': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Whether the schedule is enabled'),
+            },
+            required=['time', 'frequency', 'enabled']
+        )
+    )
+
+    def patch(self, request, *args, **kwargs):
+        data_set_id = kwargs['data_set_id']
+        schedule_data = request.data
+        time = schedule_data.get('time')
+        frequency = schedule_data.get('frequency')
+        day_of_week = schedule_data.get('day_of_week')[:3].lower()
+        enabled = schedule_data.get('enabled', True)
+
+        hour, minute = self._parse_time(time)
+
+        if frequency == 'daily':
+            day_of_week = '*'
+        elif frequency == 'monthly':
+            day_of_week = '*'
+            day_of_month = '1'
+
+        try:
+            task = PeriodicTask.objects.get(name__contains=f'sync_data_set_{data_set_id}_all_sources')
+            schedule = task.crontab
+            schedule.minute = minute
+            schedule.hour = hour
+            schedule.day_of_week = day_of_week
+            schedule.day_of_month = day_of_month if frequency == 'monthly' else '*'
+            schedule.save()
+
+            task.enabled = enabled
+            task.save()
+
+            return Response({"detail": "Sync schedule updated successfully."}, status=status.HTTP_200_OK)
+        except PeriodicTask.DoesNotExist:
+            return Response({"detail": "Sync schedule not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    def get(self, request, *args, **kwargs):
+        data_set_id = kwargs['data_set_id']
+        try:
+            task = PeriodicTask.objects.get(name__contains=f'sync_data_set_{data_set_id}_all_sources')
+            schedule = task.crontab
+            hour = int(schedule.hour)
+            minute = int(schedule.minute)
+            period = 'PM' if hour >= 12 else 'AM'
+            if hour > 12:
+                hour -= 12
+            elif hour == 0:
+                hour = 12
+            time_str = f"{hour}:{minute:02d} {period}"
+            schedule_data = {
+                "time": time_str,
+                "frequency": "monthly" if schedule.day_of_month != '*' else "daily" if schedule.day_of_week == '*' else "weekly",
+                "day_of_week": schedule.day_of_week,
+                "enabled": task.enabled,
+            }
+            return Response(schedule_data, status=status.HTTP_200_OK)
+        except PeriodicTask.DoesNotExist:
+            return Response({"detail": "Sync schedule not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    def _parse_time(self, time_str):
+        time_parts = time_str.split(':')
+        hour = int(time_parts[0])
+        minute = int(time_parts[1].split(' ')[0])
+        if 'PM' in time_str and hour != 12:
+            hour += 12
+        elif 'AM' in time_str and hour == 12:
+            hour = 0
+        return hour, minute

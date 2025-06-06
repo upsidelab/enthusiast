@@ -1,5 +1,5 @@
 import { BaseApiClient } from "@/lib/api/base.ts";
-import { DataSet, CatalogSource, User } from "@/lib/types.ts";
+import { DataSet, CatalogSource, User, SyncStatus, PaginatedResult, SyncSchedule, SyncSchedulePayload } from "@/lib/types.ts";
 
 export type DataSetResponse = {
   id: number | undefined;
@@ -269,4 +269,77 @@ export class DataSetsApiClient extends BaseApiClient {
       }
     );
   }
+
+  async getLastSynchronization(): Promise<SyncStatus> {
+    const response = await fetch(
+      `${this.apiBase}/api/data_sets/sync_status/last`,
+      {
+        ...this._requestConfiguration(),
+        method: "GET"
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch last synchronization status");
+    }
+    return await response.json() as SyncStatus;
+  }
+
+  async getSynchronizations(dataSetId: number, page: number = 1): Promise<PaginatedResult<SyncStatus>> {
+    const response = await fetch(
+      `${this.apiBase}/api/data_sets/${dataSetId}/sync-history?page=${page}`,
+      this._requestConfiguration()
+    );
+    return await response.json() as PaginatedResult<SyncStatus>;
+  }
+
+  async getSyncSchedule(dataSetId: number): Promise<SyncSchedule> {
+    const response = await fetch(
+      `${this.apiBase}/api/data_sets/${dataSetId}/sync_schedule`,
+      this._requestConfiguration()
+    );
+    return await response.json() as SyncSchedule;
+  }
+
+  async createSyncSchedule(
+    dataSetId: number,
+    schedule: SyncSchedulePayload
+  ): Promise<SyncSchedule> {
+    const response = await fetch(
+      `${this.apiBase}/api/data_sets/${dataSetId}/sync_schedule`,
+      {
+        ...this._requestConfiguration(),
+        method: "POST",
+        body: JSON.stringify(schedule),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Error ${response.status}: ${errorText}`);
+    }
+
+    return await response.json() as SyncSchedule;
+  }
+
+  async updateSyncSchedule(
+    dataSetId: number,
+    schedule: SyncSchedulePayload
+  ): Promise<SyncSchedule> {
+    const response = await fetch(
+      `${this.apiBase}/api/data_sets/${dataSetId}/sync_schedule`,
+      {
+        ...this._requestConfiguration(),
+        method: "PATCH",
+        body: JSON.stringify(schedule),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Error ${response.status}: ${errorText}`);
+    }
+
+    return await response.json();
+  }
+
 }

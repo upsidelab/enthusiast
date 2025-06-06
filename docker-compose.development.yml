@@ -20,42 +20,21 @@ services:
     build:
       context: server/
       dockerfile: Dockerfile.development
+    volumes:
+      - ./server:/app
     ports:
       - "10000:10000"
+    env_file:
+      - ./server/.env
     environment:
       - PORT=10000
       - RUN_MIGRATIONS=True
-      - ECL_DB_HOST=postgres
-      - ECL_DB_PORT=5432
-      - ECL_DB_USER=ecl
-      - ECL_DB_PASSWORD=ecl
-      - ECL_DB_NAME=ecl-development
-      - ECL_DJANGO_ALLOWED_HOSTS=["localhost", "127.0.0.1"]
-      - ECL_DJANGO_CORS_ALLOWED_ORIGINS=["http://localhost:10001", "http://127.0.0.1:10001"]
-      - ECL_DJANGO_SECRET_KEY=xxxxxxxxxxxxxxxxxx
-      - ECL_DJANGO_DEBUG=True
-      - ECL_CELERY_BROKER_URL=redis://redis:6379/0
-      - ECL_CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - ECL_CELERY_TIMEZONE=UTC
-      - ECL_ADMIN_EMAIL=${ECL_ADMIN_EMAIL:-admin@example.com}
-      - ECL_ADMIN_PASSWORD=${ECL_ADMIN_PASSWORD:-changeme}
-      - OPENAI_API_KEY=$OPENAI_API_KEY
   worker:
     build:
       context: server/
       dockerfile: Dockerfile.development
+    env_file:
+      - ./server/.env
     environment:
+      - RUN_MIGRATIONS=False
       - RUN_WORKER=True
-      - ECL_DB_HOST=postgres
-      - ECL_DB_PORT=5432
-      - ECL_DB_USER=ecl
-      - ECL_DB_PASSWORD=ecl
-      - ECL_DB_NAME=ecl-development
-      - ECL_DJANGO_ALLOWED_HOSTS=["localhost", "127.0.0.1"]
-      - ECL_DJANGO_CORS_ALLOWED_ORIGINS=["http://localhost:10001", "http://127.0.0.1:10001"]
-      - ECL_DJANGO_SECRET_KEY=xxxxxxxxxxxxxxxxxx
-      - ECL_DJANGO_DEBUG=True
-      - ECL_CELERY_BROKER_URL=redis://redis:6379/0
-      - ECL_CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - ECL_CELERY_TIMEZONE=UTC
-      - OPENAI_API_KEY=$OPENAI_API_KEY

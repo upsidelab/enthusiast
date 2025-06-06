@@ -31,7 +31,7 @@ jobs:
     environment: production
     needs: detect-changes
     runs-on: ubuntu-latest
-    if: ${{ needs.detect-changes.outputs.changed != '' }}
+    if: ${{ needs.detect-changes.outputs.changed != '[""]' }}
     strategy:
       matrix:
         plugin: ${{ fromJson(needs.detect-changes.outputs.changed) }}

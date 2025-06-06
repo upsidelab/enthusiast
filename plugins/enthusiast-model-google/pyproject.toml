@@ -1,15 +1,15 @@
 [tool.poetry]
-name = "enthusiast-model-openai"
-version = "0.4.1"
+name = "enthusiast-model-google"
+version = "0.1.0"
 description = ""
-authors = ["Rafal Cymerys <rafal@upsidelab.io>"]
+authors = ["Damian Sowiński <damian.sowinski@upsidelab.io>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
 enthusiast-common = "~=0.6"
-openai = "^1.59.6"
-langchain-openai = "^0.3.0"
+google-genai = "^1.18.0"
+langchain-google-genai = "^2.1.5"
 
 
 [build-system]

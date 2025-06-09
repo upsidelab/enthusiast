@@ -23,6 +23,7 @@ export type FeedbackData = {
 
 export type TaskHandle = {
   task_id: string;
+  streaming: boolean;
 }
 
 export class ApiClient {

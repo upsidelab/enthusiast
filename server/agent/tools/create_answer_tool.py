@@ -52,9 +52,15 @@ class CreateAnswerTool(CustomTool):
     max_tokens: int = 30000
     max_retry: int = 3
     conversation: Conversation = None
+    streaming: bool = False
 
     def __init__(
-        self, chat_model: str, conversation: Conversation, language_model_provider: LanguageModelProvider, **kwargs: Any
+        self,
+        chat_model: str,
+        conversation: Conversation,
+        language_model_provider: LanguageModelProvider,
+        streaming: bool = False,
+        **kwargs: Any,
     ):
         super().__init__(
             data_set=conversation.data_set,
@@ -67,6 +73,7 @@ class CreateAnswerTool(CustomTool):
         else:
             self.encoding = tiktoken.encoding_for_model("gpt-4o")
         self.conversation = conversation
+        self.streaming = streaming
 
     def _get_document_context(self, relevant_documents, cut_off_cnt):
         """Identify document context for a query.
@@ -112,7 +119,10 @@ class CreateAnswerTool(CustomTool):
 
         prompt = PromptTemplate.from_template(CREATE_CONTENT_PROMPT_TEMPLATE)
         callback_handler = ConversationWebSocketCallbackHandler(self.conversation)
-        llm = self._language_model_provider.provide_language_model(callbacks=[callback_handler])
+        if self.streaming:
+            llm = self._language_model_provider.provide_streaming_language_model(callbacks=[callback_handler])
+        else:
+            llm = self._language_model_provider.provide_language_model()
         chain = prompt | llm
 
         retry = -1

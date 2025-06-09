@@ -15,11 +15,18 @@ logger = logging.getLogger(__name__)
 
 
 class Agent:
-    def __init__(self, conversation: Conversation):
+    def __init__(self, conversation: Conversation, streaming: bool = False):
         callback_handler = ConversationWebSocketCallbackHandler(conversation)
         language_model_provider = LanguageModelRegistry().provider_for_dataset(conversation.data_set)
-        self._llm = language_model_provider.provide_language_model(callbacks=[callback_handler])
-        self._tools = ToolManager(language_model_provider=language_model_provider, conversation=conversation).tools
+        self._tools = ToolManager(
+            language_model_provider=language_model_provider, conversation=conversation, streaming=streaming
+        ).tools
+
+        if streaming:
+            self._llm = language_model_provider.provide_streaming_language_model(callbacks=[callback_handler])
+        else:
+            self._llm = language_model_provider.provide_language_model()
+
         self._agent_executor = self._create_agent_with_tools(
             self._llm, self._tools, conversation.data_set.system_message
         )

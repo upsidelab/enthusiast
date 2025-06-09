@@ -10,8 +10,11 @@ PRIORITIZED_MODELS = ["gpt-4o", "gpt-4o-mini"]
 
 
 class OpenAILanguageModelProvider(LanguageModelProvider):
-    def provide_language_model(self, callbacks: list[BaseCallbackHandler] = None) -> BaseLanguageModel:
-        return ChatOpenAI(name=self._model, streaming=True, callbacks=callbacks)
+    def provide_language_model(self) -> BaseLanguageModel:
+        return ChatOpenAI(model=self._model)
+
+    def provide_streaming_language_model(self, callbacks: list[BaseCallbackHandler] | None) -> BaseLanguageModel:
+        return ChatOpenAI(model=self._model, callbacks=callbacks, streaming=True)
 
     def model_name(self) -> str:
         return self._model

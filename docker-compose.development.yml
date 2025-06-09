@@ -11,6 +11,8 @@ services:
     build:
       context: frontend/
       dockerfile: Dockerfile.development
+    volumes:
+      - ./frontend/src:/app/src
     environment:
       - PORT=10001
       - VITE_API_BASE=http://localhost:10000

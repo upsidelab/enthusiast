@@ -96,65 +96,60 @@ export function Conversation({conversationId}: ConversationProps) {
     }, [conversationId, skipConversationReload]);
 
     const createWsConnection = (conversationId: number) => {
-        if (streamingEnabled) {
-            ws.current = new WebSocket(`${import.meta.env.VITE_WS_BASE}/ws/chat/${conversationId}/`);
-            ws.current.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                if (data.event === "on_parser_start") {
-                    setIsAgentLoading(true);
-                } else if (data.event === "on_parser_stream") {
-                    setMessages((prevMessages) => {
-                        const lastMessage = prevMessages[prevMessages.length - 1];
-                        if (lastMessage && lastMessage.role === "agent" && lastMessage.id === null) {
-                            return [
-                                ...prevMessages.slice(0, -1),
-                                {...lastMessage, text: lastMessage.text + data.data.chunk}
-                            ];
-                        } else {
-                            return [...prevMessages, {role: "agent", text: data.data.chunk, id: null}];
-                        }
-                    });
-                    setTimeout(() => {
-                        lastMessageRef.current?.scrollIntoView({behavior: "smooth"});
-                    });
-                } else if (data.error) {
-                    setIsLoading(false);
-                }
-            };
+        ws.current = new WebSocket(`${import.meta.env.VITE_WS_BASE}/ws/chat/${conversationId}/`);
+        ws.current.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.event === "on_parser_start") {
+                setIsAgentLoading(true);
+            } else if (data.event === "on_parser_stream") {
+                setIsLoading(false);
+                setIsAgentLoading(false);
+                setMessages((prevMessages) => {
+                    const lastMessage = prevMessages[prevMessages.length - 1];
+                    if (lastMessage && lastMessage.role === "agent" && lastMessage.id === null) {
+                        return [
+                            ...prevMessages.slice(0, -1),
+                            {...lastMessage, text: lastMessage.text + data.data.chunk}
+                        ];
+                    } else {
+                        return [...prevMessages, {role: "agent", text: data.data.chunk, id: null}];
+                    }
+                });
+                setTimeout(() => {
+                    lastMessageRef.current?.scrollIntoView({behavior: "smooth"});
+                });
+            } else if (data.error) {
+                setIsLoading(false);
+            }
+        };
 
-            ws.current.onerror = () => {
+        ws.current.onerror = () => {
+            setUsePolling(true);
+        };
+
+        ws.current.onclose = (event) => {
+            if (!event.wasClean) {
                 setUsePolling(true);
-            };
+            }
+        };
 
-            ws.current.onclose = (event) => {
-                if (!event.wasClean) {
-                    setUsePolling(true);
-                }
-            };
-
-            return () => {
-                ws.current?.close();
-            };
-        }
+        return () => {
+            ws.current?.close();
+        };
     }
     const updateTaskStatus = async (currentConversationId: number, taskHandle: TaskHandle, streaming: boolean) => {
         try {
+            if (streaming) {
+                return;
+            }
             const response = await api.conversations().fetchResponseMessage(currentConversationId!, taskHandle);
             if (response) {
                 setIsAgentLoading(false);
                 setMessages((prev) => {
-                        if (streaming) {
-                            return prev.map((msg) =>
-                                msg.role === "agent" && msg.id === null
-                                    ? {...msg, id: response.id, text: response.text}
-                                    : msg
-                            )
-                        } else {
                             return [
                                 ...prev,
                                 {role: "agent", text: response.text, id: response.id}
                             ]
-                        }
                     }
                 );
                 setIsLoading(false);
@@ -202,13 +197,13 @@ export function Conversation({conversationId}: ConversationProps) {
             setIsAgentLoading(false);
         }
     }
-            return (
-            <ConversationUI
-                messages={messages}
-                isAgentLoading={isAgentLoading}
-                lastMessageRef={lastMessageRef}
-                onSubmit={onMessageComposerSubmit}
-                isLoading={isLoading}
-            />
-        );
+    return (
+        <ConversationUI
+            messages={messages}
+            isAgentLoading={isAgentLoading}
+            lastMessageRef={lastMessageRef}
+            onSubmit={onMessageComposerSubmit}
+            isLoading={isLoading}
+        />
+    );
 }

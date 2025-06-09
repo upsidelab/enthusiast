@@ -47,7 +47,7 @@ class LanguageModelProvider(ABC):
         self._model = model
 
     @abstractmethod
-    def provide_language_model(self, **kwargs) -> Type[BaseLanguageModel]:
+    def provide_language_model(self) -> BaseLanguageModel:
         """Initializes and returns an instance of the language model.
 
         Returns:

@@ -28,7 +28,8 @@ services:
     ports:
       - "10000:10000"
     env_file:
-      - ./server/.env
+      - path: ./server/.env
+        required: false
     environment:
       - PORT=10000
       - RUN_MIGRATIONS=True
@@ -37,7 +38,8 @@ services:
       context: server/
       dockerfile: Dockerfile.development
     env_file:
-      - ./server/.env
+      - path: ./server/.env
+        required: false
     environment:
       - RUN_MIGRATIONS=False
       - RUN_WORKER=True

@@ -36,13 +36,12 @@ poetry add enthusiast-common
 
 Next, implement your custom tool. Let's create a file named `tool.py` that contains a class that inherits from `CustomTool` interface:
 
-
 ```python title="my-custom-verification-tool/my_custom_verification_tool/tool.py"
 from pydantic import BaseModel
 from enthusiast_common import CustomTool
 from agent.retrievers import DocumentRetriever
 from agent.retrievers import ProductRetriever
-from catalog.language_models import LanguageModelRegistry
+from agent.registries.language_models import LanguageModelRegistry
 
 VERIFY_CONTENT_PROMPT = """
     Based on the following documents delimited by three backticks

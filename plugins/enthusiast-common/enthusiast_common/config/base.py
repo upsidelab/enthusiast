@@ -1,11 +1,10 @@
 from typing import Type, Optional
 
-from langchain.agents import AgentExecutor
 from langchain_core.callbacks import BaseCallbackHandler
 from dataclasses import dataclass, field
 
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.prompts import ChatMessagePromptTemplate, PromptTemplate
+from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
 
 from ..agents import BaseAgent
 from ..services.conversation import BaseConversationService
@@ -83,7 +82,7 @@ class LLMToolConfig:
 @dataclass
 class AgentToolConfig:
     model_class: Type[BaseAgentTool]
-    agent_executor: AgentExecutor
+    agent: BaseAgent
 
 
 @dataclass
@@ -110,7 +109,7 @@ class RetrieversConfig:
 @dataclass
 class AgentConfig:
     conversation_id: int
-    prompt_template: PromptTemplate | ChatMessagePromptTemplate
+    prompt_template: PromptTemplate | ChatPromptTemplate
     agent_class: Type[BaseAgent]
     conversation_service: Type[BaseConversationService]
     repositories: RepositoriesConfig
@@ -125,4 +124,4 @@ class AgentConfig:
 
 @dataclass
 class ToolCallingAgentConfig(AgentConfig):
-    prompt_template: ChatMessagePromptTemplate
+    prompt_template: ChatPromptTemplate

@@ -13,7 +13,7 @@ export interface ConversationProps {
 }
 
 export interface MessageProps {
-    role: "user" | "agent" | "agent_error";
+    role: "human" | "ai" | "system";
     text: string;
     id: number | null;
 }
@@ -31,13 +31,13 @@ function ConversationUI({messages, isAgentLoading, lastMessageRef, onSubmit, isL
         <div className="flex flex-col h-full px-4 pt-4">
             <div className="grow flex-1 space-y-4">
                 {messages.map((message, index) =>
-                    message.role === "agent_error" ? (
+                    message.role === "system" ? (
                         <MessageError key={index} text={message.text}/>
                     ) : (
                         <MessageBubble
                             key={index}
                             text={message.text}
-                            variant={message.role === "user" ? "primary" : "secondary"}
+                            variant={message.role === "human" ? "primary" : "secondary"}
                             questionId={message.id}
                         />
                     )
@@ -122,13 +122,13 @@ export function Conversation({ conversationId }: ConversationProps) {
             setMessages((prevMessages) => {
                 const lastMessage = prevMessages[prevMessages.length - 1];
 
-                if (lastMessage && lastMessage.role === "agent" && lastMessage.id === null) {
+                if (lastMessage && lastMessage.role === "ai" && lastMessage.id === null) {
                     return [
                         ...prevMessages.slice(0, -1),
                         { ...lastMessage, text: lastMessage.text + data.data.chunk }
                     ];
                 } else {
-                    return [...prevMessages, { role: "agent", text: data.data.chunk, id: null }];
+                    return [...prevMessages, { role: "ai", text: data.data.chunk, id: null }];
                 }
             });
 
@@ -202,7 +202,7 @@ export function Conversation({ conversationId }: ConversationProps) {
                 setIsAgentLoading(false);
                 setMessages((prev) => [
                     ...prev,
-                    { role: "agent", text: response.text, id: response.id }
+                    { role: "ai", text: response.text, id: response.id }
                 ]);
                 setIsLoading(false);
                 scrollToLastMessage();
@@ -218,7 +218,7 @@ export function Conversation({ conversationId }: ConversationProps) {
     const addUserMessage = (message: string) => {
         setMessages((prev) => [
             ...prev,
-            { role: "user", text: message, id: null }
+            { role: "human", text: message, id: null }
         ]);
         scrollToLastMessage();
     };

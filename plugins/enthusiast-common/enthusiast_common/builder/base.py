@@ -103,7 +103,7 @@ class BaseAgentBuilder(ABC):
         pass
 
     @abstractmethod
-    def _build_agent_tools(self, injector: BaseInjector | None) -> list[BaseAgentTool]:
+    def _build_agent_tools(self) -> list[BaseAgentTool]:
         pass
 
     @abstractmethod

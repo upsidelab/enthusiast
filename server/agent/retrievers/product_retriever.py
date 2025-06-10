@@ -1,8 +1,13 @@
+from typing import Any
+
 from django.core import serializers
+from django.db.models import QuerySet
+from enthusiast_common.injectors import BaseProductRetriever
+from enthusiast_common.repositories import BaseDataSetRepository, BaseProductRepository
+from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import PromptTemplate
 
-from catalog.language_models import LanguageModelRegistry
-from catalog.models import Product, DataSet
+from catalog.models import Product
 
 QUERY_PROMPT_TEMPLATE = """
     With the following database schema delimited by three backticks ```
@@ -33,26 +38,41 @@ QUERY_PROMPT_TEMPLATE = """
 """
 
 
-class ProductRetriever:
-    def __init__(self, data_set: DataSet, number_of_products: int = 12, max_sample_products: int = 12):
-        self.data_set = data_set
+class ProductRetriever(BaseProductRetriever[Product]):
+    def __init__(
+        self,
+        data_set_id: int,
+        data_set_repo: BaseDataSetRepository,
+        product_repo: BaseProductRepository,
+        llm: BaseLanguageModel,
+        prompt_template: str,
+        number_of_products: int = 12,
+        max_sample_products: int = 12,
+    ):
+        super().__init__(
+            data_set_id, data_set_repo, product_repo, llm, prompt_template, number_of_products, max_sample_products
+        )
+        self.data_set_id = data_set_id
+        self.data_set_repo = data_set_repo
+        self.product_repo = product_repo
         self.number_of_products = number_of_products
         self.max_sample_products = max_sample_products
+        self.prompt_template = prompt_template
+        self.llm = llm
 
-    def find_products_matching_query(self, user_query: str):
+    def find_products_matching_query(self, user_query: str) -> QuerySet[Product]:
         agent_where_clause = self._build_where_clause_for_query(user_query)
-        where_conditions = [f"data_set_id = {self.data_set.id}"]  # Security: access only to approved data set.
+        where_conditions = [f"data_set_id = {self.data_set_id}"]
         if agent_where_clause:
             where_conditions.append(agent_where_clause)
-        return Product.objects.extra(where=where_conditions)[: self.number_of_products]
+        return self.product_repo.extra(where_conditions=where_conditions)[: self.number_of_products]
 
-    def _get_sample_products_json(self):
-        sample_products = Product.objects.filter(data_set_id__exact=self.data_set.id)[: self.max_sample_products]
+    def _get_sample_products_json(self) -> Any:
+        sample_products = self.product_repo.filter(data_set_id__exact=self.data_set_id)[: self.max_sample_products]
         return serializers.serialize("json", sample_products)
 
-    def _build_where_clause_for_query(self, query: str):
-        llm = LanguageModelRegistry().provider_for_dataset(self.data_set).provide_language_model()
-        chain = PromptTemplate.from_template(QUERY_PROMPT_TEMPLATE) | llm
+    def _build_where_clause_for_query(self, query: str) -> str:
+        chain = PromptTemplate.from_template(self.prompt_template) | self.llm
         llm_result = chain.invoke({"sample_products_json": self._get_sample_products_json(), "query": query})
         sanitized_result = llm_result.content.strip("`").removeprefix("sql").strip("\n").replace("%", "%%")
         return sanitized_result

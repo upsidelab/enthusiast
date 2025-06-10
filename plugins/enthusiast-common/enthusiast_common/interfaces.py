@@ -55,7 +55,9 @@ class LanguageModelProvider(ABC):
         """
         pass
 
-    def provide_streaming_language_model(self, callbacks: list[BaseCallbackHandler] | None = None, **kwargs):
+    def provide_streaming_language_model(
+        self, callbacks: list[BaseCallbackHandler] | None = None, **kwargs
+    ):
         raise NotImplementedError()
 
     @abstractmethod

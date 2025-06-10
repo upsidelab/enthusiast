@@ -5,7 +5,7 @@ from channels.layers import get_channel_layer
 from agent.conversation import ConversationManager
 
 
-@shared_task(bind=True, max_retries=3)
+@shared_task(bind=True, max_retries=0)
 def respond_to_user_message_task(
     self, conversation_id: int, data_set_id: int, user_id: int, message: str, streaming: bool
 ):

@@ -1,33 +1,31 @@
-from typing import Type, Optional
+from dataclasses import dataclass, field
+from typing import Any, Dict, Generic, Optional, Type, TypeVar
 
 from langchain_core.callbacks import BaseCallbackHandler
-from dataclasses import dataclass, field
-
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 
 from ..agents import BaseAgent
-from ..services.conversation import BaseConversationService
-from ..tools import BaseAgentTool, BaseLLMTool, BaseFunctionTool
+from ..injectors.base import BaseInjector
 from ..llm import BaseLLM
 from ..registry import (
-    BaseLanguageModelRegistry,
-    BaseEmbeddingProviderRegistry,
     BaseDBModelsRegistry,
+    BaseEmbeddingProviderRegistry,
+    BaseLanguageModelRegistry,
 )
 from ..repositories.base import (
-    BaseUserRepository,
-    BaseMessageRepository,
     BaseConversationRepository,
     BaseDataSetRepository,
+    BaseMessageRepository,
+    BaseModelChunkRepository,
     BaseProductRepository,
-    BaseDocumentChunkRepository,
+    BaseUserRepository,
 )
-from ..injectors import (
-    BaseDocumentRetriever,
-    BaseProductRetriever,
-    BaseInjector,
-)
+from ..retrievers import BaseRetriever
+from ..services.conversation import BaseConversationService
+from ..tools import BaseAgentTool, BaseFunctionTool, BaseLLMTool
+
+InjectorT = TypeVar("InjectorT", bound=BaseInjector)
 
 
 @dataclass
@@ -68,8 +66,9 @@ class RepositoriesConfig:
     message: Type[BaseMessageRepository]
     conversation: Type[BaseConversationRepository]
     data_set: Type[BaseDataSetRepository]
-    document_chunk: Type[BaseDocumentChunkRepository]
+    document_chunk: Type[BaseModelChunkRepository]
     product: Type[BaseProductRepository]
+    product_chunk: Type[BaseModelChunkRepository]
 
 
 @dataclass
@@ -86,35 +85,26 @@ class AgentToolConfig:
 
 
 @dataclass
-class DocumentRetrieverConfig:
-    retriever_class: Type[BaseDocumentRetriever]
-    max_documents: int = 12
-
-
-@dataclass
-class ProductRetrieverConfig:
-    retriever_class: Type[BaseProductRetriever]
-    number_of_products: int = 12
-    max_sample_products: int = 12
-    prompt_template: str | None = None
-    llm: BaseLanguageModel | None = None
+class RetrieverConfig:
+    retriever_class: Type[BaseRetriever]
+    extra_kwargs: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class RetrieversConfig:
-    document: DocumentRetrieverConfig
-    product: ProductRetrieverConfig
+    document: RetrieverConfig
+    product: RetrieverConfig
 
 
 @dataclass
-class AgentConfig:
+class AgentConfig(Generic[InjectorT]):
     conversation_id: int
     prompt_template: PromptTemplate | ChatPromptTemplate
     agent_class: Type[BaseAgent]
     conversation_service: Type[BaseConversationService]
     repositories: RepositoriesConfig
     retrievers: RetrieversConfig
-    injector: Type[BaseInjector]
+    injector: Type[InjectorT]
     registry: RegistryConfig
     function_tools: Optional[list[Type[BaseFunctionTool]]] = None
     llm_tools: Optional[list[LLMToolConfig]] = None

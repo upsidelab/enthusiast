@@ -8,6 +8,37 @@ class ConversationWebSocketCallbackHandler(BaseCallbackHandler):
         self.group_name = f"conversation_{conversation.id}"
         self.channel_layer = get_channel_layer()
         self.run_id = None
+        self.first_final_answer_chunk = False
+        self.second_final_answer_chunk = False
+        self.third_final_answer_chunk = False
+
+    def _restore_final_answer_chunks(self):
+        self.first_final_answer_chunk = False
+        self.second_final_answer_chunk = False
+        self.third_final_answer_chunk = False
+
+    def _is_final_answer_chunk(self, chunk: str):
+        chunk = chunk.strip(" ").lower()
+        if not self.first_final_answer_chunk:
+            if not chunk == "final":
+                self._restore_final_answer_chunks()
+            else:
+                self.first_final_answer_chunk = True
+            return False
+        elif not self.second_final_answer_chunk:
+            if not chunk == "answer":
+                self._restore_final_answer_chunks()
+            else:
+                self.second_final_answer_chunk = True
+            return False
+        elif not self.third_final_answer_chunk:
+            if not chunk == ":":
+                self._restore_final_answer_chunks()
+            else:
+                self.third_final_answer_chunk = True
+            return False
+        else:
+            return True
 
     def on_chain_start(self, serialized, inputs, run_id, **kwargs):
         self.run_id = run_id
@@ -21,6 +52,7 @@ class ConversationWebSocketCallbackHandler(BaseCallbackHandler):
         )
 
     def on_llm_new_token(self, token: str, **kwargs):
+        # if self._is_final_answer_chunk(token):
         async_to_sync(self.channel_layer.group_send)(
             self.group_name,
             {

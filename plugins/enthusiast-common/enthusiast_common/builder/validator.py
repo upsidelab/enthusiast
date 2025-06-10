@@ -177,28 +177,10 @@ class AgentConfigValidator:
             result.add_error("retrievers.product configuration is required")
         elif not retrievers.product.retriever_class:
             result.add_error("retrievers.product.retriever_class is required")
-        else:
-            if retrievers.product.number_of_products is not None:
-                if (
-                    not isinstance(retrievers.product.number_of_products, int)
-                    or retrievers.product.number_of_products <= 0
-                ):
-                    result.add_error("retrievers.product.number_of_products must be a positive integer")
-
-            if retrievers.product.max_sample_products is not None:
-                if (
-                    not isinstance(retrievers.product.max_sample_products, int)
-                    or retrievers.product.max_sample_products <= 0
-                ):
-                    result.add_error("retrievers.product.max_sample_products must be a positive integer")
         if not retrievers.document:
             result.add_error("retrievers.document configuration is required")
         elif not retrievers.document.retriever_class:
             result.add_error("retrievers.document.retriever_class is required")
-        else:
-            if retrievers.document.max_documents is not None:
-                if not isinstance(retrievers.document.max_documents, int) or retrievers.document.max_documents <= 0:
-                    result.add_error("retrievers.document.max_documents must be a positive integer")
 
     def _validate_tools_config(self, config: AgentConfig, result: ConfigValidationResult):
         """Validate tools configuration"""

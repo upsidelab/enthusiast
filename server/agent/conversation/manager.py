@@ -1,8 +1,8 @@
 from datetime import datetime
 
 from account.models import User
+from agent.core.agents.tool_calling_agent.builder import Builder
 from agent.core.agents.tool_calling_agent.config import get_config
-from agent.core.builder import AgentBuilder
 from agent.models import Conversation, Message
 
 
@@ -14,7 +14,7 @@ class ConversationManager:
         relevant content.
         """
         config = get_config(conversation, streaming)
-        agent = AgentBuilder(config).build()
+        agent = Builder(config).build()
         response = agent.get_answer(question_message)
 
         return response

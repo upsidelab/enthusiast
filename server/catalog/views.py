@@ -20,8 +20,8 @@ from sync.tasks import (
     sync_data_set_product_sources,
     sync_product_source,
 )
-from .embeddings import EmbeddingProviderRegistry
-from .language_models import LanguageModelRegistry
+from agent.registries.embeddings import EmbeddingProviderRegistry
+from agent.registries.language_models import LanguageModelRegistry
 from .models import DataSet, DocumentSource, ProductSource
 from .serializers import (
     DataSetSerializer,

@@ -4,17 +4,14 @@ import tiktoken
 from typing import Type, Any, Optional
 
 from django.core import serializers
+from enthusiast_common.injectors import BaseInjector
+from enthusiast_common.repositories import BaseDataSetRepository
+from enthusiast_common.tools import BaseLLMTool
+from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import PromptTemplate
 from pydantic import BaseModel, Field
 
-from agent.retrievers import DocumentRetriever
-from agent.retrievers import ProductRetriever
-
-from enthusiast_common.interfaces import CustomTool, LanguageModelProvider
-
-from agent.callbacks import ConversationWebSocketCallbackHandler
-
-from agent.models import Conversation
+from agent.repositories import DjangoDataSetRepository
 
 logger = logging.getLogger(__name__)
 
@@ -41,39 +38,43 @@ class CreateAnswerToolInput(BaseModel):
     full_user_request: str = Field(description="user's full request")
 
 
-class CreateAnswerTool(CustomTool):
+class CreateAnswerTool(BaseLLMTool):
     name: str = "create_answer_tool"
     description: str = "use it when asked to generate content or answer a question about products"
     args_schema: Type[BaseModel] = CreateAnswerToolInput
     return_direct: bool = True
-    data_set: any = None
     chat_model: Optional[str] = None
     encoding: tiktoken.encoding_for_model = None
     max_tokens: int = 30000
     max_retry: int = 3
-    conversation: Conversation = None
-    streaming: bool = False
+    data_set_id: int = None
+    data_set_repo: BaseDataSetRepository = None
+    llm: BaseLanguageModel = None
+    injector: Optional[BaseInjector] = None
 
     def __init__(
         self,
-        chat_model: str,
-        conversation: Conversation,
-        language_model_provider: LanguageModelProvider,
-        streaming: bool = False,
+        data_set_id: int,
+        data_set_repo: DjangoDataSetRepository,
+        llm: BaseLanguageModel,
+        injector: BaseInjector | None,
         **kwargs: Any,
     ):
         super().__init__(
-            data_set=conversation.data_set,
-            chat_model=chat_model,
-            language_model_provider=language_model_provider,
+            data_set_id=data_set_id,
+            data_set_repo=data_set_repo,
+            llm=llm,
+            injector=injector,
             **kwargs,
         )
-        if language_model_provider.model_name() in tiktoken.model.MODEL_TO_ENCODING:
-            self.encoding = tiktoken.encoding_for_model(language_model_provider.model_name())
+        self.data_set_id = data_set_id
+        self.data_set_repo = data_set_repo
+        self.llm = llm
+        self.injector = injector
+        if llm.name in tiktoken.model.MODEL_TO_ENCODING:
+            self.encoding = tiktoken.encoding_for_model(llm.name)
         else:
             self.encoding = tiktoken.encoding_for_model("gpt-4o")
-        self.conversation = conversation
-        self.streaming = streaming
 
     def _get_document_context(self, relevant_documents, cut_off_cnt):
         """Identify document context for a query.
@@ -111,19 +112,15 @@ class CreateAnswerTool(CustomTool):
         return document_context
 
     def _run(self, full_user_request: str):
-        document_retriever = DocumentRetriever(data_set=self.data_set)
+        document_retriever = self.injector.document_retriever
+        product_retriever = self.injector.product_retriever
         relevant_documents = document_retriever.find_documents_matching_query(full_user_request)
-        relevant_products = ProductRetriever(data_set=self.data_set).find_products_matching_query(full_user_request)
+        relevant_products = product_retriever.find_products_matching_query(full_user_request)
 
         product_context = serializers.serialize("json", relevant_products)
 
         prompt = PromptTemplate.from_template(CREATE_CONTENT_PROMPT_TEMPLATE)
-        callback_handler = ConversationWebSocketCallbackHandler(self.conversation)
-        if self.streaming:
-            llm = self._language_model_provider.provide_streaming_language_model(callbacks=[callback_handler])
-        else:
-            llm = self._language_model_provider.provide_language_model()
-        chain = prompt | llm
+        chain = prompt | self.llm
 
         retry = -1
         while retry < self.max_retry:

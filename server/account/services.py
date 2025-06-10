@@ -1,6 +1,7 @@
 from django.conf import settings
 from .models import User
 
+
 class ServiceAccountNameService:
     def generate_service_account_email(self, name: str) -> str:
         """

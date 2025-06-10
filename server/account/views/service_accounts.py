@@ -20,13 +20,11 @@ class CheckServiceNameView(APIView):
         operation_description="Check if a service account name is available",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            properties={
-                'name': openapi.Schema(type=openapi.TYPE_STRING, description='Service account name')
-            }
-        )
+            properties={"name": openapi.Schema(type=openapi.TYPE_STRING, description="Service account name")},
+        ),
     )
     def post(self, request):
-        name = request.data.get('name')
+        name = request.data.get("name")
         service = ServiceAccountNameService()
         if service.is_service_account_name_available(name):
             return Response({"is_available": True}, status=status.HTTP_200_OK)
@@ -39,8 +37,8 @@ class ResetTokenView(APIView):
     @swagger_auto_schema(
         operation_description="Revoke and regenerate a token for a service account",
         manual_parameters=[
-            openapi.Parameter('id', openapi.IN_PATH, description='ID of the service account', type=openapi.TYPE_INTEGER)
-        ]
+            openapi.Parameter("id", openapi.IN_PATH, description="ID of the service account", type=openapi.TYPE_INTEGER)
+        ],
     )
     def post(self, request, id):
         service_account = User.objects.get(id=id, is_service_account=True)
@@ -52,11 +50,10 @@ class ResetTokenView(APIView):
 class ServiceAccountListView(ListAPIView):
     permission_classes = [IsAdminUser]
     serializer_class = ServiceAccountSerializer
-    queryset = User.objects.filter(is_service_account=True).order_by('-date_joined')
+    queryset = User.objects.filter(is_service_account=True).order_by("-date_joined")
 
     @swagger_auto_schema(
-        operation_description="Create a new service account",
-        request_body=CreateUpdateServiceAccountSerializer
+        operation_description="Create a new service account", request_body=CreateUpdateServiceAccountSerializer
     )
     def post(self, request):
         serializer = CreateUpdateServiceAccountSerializer(data=request.data)
@@ -76,8 +73,8 @@ class ServiceAccountView(APIView):
         operation_description="Update a service account",
         request_body=CreateUpdateServiceAccountSerializer,
         manual_parameters=[
-            openapi.Parameter('id', openapi.IN_PATH, description='ID of the service account', type=openapi.TYPE_INTEGER)
-        ]
+            openapi.Parameter("id", openapi.IN_PATH, description="ID of the service account", type=openapi.TYPE_INTEGER)
+        ],
     )
     def patch(self, request, id):
         service_account = User.objects.get(id=id, is_service_account=True)

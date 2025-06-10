@@ -3,14 +3,18 @@ from dataclasses import dataclass
 from importlib import import_module
 from typing import Generic, TypeVar
 
+
 @dataclass
 class DataSetSource:
     """Represents configuration of a data set source."""
+
     plugin_name: str
     data_set_id: int
     config: dict
 
+
 T = TypeVar("T")
+
 
 class SourcePluginRegistry(ABC):
     """Registry of available source plugins registered in ECL system."""

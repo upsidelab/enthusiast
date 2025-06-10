@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('catalog', '0003_alter_document_url_alter_product_entry_id_and_more'),
+        ("catalog", "0003_alter_document_url_alter_product_entry_id_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='dataset',
-            name='language_model',
-            field=models.CharField(default='gpt-4o'),
+            model_name="dataset",
+            name="language_model",
+            field=models.CharField(default="gpt-4o"),
         ),
         migrations.AddField(
-            model_name='dataset',
-            name='language_model_provider',
-            field=models.CharField(default='OpenAI'),
+            model_name="dataset",
+            name="language_model_provider",
+            field=models.CharField(default="OpenAI"),
         ),
     ]

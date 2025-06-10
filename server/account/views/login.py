@@ -12,24 +12,19 @@ class LoginView(APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email'),
-                'password': openapi.Schema(type=openapi.TYPE_STRING, description='Password')
-            }
+                "email": openapi.Schema(type=openapi.TYPE_STRING, description="Email"),
+                "password": openapi.Schema(type=openapi.TYPE_STRING, description="Password"),
+            },
         ),
         responses={
             200: openapi.Response(
-                description="Token retrieved successfully",
-                examples={
-                    "application/json": {
-                        "token": "string"
-                    }
-                }
+                description="Token retrieved successfully", examples={"application/json": {"token": "string"}}
             ),
-            403: "Forbidden"
-        }
+            403: "Forbidden",
+        },
     )
     def post(self, request):
-        user = authenticate(username=request.data['email'], password=request.data['password'])
+        user = authenticate(username=request.data["email"], password=request.data["password"])
         if user:
             token, created = Token.objects.get_or_create(user=user)
             return Response({"token": token.key})

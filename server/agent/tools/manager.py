@@ -7,6 +7,7 @@ from .registry import ToolRegistry
 
 logger = logging.getLogger(__name__)
 
+
 class ToolManager:
     def __init__(self, data_set: DataSet, language_model_provider: LanguageModelProvider):
         self.registry = ToolRegistry()

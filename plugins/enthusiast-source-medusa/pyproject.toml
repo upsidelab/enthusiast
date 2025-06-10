@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "enthusiast-source-medusa"
-version = "0.1.1"
+version = "0.1.2"
 description = ""
 authors = ["Kuba Szczęśniak <kuba.szczęśniak@upsidelab.io>"]
 readme = "README.md"

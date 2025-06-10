@@ -18,4 +18,3 @@ class DocumentDetails:
     url: str
     title: str
     content: str
-

@@ -99,7 +99,7 @@ class CustomTool(BaseTool):
     description: str
     args_schema: Type[BaseModel]
     return_direct: bool
-    data_set: any # TODO use a proper type definition
+    data_set: any  # TODO use a proper type definition
     chat_model: Optional[str]
 
     def __init__(self, data_set, chat_model, language_model_provider: LanguageModelProvider, **kwargs):
@@ -118,7 +118,7 @@ class CustomTool(BaseTool):
 
     @abstractmethod
     def _run(self, *args, **kwargs):
-        """ Abstract method to run the tool.
+        """Abstract method to run the tool.
 
         Args:
             *args: Positional arguments.

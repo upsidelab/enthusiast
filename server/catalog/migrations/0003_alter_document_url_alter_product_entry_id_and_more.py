@@ -4,28 +4,27 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('catalog', '0002_initial'),
+        ("catalog", "0002_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='document',
-            name='url',
+            model_name="document",
+            name="url",
             field=models.CharField(max_length=255),
         ),
         migrations.AlterField(
-            model_name='product',
-            name='entry_id',
+            model_name="product",
+            name="entry_id",
             field=models.CharField(max_length=255),
         ),
         migrations.AddConstraint(
-            model_name='document',
-            constraint=models.UniqueConstraint(fields=('data_set', 'url'), name='uq_document'),
+            model_name="document",
+            constraint=models.UniqueConstraint(fields=("data_set", "url"), name="uq_document"),
         ),
         migrations.AddConstraint(
-            model_name='product',
-            constraint=models.UniqueConstraint(fields=('data_set', 'entry_id'), name='uq_product'),
+            model_name="product",
+            constraint=models.UniqueConstraint(fields=("data_set", "entry_id"), name="uq_product"),
         ),
     ]

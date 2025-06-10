@@ -39,7 +39,11 @@ class SolidusProductSource(ProductSourcePlugin):
             sku=solidus_product.get("master", [{}]).get("sku") if solidus_product.get("master") else None,
             price=float(solidus_product.get("price")),
             properties=self.get_properties(solidus_product.get("product_properties")),
-            categories=str([taxon.get("name") for taxon in solidus_product.get("classifications", {}).get("taxon", [])] if solidus_product.get("collection") else [])
+            categories=str(
+                [taxon.get("name") for taxon in solidus_product.get("classifications", {}).get("taxon", [])]
+                if solidus_product.get("collection")
+                else []
+            ),
         )
 
         return product
@@ -55,12 +59,10 @@ class SolidusProductSource(ProductSourcePlugin):
 
         products = []
         page = 1
-        headers = {
-            "Authorization": f"Bearer {self._api_key}"
-        }
+        headers = {"Authorization": f"Bearer {self._api_key}"}
 
         while True:
-            response = requests.get(endpoint, headers=headers, params={'page': page})
+            response = requests.get(endpoint, headers=headers, params={"page": page})
 
             if response.status_code == 404:
                 raise Exception("The endpoint was not found. Please verify the URL.")

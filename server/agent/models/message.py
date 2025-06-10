@@ -13,5 +13,7 @@ class Message(models.Model):
     feedback = models.TextField(null=True)
 
     class Meta:
-        db_table_comment = ("A message sent during a conversation. Role describes category of a message, it may be "
-                            "a question asked by a user, agent's answer, or system message.")
+        db_table_comment = (
+            "A message sent during a conversation. Role describes category of a message, it may be "
+            "a question asked by a user, agent's answer, or system message."
+        )

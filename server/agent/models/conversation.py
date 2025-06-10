@@ -12,18 +12,19 @@ class Conversation(models.Model):
     summary = models.CharField(null=True)
 
     class Meta:
-        db_table_comment = ("A conversation is a collection of various messages exchanged during one session. Messages "
-                            "are mostly questions and answers and have different actors such as end user asking "
-                            "question and ECL agent answering those questions.")
+        db_table_comment = (
+            "A conversation is a collection of various messages exchanged during one session. Messages "
+            "are mostly questions and answers and have different actors such as end user asking "
+            "question and ECL agent answering those questions."
+        )
 
     def get_messages(self):
-        """Return list of messages exchanged during a conversation.
-        """
+        """Return list of messages exchanged during a conversation."""
         history = []
-        for message in self.messages.all().order_by('id'):
-            if message.role == 'user':
+        for message in self.messages.all().order_by("id"):
+            if message.role == "user":
                 history.append(HumanMessage(content=message.text or ""))
-            elif message.role == 'agent':
+            elif message.role == "agent":
                 history.append(AIMessage(content=message.text or ""))
 
         return history

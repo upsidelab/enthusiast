@@ -10,7 +10,7 @@ class UserManager(BaseUserManager):
 
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
-        if extra_fields.get('is_service_account', False):
+        if extra_fields.get("is_service_account", False):
             user.set_unusable_password()
         else:
             user.set_password(password)

@@ -7,8 +7,8 @@ from catalog.models import DataSet
 
 logger = logging.getLogger(__name__)
 
-class ToolRegistry:
 
+class ToolRegistry:
     def __init__(self):
         self.tool_classes = self._load_tool_classes()
 
@@ -21,7 +21,7 @@ class ToolRegistry:
         """
         tool_classes = {}
         for tool_name, module_path in settings.AGENT_TOOLS.items():
-            module_name, class_name = module_path.rsplit('.', 1)
+            module_name, class_name = module_path.rsplit(".", 1)
             module = importlib.import_module(module_name)
             tool_class = getattr(module, class_name)
             tool_classes[tool_name] = tool_class
@@ -40,6 +40,8 @@ class ToolRegistry:
         """
         tools = []
         for tool_name, tool_class in self.tool_classes.items():
-            tool_instance = tool_class(data_set=data_set, chat_model=None, language_model_provider=language_model_provider)
+            tool_instance = tool_class(
+                data_set=data_set, chat_model=None, language_model_provider=language_model_provider
+            )
             tools.append(tool_instance)
         return tools

@@ -1,7 +1,7 @@
+from enthusiast_common.registry.embeddings import EmbeddingProvider
+from enthusiast_common.utils import prioritize_items
 from openai import OpenAI
 
-from enthusiast_common import EmbeddingProvider
-from enthusiast_common.utils import prioritize_items
 
 PRIORITIZED_MODELS = ["text-embedding-3-large", "text-embedding-3-small"]
 

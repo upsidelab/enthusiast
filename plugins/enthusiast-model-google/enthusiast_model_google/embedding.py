@@ -1,4 +1,4 @@
-from enthusiast_common import EmbeddingProvider
+from enthusiast_common.registry.embeddings import EmbeddingProvider
 from enthusiast_common.utils import prioritize_items
 from google import genai
 from google.genai.types import EmbedContentConfig

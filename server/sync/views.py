@@ -10,6 +10,7 @@ class GetDocumentSourcePlugins(APIView):
     """
     View to get list of plugins registered in ECL settings.
     """
+
     permission_classes = [IsAuthenticated]
     serializer_class = SourcePluginSerializer
     pagination_class = None
@@ -26,6 +27,7 @@ class GetProductSourcePlugins(APIView):
     """
     View to get list of plugins registered in ECL settings.
     """
+
     permission_classes = [IsAuthenticated]
     serializer_class = SourcePluginSerializer
     pagination_class = None

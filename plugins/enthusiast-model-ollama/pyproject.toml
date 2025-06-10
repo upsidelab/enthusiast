@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "enthusiast-model-ollama"
-version = "0.2.0"
+version = "0.2.1"
 description = ""
 authors = ["Rafal Cymerys <rafal@upsidelab.io>"]
 readme = "README.md"

@@ -12,25 +12,20 @@ class AskQuestionSerializer(serializers.Serializer):
         question_message:
             Str, A question message.
     """
+
     data_set_id = serializers.IntegerField(
-        required=False,
-        allow_null=False,
-        error_messages={
-            'null': 'Data Set ID cannot be blank'
-        }
+        required=False, allow_null=False, error_messages={"null": "Data Set ID cannot be blank"}
     )
 
     question_message = serializers.CharField(
-        required=True,
-        allow_blank=False,
-        error_messages={
-            'blank': 'Query message cannot be blank.'
-        }
+        required=True, allow_blank=False, error_messages={"blank": "Query message cannot be blank."}
     )
 
     def validate_conversation_id(self, value):
         if not Conversation.objects.filter(id=value).exists():
-            raise serializers.ValidationError(f'Conversation with the given ID ({value}) does not exist. Either skip this parameter (a new conversation will be created), or provide a valid ID of an existing conversation')
+            raise serializers.ValidationError(
+                f"Conversation with the given ID ({value}) does not exist. Either skip this parameter (a new conversation will be created), or provide a valid ID of an existing conversation"
+            )
         return value
 
 
@@ -39,15 +34,15 @@ class ConversationCreationSerializer(serializers.Serializer):
         required=False,
         allow_null=False,
         error_messages={
-            'null': 'Data Set ID cannot be blank. Either skip this parameter, or provide a valid ID of a data set'
-        }
+            "null": "Data Set ID cannot be blank. Either skip this parameter, or provide a valid ID of a data set"
+        },
     )
 
 
 class ConversationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Conversation
-        fields = ['id', 'started_at', 'summary']
+        fields = ["id", "started_at", "summary"]
 
 
 class MessageFeedbackSerializer(serializers.ModelSerializer):
@@ -55,26 +50,24 @@ class MessageFeedbackSerializer(serializers.ModelSerializer):
     feedback = serializers.CharField(
         required=True,
         allow_blank=False,
-        error_messages={
-            'blank': 'Feedback cannot be blank.',
-            'required': 'Feedback is required.'
-        }
+        error_messages={"blank": "Feedback cannot be blank.", "required": "Feedback is required."},
     )
 
     class Meta:
         model = Message
-        fields = ['rating', 'feedback']
+        fields = ["rating", "feedback"]
 
 
 class MessagesSerializer(serializers.ModelSerializer):
     # Serializer to get list of messages exchanged during a given conversation.
     class Meta:
         model = Message
-        fields = ['id', 'text', 'role']
+        fields = ["id", "text", "role"]
+
 
 class ConversationContentSerializer(ConversationSerializer):
     # This serializer returns conversation details extended with history.
     history = MessagesSerializer(many=True)
 
     class Meta(ConversationSerializer.Meta):
-        fields = ConversationSerializer.Meta.fields + ['history']
+        fields = ConversationSerializer.Meta.fields + ["history"]

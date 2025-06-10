@@ -29,7 +29,7 @@ class Agent:
                 ("system", system_prompt),
                 ("placeholder", "{chat_history}"),
                 ("human", "{input}"),
-                ("placeholder", "{agent_scratchpad}")
+                ("placeholder", "{agent_scratchpad}"),
             ]
         )
 
@@ -37,11 +37,9 @@ class Agent:
         return AgentExecutor(agent=agent, tools=tools, verbose=True)
 
     def _create_agent_memory(self, messages):
-        memory = ConversationSummaryBufferMemory(llm=self._llm,
-                                                 memory_key="chat_history",
-                                                 return_messages=True,
-                                                 max_token_limit=3000,
-                                                 output_key="output")
+        memory = ConversationSummaryBufferMemory(
+            llm=self._llm, memory_key="chat_history", return_messages=True, max_token_limit=3000, output_key="output"
+        )
         memory.chat_memory.add_messages(messages)
         return memory
 

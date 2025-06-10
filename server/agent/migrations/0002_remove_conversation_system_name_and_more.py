@@ -5,19 +5,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('agent', '0001_initial'),
+        ("agent", "0001_initial"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='conversation',
-            name='system_name',
+            model_name="conversation",
+            name="system_name",
         ),
         migrations.AlterField(
-            model_name='message',
-            name='conversation',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='messages', to='agent.conversation'),
+            model_name="message",
+            name="conversation",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT, related_name="messages", to="agent.conversation"
+            ),
         ),
     ]

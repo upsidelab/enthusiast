@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("catalog", "0004_dataset_language_model_and_more"),
     ]

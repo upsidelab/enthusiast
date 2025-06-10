@@ -7,4 +7,3 @@ class DocumentSourcePluginRegistry(SourcePluginRegistry):
 
     def get_plugins(self):
         return settings.CATALOG_DOCUMENT_SOURCE_PLUGINS.items()
-

@@ -21,8 +21,9 @@ class DocumentRetriever:
     def _find_documents_matching_vector(self, embedding_vector: list[float]) -> list[DocumentChunk]:
         embedding_distance = CosineDistance("embedding", embedding_vector)
         embeddings_by_distance = DocumentChunk.objects.annotate(distance=embedding_distance).order_by("distance")
-        embeddings_with_documents = embeddings_by_distance.select_related('document').filter(
-            document__data_set_id__exact=self.data_set.id)
-        limited_embeddings_with_documents = embeddings_with_documents[:self.max_documents]
+        embeddings_with_documents = embeddings_by_distance.select_related("document").filter(
+            document__data_set_id__exact=self.data_set.id
+        )
+        limited_embeddings_with_documents = embeddings_with_documents[: self.max_documents]
 
         return limited_embeddings_with_documents

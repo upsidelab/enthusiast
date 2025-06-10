@@ -18,14 +18,16 @@ class DataSet(models.Model):
     embedding_chunk_size = models.IntegerField(default=3000)
     embedding_chunk_overlap = models.IntegerField(default=150)
     system_message = models.TextField(
-        default="You are a sales support agent, and you know everything about a company and their products.")
+        default="You are a sales support agent, and you know everything about a company and their products."
+    )
 
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="data_sets")
 
     class Meta:
-        db_table_comment = ("List of various data sets. One data set may be the whole company's content such as blog "
-                            "posts, or some part of it: a data set may be represent a brand or department.")
-
+        db_table_comment = (
+            "List of various data sets. One data set may be the whole company's content such as blog "
+            "posts, or some part of it: a data set may be represent a brand or department."
+        )
 
 
 class ProductSource(models.Model):
@@ -47,13 +49,12 @@ class Document(models.Model):
     content = models.TextField()
 
     class Meta:
-        db_table_comment = ("List of documents being part of a larger data set. A document may be for instance a blog "
-                            "post. This is the main entity being analysed by ECL engine when user asks questions "
-                            "regarding company's offer.")
-        constraints = [
-            models.UniqueConstraint(fields=['data_set', 'url'], name='uq_document')
-        ]
-
+        db_table_comment = (
+            "List of documents being part of a larger data set. A document may be for instance a blog "
+            "post. This is the main entity being analysed by ECL engine when user asks questions "
+            "regarding company's offer."
+        )
+        constraints = [models.UniqueConstraint(fields=["data_set", "url"], name="uq_document")]
 
     def split(self, chunk_size, chunk_overlap):
         """
@@ -105,7 +106,4 @@ class Product(models.Model):
 
     class Meta:
         db_table_comment = "List of products from a given data set."
-        constraints = [
-            models.UniqueConstraint(fields=['data_set', 'entry_id'], name='uq_product')
-        ]
-
+        constraints = [models.UniqueConstraint(fields=["data_set", "entry_id"], name="uq_product")]

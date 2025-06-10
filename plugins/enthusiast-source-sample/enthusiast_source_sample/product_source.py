@@ -11,18 +11,20 @@ class SampleProductSource(ProductSourcePlugin):
 
     def fetch(self) -> list[ProductDetails]:
         results = []
-        with open(self.sample_file_path, newline='', encoding='utf-8-sig') as csvfile:
+        with open(self.sample_file_path, newline="", encoding="utf-8-sig") as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
-                results.append(ProductDetails(
-                    entry_id=row['ID'],
-                    name=row['Name'],
-                    slug=row['SKU'],
-                    sku=row['SKU'],
-                    description=row['Description'],
-                    properties=row['Merged Properties'],
-                    categories=row['Categories'],
-                    price=row['Price']
-                ))
+                results.append(
+                    ProductDetails(
+                        entry_id=row["ID"],
+                        name=row["Name"],
+                        slug=row["SKU"],
+                        sku=row["SKU"],
+                        description=row["Description"],
+                        properties=row["Merged Properties"],
+                        categories=row["Categories"],
+                        price=row["Price"],
+                    )
+                )
 
         return results

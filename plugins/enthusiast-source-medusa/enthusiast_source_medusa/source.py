@@ -32,9 +32,13 @@ class MedusaProductSource(ProductSourcePlugin):
             slug=medusa_product.get("handle"),
             description=medusa_product.get("description"),
             sku=medusa_product.get("variants", [{}])[0].get("sku") if medusa_product.get("variants") else None,
-            price=medusa_product.get("variants", [{}])[0].get("prices", [{}])[0].get("amount") if medusa_product.get("variants") else None,
+            price=medusa_product.get("variants", [{}])[0].get("prices", [{}])[0].get("amount")
+            if medusa_product.get("variants")
+            else None,
             properties=medusa_product.get("metadata"),
-            categories=[category.get("name") for category in medusa_product.get("collection", {}).get("categories", [])] if medusa_product.get("collection") else []
+            categories=[category.get("name") for category in medusa_product.get("collection", {}).get("categories", [])]
+            if medusa_product.get("collection")
+            else [],
         )
 
         return product
@@ -51,9 +55,7 @@ class MedusaProductSource(ProductSourcePlugin):
         offset = 0  # Starting point for product list pagination.
         limit = 100  # Page size.
 
-        headers = {
-            "Authorization": f"Bearer {self._api_key}"
-        }
+        headers = {"Authorization": f"Bearer {self._api_key}"}
 
         while True:
             response = requests.get(endpoint, headers=headers, params={"limit": limit, "offset": offset})

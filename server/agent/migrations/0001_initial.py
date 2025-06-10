@@ -6,41 +6,45 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('catalog', '0002_initial'),
+        ("catalog", "0002_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Conversation',
+            name="Conversation",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('started_at', models.DateTimeField(auto_now_add=True)),
-                ('system_name', models.CharField(default='system', max_length=50, null=True)),
-                ('data_set', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='catalog.dataset')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("started_at", models.DateTimeField(auto_now_add=True)),
+                ("system_name", models.CharField(default="system", max_length=50, null=True)),
+                ("data_set", models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="catalog.dataset")),
+                ("user", models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL)),
             ],
             options={
-                'db_table_comment': 'A conversation is a collection of various messages exchanged during one session. Messages are mostly questions and answers and have different actors such as end user asking question and ECL agent answering those questions.',
+                "db_table_comment": "A conversation is a collection of various messages exchanged during one session. Messages are mostly questions and answers and have different actors such as end user asking question and ECL agent answering those questions.",
             },
         ),
         migrations.CreateModel(
-            name='Message',
+            name="Message",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('role', models.CharField(max_length=15)),
-                ('text', models.TextField()),
-                ('rating', models.IntegerField(null=True)),
-                ('feedback', models.TextField(null=True)),
-                ('conversation', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='message', to='agent.conversation')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("role", models.CharField(max_length=15)),
+                ("text", models.TextField()),
+                ("rating", models.IntegerField(null=True)),
+                ("feedback", models.TextField(null=True)),
+                (
+                    "conversation",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT, related_name="message", to="agent.conversation"
+                    ),
+                ),
             ],
             options={
-                'db_table_comment': "A message sent during a conversation. Role describes category of a message, it may be a question asked by a user, agent's answer, or system message.",
+                "db_table_comment": "A message sent during a conversation. Role describes category of a message, it may be a question asked by a user, agent's answer, or system message.",
             },
         ),
     ]

@@ -81,7 +81,7 @@ class ShopifyProductSource(ProductSourcePlugin):
                     "tags": shopify_product.get("tags", ""),
                 }
             ),
-            categories=shopify_product.get("category", "")
+            categories=shopify_product.get("category", ""),
         )
         # Collect attributes from variants level.
         prices = []
@@ -108,10 +108,7 @@ class ShopifyProductSource(ProductSourcePlugin):
         cursor = None
 
         while has_next_page:
-            variables = {
-                "first": 50,
-                 "after": cursor
-            }
+            variables = {"first": 50, "after": cursor}
 
             response = shopify.GraphQL().execute(query, variables=variables)
 

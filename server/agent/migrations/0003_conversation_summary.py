@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("agent", "0002_remove_conversation_system_name_and_more"),
     ]

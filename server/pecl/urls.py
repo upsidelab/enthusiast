@@ -14,6 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import include, path
 from rest_framework import permissions
@@ -23,7 +24,7 @@ from drf_yasg import openapi
 schema_view = get_schema_view(
     openapi.Info(
         title="E-Commerce LLM API",
-        default_version='v1.0',
+        default_version="v1.0",
         description="Documentation for E-Commerce LLM API",
     ),
     public=True,
@@ -31,11 +32,11 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    path('api/docs<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-    path('api/docs/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('admin/', admin.site.urls),
-    path('', include('catalog.urls')),
-    path('', include('agent.urls')),
-    path('', include('account.urls')),
-    path('', include('sync.urls'))
+    path("api/docs<format>/", schema_view.without_ui(cache_timeout=0), name="schema-json"),
+    path("api/docs/", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
+    path("admin/", admin.site.urls),
+    path("", include("catalog.urls")),
+    path("", include("agent.urls")),
+    path("", include("account.urls")),
+    path("", include("sync.urls")),
 ]

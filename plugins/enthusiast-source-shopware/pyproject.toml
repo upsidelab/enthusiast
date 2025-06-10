@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "enthusiast-source-shopware"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = ["Mateusz Porebski <mateusz.porebski@upsidelab.io>"]
 readme = "README.md"

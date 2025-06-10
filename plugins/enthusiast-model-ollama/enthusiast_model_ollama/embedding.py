@@ -1,6 +1,7 @@
 from enthusiast_common import EmbeddingProvider
 from ollama import Client
 
+
 class OllamaEmbeddingProvider(EmbeddingProvider):
     def generate_embeddings(self, content: str) -> list[float]:
         """

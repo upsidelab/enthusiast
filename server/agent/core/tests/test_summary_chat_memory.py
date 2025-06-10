@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 import pytest
 from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.messages import HumanMessage, AIMessage, FunctionMessage
+from langchain_core.messages import AIMessage, FunctionMessage, HumanMessage
 from langchain_core.tools import BaseTool
 
 from agent.core.summary_chat_memory import SummaryChatMemory
@@ -25,13 +25,13 @@ class TestSummaryChatMemory:
             return_messages=True,
             max_token_limit=max_token_limit,
             output_key="output",
-            chat_memory=mock_chat_memory
+            chat_memory=mock_chat_memory,
         )
 
         # Then
         assert memory.max_token_limit == max_token_limit
         assert memory.chat_memory is not None
-        assert hasattr(memory, 'save_context')
+        assert hasattr(memory, "save_context")
         assert callable(memory.save_context)
 
     def test_inheritance_from_persist_intermediate_steps_mixin(self):
@@ -45,12 +45,12 @@ class TestSummaryChatMemory:
             return_messages=True,
             max_token_limit=1000,
             output_key="output",
-            chat_memory=mock_chat_memory
+            chat_memory=mock_chat_memory,
         )
 
         # When & Then
         # Verify that the class has the save_context method from the mixin
-        assert hasattr(memory, 'save_context')
+        assert hasattr(memory, "save_context")
         assert callable(memory.save_context)
 
     def test_inheritance_from_conversation_summary_buffer_memory(self):
@@ -64,15 +64,15 @@ class TestSummaryChatMemory:
             return_messages=True,
             max_token_limit=1000,
             output_key="output",
-            chat_memory=mock_chat_memory
+            chat_memory=mock_chat_memory,
         )
 
         # When & Then
         # Verify that the class has properties from ConversationSummaryBufferMemory
-        assert hasattr(memory, 'max_token_limit')
-        assert hasattr(memory, 'chat_memory')
-        assert hasattr(memory, 'load_memory_variables')
-        assert hasattr(memory, 'llm')
+        assert hasattr(memory, "max_token_limit")
+        assert hasattr(memory, "chat_memory")
+        assert hasattr(memory, "load_memory_variables")
+        assert hasattr(memory, "llm")
 
     def test_save_context_with_basic_messages(self):
         # Given
@@ -85,7 +85,7 @@ class TestSummaryChatMemory:
             return_messages=True,
             max_token_limit=1000,
             output_key="output",
-            chat_memory=mock_chat_memory
+            chat_memory=mock_chat_memory,
         )
         inputs = {"input": "Hello, how are you?"}
         outputs = {"output": "I'm doing well, thank you!"}
@@ -116,21 +116,21 @@ class TestSummaryChatMemory:
             return_messages=True,
             max_token_limit=1000,
             output_key="output",
-            chat_memory=mock_chat_memory
+            chat_memory=mock_chat_memory,
         )
         inputs = {"input": "What's the weather like?"}
-        
+
         # Mock tool and action
         mock_tool = Mock(spec=BaseTool)
         mock_tool.name = "weather_tool"
-        
+
         mock_action = Mock()
         mock_action.tool = "weather_tool"
         mock_action.messages = [AIMessage(content="I'll check the weather for you")]
-        
+
         outputs = {
             "output": "The weather is sunny today!",
-            "intermediate_steps": [(mock_action, "Temperature: 25°C, Condition: Sunny")]
+            "intermediate_steps": [(mock_action, "Temperature: 25°C, Condition: Sunny")],
         }
 
         # When
@@ -139,23 +139,23 @@ class TestSummaryChatMemory:
         # Then
         # Should have 4 calls: Human, AI action, Function, Final AI
         assert mock_chat_memory.add_message.call_count == 4
-        
+
         # Verify the sequence of calls
         call_args_list = mock_chat_memory.add_message.call_args_list
-        
+
         # Human message
         assert isinstance(call_args_list[0][0][0], HumanMessage)
         assert call_args_list[0][0][0].content == "What's the weather like?"
-        
+
         # AI action message
         assert isinstance(call_args_list[1][0][0], AIMessage)
         assert call_args_list[1][0][0].content == "I'll check the weather for you"
-        
+
         # Function message
         assert isinstance(call_args_list[2][0][0], FunctionMessage)
         assert call_args_list[2][0][0].name == "weather_tool"
         assert call_args_list[2][0][0].content == "Temperature: 25°C, Condition: Sunny"
-        
+
         # Final AI response
         assert isinstance(call_args_list[3][0][0], AIMessage)
         assert call_args_list[3][0][0].content == "The weather is sunny today!"
@@ -171,25 +171,25 @@ class TestSummaryChatMemory:
             return_messages=True,
             max_token_limit=1000,
             output_key="output",
-            chat_memory=mock_chat_memory
+            chat_memory=mock_chat_memory,
         )
         inputs = {"input": "Get me some data"}
-        
+
         # Mock tools and actions
         mock_action1 = Mock()
         mock_action1.tool = "search_tool"
         mock_action1.messages = [AIMessage(content="Searching for data...")]
-        
+
         mock_action2 = Mock()
         mock_action2.tool = "process_tool"
         mock_action2.messages = [AIMessage(content="Processing data...")]
-        
+
         outputs = {
             "output": "Here's your processed data",
             "intermediate_steps": [
                 (mock_action1, "Found 10 records"),
-                (mock_action2, "Processed 10 records successfully")
-            ]
+                (mock_action2, "Processed 10 records successfully"),
+            ],
         }
 
         # When
@@ -198,29 +198,29 @@ class TestSummaryChatMemory:
         # Then
         # Should have 6 calls: Human + 2 AI + 2 Function + Final AI
         assert mock_chat_memory.add_message.call_count == 6
-        
+
         # Verify the sequence of calls
         call_args_list = mock_chat_memory.add_message.call_args_list
-        
+
         # Human message
         assert isinstance(call_args_list[0][0][0], HumanMessage)
-        
+
         # First AI action
         assert isinstance(call_args_list[1][0][0], AIMessage)
         assert call_args_list[1][0][0].content == "Searching for data..."
-        
+
         # First Function message
         assert isinstance(call_args_list[2][0][0], FunctionMessage)
         assert call_args_list[2][0][0].name == "search_tool"
-        
+
         # Second AI action
         assert isinstance(call_args_list[3][0][0], AIMessage)
         assert call_args_list[3][0][0].content == "Processing data..."
-        
+
         # Second Function message
         assert isinstance(call_args_list[4][0][0], FunctionMessage)
         assert call_args_list[4][0][0].name == "process_tool"
-        
+
         # Final AI response
         assert isinstance(call_args_list[5][0][0], AIMessage)
 
@@ -235,7 +235,7 @@ class TestSummaryChatMemory:
             return_messages=True,
             max_token_limit=1000,
             output_key="output",
-            chat_memory=mock_chat_memory
+            chat_memory=mock_chat_memory,
         )
         inputs = {"input": "Simple question"}
         outputs = {"output": "Simple answer"}
@@ -260,7 +260,7 @@ class TestSummaryChatMemory:
             return_messages=True,
             max_token_limit=1000,
             output_key="output",
-            chat_memory=mock_chat_memory
+            chat_memory=mock_chat_memory,
         )
         inputs = {"input": "Question with empty steps"}
         outputs = {"output": "Answer", "intermediate_steps": []}
@@ -285,7 +285,7 @@ class TestSummaryChatMemory:
             return_messages=True,
             max_token_limit=1000,
             output_key="output",
-            chat_memory=mock_chat_memory
+            chat_memory=mock_chat_memory,
         )
         inputs = {"input": "Question without intermediate steps"}
         outputs = {"output": "Answer"}
@@ -311,7 +311,7 @@ class TestSummaryChatMemory:
             return_messages=True,
             max_token_limit=1000,
             output_key="output",
-            chat_memory=mock_chat_memory
+            chat_memory=mock_chat_memory,
         )
         inputs = {"input": "Short message"}
         outputs = {"output": "Short response"}
@@ -332,7 +332,7 @@ class TestSummaryChatMemory:
             assert "Short message" in loaded_vars["chat_history"]
             assert "Short response" in loaded_vars["chat_history"]
 
-    @patch('langchain.memory.ConversationSummaryBufferMemory.load_memory_variables')
+    @patch("langchain.memory.ConversationSummaryBufferMemory.load_memory_variables")
     def test_load_memory_variables_with_long_history(self, mock_load_memory_variables):
         # Given
         mock_llm = Mock(spec=BaseLanguageModel)
@@ -344,14 +344,14 @@ class TestSummaryChatMemory:
             return_messages=True,
             max_token_limit=100,
             output_key="output",
-            chat_memory=mock_chat_memory
+            chat_memory=mock_chat_memory,
         )
-        
+
         # Mock the parent class method to return a summarized history
         mock_load_memory_variables.return_value = {
             "chat_history": "Summarized conversation: User asked about weather, AI provided sunny forecast"
         }
-        
+
         # Add some messages to trigger summarization
         for i in range(10):
             inputs = {"input": f"Message {i}"}
@@ -377,13 +377,13 @@ class TestSummaryChatMemory:
             return_messages=True,
             max_token_limit=1000,
             output_key="output",
-            chat_memory=mock_chat_memory
+            chat_memory=mock_chat_memory,
         )
-        
+
         # First conversation
         inputs1 = {"input": "What's 2+2?"}
         outputs1 = {"output": "2+2 equals 4"}
-        
+
         # Second conversation
         inputs2 = {"input": "What about 3+3?"}
         outputs2 = {"output": "3+3 equals 6"}
@@ -395,14 +395,14 @@ class TestSummaryChatMemory:
         # Then
         # Should have 4 total calls (2 messages per conversation)
         assert mock_chat_memory.add_message.call_count == 4
-        
+
         # Verify the sequence of calls
         call_args_list = mock_chat_memory.add_message.call_args_list
-        
+
         # First conversation
         assert call_args_list[0][0][0].content == "What's 2+2?"
         assert call_args_list[1][0][0].content == "2+2 equals 4"
-        
+
         # Second conversation
         assert call_args_list[2][0][0].content == "What about 3+3?"
         assert call_args_list[3][0][0].content == "3+3 equals 6"
@@ -418,30 +418,30 @@ class TestSummaryChatMemory:
             return_messages=True,
             max_token_limit=1000,
             output_key="output",
-            chat_memory=mock_chat_memory
+            chat_memory=mock_chat_memory,
         )
         inputs = {"input": "Analyze this data"}
-        
+
         # Mock complex tool actions
         mock_action1 = Mock()
         mock_action1.tool = "data_loader"
         mock_action1.messages = [AIMessage(content="Loading data from database...")]
-        
+
         mock_action2 = Mock()
         mock_action2.tool = "data_analyzer"
         mock_action2.messages = [AIMessage(content="Analyzing data patterns...")]
-        
+
         mock_action3 = Mock()
         mock_action3.tool = "report_generator"
         mock_action3.messages = [AIMessage(content="Generating analysis report...")]
-        
+
         outputs = {
             "output": "Analysis complete. Found 3 key insights.",
             "intermediate_steps": [
                 (mock_action1, "Data loaded: 1000 records"),
                 (mock_action2, "Analysis complete: 3 patterns identified"),
-                (mock_action3, "Report generated: analysis_report.pdf")
-            ]
+                (mock_action3, "Report generated: analysis_report.pdf"),
+            ],
         }
 
         # When
@@ -450,7 +450,7 @@ class TestSummaryChatMemory:
         # Then
         # Should have 8 calls: Human + 3 AI + 3 Function + Final AI
         assert mock_chat_memory.add_message.call_count == 8
-        
+
         # Verify tool names in function messages
         call_args_list = mock_chat_memory.add_message.call_args_list
         function_messages = [call[0][0] for call in call_args_list if isinstance(call[0][0], FunctionMessage)]
@@ -470,12 +470,12 @@ class TestSummaryChatMemory:
             return_messages=True,
             max_token_limit=1000,
             output_key="output",
-            chat_memory=mock_chat_memory
+            chat_memory=mock_chat_memory,
         )
         inputs = {"input": "Test message"}
         outputs = {"output": "Test response"}
         memory.save_context(inputs, outputs)
-        
+
         # Verify messages were saved
         assert mock_chat_memory.add_message.call_count == 2
 
@@ -496,7 +496,7 @@ class TestSummaryChatMemory:
             return_messages=True,
             max_token_limit=1000,
             output_key="output",
-            chat_memory=mock_chat_memory
+            chat_memory=mock_chat_memory,
         )
         inputs = {"input": "Message with special chars: !@#$%^&*()"}
         outputs = {"output": "Response with emojis: 😀🎉🚀"}
@@ -521,7 +521,7 @@ class TestSummaryChatMemory:
             return_messages=True,
             max_token_limit=1000,
             output_key="output",
-            chat_memory=mock_chat_memory
+            chat_memory=mock_chat_memory,
         )
         inputs = {"input": ""}
         outputs = {"output": ""}
@@ -533,4 +533,4 @@ class TestSummaryChatMemory:
         assert mock_chat_memory.add_message.call_count == 2
         call_args_list = mock_chat_memory.add_message.call_args_list
         assert call_args_list[0][0][0].content == ""
-        assert call_args_list[1][0][0].content == "" 
+        assert call_args_list[1][0][0].content == ""

@@ -8,4 +8,5 @@ class SummaryChatMemory(PersistIntermediateStepsMixin, ConversationSummaryBuffer
     This memory persists intermediate steps, and summarizes the history passed back to the agent if the history
     exceeds the token limit.
     """
+
     pass

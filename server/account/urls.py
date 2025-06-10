@@ -1,9 +1,9 @@
 from django.urls import path
 
-import account.views.login
 import account.views.accounts
-import account.views.users
+import account.views.login
 import account.views.service_accounts
+import account.views.users
 
 urlpatterns = [
     path("api/auth/login", account.views.login.LoginView.as_view(), name="login"),

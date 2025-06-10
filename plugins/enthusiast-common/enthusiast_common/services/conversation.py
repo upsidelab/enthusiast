@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar, Any
+from typing import Any, Generic, TypeVar
 
 from ..repositories import (
-    BaseUserRepository,
-    BaseMessageRepository,
     BaseConversationRepository,
+    BaseMessageRepository,
+    BaseUserRepository,
 )
 
 T = TypeVar("T")

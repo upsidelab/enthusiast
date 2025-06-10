@@ -1,6 +1,6 @@
 import pytest
 from django.contrib.auth import get_user_model
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.messages import AIMessage, HumanMessage
 
 from agent.core.persistent_chat_history import PersistentChatHistory
 from agent.models import Conversation
@@ -57,4 +57,4 @@ class TestPersistentChatHistory:
         history.clear()
 
         # Then
-        assert conversation.messages.count() == 0 
+        assert conversation.messages.count() == 0

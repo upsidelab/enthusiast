@@ -1,10 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, Generic, Iterable
+from typing import Generic, Iterable, TypeVar
 
 from ..registry import BaseEmbeddingProviderRegistry
-from ..repositories import BaseDataSetRepository
-from ..repositories import BaseDocumentChunkRepository
-
+from ..repositories import BaseDataSetRepository, BaseDocumentChunkRepository
 
 T = TypeVar("T")
 

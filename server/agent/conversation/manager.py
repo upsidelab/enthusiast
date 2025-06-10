@@ -50,6 +50,4 @@ class ConversationManager:
         error_message = "We couldn't process your request at this time"
 
         conversation = self.get_conversation(user_id=user_id, data_set_id=data_set_id, conversation_id=conversation_id)
-        Message.objects.create(
-            conversation=conversation, created_at=datetime.now(), role="system", text=error_message
-        )
+        Message.objects.create(conversation=conversation, created_at=datetime.now(), role="system", text=error_message)

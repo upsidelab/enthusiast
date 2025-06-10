@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, Generic, Type, Optional, List
+from typing import Generic, List, Optional, Type, TypeVar
 
 from pgvector.django import CosineDistance
 

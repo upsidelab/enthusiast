@@ -1,17 +1,18 @@
-from typing import Optional, Type, TypeVar
+from typing import TypeVar, Type, Optional
 
 from django.db import models
 from django.db.models import QuerySet
+from pgvector.django import CosineDistance
+
 from enthusiast_common.repositories import (
+    BaseRepository,
+    BaseMessageRepository,
     BaseConversationRepository,
+    BaseUserRepository,
     BaseDataSetRepository,
     BaseDocumentChunkRepository,
-    BaseMessageRepository,
     BaseProductRepository,
-    BaseRepository,
-    BaseUserRepository,
 )
-from pgvector.django import CosineDistance
 
 from account.models import User
 from agent.models import Conversation, Message

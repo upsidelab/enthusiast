@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.core import serializers
 from django.db.models import QuerySet
 from enthusiast_common.injectors import BaseProductRetriever
@@ -65,7 +67,7 @@ class ProductRetriever(BaseProductRetriever[Product]):
             where_conditions.append(agent_where_clause)
         return self.product_repo.extra(where_conditions=where_conditions)[: self.number_of_products]
 
-    def _get_sample_products_json(self) -> str:
+    def _get_sample_products_json(self) -> Any:
         sample_products = self.product_repo.filter(data_set_id__exact=self.data_set_id)[: self.max_sample_products]
         return serializers.serialize("json", sample_products)
 

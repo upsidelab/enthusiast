@@ -1,6 +1,7 @@
 import logging
-
 import tiktoken
+
+
 from django.core import serializers
 from enthusiast_common.injectors import BaseInjector
 from enthusiast_common.tools import BaseLLMTool
@@ -50,7 +51,7 @@ class CreateAnswerTool(BaseLLMTool):
         data_set_id: int,
         data_set_repo: DjangoDataSetRepository,
         llm: BaseLanguageModel,
-        injector: BaseInjector,
+        injector: BaseInjector | None,
     ):
         super().__init__(data_set_id=data_set_id, data_set_repo=data_set_repo, llm=llm, injector=injector)
         self.data_set_id = data_set_id

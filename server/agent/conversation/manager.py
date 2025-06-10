@@ -6,13 +6,13 @@ from agent.models import Conversation, Message
 
 
 class ConversationManager:
-    def get_answer(self, conversation: Conversation, question_message):
+    def get_answer(self, conversation: Conversation, question_message, streaming):
         """Formulate an answer to a given question and store the decision-making process.
 
         Engine calculates embedding for a question and using similarity search collects documents that may contain
         relevant content.
         """
-        agent = Agent(conversation=conversation)
+        agent = Agent(conversation=conversation, streaming=streaming)
         response = agent.process_user_request(question_message)
 
         return response["output"]
@@ -29,7 +29,9 @@ class ConversationManager:
         data_set = user.data_sets.get(id=data_set_id)
         return Conversation.objects.get(id=conversation_id, data_set=data_set, user=user)
 
-    def respond_to_user_message(self, conversation_id: int, data_set_id: int, user_id: int, message: str):
+    def respond_to_user_message(
+        self, conversation_id: int, data_set_id: int, user_id: int, message: str, streaming: bool
+    ):
         conversation = self.get_conversation(user_id=user_id, data_set_id=data_set_id, conversation_id=conversation_id)
 
         user_message = Message.objects.create(
@@ -41,7 +43,7 @@ class ConversationManager:
             conversation.summary = user_message.text
             conversation.save()
 
-        response_text = self.get_answer(conversation, user_message.text)
+        response_text = self.get_answer(conversation, user_message.text, streaming)
         response = Message.objects.create(
             conversation=conversation, created_at=datetime.now(), role="agent", text=response_text
         )

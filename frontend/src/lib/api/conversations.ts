@@ -8,8 +8,8 @@ export type CreateConversationPayload = {
 
 export type CreateMessagePayload = {
   question_message: string;
-  conversation_id: number | null;
   data_set_id: number;
+  streaming: boolean;
 }
 
 type TaskState = {
@@ -42,11 +42,11 @@ export class ConversationsApiClient extends BaseApiClient {
     return id;
   }
 
-  async sendMessage(conversationId: number, dataSetId: number, message: string): Promise<TaskHandle> {
+  async sendMessage(conversationId: number, dataSetId: number, message: string, streaming: boolean): Promise<TaskHandle> {
     const requestBody: CreateMessagePayload = {
       "question_message": message,
-      "conversation_id": conversationId,
-      "data_set_id": dataSetId
+      "data_set_id": dataSetId,
+      streaming
     }
 
     const response = await fetch(`${this.apiBase}/api/conversations/${conversationId}`, {

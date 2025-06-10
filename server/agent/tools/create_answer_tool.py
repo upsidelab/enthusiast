@@ -9,9 +9,12 @@ from pydantic import BaseModel, Field
 
 from agent.retrievers import DocumentRetriever
 from agent.retrievers import ProductRetriever
-from catalog.models import DataSet
 
 from enthusiast_common.interfaces import CustomTool, LanguageModelProvider
+
+from agent.callbacks import ConversationWebSocketCallbackHandler
+
+from agent.models import Conversation
 
 logger = logging.getLogger(__name__)
 
@@ -48,17 +51,29 @@ class CreateAnswerTool(CustomTool):
     encoding: tiktoken.encoding_for_model = None
     max_tokens: int = 30000
     max_retry: int = 3
+    conversation: Conversation = None
+    streaming: bool = False
 
     def __init__(
-        self, data_set: DataSet, chat_model: str, language_model_provider: LanguageModelProvider, **kwargs: Any
+        self,
+        chat_model: str,
+        conversation: Conversation,
+        language_model_provider: LanguageModelProvider,
+        streaming: bool = False,
+        **kwargs: Any,
     ):
         super().__init__(
-            data_set=data_set, chat_model=chat_model, language_model_provider=language_model_provider, **kwargs
+            data_set=conversation.data_set,
+            chat_model=chat_model,
+            language_model_provider=language_model_provider,
+            **kwargs,
         )
         if language_model_provider.model_name() in tiktoken.model.MODEL_TO_ENCODING:
             self.encoding = tiktoken.encoding_for_model(language_model_provider.model_name())
         else:
             self.encoding = tiktoken.encoding_for_model("gpt-4o")
+        self.conversation = conversation
+        self.streaming = streaming
 
     def _get_document_context(self, relevant_documents, cut_off_cnt):
         """Identify document context for a query.
@@ -103,7 +118,11 @@ class CreateAnswerTool(CustomTool):
         product_context = serializers.serialize("json", relevant_products)
 
         prompt = PromptTemplate.from_template(CREATE_CONTENT_PROMPT_TEMPLATE)
-        llm = self._language_model_provider.provide_language_model()
+        callback_handler = ConversationWebSocketCallbackHandler(self.conversation)
+        if self.streaming:
+            llm = self._language_model_provider.provide_streaming_language_model(callbacks=[callback_handler])
+        else:
+            llm = self._language_model_provider.provide_language_model()
         chain = prompt | llm
 
         retry = -1

@@ -16,6 +16,7 @@ from agent.serializers import (
     ConversationCreationSerializer,
 )
 from agent.conversation import ConversationManager
+from catalog.language_models import LanguageModelRegistry
 
 
 class GetTaskStatus(APIView):
@@ -83,12 +84,17 @@ class ConversationView(APIView):
 
             data_set_id = serializer.validated_data.get("data_set_id")
             question_message = serializer.validated_data.get("question_message")
-
+            streaming = serializer.validated_data.get("streaming")
+            language_model_provider = Conversation.objects.get(id=conversation_id).data_set.language_model_provider
+            language_model_provider_class = LanguageModelRegistry().provider_class_by_name(language_model_provider)
             task = respond_to_user_message_task.apply_async(
-                args=[conversation_id, data_set_id, request.user.id, question_message]
+                args=[conversation_id, data_set_id, request.user.id, question_message, streaming]
             )
 
-            return Response({"task_id": task.id}, status=status.HTTP_202_ACCEPTED)
+            return Response(
+                {"task_id": task.id, "streaming": language_model_provider_class.STREAMING_AVAILABLE},
+                status=status.HTTP_202_ACCEPTED,
+            )
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

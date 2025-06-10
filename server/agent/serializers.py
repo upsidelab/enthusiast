@@ -20,6 +20,10 @@ class AskQuestionSerializer(serializers.Serializer):
     question_message = serializers.CharField(
         required=True, allow_blank=False, error_messages={"blank": "Query message cannot be blank."}
     )
+    streaming = serializers.BooleanField(
+        default=False,
+        required=False,
+    )
 
     def validate_conversation_id(self, value):
         if not Conversation.objects.filter(id=value).exists():

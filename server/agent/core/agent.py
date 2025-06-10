@@ -6,6 +6,7 @@ from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import BaseTool
 
+from agent.callbacks import ConversationWebSocketCallbackHandler
 from agent.models import Conversation
 from agent.tools.manager import ToolManager
 from catalog.language_models import LanguageModelRegistry
@@ -14,13 +15,21 @@ logger = logging.getLogger(__name__)
 
 
 class Agent:
-    def __init__(self, conversation: Conversation):
-        data_set = conversation.data_set
+    def __init__(self, conversation: Conversation, streaming: bool = False):
+        callback_handler = ConversationWebSocketCallbackHandler(conversation)
         language_model_provider = LanguageModelRegistry().provider_for_dataset(conversation.data_set)
+        self._tools = ToolManager(
+            language_model_provider=language_model_provider, conversation=conversation, streaming=streaming
+        ).tools
 
-        self._llm = language_model_provider.provide_language_model()
-        self._tools = ToolManager(data_set=data_set, language_model_provider=language_model_provider).tools
-        self._agent_executor = self._create_agent_with_tools(self._llm, self._tools, data_set.system_message)
+        if streaming:
+            self._llm = language_model_provider.provide_streaming_language_model(callbacks=[callback_handler])
+        else:
+            self._llm = language_model_provider.provide_language_model()
+
+        self._agent_executor = self._create_agent_with_tools(
+            self._llm, self._tools, conversation.data_set.system_message
+        )
         self._memory = self._create_agent_memory(conversation.get_messages())
 
     def _create_agent_with_tools(self, llm: BaseLanguageModel, tools: list[BaseTool], system_prompt: str):

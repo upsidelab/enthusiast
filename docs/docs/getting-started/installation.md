@@ -12,11 +12,12 @@ First, clone the application repository:
 
 ```shell
 $ git clone https://github.com/upsidelab/enthusiast
+$ cp enthusiast/server/sample.env enthusiast/server/.env
 ```
 
 :::info
 The default configuration uses the OpenAI API for generating document embeddings and for the large language model. Make sure that your OpenAI has access to gpt-4o it is default recommended model if not - at least gpt-4o-mini to ensure proper work of the application.
-You need to provide your OpenAI API key via the OPENAI_API_KEY environment variable.
+You need to provide your OpenAI API key via the OPENAI_API_KEY environment variable in the enthusiast/server/.env directory.
 :::
 
 Next, run Docker Compose to start the environment:
@@ -27,12 +28,12 @@ import TabItem from '@theme/TabItem';
 <Tabs>
   <TabItem value="macos-linux" label="macOS/Linux" default>
     ```bash
-    $ OPENAI_API_KEY=<yourkey> docker compose -f docker-compose.development.yml up -d
+    $ docker compose -f docker-compose.development.yml up -d
     ```
   </TabItem>
   <TabItem value="windows" label="Windows">
     ```powershell
-    $ $env:OPENAI_API_KEY="<yourkey>"; docker-compose -f docker-compose.development.yml up -d
+    $ docker-compose -f docker-compose.development.yml up -d
     ```
   </TabItem>
 </Tabs>

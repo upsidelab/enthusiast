@@ -1,4 +1,5 @@
 from enthusiast_common.config import (
+    AgentConfig,
     EmbeddingsRegistryConfig,
     LLMConfig,
     LLMRegistryConfig,
@@ -8,13 +9,14 @@ from enthusiast_common.config import (
     RepositoriesConfig,
     RetrieverConfig,
     RetrieversConfig,
-    ToolCallingAgentConfig,
 )
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.callbacks import StdOutCallbackHandler
+from langchain_core.prompts import PromptTemplate
 
-from agent.callbacks import ConversationWebSocketCallbackHandler
+from agent.callbacks import ReactAgentWebsocketCallbackHandler
 from agent.conversation.service import ConversationService
-from agent.core.agents import ToolCallingAgent
+from agent.core.agents.product_search_react_agent.agent import ProductSearchReActAgent
+from agent.core.agents.product_search_react_agent.prompt import PRODUCT_FINDER_AGENT_PROMPT
 from agent.injector import Injector
 from agent.models import Conversation
 from agent.registries.embeddings import EmbeddingProviderRegistry
@@ -29,33 +31,30 @@ from agent.repositories import (
     DjangoProductRepository,
     DjangoUserRepository,
 )
-from agent.retrievers import DocumentRetriever, ProductRetriever
-from agent.retrievers.product_retriever import QUERY_PROMPT_TEMPLATE
-from agent.tools import CreateAnswerTool
+from agent.retrievers import DocumentRetriever
+from agent.retrievers.product_vs_retriever import ProductVectorStoreRetriever
+from agent.tools import ProductVectorStoreSearchTool
+from agent.tools.verify_product_tool import ProductVerificationTool
 
 
-def get_config(conversation: Conversation, streaming: bool) -> ToolCallingAgentConfig:
-    return ToolCallingAgentConfig(
+def get_config(conversation: Conversation, streaming: bool) -> AgentConfig:
+    return AgentConfig(
         conversation_id=conversation.id,
-        prompt_template=ChatPromptTemplate.from_messages(
-            [
-                (
-                    "system",
-                    "You are a sales support agent, and you know everything about a company and their products.",
-                ),
-                ("placeholder", "{chat_history}"),
-                ("human", "{input}"),
-                ("placeholder", "{agent_scratchpad}"),
-            ]
+        prompt_template=PromptTemplate(
+            input_variables=["tools", "tool_names", "input", "agent_scratchpad"], template=PRODUCT_FINDER_AGENT_PROMPT
         ),
-        agent_class=ToolCallingAgent,
+        agent_class=ProductSearchReActAgent,
         conversation_service=ConversationService,
         llm_tools=[
             LLMToolConfig(
-                model_class=CreateAnswerTool,
-            )
+                model_class=ProductVectorStoreSearchTool,
+            ),
+            LLMToolConfig(model_class=ProductVerificationTool),
         ],
-        llm=LLMConfig(callbacks=[ConversationWebSocketCallbackHandler(conversation)], streaming=streaming),
+        llm=LLMConfig(
+            callbacks=[ReactAgentWebsocketCallbackHandler(conversation), StdOutCallbackHandler()],
+            streaming=streaming,
+        ),
         injector=Injector,
         repositories=RepositoriesConfig(
             user=DjangoUserRepository,
@@ -68,14 +67,7 @@ def get_config(conversation: Conversation, streaming: bool) -> ToolCallingAgentC
         ),
         retrievers=RetrieversConfig(
             document=RetrieverConfig(retriever_class=DocumentRetriever),
-            product=RetrieverConfig(
-                retriever_class=ProductRetriever,
-                extra_kwargs={
-                    "prompt_template": QUERY_PROMPT_TEMPLATE,
-                    "max_sample_products": 12,
-                    "number_of_products": 12,
-                },
-            ),
+            product=RetrieverConfig(retriever_class=ProductVectorStoreRetriever, extra_kwargs={"max_objects": 30}),
         ),
         registry=RegistryConfig(
             llm=LLMRegistryConfig(registry_class=LanguageModelRegistry),

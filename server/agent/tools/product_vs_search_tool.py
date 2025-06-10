@@ -1,45 +1,27 @@
 import logging
 
 import tiktoken
-from django.core import serializers
 from enthusiast_common.injectors import BaseInjector
 from enthusiast_common.tools import BaseLLMTool
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.prompts import PromptTemplate
 from pydantic import BaseModel, Field
 
 from agent.repositories import DjangoDataSetRepository
 
 logger = logging.getLogger(__name__)
 
-CREATE_CONTENT_PROMPT_TEMPLATE = """
-    You're supporting a sales agent or a customer support representative, in answering questions they get from the customers.
-    
-    Based on the following documents delimited by three backticks
-    ```
-    {document_context}
-    ```
-    and the following products delimited by three backticks
-    ```
-    {product_context}
-    ```
-    respond to the following user request delimited by three backticks
-    ```
-    {query}
-    ``` 
-    Be concise and make sure that the response is to the point. Don't include unnecessary information.
-"""
 
-
-class CreateAnswerToolInput(BaseModel):
+class ProductVectorStoreSearchInput(BaseModel):
     full_user_request: str = Field(description="user's full request")
 
 
-class CreateAnswerTool(BaseLLMTool):
-    NAME = "create_answer_tool"
-    DESCRIPTION = "use it when asked to generate content or answer a question about products"
-    ARGS_SCHEMA = CreateAnswerToolInput
-    RETURN_DIRECT = True
+class ProductVectorStoreSearchTool(BaseLLMTool):
+    NAME = "search_matching_products"
+    DESCRIPTION = (
+        "It's tool for vector store search use it with suitable phrases when you need to find matching products"
+    )
+    ARGS_SCHEMA = ProductVectorStoreSearchInput
+    RETURN_DIRECT = False
 
     ENCODING: tiktoken.encoding_for_model = None
     MAX_TOKENS: int = 30000
@@ -50,7 +32,7 @@ class CreateAnswerTool(BaseLLMTool):
         data_set_id: int,
         data_set_repo: DjangoDataSetRepository,
         llm: BaseLanguageModel,
-        injector: BaseInjector,
+        injector: BaseInjector | None,
     ):
         super().__init__(data_set_id=data_set_id, data_set_repo=data_set_repo, llm=llm, injector=injector)
         self.data_set_id = data_set_id
@@ -85,7 +67,7 @@ class CreateAnswerTool(BaseLLMTool):
             cut_off_cnt: Int, how many documents to remove from the end of the full list.
         """
         offset = 0.8  # Used as an estimated 'exchange rate' between a word and a token.
-        document_context = " ".join(
+        document_context = "\n".join(
             map(lambda x: x.content, relevant_documents[: len(relevant_documents) - cut_off_cnt])
         )
         tokens_cnt = len(self.ENCODING.encode(document_context))
@@ -98,31 +80,15 @@ class CreateAnswerTool(BaseLLMTool):
         return document_context
 
     def run(self, full_user_request: str):
-        document_retriever = self.injector.document_retriever
         product_retriever = self.injector.product_retriever
-        relevant_documents = document_retriever.find_model_matching_query(full_user_request)
-        relevant_products = product_retriever.find_products_matching_query(full_user_request)
-
-        product_context = serializers.serialize("json", relevant_products)
-
-        prompt = PromptTemplate.from_template(CREATE_CONTENT_PROMPT_TEMPLATE)
-        chain = prompt | self.llm
-
+        relevant_documents = product_retriever.find_model_matching_query(full_user_request)
         retry = -1
         while retry < self.MAX_RETRY:
             try:
                 retry += 1
 
                 document_context = self._get_document_context(relevant_documents, retry)
-
-                llm_result = chain.invoke(
-                    {
-                        "query": full_user_request,
-                        "document_context": document_context,
-                        "product_context": product_context,
-                    }
-                )
-                return llm_result.content
+                return document_context
             except Exception as error:
                 logging.error(f"Problem with generating an answer. Retry: {retry}/{self.MAX_RETRY}. Error msg: {error}")
 

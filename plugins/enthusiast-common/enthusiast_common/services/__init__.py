@@ -1,1 +1,3 @@
-from .conversation import BaseConversationService  # noqa
+from .conversation import BaseConversationService
+
+__all__ = ["BaseConversationService"]

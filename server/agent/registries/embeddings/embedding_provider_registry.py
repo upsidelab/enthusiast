@@ -15,7 +15,10 @@ class EmbeddingProviderRegistry(BaseEmbeddingProviderRegistry):
         super().__init__(providers)
         self._providers = providers
         if data_set_repo is None:
-            self._data_set_repo = DjangoDataSetRepository(settings.CATALOG_MODELS["data_set"])
+            module_name, class_name = settings.CATALOG_MODELS["data_set"].rsplit(".", 1)
+            module = import_module(module_name)
+            provider_class = getattr(module, class_name)
+            self._data_set_repo = DjangoDataSetRepository(provider_class)
         else:
             self._data_set_repo = data_set_repo
 

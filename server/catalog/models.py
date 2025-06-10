@@ -107,3 +107,48 @@ class Product(models.Model):
     class Meta:
         db_table_comment = "List of products from a given data set."
         constraints = [models.UniqueConstraint(fields=["data_set", "entry_id"], name="uq_product")]
+
+    def get_content(self):
+        return f"""
+            NAME: {self.name}\n
+            DESCRIPTION: {self.description}\n
+            PROPERTIES: {self.properties}\n
+            CATEGORIES: {self.categories}\n
+            PRICE: {self.price}
+        """
+
+    def split(self, chunk_size, chunk_overlap):
+        """
+        Split a document into chunks that comply with the embedding model's token limits, removing old chunks if present.
+
+        This function splits a document into one or more overlapping chunks to provide context for user queries.
+        The main rule is that each chunk must stay within the token limit of the embedding model.
+        For long documents that exceed this limit, the document is divided into multiple smaller chunks,
+        while shorter documents are represented as a single chunk.
+        If old chunks are present, they are removed before creating new ones.
+
+        Args:
+            chunk_size (int): The maximum number of tokens allowed in a single chunk.
+            chunk_overlap (int): The number of overlapping tokens between adjacent chunks.
+        """
+        self.chunks.all().delete()
+
+        splitter = TokenTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+        chunks = splitter.split_text(self.get_content())
+
+        for chunk in chunks:
+            self.chunks.create(product=self, content=chunk)
+
+
+class ProductChunk(models.Model):
+    product = models.ForeignKey(Product, related_name="chunks", on_delete=models.CASCADE)
+    content = models.TextField()
+    embedding = VectorField(null=True)
+
+    def set_embedding(self, embedding_vector: list[float]):
+        """Sets the embedding vector for this document chunk.
+
+        Args:
+            embedding_vector (list[float]): The embedding vector to associate with the document chunk.
+        """
+        self.embedding = embedding_vector

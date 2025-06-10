@@ -1,7 +1,3 @@
-enthusiast-common==1.1.0
-enthusiast-model-openai==1.1.0
-enthusiast-source-sample==1.0.0
-enthusiast-source-woocommerce==1.0.0
 aiohappyeyeballs==2.4.3
 aiohttp==3.10.11
 aiosignal==1.3.1
@@ -33,6 +29,9 @@ django-cors-headers==4.4.0
 django-environ==0.12.0
 djangorestframework==3.15.2
 drf-yasg==1.21.8
+enthusiast-common==1.1.0
+enthusiast-model-openai==1.1.0
+enthusiast-source-sample==1.0.0
 frozenlist==1.4.1
 gunicorn==23.0.0
 h11==0.14.0

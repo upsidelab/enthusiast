@@ -1,33 +1,32 @@
-from typing import Type, Optional
+from dataclasses import dataclass, field
+from typing import Optional, Type
 
 from langchain_core.callbacks import BaseCallbackHandler
-from dataclasses import dataclass, field
-
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 
 from ..agents import BaseAgent
-from ..services.conversation import BaseConversationService
-from ..tools import BaseAgentTool, BaseLLMTool, BaseFunctionTool
-from ..llm import BaseLLM
-from ..registry import (
-    BaseLanguageModelRegistry,
-    BaseEmbeddingProviderRegistry,
-    BaseDBModelsRegistry,
-)
-from ..repositories.base import (
-    BaseUserRepository,
-    BaseMessageRepository,
-    BaseConversationRepository,
-    BaseDataSetRepository,
-    BaseProductRepository,
-    BaseDocumentChunkRepository,
-)
 from ..injectors import (
     BaseDocumentRetriever,
-    BaseProductRetriever,
     BaseInjector,
+    BaseProductRetriever,
 )
+from ..llm import BaseLLM
+from ..registry import (
+    BaseDBModelsRegistry,
+    BaseEmbeddingProviderRegistry,
+    BaseLanguageModelRegistry,
+)
+from ..repositories.base import (
+    BaseConversationRepository,
+    BaseDataSetRepository,
+    BaseDocumentChunkRepository,
+    BaseMessageRepository,
+    BaseProductRepository,
+    BaseUserRepository,
+)
+from ..services.conversation import BaseConversationService
+from ..tools import BaseAgentTool, BaseFunctionTool, BaseLLMTool
 
 
 @dataclass

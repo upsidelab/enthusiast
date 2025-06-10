@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any
 
 from enthusiast_common.services import BaseConversationService
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.messages import AIMessage, HumanMessage
 
 from agent.models import Conversation
 

@@ -1,7 +1,7 @@
 from enthusiast_common.agents import BaseAgent
 from enthusiast_common.services import BaseConversationService
 from enthusiast_common.tools.base import BaseTool
-from langchain.agents import create_tool_calling_agent, AgentExecutor
+from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
 

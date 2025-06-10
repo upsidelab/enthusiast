@@ -5,8 +5,8 @@ from django.db.models import QuerySet
 from enthusiast_common.repositories import (
     BaseConversationRepository,
     BaseDataSetRepository,
-    BaseDocumentChunkRepository,
     BaseMessageRepository,
+    BaseModelChunkRepository,
     BaseProductRepository,
     BaseRepository,
     BaseUserRepository,
@@ -15,7 +15,7 @@ from pgvector.django import CosineDistance
 
 from account.models import User
 from agent.models import Conversation, Message
-from catalog.models import DataSet, DocumentChunk, Product
+from catalog.models import DataSet, DocumentChunk, Product, ProductChunk
 
 T = TypeVar("T", bound=models.Model)
 
@@ -64,15 +64,22 @@ class DjangoUserRepository(
         return user.datasets.get(pk=data_set_id)
 
 
-class DjangoDocumentChunkRepository(BaseDjangoRepository[DocumentChunk], BaseDocumentChunkRepository[DocumentChunk]):
-    def get_document_chunk_by_distance_for_data_set(
-        self, data_set_id: int, distance: CosineDistance
-    ) -> QuerySet[DocumentChunk]:
+class DjangoDocumentChunkRepository(BaseDjangoRepository[DocumentChunk], BaseModelChunkRepository[DocumentChunk]):
+    def get_chunk_by_distance_for_data_set(self, data_set_id: int, distance: CosineDistance) -> QuerySet[DocumentChunk]:
         embeddings_by_distance = self.model.objects.annotate(distance=distance).order_by("distance")
         embeddings_with_documents = embeddings_by_distance.select_related("document").filter(
             document__data_set_id__exact=data_set_id
         )
         return embeddings_with_documents
+
+
+class DjangoProductChunkRepository(BaseDjangoRepository[ProductChunk], BaseModelChunkRepository[ProductChunk]):
+    def get_chunk_by_distance_for_data_set(self, data_set_id: int, distance: CosineDistance) -> QuerySet[ProductChunk]:
+        embeddings_by_distance = self.model.objects.annotate(distance=distance).order_by("distance")
+        embeddings_with_products = embeddings_by_distance.select_related("product").filter(
+            product__data_set_id__exact=data_set_id
+        )
+        return embeddings_with_products
 
 
 class DjangoProductRepository(BaseDjangoRepository[Product], BaseProductRepository[Product]):

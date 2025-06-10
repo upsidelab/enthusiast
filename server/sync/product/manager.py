@@ -1,6 +1,7 @@
 from enthusiast_common import ProductDetails
 
 from catalog.models import Product, ProductSource
+from catalog.tasks import index_product_task
 from sync.base import DataSetSource, SyncManager
 from sync.product.registry import ProductSourcePluginRegistry
 
@@ -49,3 +50,4 @@ class ProductSyncManager(SyncManager[ProductDetails]):
                 "price": item_data.price,
             },
         )
+        index_product_task.apply_async([item.id])

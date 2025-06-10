@@ -1,7 +1,12 @@
+from typing import Self
+
 from django.core import serializers
 from django.db.models import QuerySet
-from enthusiast_common.injectors import BaseProductRetriever
+from enthusiast_common.builder import RepositoriesInstances
+from enthusiast_common.config import AgentConfig
+from enthusiast_common.registry import BaseEmbeddingProviderRegistry
 from enthusiast_common.repositories import BaseDataSetRepository, BaseProductRepository
+from enthusiast_common.retrievers import BaseRetriever
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import PromptTemplate
 
@@ -36,7 +41,7 @@ QUERY_PROMPT_TEMPLATE = """
 """
 
 
-class ProductRetriever(BaseProductRetriever[Product]):
+class ProductRetriever(BaseRetriever):
     def __init__(
         self,
         data_set_id: int,
@@ -47,9 +52,6 @@ class ProductRetriever(BaseProductRetriever[Product]):
         number_of_products: int = 12,
         max_sample_products: int = 12,
     ):
-        super().__init__(
-            data_set_id, data_set_repo, product_repo, llm, prompt_template, number_of_products, max_sample_products
-        )
         self.data_set_id = data_set_id
         self.data_set_repo = data_set_repo
         self.product_repo = product_repo
@@ -74,3 +76,20 @@ class ProductRetriever(BaseProductRetriever[Product]):
         llm_result = chain.invoke({"sample_products_json": self._get_sample_products_json(), "query": query})
         sanitized_result = llm_result.content.strip("`").removeprefix("sql").strip("\n").replace("%", "%%")
         return sanitized_result
+
+    @classmethod
+    def create(
+        cls,
+        config: AgentConfig,
+        data_set_id: int,
+        repositories: RepositoriesInstances,
+        embeddings_registry: BaseEmbeddingProviderRegistry,
+        llm: BaseLanguageModel,
+    ) -> Self:
+        return cls(
+            data_set_id=data_set_id,
+            data_set_repo=repositories.data_set,
+            product_repo=repositories.product,
+            llm=llm,
+            **config.retrievers.product.extra_kwargs,
+        )

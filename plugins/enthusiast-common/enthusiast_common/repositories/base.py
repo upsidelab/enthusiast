@@ -42,9 +42,8 @@ class BaseUserRepository(BaseRepository[T], ABC, Generic[T, U]):
         pass
 
 
-class BaseDocumentChunkRepository(BaseRepository[T], ABC):
-    @abstractmethod
-    def get_document_chunk_by_distance_for_data_set(self, data_set_id: int, distance: CosineDistance) -> Optional[T]:
+class BaseModelChunkRepository(BaseRepository[T], ABC):
+    def get_chunk_by_distance_for_data_set(self, data_set_id: int, distance: CosineDistance) -> Optional[T]:
         pass
 
 

@@ -58,106 +58,150 @@ const api = new ApiClient(authenticationProviderInstance);
 
 const streamingEnabled = Boolean(import.meta.env.VITE_WS_BASE);
 
-export function Conversation({conversationId}: ConversationProps) {
+export function Conversation({ conversationId }: ConversationProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [isAgentLoading, setIsAgentLoading] = useState(false);
     const [messages, setMessages] = useState<MessageProps[]>([]);
-    const [skipConversationReload, setSkipConversationReload] = useState(false);
-    const [usePolling, setUsePolling] = useState(!streamingEnabled);
+    const [pendingMessage, setPendingMessage] = useState<string | null>(null);
+
+    const usePolling = useRef(!streamingEnabled);
     const lastMessageRef = useRef<HTMLDivElement | null>(null);
-    const {dataSetId} = useApplicationContext()!;
-    const navigate = useNavigate();
     const ws = useRef<WebSocket | null>(null);
 
+    const { dataSetId } = useApplicationContext()!;
+    const navigate = useNavigate();
+
+    // Cleanup WebSocket on unmount
     useEffect(() => {
-        ws.current?.close()
+        return () => {
+            ws.current?.close();
+        };
     }, []);
 
+    // Load messages when conversationId changes
     useEffect(() => {
-        const loadInitialMessages = async () => {
-            if (skipConversationReload) {
-                setSkipConversationReload(false);
-                return;
-            }
-
+        const loadMessages = async () => {
             if (!conversationId) {
                 setMessages([]);
                 return;
             }
+
+            if (pendingMessage) {
+                onMessageComposerSubmit(pendingMessage);
+                setPendingMessage(null);
+                return;
+            }
+
             const conversation = await api.conversations().getConversation(conversationId);
             const initialMessages = conversation.history as MessageProps[];
             setMessages(initialMessages);
-        }
 
-        loadInitialMessages();
+            setTimeout(() => {
+                lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
+            }, 100);
+        };
+
+        loadMessages();
+    }, [conversationId]);
+
+    const scrollToLastMessage = () => {
         setTimeout(() => {
-            lastMessageRef.current?.scrollIntoView({behavior: "smooth"});
+            lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
         });
-    }, [conversationId, skipConversationReload]);
+    };
 
-    const createWsConnection = (conversationId: number) => {
-        ws.current = new WebSocket(`${import.meta.env.VITE_WS_BASE}/ws/chat/${conversationId}/`);
-        ws.current.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if (data.event === "on_parser_start") {
-                setIsAgentLoading(true);
-            } else if (data.event === "on_parser_stream") {
-                setIsLoading(false);
-                setIsAgentLoading(false);
-                setMessages((prevMessages) => {
-                    const lastMessage = prevMessages[prevMessages.length - 1];
-                    if (lastMessage && lastMessage.role === "agent" && lastMessage.id === null) {
-                        return [
-                            ...prevMessages.slice(0, -1),
-                            {...lastMessage, text: lastMessage.text + data.data.chunk}
-                        ];
-                    } else {
-                        return [...prevMessages, {role: "agent", text: data.data.chunk, id: null}];
-                    }
-                });
-                setTimeout(() => {
-                    lastMessageRef.current?.scrollIntoView({behavior: "smooth"});
-                });
-            } else if (data.error) {
-                setIsLoading(false);
-            }
-        };
+    const handleWebSocketMessage = (event: MessageEvent) => {
+        const data = JSON.parse(event.data);
 
-        ws.current.onerror = () => {
-            setUsePolling(true);
-        };
+        if (data.event === "on_parser_start") {
+            setIsAgentLoading(true);
+        } else if (data.event === "on_parser_stream") {
+            setIsLoading(false);
+            setIsAgentLoading(false);
 
-        ws.current.onclose = (event) => {
-            if (!event.wasClean) {
-                setUsePolling(true);
-            }
-        };
+            setMessages((prevMessages) => {
+                const lastMessage = prevMessages[prevMessages.length - 1];
 
-        return () => {
-            ws.current?.close();
-        };
-    }
-    const updateTaskStatus = async (currentConversationId: number, taskHandle: TaskHandle, streaming: boolean) => {
-        try {
-            if (streaming) {
+                if (lastMessage && lastMessage.role === "agent" && lastMessage.id === null) {
+                    return [
+                        ...prevMessages.slice(0, -1),
+                        { ...lastMessage, text: lastMessage.text + data.data.chunk }
+                    ];
+                } else {
+                    return [...prevMessages, { role: "agent", text: data.data.chunk, id: null }];
+                }
+            });
+
+            scrollToLastMessage();
+        } else if (data.error) {
+            setIsLoading(false);
+        }
+    };
+
+    const handleWebSocketError = () => {
+        usePolling.current = true;
+    };
+
+    const handleWebSocketClose = (event: CloseEvent) => {
+        if (!event.wasClean) {
+            usePolling.current = true;
+        }
+    };
+
+    const createWsConnection = (conversationId: number): Promise<boolean> => {
+        return new Promise((resolve) => {
+            if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+                resolve(true);
                 return;
             }
-            const response = await api.conversations().fetchResponseMessage(currentConversationId!, taskHandle);
+
+            if (ws.current) {
+                ws.current.close();
+            }
+
+            ws.current = new WebSocket(`${import.meta.env.VITE_WS_BASE}/ws/chat/${conversationId}/`);
+
+            ws.current.onopen = () => {
+                resolve(true);
+            };
+            ws.current.onmessage = handleWebSocketMessage;
+            ws.current.onerror = () => {
+                handleWebSocketError();
+                resolve(false);
+            };
+            ws.current.onclose = (event) => {
+                handleWebSocketClose(event);
+                resolve(false);
+            };
+
+            setTimeout(() => {
+                if (ws.current && ws.current.readyState !== WebSocket.OPEN) {
+                    usePolling.current = true;
+                    ws.current.close();
+                    resolve(false);
+                }
+            }, 5000);
+        });
+    };
+
+    const updateTaskStatus = async (conversationId: number, taskHandle: TaskHandle, streaming: boolean) => {
+        if (streaming) {
+            return;
+        }
+
+        try {
+            const response = await api.conversations().fetchResponseMessage(conversationId!, taskHandle);
+
             if (response) {
                 setIsAgentLoading(false);
-                setMessages((prev) => {
-                            return [
-                                ...prev,
-                                {role: "agent", text: response.text, id: response.id}
-                            ]
-                    }
-                );
+                setMessages((prev) => [
+                    ...prev,
+                    { role: "agent", text: response.text, id: response.id }
+                ]);
                 setIsLoading(false);
-                setTimeout(() => {
-                    lastMessageRef.current?.scrollIntoView({behavior: "smooth"});
-                });
+                scrollToLastMessage();
             } else {
-                setTimeout(() => updateTaskStatus(currentConversationId, taskHandle, streaming), 2000);
+                setTimeout(() => updateTaskStatus(conversationId, taskHandle, streaming), 2000);
             }
         } catch {
             setIsLoading(false);
@@ -165,38 +209,44 @@ export function Conversation({conversationId}: ConversationProps) {
         }
     };
 
-    const onMessageComposerSubmit = async (message: string) => {
-        setIsLoading(true);
-        setIsAgentLoading(true);
+    const addUserMessage = (message: string) => {
         setMessages((prev) => [
             ...prev,
-            {role: "user", text: message, id: null}
+            { role: "user", text: message, id: null }
         ]);
-        setTimeout(() => {
-            lastMessageRef.current?.scrollIntoView({behavior: "smooth"});
-        });
-        let currentConversationId = conversationId;
-        if (!currentConversationId) {
-            currentConversationId = await api.conversations().createConversation(dataSetId!);
-            setSkipConversationReload(true);
-            navigate(`/data-sets/${dataSetId}/chat/${currentConversationId}`);
+        scrollToLastMessage();
+    };
+
+    const onMessageComposerSubmit = async (message: string) => {
+        if (!conversationId) {
+            const newConversationId = await api.conversations().createConversation(dataSetId!);
+            setPendingMessage(message);
+            navigate(`/data-sets/${dataSetId}/chat/${newConversationId}`);
+            return;
         }
 
-        const taskHandle = await api.conversations().sendMessage(currentConversationId, dataSetId!, message, streamingEnabled);
-        setUsePolling(!taskHandle.streaming)
-        if (!usePolling) {
-            createWsConnection(currentConversationId!);
-            if (!ws.current || ws.current.readyState !== WebSocket.OPEN) {
-                setUsePolling(true);
+        setIsLoading(true);
+        setIsAgentLoading(true);
+        addUserMessage(message);
+
+        const taskHandle = await api.conversations().sendMessage(conversationId, dataSetId!, message, streamingEnabled);
+        usePolling.current = !taskHandle.streaming;
+
+        if (taskHandle.streaming) {
+            const connected = await createWsConnection(conversationId);
+            if (!connected) {
+                usePolling.current = true;
             }
         }
+
         try {
-            updateTaskStatus(currentConversationId, taskHandle, !usePolling);
+            updateTaskStatus(conversationId, taskHandle, !usePolling.current);
         } catch {
             setIsLoading(false);
             setIsAgentLoading(false);
         }
-    }
+    };
+
     return (
         <ConversationUI
             messages={messages}

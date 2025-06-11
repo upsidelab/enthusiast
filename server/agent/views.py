@@ -92,7 +92,7 @@ class ConversationView(APIView):
             )
 
             return Response(
-                {"task_id": task.id, "streaming": language_model_provider_class.STREAMING_AVAILABLE},
+                {"task_id": task.id, "streaming": language_model_provider_class.STREAMING_AVAILABLE and streaming},
                 status=status.HTTP_202_ACCEPTED,
             )
         else:

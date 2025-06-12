@@ -1,131 +1,79 @@
-from typing import Type, Optional
+from abc import ABC, abstractmethod
+from typing import Sequence, Self
 
-from django.db import models
-from langchain_core.callbacks import BaseCallbackHandler
-from dataclasses import dataclass, fields
-from abc import ABC
-
-from langchain.agents import AgentExecutor
+from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
+from langchain_core.prompts.chat import MessageLikeRepresentation
 
-from ..services.conversation import BaseConversationService
-from ..llm import BaseLLM, BaseLanguageModelRegistry, BaseDjangoSettingsModelRegistry
-from ..repositories.base import (
-    BaseUserRepository,
-    BaseMessageRepository,
-    BaseConversationRepository,
-    BaseDataSetRepository,
-    BaseRepository,
-)
-from ..repositories.django import (
-    DjangoMessageRepository,
-    DjangoConversationRepository,
-    DjangoUserRepository,
-    DjangoDataSetRepository,
-)
+from ..services.conversation import ConversationService
+from ..tools import AbstractTool
 
 
-class RegistryConfig:
-    registry_class: Type[BaseLanguageModelRegistry] = BaseDjangoSettingsModelRegistry
-    providers: Optional[dict[str, str]] = None
-
-
-@dataclass
-class LLMConfig:
-    model_class: Type[BaseLLM] = BaseLLM
-    registry: RegistryConfig = RegistryConfig()
-    callbacks: list[BaseCallbackHandler] = None
-    streaming: bool = False
-
-
-@dataclass
-class RepositoryConfig:
-    model: models.Model
-    repo_class: BaseRepository
-
-
-@dataclass
-class RepositoriesConfig:
-    user: Type[BaseUserRepository] = DjangoUserRepository
-    message: Type[BaseMessageRepository] = DjangoMessageRepository
-    conversation: Type[BaseConversationRepository] = DjangoConversationRepository
-    data_set: Type[BaseDataSetRepository] = DjangoDataSetRepository
-
-
-@dataclass
-class ModelsConfig:
-    user: Type[models.Model]
-    message: Type[models.Model]
-    conversation: Type[models.Model]
-    data_set: Type[models.Model]
-
-
-@dataclass
-class AgentConfig:
-    data_set_id: int
-    models: ModelsConfig
-    prompt_template: str
-    llm: LLMConfig = LLMConfig()
-    repositories: RepositoriesConfig = RepositoriesConfig()
-    # tools:
-    # injectors
-
-
-class AgentBuilder:
-    def __init__(self, config: AgentConfig):
-        self._config = config
-
-    def build(self):
-        repositories = self._build_repositories()
-        data_set_repo = getattr(repositories, "data_set", None)
-        llm = self._build_llm(data_set_repo)
-        prompt = self._build_prompt()
-        print(llm, prompt)
-
-    def _build_llm(self, data_set_repo: BaseDataSetRepository) -> BaseLanguageModel:
-        llm_registry_class = self._config.llm.registry.registry_class
-        if providers := self._config.llm.registry.providers:
-            llm_registry = llm_registry_class(providers=providers)
-        else:
-            llm_registry = llm_registry_class(data_set_repo=data_set_repo)
-
-        llm = self._config.llm.model_class(
-            llm_registry=llm_registry,
-            callbacks=self._config.llm.callbacks,
-            streaming=self._config.llm.streaming,
-            data_set_repo=data_set_repo,
-        )
-        return llm.create(self._config.data_set_id)
-
-    def _build_repositories(self) -> dict[str, BaseRepository]:
-        repositories = {}
-        repo_fields = fields(self._config.repositories)
-        for field in repo_fields:
-            name = field.name
-            repo_class = getattr(self._config.repositories, name)
-            model_class = getattr(self._config.models, name)
-            repositories[name] = repo_class(model_class)
-        return repositories
-
-    def _build_prompt(self) -> PromptTemplate:
-        return PromptTemplate.from_template(self._config.prompt_template)
-
-
-class Agent(ABC):
+class BaseAgent(ABC):
     def __init__(
         self,
-        data_set_id: int,
+        tools: list[AbstractTool],
+        llm: BaseLanguageModel,
+        prompt: ChatPromptTemplate,
+        conversation_service: ConversationService,
     ):
-        self._data_set_id = data_set_id
+        self._tools = tools
+        self._llm = llm
+        self._prompt = prompt
+        self._conversation_service = conversation_service
 
-    def create(
-        self,
-        llm: BaseLLM,
-        conversation_service: BaseConversationService,
-        callbacks,
-        streaming,
-        tools,
-        injections,
-    ) -> AgentExecutor:
+    @classmethod
+    @abstractmethod
+    def create_prompt(cls, template: Sequence[MessageLikeRepresentation] | str) -> PromptTemplate | ChatPromptTemplate:
         pass
+
+    @abstractmethod
+    def _create_agent_executor(self, **kwargs) -> AgentExecutor:
+        pass
+
+    def _set_agent_executor(self, agent_executor: AgentExecutor):
+        self._agent_executor = agent_executor
+
+    def create(self, **kwargs) -> Self:
+        self._create_agent_executor(**kwargs)
+        self._set_agent_executor(self._agent_executor)
+        return self
+
+
+class ToolCallingAgent(BaseAgent):
+    def _create_agent_executor(self, **kwargs):
+        agent = create_tool_calling_agent(self._llm, self._tools, self._prompt)
+        return AgentExecutor(agent=agent, tools=self._tools, verbose=True, **kwargs)
+
+    def get_answer(self, input_text: str) -> str:
+        agent_output = self._agent_executor.invoke({"input": input_text, "chat_history": self._memory.buffer})
+        return agent_output["output"]
+
+    @classmethod
+    def create_prompt(cls, template: Sequence[MessageLikeRepresentation]) -> ChatPromptTemplate:
+        return ChatPromptTemplate.from_messages(template)
+
+        # callback_handler = ConversationWebSocketCallbackHandler(conversation)
+        # language_model_provider = LanguageModelRegistry().provider_for_dataset(conversation.data_set)
+        # self._tools = ToolManager(
+        #     language_model_provider=language_model_provider, conversation=conversation, streaming=streaming
+        # ).tools
+        #
+        # if streaming:
+        #     self._llm = language_model_provider.provide_streaming_language_model(callbacks=[callback_handler])
+        # else:
+        #     self._llm = language_model_provider.provide_language_model()
+        #
+        # self._agent_executor = self._create_agent_with_tools(
+        #     self._llm, self._tools, conversation.data_set.system_message
+        # )
+        # self._memory = self._create_agent_memory(conversation.get_messages())
+
+    #
+    # def _create_agent_memory(self, messages):
+    #     memory = ConversationSummaryBufferMemory(
+    #         llm=self._llm, memory_key="chat_history", return_messages=True, max_token_limit=3000, output_key="output"
+    #     )
+    #     memory.chat_memory.add_messages(messages)
+    #     return memory

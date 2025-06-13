@@ -133,6 +133,12 @@ export function Conversation({ conversationId }: ConversationProps) {
             });
 
             scrollToLastMessage();
+        } else if (data.event === "message_id") {
+              setMessages((prevMessages) => {
+                  const lastMessage = prevMessages[prevMessages.length - 1];
+                  lastMessage.id = data.data.output
+                  return [... prevMessages.slice(0, -1), lastMessage];
+              })
         } else if (data.error) {
             setIsLoading(false);
         }

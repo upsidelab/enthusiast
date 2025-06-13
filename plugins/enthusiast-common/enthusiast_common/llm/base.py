@@ -4,7 +4,7 @@ from enthusiast_common import LanguageModelProvider
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
 
-from ..repositories.base import BaseDataSetRepository
+from ..repositories import BaseDataSetRepository
 from ..registry import BaseLanguageModelRegistry
 
 
@@ -30,7 +30,7 @@ class BaseLLM:
         if self._streaming:
             return provider.provide_streaming_language_model(callbacks=self._callbacks)
         else:
-            return provider.provide_language_model(callbacks=self._callbacks)
+            return provider.provide_language_model()
 
     def create(self, data_set_id: int):
         provider_class = self._get_llm_provider(data_set_id)

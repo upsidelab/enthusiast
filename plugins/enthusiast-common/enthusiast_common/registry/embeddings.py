@@ -47,7 +47,7 @@ class BaseEmbeddingProviderRegistry(ABC):
 
 class BaseDjangoSettingsEmbeddingRegistry(BaseEmbeddingProviderRegistry):
     def __init__(self, data_set_repo: BaseDataSetRepository):
-        providers = settings.CATALOG_LANGUAGE_MODEL_PROVIDERS
+        providers = settings.CATALOG_EMBEDDING_PROVIDERS
         super().__init__(providers)
         self._providers = providers
         self.data_set_repo = data_set_repo

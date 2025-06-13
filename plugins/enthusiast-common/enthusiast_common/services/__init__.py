@@ -1,1 +1,1 @@
-from .conversation import BaseConversationService  # noqa
+from .conversation import ConversationService  # noqa

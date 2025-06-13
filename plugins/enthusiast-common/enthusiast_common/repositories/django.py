@@ -1,7 +1,8 @@
 from typing import TypeVar, Type, Optional, Generic
 
 from django.db import models
-
+from django.db.models import QuerySet
+from pgvector.django import CosineDistance
 
 from .base import (
     BaseRepository,
@@ -9,6 +10,8 @@ from .base import (
     BaseConversationRepository,
     BaseUserRepository,
     BaseDataSetRepository,
+    BaseDocumentChunkRepository,
+    BaseProductRepository,
 )
 
 T = TypeVar("T", bound=models.Model)
@@ -28,6 +31,9 @@ class BaseDjangoRepository(BaseRepository[T]):
 
     def list(self) -> list[T]:
         return list(self.model.objects.all())
+
+    def filter(self, **kwargs) -> QuerySet[T]:
+        return self.model.objects.filter(**kwargs)
 
     def create(self, **kwargs) -> T:
         instance = self.model(**kwargs)
@@ -53,19 +59,27 @@ class DjangoUserRepository(BaseDjangoRepository[T], BaseUserRepository, Generic[
         return user.datasets.get(pk=data_set_id)
 
 
-class DjangoMessageRepository(
-    BaseDjangoRepository[T], BaseMessageRepository, Generic[T]
-):
+class DjangoDocumentChunkRepository(BaseDjangoRepository[T], BaseDocumentChunkRepository, Generic[T]):
+    def get_document_chunk_by_distance_for_data_set(self, data_set_id: int, distance: CosineDistance) -> QuerySet[T]:
+        embeddings_by_distance = self.model.objects.annotate(distance=distance).order_by("distance")
+        embeddings_with_documents = embeddings_by_distance.select_related("document").filter(
+            document__data_set_id__exact=data_set_id
+        )
+        return embeddings_with_documents
+
+
+class DjangoProductRepository(BaseDjangoRepository[T], BaseProductRepository[T], Generic[T]):
+    def extra(self, where_conditions: list[str]) -> QuerySet[T]:
+        return self.model.objects.extra(where=where_conditions)
+
+
+class DjangoMessageRepository(BaseDjangoRepository[T], BaseMessageRepository, Generic[T]):
     pass
 
 
-class DjangoConversationRepository(
-    BaseDjangoRepository[T], BaseConversationRepository, Generic[T]
-):
+class DjangoConversationRepository(BaseDjangoRepository[T], BaseConversationRepository, Generic[T]):
     pass
 
 
-class DjangoDataSetRepository(
-    BaseDjangoRepository[T], BaseDataSetRepository, Generic[T]
-):
+class DjangoDataSetRepository(BaseDjangoRepository[T], BaseDataSetRepository, Generic[T]):
     pass

@@ -5,15 +5,17 @@ from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
 from langchain_core.prompts.chat import MessageLikeRepresentation
+from langchain_core.tools import BaseTool
 
-from ..services.conversation import ConversationService
-from ..tools import AbstractTool
+from ..services import ConversationService
 
 
 class BaseAgent(ABC):
+    _agent_executor: AgentExecutor
+
     def __init__(
         self,
-        tools: list[AbstractTool],
+        tools: list[BaseTool],
         llm: BaseLanguageModel,
         prompt: ChatPromptTemplate,
         conversation_service: ConversationService,
@@ -36,8 +38,8 @@ class BaseAgent(ABC):
         self._agent_executor = agent_executor
 
     def create(self, **kwargs) -> Self:
-        self._create_agent_executor(**kwargs)
-        self._set_agent_executor(self._agent_executor)
+        agent_executor = self._create_agent_executor(**kwargs)
+        self._set_agent_executor(agent_executor)
         return self
 
 
@@ -53,21 +55,6 @@ class ToolCallingAgent(BaseAgent):
     @classmethod
     def create_prompt(cls, template: Sequence[MessageLikeRepresentation]) -> ChatPromptTemplate:
         return ChatPromptTemplate.from_messages(template)
-
-        # callback_handler = ConversationWebSocketCallbackHandler(conversation)
-        # language_model_provider = LanguageModelRegistry().provider_for_dataset(conversation.data_set)
-        # self._tools = ToolManager(
-        #     language_model_provider=language_model_provider, conversation=conversation, streaming=streaming
-        # ).tools
-        #
-        # if streaming:
-        #     self._llm = language_model_provider.provide_streaming_language_model(callbacks=[callback_handler])
-        # else:
-        #     self._llm = language_model_provider.provide_language_model()
-        #
-        # self._agent_executor = self._create_agent_with_tools(
-        #     self._llm, self._tools, conversation.data_set.system_message
-        # )
         # self._memory = self._create_agent_memory(conversation.get_messages())
 
     #

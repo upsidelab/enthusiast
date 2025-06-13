@@ -1,17 +1,16 @@
-from abc import abstractmethod, ABC
-from typing import Type, Any
+from abc import abstractmethod
+from typing import Type
 
+from enthusiast_common.repositories import BaseDataSetRepository
 from langchain.agents import AgentExecutor
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel
 
-
-class AbstractTool(BaseTool, ABC):
-    pass
+from ..injectors import BaseInjector
 
 
-class BaseFunctionTool(AbstractTool):
+class BaseFunctionTool(BaseTool):
     name: str
     description: str
     args_schema: Type[BaseModel]
@@ -31,17 +30,20 @@ class BaseFunctionTool(AbstractTool):
         pass
 
 
-class BaseLLMTool(AbstractTool):
+class BaseLLMTool(BaseTool):
     name: str
     description: str
     args_schema: Type[BaseModel]
     return_direct: bool
-    data_set: any
+    data_set_id: int
+    injector: BaseInjector | None
 
     def __init__(
         self,
-        data_set: Any,
+        data_set_id: int,
+        data_set_repo: BaseDataSetRepository,
         llm: BaseLanguageModel,
+        injector: BaseInjector | None,
         **kwargs,
     ):
         """Initialize the ToolInterface.
@@ -52,8 +54,10 @@ class BaseLLMTool(AbstractTool):
         """
 
         super().__init__(**kwargs)
-        self.data_set = data_set
+        self.injector = injector
+        self.data_set_repo = data_set_repo
         self.llm = llm
+        self.data_set_id = data_set_id
 
     @abstractmethod
     def _run(self, *args, **kwargs):
@@ -66,14 +70,14 @@ class BaseLLMTool(AbstractTool):
         pass
 
 
-class BaseAgentTool(AbstractTool):
+class BaseAgentTool(BaseTool):
     name: str
     description: str
     args_schema: Type[BaseModel]
     return_direct: bool
     agent_executor: AgentExecutor
 
-    def __init__(self, agent_executor: AgentExecutor, **kwargs):
+    def __init__(self, agent_executor: AgentExecutor, injector: BaseInjector | None, **kwargs):
         """Initialize the ToolInterface.
 
         Args:
@@ -82,6 +86,7 @@ class BaseAgentTool(AbstractTool):
         """
         super().__init__(**kwargs)
         self.agent_executor = agent_executor
+        self.injector = injector
 
     @abstractmethod
     def _run(self, *args, **kwargs):

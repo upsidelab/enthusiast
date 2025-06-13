@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Generic, TypeVar
 
-from ..repositories.base import (
+from ..repositories import (
     BaseUserRepository,
     BaseMessageRepository,
     BaseConversationRepository,
@@ -23,12 +23,8 @@ class ConversationService(Generic[T]):
 
     def create_conversation(self, user_id: int, data_set_id: int) -> T:
         user = self.user_repo.get_by_id(user_id)
-        data_set = self.user_repo.get_user_dataset(
-            user_id=user_id, data_set_id=data_set_id
-        )
-        conversation = self.conversation_repo.create(
-            started_at=datetime.now(), user=user, data_set=data_set
-        )
+        data_set = self.user_repo.get_user_dataset(user_id=user_id, data_set_id=data_set_id)
+        conversation = self.conversation_repo.create(started_at=datetime.now(), user=user, data_set=data_set)
         return conversation
 
     def save_user_message(self, conversation_id: int, message: str):

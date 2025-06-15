@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "enthusiast-source-wordpress"
-version = "0.1.2"
-description = ""
+version = "1.0.0"
+description = "A plugin for Enthusiast that provides a Wordpress documents importer."
 authors = ["Rafal Cymerys <rafal@upsidelab.io>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-enthusiast-common = ">=0.2,<1"
+enthusiast-common = ">=1,<2"
 requests = "^2.32.3"
 
 

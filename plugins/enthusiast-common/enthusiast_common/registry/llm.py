@@ -3,6 +3,7 @@ from importlib import import_module
 from typing import Any, Type
 
 from django.conf import settings
+from enthusiast_common.repositories import DjangoDataSetRepository
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
 
@@ -61,11 +62,14 @@ class BaseLanguageModelRegistry(ABC):
 
 
 class BaseDjangoSettingsModelRegistry(BaseLanguageModelRegistry):
-    def __init__(self, data_set_repo: BaseDataSetRepository):
+    def __init__(self, data_set_repo: BaseDataSetRepository | None = None):
         providers = settings.CATALOG_LANGUAGE_MODEL_PROVIDERS
         super().__init__(providers)
         self._providers = providers
-        self.data_set_repo = data_set_repo
+        if data_set_repo is None:
+            self._data_set_repo = DjangoDataSetRepository(settings.CATALOG_MODELS["data_set"])
+        else:
+            self._data_set_repo = data_set_repo
 
     def provider_class_by_name(self, name: str) -> Type[LanguageModelProvider]:
         provider_class_name = self._providers[name]
@@ -75,6 +79,6 @@ class BaseDjangoSettingsModelRegistry(BaseLanguageModelRegistry):
         return provider_class
 
     def provider_for_dataset(self, data_set_id: int) -> Type[LanguageModelProvider]:
-        data_set = self.data_set_repo.get_by_id(data_set_id)
+        data_set = self._data_set_repo.get_by_id(data_set_id)
         provider_class = self.provider_class_by_name(data_set.language_model_provider)
         return provider_class

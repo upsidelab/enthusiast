@@ -1,6 +1,7 @@
-from langchain_core.callbacks import BaseCallbackHandler
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
+from langchain_core.callbacks import BaseCallbackHandler
+
 
 class ConversationWebSocketCallbackHandler(BaseCallbackHandler):
     def __init__(self, conversation):
@@ -16,7 +17,7 @@ class ConversationWebSocketCallbackHandler(BaseCallbackHandler):
                 "type": "chat_message",
                 "event": "start",
                 "run_id": run_id,
-            }
+            },
         )
 
     def on_llm_new_token(self, token: str, **kwargs):
@@ -27,16 +28,11 @@ class ConversationWebSocketCallbackHandler(BaseCallbackHandler):
                 "event": "stream",
                 "run_id": self.run_id,
                 "token": token,
-            }
+            },
         )
 
     def on_chain_end(self, outputs, **kwargs):
         async_to_sync(self.channel_layer.group_send)(
             self.group_name,
-            {
-                "type": "chat_message",
-                "event": "end",
-                "run_id": self.run_id,
-                "output": outputs.get("output")
-            }
+            {"type": "chat_message", "event": "end", "run_id": self.run_id, "output": outputs.get("output")},
         )

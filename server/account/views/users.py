@@ -1,10 +1,10 @@
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework.generics import ListCreateAPIView, UpdateAPIView
 from rest_framework.permissions import IsAdminUser
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
 
 from account.models import User
-from account.serializers import UserSerializer, UserUpdateSerializer, UserUpdatePasswordSerializer
+from account.serializers import UserSerializer, UserUpdatePasswordSerializer, UserUpdateSerializer
 
 
 class UserListView(ListCreateAPIView):

@@ -1,11 +1,11 @@
-from rest_framework.authtoken.models import Token
-from rest_framework.test import APITestCase
-from rest_framework import status
-
 from unittest.mock import patch
 
+from rest_framework import status
+from rest_framework.authtoken.models import Token
+from rest_framework.test import APITestCase
+
 from account.models import User
-from agent.models import EmbeddingModel, EmbeddingDimension
+from agent.models import EmbeddingDimension, EmbeddingModel
 from catalog.models import DataSet
 
 

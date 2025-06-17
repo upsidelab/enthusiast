@@ -1,6 +1,6 @@
 import json
-import shopify
 
+import shopify
 from enthusiast_common import ProductDetails, ProductSourcePlugin
 
 

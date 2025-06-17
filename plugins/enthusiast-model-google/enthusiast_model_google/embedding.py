@@ -3,7 +3,6 @@ from enthusiast_common.utils import prioritize_items
 from google import genai
 from google.genai.types import EmbedContentConfig
 
-
 PRIORITIZED_MODELS = ["models/embedding-001", "models/text-embedding-004"]
 
 

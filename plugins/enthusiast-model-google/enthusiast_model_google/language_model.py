@@ -3,7 +3,6 @@ from enthusiast_common.utils import prioritize_items
 from google import genai
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
-
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 PRIORITIZED_MODELS = ["models/gemini-2.0-flash", "models/gemini-1.5-flash"]

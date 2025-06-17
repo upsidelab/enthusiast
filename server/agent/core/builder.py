@@ -3,12 +3,12 @@ from dataclasses import fields
 from enthusiast_common.agents import BaseAgent
 from enthusiast_common.builder import BaseAgentBuilder, RepositoriesInstances
 from enthusiast_common.config import LLMConfig
-from enthusiast_common.injectors import BaseInjector, BaseProductRetriever, BaseDocumentRetriever
-from enthusiast_common.registry import BaseEmbeddingProviderRegistry, BaseLanguageModelRegistry, BaseDBModelsRegistry
+from enthusiast_common.injectors import BaseDocumentRetriever, BaseInjector, BaseProductRetriever
+from enthusiast_common.registry import BaseDBModelsRegistry, BaseEmbeddingProviderRegistry, BaseLanguageModelRegistry
 from enthusiast_common.services import BaseConversationService
-from enthusiast_common.tools import BaseFunctionTool, BaseLLMTool, BaseAgentTool
+from enthusiast_common.tools import BaseAgentTool, BaseFunctionTool, BaseLLMTool
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.prompts import PromptTemplate, ChatMessagePromptTemplate
+from langchain_core.prompts import ChatMessagePromptTemplate, PromptTemplate
 from langchain_core.tools import BaseTool
 
 

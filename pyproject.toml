@@ -1,3 +1,7 @@
 [tool.ruff]
 line-length = 120
 target-version = "py312"
+[tool.ruff.lint]
+extend-select = ["I"]
+[tool.ruff.lint.isort]
+known-first-party = ["agent", "account", "catalog", "pecl", "sync"]

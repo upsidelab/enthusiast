@@ -1,5 +1,4 @@
 import requests
-
 from enthusiast_common import ProductDetails, ProductSourcePlugin
 
 

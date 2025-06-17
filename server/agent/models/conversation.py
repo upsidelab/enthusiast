@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.messages import AIMessage, HumanMessage
 
 from catalog.models import DataSet
 

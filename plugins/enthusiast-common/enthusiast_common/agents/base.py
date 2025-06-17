@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Self
 
 from langchain.agents import AgentExecutor
 from langchain.memory import ConversationSummaryBufferMemory
@@ -34,19 +33,3 @@ class BaseAgent(ABC):
     @abstractmethod
     def get_answer(self, input_text: str) -> str:
         pass
-
-    @abstractmethod
-    def _create_agent_executor(self, **kwargs) -> AgentExecutor:
-        pass
-
-    @abstractmethod
-    def _create_agent_memory(self, messages) -> ConversationSummaryBufferMemory:
-        pass
-
-    def _set_agent_executor(self, agent_executor: AgentExecutor):
-        self._agent_executor = agent_executor
-
-    def create(self, **kwargs) -> Self:
-        agent_executor = self._create_agent_executor(**kwargs)
-        self._set_agent_executor(agent_executor)
-        return self

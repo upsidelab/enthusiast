@@ -12,5 +12,3 @@ from .base import AgentToolConfig  # noqa
 from .base import ToolCallingAgentConfig  # noqa
 from .base import DocumentRetrieverConfig  # noqa
 from .base import ProductRetrieverConfig  # noqa
-
-from .validator import AgentConfigValidator  # noqa

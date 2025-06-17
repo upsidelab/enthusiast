@@ -1,7 +1,7 @@
 import logging
 from typing import Optional, Type
 
-from .base import BaseAgent
+from ..agents import BaseAgent
 from ..config import AgentConfig, LLMConfig, RegistryConfig, RepositoriesConfig, RetrieversConfig
 from ..injectors import BaseInjector
 from ..services import BaseConversationService

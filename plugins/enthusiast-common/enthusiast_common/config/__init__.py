@@ -5,7 +5,6 @@ from .base import RetrieversConfig  # noqa
 from .base import RegistryConfig  # noqa
 from .base import LLMToolConfig  # noqa
 from .base import RegistryConfig  # noqa
-from .base import RepositoryConfig  # noqa
 from .base import ModelsRegistryConfig  # noqa
 from .base import LLMRegistryConfig  # noqa
 from .base import EmbeddingsRegistryConfig  # noqa

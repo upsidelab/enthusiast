@@ -7,7 +7,6 @@ from langchain_core.tools import BaseTool
 from .base import BaseAgent
 from ..config import AgentConfig, LLMConfig, AgentConfigValidator
 from ..injectors import BaseProductRetriever, BaseDocumentRetriever, BaseInjector
-from ..services.conversation import ConversationService
 from ..tools import BaseAgentTool, BaseLLMTool, BaseFunctionTool
 from ..registry import BaseLanguageModelRegistry, BaseEmbeddingProviderRegistry, BaseDBModelsRegistry
 from ..repositories import (
@@ -18,6 +17,7 @@ from ..repositories import (
     BaseMessageRepository,
     BaseConversationRepository,
 )
+from ..services import BaseConversationService
 
 
 @dataclass
@@ -42,19 +42,18 @@ class AgentBuilder:
         self._build_and_set_repositories(model_registry)
         self._data_set_id = self._repositories.conversation.get_data_set_id(self._config.conversation_id)
         llm = self._build_llm(self._config.llm)
-        prompt = self._build_prompt()
         conversation_service = self._build_conversation_service()
         embeddings_registry = self._build_embeddings_registry()
         injector = self._build_injector(embeddings_registry)
         tools = self._build_tools(default_llm=llm, injector=injector)
-        return self._build_agent(tools, llm, prompt, conversation_service)
+        return self._build_agent(tools, llm, self._config.prompt_template, conversation_service)
 
     def _build_agent(
         self,
         tools: list[BaseTool],
         llm: BaseLanguageModel,
         prompt: PromptTemplate | ChatMessagePromptTemplate,
-        conversation_service: ConversationService,
+        conversation_service: BaseConversationService,
     ) -> BaseAgent:
         return self._config.agent_class(
             tools=tools,
@@ -65,12 +64,9 @@ class AgentBuilder:
         )
 
     def _build_injector(self, embeddings_registry: BaseEmbeddingProviderRegistry) -> BaseInjector:
-        injector = self._config.injector()
         document_retriever = self._build_document_retriever(embeddings_registry=embeddings_registry)
         product_retriever = self._build_product_retriever()
-        injector.document_retriever = document_retriever
-        injector.product_retriever = product_retriever
-        return injector
+        return self._config.injector(product_retriever=product_retriever, document_retriever=document_retriever)
 
     def _build_llm_registry(self) -> BaseLanguageModelRegistry:
         llm_registry_class = self._config.registry.llm.registry_class
@@ -132,9 +128,6 @@ class AgentBuilder:
         )
         return llm.create(self._data_set_id)
 
-    def _build_prompt(self) -> PromptTemplate | ChatMessagePromptTemplate:
-        return self._config.agent_class.create_prompt(self._config.prompt_template)
-
     def _build_tools(self, default_llm: BaseLanguageModel, injector: BaseInjector) -> list[BaseTool]:
         function_tools = self._build_function_tools() if self._config.function_tools else []
         llm_tools = self._build_llm_tools(default_llm, injector) if self._config.llm_tools else []
@@ -167,7 +160,7 @@ class AgentBuilder:
             for tool_config in self._config.agent_tools
         ]
 
-    def _build_conversation_service(self) -> ConversationService:
+    def _build_conversation_service(self) -> BaseConversationService:
         return self._config.conversation_service(
             conversation_repo=self._repositories.conversation,
             message_repo=self._repositories.message,

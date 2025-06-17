@@ -1,14 +1,13 @@
 from abc import ABC, abstractmethod
-from typing import Sequence, Self
+from typing import Self
 
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain.memory import ConversationSummaryBufferMemory
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
-from langchain_core.prompts.chat import MessageLikeRepresentation
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import BaseTool
 
-from ..services import ConversationService
+from ..services import BaseConversationService
 
 
 class BaseAgent(ABC):
@@ -19,7 +18,7 @@ class BaseAgent(ABC):
         tools: list[BaseTool],
         llm: BaseLanguageModel,
         prompt: ChatPromptTemplate,
-        conversation_service: ConversationService,
+        conversation_service: BaseConversationService,
         conversation_id: int,
     ):
         self._tools = tools
@@ -28,11 +27,6 @@ class BaseAgent(ABC):
         self._conversation_service = conversation_service
         self._conversation_id = conversation_id
         self._memory = self._create_agent_memory(conversation_service.get_messages(self._conversation_id))
-
-    @classmethod
-    @abstractmethod
-    def create_prompt(cls, template: Sequence[MessageLikeRepresentation] | str) -> PromptTemplate | ChatPromptTemplate:
-        pass
 
     @abstractmethod
     def _create_agent_executor(self, **kwargs) -> AgentExecutor:
@@ -59,10 +53,6 @@ class ToolCallingAgent(BaseAgent):
     def get_answer(self, input_text: str) -> str:
         agent_output = self._agent_executor.invoke({"input": input_text, "chat_history": self._memory.buffer})
         return agent_output["output"]
-
-    @classmethod
-    def create_prompt(cls, template: Sequence[MessageLikeRepresentation]) -> ChatPromptTemplate:
-        return ChatPromptTemplate.from_messages(template)
 
     def _create_agent_memory(self, messages) -> ConversationSummaryBufferMemory:
         memory = ConversationSummaryBufferMemory(

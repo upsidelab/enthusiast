@@ -4,7 +4,7 @@ from typing import Optional, Type
 from .base import BaseAgent
 from ..config import AgentConfig, LLMConfig, RegistryConfig, RepositoriesConfig, RetrieversConfig
 from ..injectors import BaseInjector
-from ..services.conversation import ConversationService
+from ..services import BaseConversationService
 from ..tools import BaseAgentTool, BaseLLMTool, BaseFunctionTool
 
 
@@ -119,7 +119,7 @@ class AgentConfigValidator:
 
         if not config.conversation_service:
             result.add_error("conversation_service is required")
-        elif not issubclass(config.conversation_service, ConversationService):
+        elif not issubclass(config.conversation_service, BaseConversationService):
             result.add_error("conversation_service must be a subclass of ConversationService")
 
     def _validate_registry_config(self, registry: RegistryConfig, result: ConfigValidationResult):

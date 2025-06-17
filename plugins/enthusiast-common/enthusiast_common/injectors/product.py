@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, Generic, Iterable, Any
+from typing import Any, Generic, Iterable, TypeVar
 
 from langchain_core.language_models import BaseLanguageModel
 
-from ..repositories import BaseProductRepository, BaseDataSetRepository
+from ..repositories import BaseDataSetRepository, BaseProductRepository
 
 QUERY_PROMPT_TEMPLATE = """
     With the following database schema delimited by three backticks ```

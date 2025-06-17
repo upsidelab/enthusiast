@@ -2,24 +2,24 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.prompts import PromptTemplate, ChatMessagePromptTemplate
+from langchain_core.prompts import ChatMessagePromptTemplate, PromptTemplate
 from langchain_core.tools import BaseTool
 
 from ..agents import BaseAgent
 from ..config import AgentConfig, LLMConfig
-from .validator import AgentConfigValidator
-from ..injectors import BaseProductRetriever, BaseDocumentRetriever, BaseInjector
-from ..tools import BaseAgentTool, BaseLLMTool, BaseFunctionTool
-from ..registry import BaseLanguageModelRegistry, BaseEmbeddingProviderRegistry, BaseDBModelsRegistry
+from ..injectors import BaseDocumentRetriever, BaseInjector, BaseProductRetriever
+from ..registry import BaseDBModelsRegistry, BaseEmbeddingProviderRegistry, BaseLanguageModelRegistry
 from ..repositories import (
-    BaseProductRepository,
+    BaseConversationRepository,
     BaseDataSetRepository,
     BaseDocumentChunkRepository,
-    BaseUserRepository,
     BaseMessageRepository,
-    BaseConversationRepository,
+    BaseProductRepository,
+    BaseUserRepository,
 )
 from ..services import BaseConversationService
+from ..tools import BaseAgentTool, BaseFunctionTool, BaseLLMTool
+from .validator import AgentConfigValidator
 
 
 @dataclass

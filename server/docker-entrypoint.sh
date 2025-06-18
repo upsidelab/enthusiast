@@ -9,5 +9,5 @@ else
         python manage.py ensuresuperuser --email=$ECL_ADMIN_EMAIL --password=$ECL_ADMIN_PASSWORD
     fi
 
-    exec python manage.py runserver 0.0.0.0:$PORT
+    exec daphne -b 0.0.0.0 -p ${PORT:-8000} pecl.asgi:application
 fi

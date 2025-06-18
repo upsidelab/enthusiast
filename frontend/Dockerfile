@@ -1,5 +1,13 @@
 FROM node:20
 
+ARG VITE_API_BASE
+ARG VITE_WS_BASE
+ARG PORT
+
+ENV VITE_API_BASE=$VITE_API_BASE
+ENV VITE_WS_BASE=$VITE_WS_BASE
+ENV PORT=$PORT
+
 WORKDIR /app
 
 COPY package.json pnpm-lock.yaml ./
@@ -11,4 +19,4 @@ COPY . .
 
 RUN pnpm build
 
-CMD pnpm exec vite preview --port $PORT
+CMD pnpm exec vite preview --host 0.0.0.0 --port $PORT

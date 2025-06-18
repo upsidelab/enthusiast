@@ -10,21 +10,17 @@ services:
   frontend:
     build:
       context: frontend/
-      dockerfile: Dockerfile.development
-    volumes:
-      - ./frontend/src:/app/src
-    environment:
-      - PORT=10001
-      - VITE_API_BASE=http://localhost:10000
-      - VITE_WS_BASE=ws://localhost:10000
+      dockerfile: Dockerfile
+      args:
+        - PORT=10001
+        - VITE_API_BASE=http://localhost:10000
+        - VITE_WS_BASE=ws://localhost:10000
     ports:
       - "10001:10001"
   api:
     build:
       context: server/
-      dockerfile: Dockerfile.development
-    volumes:
-      - ./server:/app
+      dockerfile: Dockerfile
     ports:
       - "10000:10000"
     env_file:
@@ -35,7 +31,7 @@ services:
   worker:
     build:
       context: server/
-      dockerfile: Dockerfile.development
+      dockerfile: Dockerfile
     env_file:
       - ./server/.env
     environment:

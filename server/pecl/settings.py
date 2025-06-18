@@ -223,15 +223,6 @@ CATALOG_PRODUCT_SOURCE_PLUGINS = {
 CATALOG_DOCUMENT_SOURCE_PLUGINS = {
     "Sample Document Source": "enthusiast_source_sample.SampleDocumentSource",
 }
-CATALOG_MODELS = {
-    "user": "account.models.User",
-    "message": "agent.models.Message",
-    "conversation": "agent.models.Conversation",
-    "data_set": "catalog.models.DataSet",
-    "document_chunk": "catalog.models.DocumentChunk",
-    "product": "catalog.models.Product",
-}
-
 AGENT_TOOLS = {
     "Create Answer Tool": "agent.tools.create_answer_tool.CreateAnswerTool",
 }

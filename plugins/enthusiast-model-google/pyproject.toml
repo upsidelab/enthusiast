@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "enthusiast-model-google"
-version = "1.0.1"
+version = "1.1.0"
 description = "A plugin for Enthusiast that provides a Google Gemini connector."
 authors = ["Damian Sowiński <damian.sowinski@upsidelab.io>"]
 readme = "README.md"

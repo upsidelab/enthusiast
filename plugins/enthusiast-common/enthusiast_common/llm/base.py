@@ -24,7 +24,7 @@ class BaseLLM:
     def _get_llm_provider(self, data_set_id: int) -> Type[LanguageModelProvider]:
         return self._llm_registry.provider_for_dataset(data_set_id)
 
-    def get_llm(self, provider_class: Type[LanguageModelProvider], data_set_id: int) -> BaseLanguageModel:
+    def _get_llm(self, provider_class: Type[LanguageModelProvider], data_set_id: int) -> BaseLanguageModel:
         data_set = self._data_set_repo.get_by_id(data_set_id)
         provider = provider_class(data_set.language_model)
         if self._streaming and provider.STREAMING_AVAILABLE:
@@ -34,4 +34,4 @@ class BaseLLM:
 
     def create(self, data_set_id: int):
         provider_class = self._get_llm_provider(data_set_id)
-        return self.get_llm(provider_class, data_set_id)
+        return self._get_llm(provider_class, data_set_id)

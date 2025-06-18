@@ -1,8 +1,8 @@
 from abc import abstractmethod
 from typing import Type
 
+from enthusiast_common.agents import BaseAgent
 from enthusiast_common.repositories import BaseDataSetRepository
-from langchain.agents import AgentExecutor
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel
@@ -75,9 +75,9 @@ class BaseAgentTool(BaseTool):
     description: str
     args_schema: Type[BaseModel]
     return_direct: bool
-    agent_executor: AgentExecutor
+    agent: BaseAgent
 
-    def __init__(self, agent_executor: AgentExecutor, injector: BaseInjector | None, **kwargs):
+    def __init__(self, agent: BaseAgent, injector: BaseInjector | None, **kwargs):
         """Initialize the ToolInterface.
 
         Args:
@@ -85,7 +85,7 @@ class BaseAgentTool(BaseTool):
             **kwargs: Additional keyword arguments.
         """
         super().__init__(**kwargs)
-        self.agent_executor = agent_executor
+        self.agent = agent
         self.injector = injector
 
     @abstractmethod

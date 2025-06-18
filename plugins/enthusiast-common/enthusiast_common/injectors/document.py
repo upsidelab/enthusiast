@@ -27,9 +27,3 @@ class BaseDocumentRetriever(ABC, Generic[T]):
     @abstractmethod
     def find_documents_matching_query(self, query: str) -> Iterable[T]:
         pass
-
-    def _create_embedding_for_query(self, query: str) -> list[float]:
-        pass
-
-    def _find_documents_matching_vector(self, embedding_vector: list[float]) -> Iterable[T]:
-        pass

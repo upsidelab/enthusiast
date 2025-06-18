@@ -19,7 +19,6 @@ class BaseAgent(ABC):
         prompt: ChatPromptTemplate,
         conversation_service: BaseConversationService,
         conversation_id: int,
-        agent_executor: AgentExecutor,
         memory: ConversationSummaryBufferMemory,
     ):
         self._tools = tools
@@ -28,7 +27,6 @@ class BaseAgent(ABC):
         self._conversation_service = conversation_service
         self._conversation_id = conversation_id
         self._memory = memory
-        self._agent_executor = agent_executor
 
     @abstractmethod
     def get_answer(self, input_text: str) -> str:

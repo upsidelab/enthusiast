@@ -7,7 +7,6 @@ from dataclasses import dataclass, field
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatMessagePromptTemplate, PromptTemplate
 
-from ..injectors.product import QUERY_PROMPT_TEMPLATE
 from ..agents import BaseAgent
 from ..services.conversation import BaseConversationService
 from ..tools import BaseAgentTool, BaseLLMTool, BaseFunctionTool
@@ -98,7 +97,7 @@ class ProductRetrieverConfig:
     retriever_class: Type[BaseProductRetriever]
     number_of_products: int = 12
     max_sample_products: int = 12
-    prompt_template: str = QUERY_PROMPT_TEMPLATE
+    prompt_template: str | None = None
     llm: BaseLanguageModel | None = None
 
 

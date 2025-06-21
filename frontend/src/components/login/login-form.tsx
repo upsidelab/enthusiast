@@ -90,10 +90,8 @@ export function LoginForm({ className, ...props }: HTMLAttributes<HTMLDivElement
           </span>
         </div>
       </div>
-      <Button disabled={isLoading} variant="outline" asChild>
-        <a href="https://upsidelab.io/contact">
-          Sign up for a waitlist
-        </a>
+      <Button disabled variant="outline">
+        Log in with SSO
       </Button>
     </div>
   )

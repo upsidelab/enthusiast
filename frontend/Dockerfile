@@ -17,6 +17,6 @@ RUN pnpm install
 
 COPY . .
 
-RUN pnpm build
+RUN chmod u+x /app/docker-entrypoint.sh
 
-CMD pnpm exec vite preview --host 0.0.0.0 --port $PORT
+ENTRYPOINT ["/app/docker-entrypoint.sh"]

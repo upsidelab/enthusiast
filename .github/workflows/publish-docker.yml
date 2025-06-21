@@ -35,9 +35,7 @@ jobs:
         with:
           context: ./server
           push: true
-          tags: |
-            upsidelab/enthusiast-server:${{ inputs.tag }}
-	    ${{ inputs.push_latest && 'upsidelab/enthusiast-server:latest' || '' }}
+          tags: upsidelab/enthusiast-server:${{ inputs.tag }}${{ inputs.push_latest && ',upsidelab/enthusiast-server:latest' || '' }}
 
       - name: Build and push frontend Docker image
         uses: docker/build-push-action@v5
@@ -45,6 +43,5 @@ jobs:
           context: ./frontend
           push: true
           tags: |
-            upsidelab/enthusiast-frontend:${{ inputs.tag }}
-	    ${{ inputs.push_latest && 'upsidelab/enthusiast-frontend:latest' || '' }}
+            upsidelab/enthusiast-frontend:${{ inputs.tag }}${{ inputs.push_latest && ',upsidelab/enthusiast-frontend:latest' || '' }}
 

@@ -1,11 +1,14 @@
-from enthusiast_common.interfaces import LanguageModelProvider
+from enthusiast_common.registry.llm import LanguageModelProvider
+from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
 from langchain_ollama import ChatOllama
 from ollama import Client
 
 
 class OllamaLanguageModelProvider(LanguageModelProvider):
-    def provide_language_model(self) -> BaseLanguageModel:
+    STREAMING_AVAILABLE = False
+
+    def provide_language_model(self, callbacks: list[BaseCallbackHandler] | None = None) -> BaseLanguageModel:
         return ChatOllama(model=self._model)
 
     def model_name(self) -> str:

@@ -7,6 +7,11 @@ on:
         description: 'Docker image tag (e.g., 1.0.0)'
         required: true
         type: string
+      push_latest:
+        description: 'Also tag as latest'
+        required: true
+        default: true
+        type: boolean
 
 jobs:
   build-and-push:
@@ -30,12 +35,16 @@ jobs:
         with:
           context: ./server
           push: true
-          tags: upsidelab/enthusiast-server:${{ inputs.tag }}
+          tags: |
+            upsidelab/enthusiast-server:${{ inputs.tag }}
+	    ${{ inputs.push_latest && 'upsidelab/enthusiast-server:latest' || '' }}
 
       - name: Build and push frontend Docker image
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
           push: true
-          tags: upsidelab/enthusiast-frontend:${{ inputs.tag }}
+          tags: |
+            upsidelab/enthusiast-frontend:${{ inputs.tag }}
+	    ${{ inputs.push_latest && 'upsidelab/enthusiast-frontend:latest' || '' }}
 

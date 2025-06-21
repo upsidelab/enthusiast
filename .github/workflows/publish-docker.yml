@@ -21,6 +21,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -31,9 +34,10 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push server Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./server
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: upsidelab/enthusiast-server:${{ inputs.tag }}${{ inputs.push_latest && ',upsidelab/enthusiast-server:latest' || '' }}
 
@@ -41,6 +45,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: |
             upsidelab/enthusiast-frontend:${{ inputs.tag }}${{ inputs.push_latest && ',upsidelab/enthusiast-frontend:latest' || '' }}

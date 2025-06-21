@@ -8,6 +8,8 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 from agent.models import Conversation, Message
+from agent.registries.language_models import LanguageModelRegistry
+from agent.repositories import DjangoDataSetRepository
 from agent.serializers import (
     AskQuestionSerializer,
     ConversationSerializer,
@@ -16,7 +18,7 @@ from agent.serializers import (
     ConversationCreationSerializer,
 )
 from agent.conversation import ConversationManager
-from catalog.language_models import LanguageModelRegistry
+from catalog.models import DataSet
 
 
 class GetTaskStatus(APIView):
@@ -85,8 +87,9 @@ class ConversationView(APIView):
             data_set_id = serializer.validated_data.get("data_set_id")
             question_message = serializer.validated_data.get("question_message")
             streaming = serializer.validated_data.get("streaming")
-            language_model_provider = Conversation.objects.get(id=conversation_id).data_set.language_model_provider
-            language_model_provider_class = LanguageModelRegistry().provider_class_by_name(language_model_provider)
+            data_set = Conversation.objects.get(id=conversation_id).data_set
+            data_set_repo = DjangoDataSetRepository(DataSet)
+            language_model_provider_class = LanguageModelRegistry(data_set_repo).provider_for_dataset(data_set.id)
             task = respond_to_user_message_task.apply_async(
                 args=[conversation_id, data_set_id, request.user.id, question_message, streaming]
             )

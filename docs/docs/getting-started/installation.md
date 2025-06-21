@@ -8,16 +8,16 @@ The quickest way to start using Enthusiast is with the provided Docker Compose s
 
 ## Setting up using Docker Compose
 
-First, clone the application repository:
+First, clone the starter repository:
 
 ```shell
-$ git clone https://github.com/upsidelab/enthusiast
-$ cp enthusiast/server/sample.env enthusiast/server/.env
+$ git clone https://github.com/upsidelab/enthusiast-starter
+$ cp config/env.sample config/env
 ```
 
 :::info
 The default configuration uses the OpenAI API for generating document embeddings and for the large language model. Make sure that your OpenAI has access to gpt-4o it is default recommended model if not - at least gpt-4o-mini to ensure proper work of the application.
-You need to provide your OpenAI API key via the OPENAI_API_KEY environment variable in the enthusiast/server/.env directory.
+You need to provide your OpenAI API key via the OPENAI_API_KEY environment variable in the `config/env` file.
 :::
 
 Next, run Docker Compose to start the environment:
@@ -28,12 +28,13 @@ import TabItem from '@theme/TabItem';
 <Tabs>
   <TabItem value="macos-linux" label="macOS/Linux" default>
     ```bash
-    $ docker compose -f docker-compose.development.yml up -d
+    $ docker compose build && docker compose up
     ```
   </TabItem>
   <TabItem value="windows" label="Windows">
     ```powershell
-    $ docker-compose -f docker-compose.development.yml up -d
+    $ docker-compose build
+    $ docker-compose up
     ```
   </TabItem>
 </Tabs>

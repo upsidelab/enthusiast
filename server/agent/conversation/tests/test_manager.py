@@ -1,11 +1,12 @@
-import pytest
 from datetime import datetime
+from unittest.mock import patch
+
+import pytest
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
-from unittest.mock import patch, MagicMock
 
 from agent.conversation.manager import ConversationManager
-from agent.models import Conversation, Message
+from agent.models import Conversation
 from catalog.models import DataSet
 
 
@@ -200,7 +201,7 @@ class TestConversationManager:
         mock_get_answer.return_value = None
         
         # When
-        response = self.manager.respond_to_user_message(
+        self.manager.respond_to_user_message(
             conversation_id=conversation_id,
             data_set_id=data_set_id,
             user_id=user_id,
@@ -233,7 +234,7 @@ class TestConversationManager:
         mock_get_answer.return_value = None
         
         # When
-        response = self.manager.respond_to_user_message(
+        self.manager.respond_to_user_message(
             conversation_id=conversation_id,
             data_set_id=data_set_id,
             user_id=user_id,

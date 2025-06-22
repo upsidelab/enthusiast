@@ -29,4 +29,4 @@ class PersistentChatHistory(BaseChatMessageHistory):
         return messages_from_dict(message_dicts)
 
     def clear(self) -> None:
-        self._conversation.messages.delete()
+        self._conversation.messages.all().delete()

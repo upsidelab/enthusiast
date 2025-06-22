@@ -91,7 +91,6 @@ export function UserMenu() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuSeparator />
         <DropdownMenuItem onClick={logout}>
           Log out
         </DropdownMenuItem>

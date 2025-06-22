@@ -9,7 +9,7 @@ import {
   BookTextIcon,
   HistoryIcon,
   PlugZapIcon,
-  UserIcon
+  UserIcon, HelpCircleIcon, SparklesIcon
 } from "lucide-react";
 import { UserMenu } from "@/components/navigation/user-menu.tsx";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
@@ -47,15 +47,6 @@ export function MainSidebar() {
     }
   ];
 
-  const integrateItems: SidebarSectionItemProps[] = [
-    {
-      title: "API Documentation",
-      link: `${import.meta.env.VITE_API_BASE}/api/docs`,
-      key: "api-documentation",
-      icon: <BookTextIcon />
-    }
-  ];
-
   const manageItems: SidebarSectionItemProps[] = [
     {
       title: "Data Sets",
@@ -74,7 +65,27 @@ export function MainSidebar() {
       link: "/service-accounts",
       key: "service-accounts",
       icon: <PlugZapIcon />
-    }
+    },
+    {
+      title: "Help",
+      link: "https://upsidelab.io/tools/enthusiast/docs",
+      key: "help",
+      icon: <HelpCircleIcon />,
+      children: [
+        {
+          title: "Getting Started",
+          link: "https://upsidelab.io/tools/enthusiast/docs/category/getting-started/",
+          key: "documentation-getting-started",
+          icon: <SparklesIcon />
+        },
+        {
+          title: "API Documentation",
+          link: `${import.meta.env.VITE_API_BASE}/api/docs`,
+          key: "api-documentation",
+          icon: <BookTextIcon />
+        }
+      ]
+    },
   ];
 
   return (
@@ -83,12 +94,11 @@ export function MainSidebar() {
         <DataSetSelector />
       </SidebarHeader>
       <SidebarContent>
-        <MainSidebarSection title="Synchronize" items={synchronizeItems} />
         <MainSidebarSection title="Ask" items={askItems} />
-        <MainSidebarSection title="Integrate" items={integrateItems} />
+        <MainSidebarSection title="Synchronize" items={synchronizeItems} />
         {account && account.isStaff && (
           <>
-            <MainSidebarSection title="Manage" items={manageItems} />
+            <MainSidebarSection className="mt-auto" title="Manage" items={manageItems} />
           </>
         )}
       </SidebarContent>

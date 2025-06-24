@@ -58,7 +58,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          plugins_dist=$(find plugins -type d -name dist -printf '--find-links=%p ')
+          plugins_dist=$(find ../plugins -type d -name dist -printf '--find-links=%p ')
           pip install $plugins_dist -r requirements.txt
 
       - name: Prepare for tests

@@ -39,10 +39,20 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: install local plugins
+        run: |
+          for dir in ../plugins/*; do
+            (
+              cd "$dir"
+              poetry build -f wheel
+            )
+          done
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          plugins_dist=$(find plugins -type d -name dist -printf '--find-links=%p ')
+          pip install $plugins_dist -r requirements.txt
 
       - name: Prepare for tests
         run: cp sample.test.env .env

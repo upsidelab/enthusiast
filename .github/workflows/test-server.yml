@@ -42,10 +42,12 @@ jobs:
       - name: install local plugins
         run: |
           for dir in ../plugins/*; do
-            (
-              cd "$dir"
-              poetry build -f wheel
-            )
+            if [ -d "$dir" ]; then
+              (
+                cd "$dir"
+                poetry build -f wheel
+              )
+            fi
           done
 
       - name: Install dependencies

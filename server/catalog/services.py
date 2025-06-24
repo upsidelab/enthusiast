@@ -1,4 +1,4 @@
-from catalog.embeddings import EmbeddingProviderRegistry
+from agent.registries.embeddings import EmbeddingProviderRegistry
 from catalog.models import Document
 
 

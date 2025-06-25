@@ -46,15 +46,4 @@ class ProductsSearchTool(BaseLLMTool):
         relevant_products = product_retriever.find_products_matching_query(full_user_request)
 
         product_context = serializers.serialize("json", relevant_products)
-        logger.info(product_context, "MAKAPAKA")
         return product_context
-        # prompt = PromptTemplate.from_template(CREATE_CONTENT_PROMPT_TEMPLATE)
-        # chain = prompt | self.llm
-        #
-        # llm_result = chain.invoke(
-        #     {
-        #         "query": full_user_request,
-        #         "product_context": product_context,
-        #     }
-        # )
-        # return llm_result.content

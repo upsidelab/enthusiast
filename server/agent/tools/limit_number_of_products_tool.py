@@ -33,9 +33,6 @@ class LimitNumberOfProductsInput(BaseModel):
     products: str = Field(description="string containing list of products from products search")
 
 
-# use it only if you have a non empty list of products, to choose one product, based on user query and products or decide to ask follow up question.
-
-
 class LimitNumberOfProductsTool(BaseLLMTool):
     NAME = "narrow_down_number_of_products"
     DESCRIPTION = "Use this tool with two arguments first is user_request and second a string containing a list of products. When you need to narrow down list of products"

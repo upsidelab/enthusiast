@@ -1,4 +1,4 @@
-from typing import Any, Self
+from typing import Self
 
 from django.core import serializers
 from django.db.models import QuerySet

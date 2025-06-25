@@ -5,14 +5,26 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-COPY requirements.txt .
+COPY server/requirements.txt .
+COPY plugins/ /plugins/
 
 RUN apt-get update && apt-get install -y libpq-dev
 
-RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+RUN curl -sSL https://install.python-poetry.org | python3 -
+RUN export PATH="/root/.local/bin:$PATH"
+RUN for dir in /plugins/*; do \
+      if [ -d "$dir" ]; then \
+        (cd "$dir" && /root/.local/bin/poetry build -f wheel); \
+      fi; \
+    done
 
-COPY . .
+RUN plugins_dist=$(find ../plugins -type d -name dist -printf '--find-links=%p ')
+
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir --find-links=/plugins/enthusiast-common/dist -r requirements.txt
+
+COPY server/ /app/
+
 
 RUN chmod u+x /app/docker-entrypoint-development.sh
 

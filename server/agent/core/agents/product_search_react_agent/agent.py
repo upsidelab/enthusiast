@@ -1,15 +1,16 @@
 from enthusiast_common.agents import BaseAgent
 from enthusiast_common.services import BaseConversationService
-from enthusiast_common.tools.base import BaseTool
-from langchain.agents import AgentExecutor, create_tool_calling_agent
+from langchain.agents import AgentExecutor
+from langchain.agents.react.agent import create_react_agent
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.tools import BaseTool
 
 from agent.core.persistent_chat_history import PersistentChatHistory
 from agent.core.summary_chat_memory import SummaryChatMemory
 
 
-class ToolCallingAgent(BaseAgent):
+class ProductSearchReActAgent(BaseAgent):
     def __init__(
         self,
         tools: list[BaseTool],
@@ -17,7 +18,6 @@ class ToolCallingAgent(BaseAgent):
         prompt: ChatPromptTemplate,
         conversation_service: BaseConversationService,
         conversation_id: int,
-        **kwargs,
     ):
         self._tools = tools
         self._llm = llm
@@ -26,19 +26,19 @@ class ToolCallingAgent(BaseAgent):
         self._conversation_id = conversation_id
         memory = self._create_agent_memory()
         self._memory = memory
-        self._agent_executor = self._create_agent_executor(**kwargs)
+        self._agent_executor = self._create_agent_executor()
         super().__init__(tools, llm, prompt, conversation_service, conversation_id, memory)
 
     def _create_agent_executor(self, **kwargs):
         tools = self._create_tools()
-        agent = create_tool_calling_agent(self._llm, tools, self._prompt)
-        return AgentExecutor(agent=agent, tools=tools, verbose=True, memory=self._memory, **kwargs)
+        agent = create_react_agent(tools=tools, llm=self._llm, prompt=self._prompt)
+        return AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True, memory=self._memory, **kwargs)
 
     def _create_tools(self):
         return [tool_class.as_tool() for tool_class in self._tools]
 
     def get_answer(self, input_text: str) -> str:
-        agent_output = self._agent_executor.invoke({"input": input_text})
+        agent_output = self._agent_executor.invoke({"input": input_text, "products_description": "eSim cards"})
         return agent_output["output"]
 
     def _create_agent_memory(self) -> SummaryChatMemory:

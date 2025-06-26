@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import Generic, TypeVar
 
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatMessagePromptTemplate, PromptTemplate
@@ -7,13 +8,13 @@ from langchain_core.tools import BaseTool
 
 from ..agents import BaseAgent
 from ..config import AgentConfig, LLMConfig
-from ..injectors import BaseDocumentRetriever, BaseInjector, BaseProductRetriever
+from ..injectors import BaseInjector
 from ..registry import BaseDBModelsRegistry, BaseEmbeddingProviderRegistry, BaseLanguageModelRegistry
 from ..repositories import (
     BaseConversationRepository,
     BaseDataSetRepository,
-    BaseDocumentChunkRepository,
     BaseMessageRepository,
+    BaseModelChunkRepository,
     BaseProductRepository,
     BaseUserRepository,
 )
@@ -28,14 +29,20 @@ class RepositoriesInstances:
     message: BaseMessageRepository
     conversation: BaseConversationRepository
     data_set: BaseDataSetRepository
-    document_chunk: BaseDocumentChunkRepository
+    document_chunk: BaseModelChunkRepository
     product: BaseProductRepository
+    product_chunk: BaseModelChunkRepository
 
 
-class BaseAgentBuilder(ABC):
+ConfigT = TypeVar("ConfigT", bound=AgentConfig)
+
+
+class BaseAgentBuilder(ABC, Generic[ConfigT]):
     _repositories: RepositoriesInstances
 
-    def __init__(self, config: AgentConfig):
+    def __init__(self, config: ConfigT):
+        self._llm = None
+        self._embeddings_registry = None
         self._data_set_id = None
         self.validator = AgentConfigValidator()
         self.validator.validate_or_raise(config)
@@ -45,12 +52,12 @@ class BaseAgentBuilder(ABC):
         model_registry = self._build_db_models_registry()
         self._build_and_set_repositories(model_registry)
         self._data_set_id = self._repositories.conversation.get_data_set_id(self._config.conversation_id)
-        llm = self._build_llm(self._config.llm)
+        self._llm = self._build_llm(self._config.llm)
         conversation_service = self._build_conversation_service()
-        embeddings_registry = self._build_embeddings_registry()
-        injector = self._build_injector(embeddings_registry)
-        tools = self._build_tools(default_llm=llm, injector=injector)
-        return self._build_agent(tools, llm, self._config.prompt_template, conversation_service)
+        self._embeddings_registry = self._build_embeddings_registry()
+        injector = self._build_injector()
+        tools = self._build_tools(default_llm=self._llm, injector=injector)
+        return self._build_agent(tools, self._llm, self._config.prompt_template, conversation_service)
 
     @abstractmethod
     def _build_agent(
@@ -63,7 +70,7 @@ class BaseAgentBuilder(ABC):
         pass
 
     @abstractmethod
-    def _build_injector(self, embeddings_registry: BaseEmbeddingProviderRegistry) -> BaseInjector:
+    def _build_injector(self) -> BaseInjector:
         pass
 
     @abstractmethod
@@ -108,12 +115,4 @@ class BaseAgentBuilder(ABC):
 
     @abstractmethod
     def _build_conversation_service(self) -> BaseConversationService:
-        pass
-
-    @abstractmethod
-    def _build_product_retriever(self) -> BaseProductRetriever:
-        pass
-
-    @abstractmethod
-    def _build_document_retriever(self, embeddings_registry: BaseEmbeddingProviderRegistry) -> BaseDocumentRetriever:
         pass

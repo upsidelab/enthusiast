@@ -1,1 +1,3 @@
-from .base import BaseAgent  # noqa
+from .base import BaseAgent
+
+__all__ = ["BaseAgent"]

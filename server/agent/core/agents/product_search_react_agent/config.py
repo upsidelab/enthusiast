@@ -11,9 +11,8 @@ from enthusiast_common.config import (
     RetrieversConfig,
 )
 from langchain_core.prompts import PromptTemplate
-from langchain_core.tracers import ConsoleCallbackHandler
 
-from agent.callbacks import ConversationWebSocketCallbackHandler
+from agent.callbacks import ReactAgentWebsocketCallbackHandler
 from agent.conversation.service import ConversationService
 from agent.core.agents.product_search_react_agent.agent import ProductSearchReActAgent
 from agent.core.agents.product_search_react_agent.prompt import PRODUCT_FINDER_AGENT_PROMPT
@@ -50,7 +49,7 @@ def get_config(conversation: Conversation, streaming: bool) -> AgentConfig:
             ),
         ],
         llm=LLMConfig(
-            callbacks=[ConversationWebSocketCallbackHandler(conversation), ConsoleCallbackHandler()],
+            callbacks=[ReactAgentWebsocketCallbackHandler(conversation)],
             streaming=streaming,
         ),
         injector=Injector,

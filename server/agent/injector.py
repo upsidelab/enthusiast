@@ -1,4 +1,4 @@
-from enthusiast_common.injectors import BaseInjector, BaseProductRetriever, BaseDocumentRetriever
+from enthusiast_common.injectors import BaseDocumentRetriever, BaseInjector, BaseProductRetriever
 
 
 class Injector(BaseInjector):

@@ -1,6 +1,6 @@
-from catalog.models import DocumentSource, ProductSource
 from celery import shared_task
 
+from catalog.models import DocumentSource, ProductSource
 from sync.document.manager import DocumentSyncManager
 from sync.product.manager import ProductSyncManager
 

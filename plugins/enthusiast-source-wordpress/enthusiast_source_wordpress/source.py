@@ -1,10 +1,10 @@
 import logging
+import re
+import urllib.parse
 from typing import Optional
 
-import re
 import requests
-import urllib.parse
-from enthusiast_common import DocumentSourcePlugin, DocumentDetails
+from enthusiast_common import DocumentDetails, DocumentSourcePlugin
 from requests import Response
 
 logger = logging.getLogger(__name__)

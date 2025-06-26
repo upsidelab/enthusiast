@@ -1,7 +1,7 @@
 import csv
 from pathlib import Path
 
-from enthusiast_common import ProductSourcePlugin, ProductDetails
+from enthusiast_common import ProductDetails, ProductSourcePlugin
 
 
 class SampleProductSource(ProductSourcePlugin):

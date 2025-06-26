@@ -5,8 +5,7 @@ from ..agents import BaseAgent
 from ..config import AgentConfig, LLMConfig, RegistryConfig, RepositoriesConfig, RetrieversConfig
 from ..injectors import BaseInjector
 from ..services import BaseConversationService
-from ..tools import BaseAgentTool, BaseLLMTool, BaseFunctionTool
-
+from ..tools import BaseAgentTool, BaseFunctionTool, BaseLLMTool
 
 logger = logging.getLogger(__name__)
 

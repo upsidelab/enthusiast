@@ -1,6 +1,6 @@
 import logging
-import tiktoken
 
+import tiktoken
 from django.core import serializers
 from enthusiast_common.injectors import BaseInjector
 from enthusiast_common.tools import BaseLLMTool

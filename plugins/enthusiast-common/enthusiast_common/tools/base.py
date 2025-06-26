@@ -1,5 +1,5 @@
 import inspect
-from abc import abstractmethod, ABC, ABCMeta
+from abc import ABC, ABCMeta, abstractmethod
 from typing import Type
 
 from enthusiast_common.agents import BaseAgent

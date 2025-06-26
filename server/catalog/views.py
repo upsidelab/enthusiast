@@ -2,26 +2,27 @@ from django.db.models import Count
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.generics import ListAPIView, ListCreateAPIView, GenericAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIView
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
 from account.models import User
 from account.serializers import UserSerializer
-from pecl import settings
-from sync.tasks import (
-    sync_all_sources,
-    sync_all_document_sources,
-    sync_data_set_all_sources,
-    sync_data_set_document_sources,
-    sync_document_source,
-    sync_all_product_sources,
-    sync_data_set_product_sources,
-    sync_product_source,
-)
 from agent.registries.embeddings import EmbeddingProviderRegistry
 from agent.registries.language_models import LanguageModelRegistry
+from pecl import settings
+from sync.tasks import (
+    sync_all_document_sources,
+    sync_all_product_sources,
+    sync_all_sources,
+    sync_data_set_all_sources,
+    sync_data_set_document_sources,
+    sync_data_set_product_sources,
+    sync_document_source,
+    sync_product_source,
+)
+
 from .models import DataSet, DocumentSource, ProductSource
 from .serializers import (
     DataSetSerializer,

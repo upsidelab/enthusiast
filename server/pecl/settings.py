@@ -238,4 +238,4 @@ AGENT_TOOLS = {
 
 SERVICE_ACCOUNT_DOMAIN = env.str("SERVICE_ACCOUNT_DOMAIN", "enthusiast.internal")
 
-from .settings_override import * # noqa
+from .settings_override import *  # noqa

@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, Generic, Iterable
+from typing import Generic, Iterable, TypeVar
 
 from langchain_core.language_models import BaseLanguageModel
 
-from ..repositories import BaseProductRepository, BaseDataSetRepository
+from ..repositories import BaseDataSetRepository, BaseProductRepository
 
 T = TypeVar("T")
 

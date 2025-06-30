@@ -23,8 +23,8 @@ services:
       - "10001:10001"
   api:
     build:
-      context: server/
-      dockerfile: Dockerfile.development
+      context: .
+      dockerfile: server/Dockerfile.development
     volumes:
       - ./server:/app
     ports:
@@ -36,8 +36,8 @@ services:
       - RUN_MIGRATIONS=True
   worker:
     build:
-      context: server/
-      dockerfile: Dockerfile.development
+      context: .
+      dockerfile: server/Dockerfile.development
     env_file:
       - ./server/.env
     environment:

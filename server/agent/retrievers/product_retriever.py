@@ -1,3 +1,4 @@
+import logging
 from typing import Self
 
 from django.core import serializers
@@ -62,6 +63,8 @@ class ProductRetriever(BaseRetriever):
 
     def find_products_matching_query(self, user_query: str) -> QuerySet[Product]:
         agent_where_clause = self._build_where_clause_for_query(user_query)
+        logging.info("agent_where_clause: %s", agent_where_clause)
+
         where_conditions = [f"data_set_id = {self.data_set_id}"]
         if agent_where_clause:
             where_conditions.append(agent_where_clause)

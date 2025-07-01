@@ -1,13 +1,8 @@
 from datetime import datetime
 
 from account.models import User
-<<<<<<< HEAD
 from agent.core.agents.product_search_react_agent.builder import Builder
 from agent.core.agents.product_search_react_agent.config import get_config
-=======
-from agent.core.agents.tool_calling_agent.builder import Builder
-from agent.core.agents.tool_calling_agent.config import get_config
->>>>>>> 7b54b29 (feat: Add ReAct product search agent)
 from agent.models import Conversation, Message
 
 

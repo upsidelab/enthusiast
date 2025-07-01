@@ -1,4 +1,5 @@
 from celery.result import AsyncResult
+from django.conf import settings
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
@@ -101,6 +102,16 @@ class ConversationView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def patch(self, request, conversation_id):
+        conversation = Conversation.objects.get(id=conversation_id, user=request.user)
+
+        serializer = ConversationSerializer(conversation, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
 
 class ConversationListView(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -173,3 +184,14 @@ class MessageFeedbackView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AvailableAgentsView(APIView):
+    permission_classes = [IsAuthenticated]
+    """View to get available agents."""
+
+    @swagger_auto_schema(
+        operation_description="Get available Agents",
+    )
+    def get(self, request):
+        return Response({"choices": settings.AVAILABLE_AGENTS.keys()}, status=status.HTTP_200_OK)

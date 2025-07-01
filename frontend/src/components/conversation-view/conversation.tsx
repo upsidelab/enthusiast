@@ -7,6 +7,7 @@ import {useApplicationContext} from "@/lib/use-application-context.ts";
 import {MessageError} from "@/components/conversation-view/message-error.tsx";
 import {useNavigate} from "react-router-dom";
 import {MessageBubbleTyping} from "@/components/conversation-view/message-bubble-typing.tsx";
+import {AgentModal} from "@/components/conversation-view/agent-modal.tsx";
 
 export interface ConversationProps {
     conversationId: number | null;
@@ -24,33 +25,50 @@ interface ConversationUIProps {
     lastMessageRef: MutableRefObject<HTMLDivElement | null>
     onSubmit: (message: string) => void;
     isLoading: boolean;
+    showModal: boolean
+    onCloseModal: (selectedAgent: string) => void;
+    onOpenModal: () => void;
+    conversationAgent: string
 }
 
-function ConversationUI({messages, isAgentLoading, lastMessageRef, onSubmit, isLoading}: ConversationUIProps) {
-    return (
-        <div className="flex flex-col h-full px-4 pt-4">
-            <div className="grow flex-1 space-y-4">
-                {messages.map((message, index) =>
-                    message.role === "system" ? (
-                        <MessageError key={index} text={message.text}/>
-                    ) : (
-                        <MessageBubble
-                            key={index}
-                            text={message.text}
-                            variant={message.role === "human" ? "primary" : "secondary"}
-                            questionId={message.id}
-                        />
-                    )
-                )}
-                {isAgentLoading && <MessageBubbleTyping/>}
-                <div className="mb-4"/>
-                <div ref={lastMessageRef}/>
-            </div>
-            <div className="bottom-0 sticky flex-shrink-0 bg-white pb-4">
-                <MessageComposer onSubmit={onSubmit} isLoading={isLoading}/>
-            </div>
+function ConversationUI({
+  messages,
+  isAgentLoading,
+  lastMessageRef,
+  onSubmit,
+  isLoading,
+  showModal,
+  onCloseModal,
+  onOpenModal,
+  conversationAgent
+}: ConversationUIProps) {
+  return (
+    <div className="relative h-full">
+      <div className="flex flex-col h-full px-4 pt-4">
+        <div className="grow flex-1 space-y-4">
+          {messages.map((message, index) =>
+            message.role === "system" ? (
+              <MessageError key={index} text={message.text} />
+            ) : (
+              <MessageBubble
+                key={index}
+                text={message.text}
+                variant={message.role === "human" ? "primary" : "secondary"}
+                questionId={message.id}
+              />
+            )
+          )}
+          {isAgentLoading && <MessageBubbleTyping />}
+          <div className="mb-4" />
+          <div ref={lastMessageRef} />
         </div>
-    );
+        <div className="bottom-0 sticky flex-shrink-0 bg-white pb-4">
+          <MessageComposer onSubmit={onSubmit} isLoading={isLoading} onOpenAgentsModal={onOpenModal}/>
+        </div>
+      </div>
+        <AgentModal show={showModal} onClose={onCloseModal} currentAgent={conversationAgent}></AgentModal>
+    </div>
+  );
 }
 
 
@@ -63,24 +81,23 @@ export function Conversation({ conversationId }: ConversationProps) {
     const [isAgentLoading, setIsAgentLoading] = useState(false);
     const [messages, setMessages] = useState<MessageProps[]>([]);
     const [pendingMessage, setPendingMessage] = useState<string | null>(null);
+    const [showModal, setShowModal] = useState(false);
+    const [conversationAgent, setConversationAgent] = useState<string>("");
 
     const usePolling = useRef(!streamingEnabled);
     const lastMessageRef = useRef<HTMLDivElement | null>(null);
     const ws = useRef<WebSocket | null>(null);
-
     const { dataSetId } = useApplicationContext()!;
     const navigate = useNavigate();
 
-    // Cleanup WebSocket on unmount
-    useEffect(() => {
-        return () => {
-            ws.current?.close();
-        };
-    }, []);
-
-    // Load messages when conversationId changes
-    useEffect(() => {
-        const loadMessages = async () => {
+    const handleCloseModal = (selectedAgent: string) => {
+        setShowModal(false);
+        setConversationAgent(selectedAgent)
+    };
+    const handleOpenModal = () => {
+        setShowModal(true);
+    };
+    const loadInitialData = async () => {
             if (!conversationId) {
                 setMessages([]);
                 return;
@@ -95,13 +112,41 @@ export function Conversation({ conversationId }: ConversationProps) {
             const conversation = await api.conversations().getConversation(conversationId);
             const initialMessages = conversation.history as MessageProps[];
             setMessages(initialMessages);
+            setConversationAgent(conversation.agent)
 
             setTimeout(() => {
                 lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
             }, 100);
         };
+    const sendConversationAgentRequest = async () => {
+           if (!conversationId) {
+                return;
+            }
+           if (!conversationAgent) {
+               return
+           }
+           await api.conversations().patch(conversationId, {agent: conversationAgent})
+        }
 
-        loadMessages();
+    useEffect(() => {
+        return () => {
+            ws.current?.close();
+            if (!conversationId) {
+                setShowModal(true)
+            }
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    useEffect(() => {
+        sendConversationAgentRequest()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [conversationAgent]);
+
+    useEffect(() => {
+        loadInitialData();
+        sendConversationAgentRequest();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [conversationId]);
 
     const scrollToLastMessage = () => {
@@ -260,6 +305,10 @@ export function Conversation({ conversationId }: ConversationProps) {
             lastMessageRef={lastMessageRef}
             onSubmit={onMessageComposerSubmit}
             isLoading={isLoading}
+            showModal={showModal}
+            onCloseModal={handleCloseModal}
+            onOpenModal={handleOpenModal}
+            conversationAgent={conversationAgent}
         />
     );
 }

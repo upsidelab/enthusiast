@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button.tsx";
-import { Loader, Send } from "lucide-react";
+import {Bot, Loader, Send} from "lucide-react";
 import { ChangeEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
 import './message-composer.css';
 import { Textarea } from "@/components/ui/textarea.tsx";
@@ -7,11 +7,12 @@ import { Textarea } from "@/components/ui/textarea.tsx";
 export interface MessageComposerProps {
   onSubmit: (message: string) => void;
   isLoading: boolean;
+  onOpenAgentsModal: () => void;
 }
 
 const maxHeight = 300;
 
-export function MessageComposer({ onSubmit, isLoading }: MessageComposerProps) {
+export function MessageComposer({ onSubmit, isLoading, onOpenAgentsModal }: MessageComposerProps) {
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const inputLength = input.trim().length;
@@ -78,6 +79,15 @@ export function MessageComposer({ onSubmit, isLoading }: MessageComposerProps) {
           <Send className="h-4 w-4" />
         )}
         <span className="sr-only">Send</span>
+      </Button>
+      <Button
+        type="button"
+        size="icon"
+        variant="outline"
+        onClick={onOpenAgentsModal}
+      >
+        <Bot className="h-4 w-4" />
+        <span className="sr-only">Choose agent</span>
       </Button>
     </form>
   );

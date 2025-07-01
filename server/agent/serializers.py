@@ -46,7 +46,7 @@ class ConversationCreationSerializer(serializers.Serializer):
 class ConversationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Conversation
-        fields = ["id", "started_at", "summary"]
+        fields = ["id", "started_at", "summary", "agent"]
 
 
 class MessageFeedbackSerializer(serializers.ModelSerializer):

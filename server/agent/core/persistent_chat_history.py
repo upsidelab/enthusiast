@@ -14,18 +14,12 @@ class PersistentChatHistory(BaseChatMessageHistory):
         self._conversation = conversation
 
     def add_message(self, message: BaseMessage) -> None:
-        self._conversation.messages.create(
-            role=message.type,
-            text=message.content
-        )
+        self._conversation.messages.create(role=message.type, text=message.content)
 
     @property
     def messages(self) -> list[BaseMessage]:
         messages = self._conversation.messages.order_by("created_at")
-        message_dicts = [
-            {"type": message.role, "data": {"content": message.text}}
-            for message in messages
-        ]
+        message_dicts = [{"type": message.role, "data": {"content": message.text}} for message in messages]
         return messages_from_dict(message_dicts)
 
     def clear(self) -> None:

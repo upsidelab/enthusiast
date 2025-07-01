@@ -1,15 +1,15 @@
 from enthusiast_common.config import (
-    ToolCallingAgentConfig,
-    LLMToolConfig,
+    DocumentRetrieverConfig,
+    EmbeddingsRegistryConfig,
     LLMConfig,
+    LLMRegistryConfig,
+    LLMToolConfig,
+    ModelsRegistryConfig,
+    ProductRetrieverConfig,
+    RegistryConfig,
     RepositoriesConfig,
     RetrieversConfig,
-    RegistryConfig,
-    LLMRegistryConfig,
-    EmbeddingsRegistryConfig,
-    ModelsRegistryConfig,
-    DocumentRetrieverConfig,
-    ProductRetrieverConfig,
+    ToolCallingAgentConfig,
 )
 from langchain_core.prompts import ChatPromptTemplate
 
@@ -22,12 +22,12 @@ from agent.registries.embeddings import EmbeddingProviderRegistry
 from agent.registries.language_models import LanguageModelRegistry
 from agent.registries.models import BaseDjangoSettingsDBModelRegistry
 from agent.repositories import (
-    DjangoUserRepository,
-    DjangoDataSetRepository,
     DjangoConversationRepository,
+    DjangoDataSetRepository,
+    DjangoDocumentChunkRepository,
     DjangoMessageRepository,
     DjangoProductRepository,
-    DjangoDocumentChunkRepository,
+    DjangoUserRepository,
 )
 from agent.retrievers import DocumentRetriever, ProductRetriever
 from agent.retrievers.product_retriever import QUERY_PROMPT_TEMPLATE

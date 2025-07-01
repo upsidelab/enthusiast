@@ -1,8 +1,9 @@
-from enthusiast_common import ProductDetails, ProductSourcePlugin
-from woocommerce import API
-from urllib.parse import urlparse
 import logging
 import os
+from urllib.parse import urlparse
+
+from enthusiast_common import ProductDetails, ProductSourcePlugin
+from woocommerce import API
 
 logger = logging.getLogger(__name__)
 

@@ -1,12 +1,11 @@
 from abc import ABC, abstractmethod
+from typing import Optional, Type
 
+from enthusiast_common.structures import DocumentDetails, ProductDetails
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel
-from typing import Type, Optional
-
-from enthusiast_common.structures import ProductDetails, DocumentDetails
 
 
 class ProductSourcePlugin(ABC):
@@ -55,9 +54,7 @@ class LanguageModelProvider(ABC):
         """
         pass
 
-    def provide_streaming_language_model(
-        self, callbacks: list[BaseCallbackHandler] | None = None, **kwargs
-    ):
+    def provide_streaming_language_model(self, callbacks: list[BaseCallbackHandler] | None = None, **kwargs):
         raise NotImplementedError()
 
     @abstractmethod

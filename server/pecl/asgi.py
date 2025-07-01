@@ -15,8 +15,9 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "pecl.settings")
 ENABLE_WEBSOCKETS = os.environ.get("ENABLE_WEBSOCKETS", "true").lower() == "true"
 
 if ENABLE_WEBSOCKETS:
-    from channels.routing import ProtocolTypeRouter, URLRouter
     from channels.auth import AuthMiddlewareStack
+    from channels.routing import ProtocolTypeRouter, URLRouter
+
     import agent.routing
 
     application = ProtocolTypeRouter(

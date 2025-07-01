@@ -33,8 +33,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps({"event": "message_id", "data": {"output": output}}))
 
     async def save_message(self, output):
-        from .models import Message
-        from .models import Conversation
+        from .models import Conversation, Message
+
         conversation = await database_sync_to_async(Conversation.objects.get)(id=self.conversation_id)
         message = Message(conversation=conversation, content=output, sender="system")
         await database_sync_to_async(message.save)()

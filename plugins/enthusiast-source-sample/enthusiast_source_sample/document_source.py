@@ -1,7 +1,7 @@
 import csv
 from pathlib import Path
 
-from enthusiast_common import DocumentSourcePlugin, DocumentDetails
+from enthusiast_common import DocumentDetails, DocumentSourcePlugin
 
 
 class SampleDocumentSource(DocumentSourcePlugin):

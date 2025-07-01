@@ -1,6 +1,5 @@
 import requests
-
-from enthusiast_common import DocumentSourcePlugin, DocumentDetails
+from enthusiast_common import DocumentDetails, DocumentSourcePlugin
 
 
 class SanityCMSDocumentSource(DocumentSourcePlugin):

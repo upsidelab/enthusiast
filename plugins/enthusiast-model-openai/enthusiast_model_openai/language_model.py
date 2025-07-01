@@ -5,7 +5,6 @@ from langchain_core.language_models import BaseLanguageModel
 from langchain_openai import ChatOpenAI
 from openai import OpenAI
 
-
 PRIORITIZED_MODELS = ["gpt-4o", "gpt-4o-mini"]
 
 

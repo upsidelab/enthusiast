@@ -20,6 +20,7 @@ class DataSet(models.Model):
     system_message = models.TextField(
         default="You are a sales support agent, and you know everything about a company and their products."
     )
+    products_type = models.CharField(blank=True, max_length=255)
 
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="data_sets")
 

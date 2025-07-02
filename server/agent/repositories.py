@@ -89,7 +89,7 @@ class DjangoProductChunkRepository(BaseDjangoRepository[ProductChunk], BaseModel
             self.model.objects.annotate(
                 rank=SearchRank(SearchVector("content"), SearchQuery(keyword)), distance=distance
             )
-            .filter(rank__gt=0.07)
+            .filter(rank__gt=0.05)
             .order_by("distance")
         )
         embeddings_with_products = embeddings_by_distance_and_keyword.select_related("product").filter(

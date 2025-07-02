@@ -14,7 +14,9 @@ logger = logging.getLogger(__name__)
 
 class ProductVectorStoreSearchInput(BaseModel):
     full_user_request: str = Field(description="user's full request")
-    keyword: str = Field(description="search keyword for postgres")
+    keyword: str = Field(
+        description="one-word keyword which will determine an attribute of product for postgres search. It can be color, country, shape"
+    )
 
 
 class ProductVectorStoreSearchTool(BaseLLMTool):
@@ -70,7 +72,10 @@ class ProductVectorStoreSearchTool(BaseLLMTool):
         """
         offset = 0.8  # Used as an estimated 'exchange rate' between a word and a token.
         document_context = "\n".join(
-            map(lambda x: x.content, relevant_documents[: len(relevant_documents) - cut_off_cnt])
+            map(
+                lambda x: f"{x.content} {x.product.properties}",
+                relevant_documents[: len(relevant_documents) - cut_off_cnt],
+            )
         )
         tokens_cnt = len(self.ENCODING.encode(document_context))
         if tokens_cnt > self.MAX_TOKENS:

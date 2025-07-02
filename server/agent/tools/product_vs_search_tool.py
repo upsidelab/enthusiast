@@ -4,6 +4,7 @@ import tiktoken
 from enthusiast_common.injectors import BaseInjector
 from enthusiast_common.tools import BaseLLMTool
 from langchain_core.language_models import BaseLanguageModel
+from langchain_core.tools import StructuredTool
 from pydantic import BaseModel, Field
 
 from agent.repositories import DjangoDataSetRepository
@@ -13,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 class ProductVectorStoreSearchInput(BaseModel):
     full_user_request: str = Field(description="user's full request")
+    keyword: str = Field(description="search keyword for postgres")
 
 
 class ProductVectorStoreSearchTool(BaseLLMTool):
@@ -79,9 +81,9 @@ class ProductVectorStoreSearchTool(BaseLLMTool):
             document_context = " ".join(words)
         return document_context
 
-    def run(self, full_user_request: str):
+    def run(self, full_user_request: str, keyword: str) -> str:
         product_retriever = self.injector.product_retriever
-        relevant_documents = product_retriever.find_model_matching_query(full_user_request)
+        relevant_documents = product_retriever.find_model_matching_query(full_user_request, keyword)
         retry = -1
         while retry < self.MAX_RETRY:
             try:
@@ -95,3 +97,12 @@ class ProductVectorStoreSearchTool(BaseLLMTool):
         error_msg = f"Unable to generate the answer. Total number of retries: {retry}"
         logging.error(error_msg)
         raise Exception(error_msg)
+
+    def as_tool(self) -> StructuredTool:
+        return StructuredTool.from_function(
+            func=self.run,
+            name=self.NAME,
+            description=self.DESCRIPTION,
+            args_schema=self.ARGS_SCHEMA,
+            return_direct=self.RETURN_DIRECT,
+        )

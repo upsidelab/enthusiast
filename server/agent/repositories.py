@@ -1,5 +1,6 @@
 from typing import Optional, Type, TypeVar
 
+from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from django.db import models
 from django.db.models import QuerySet
 from enthusiast_common.repositories import (
@@ -77,6 +78,21 @@ class DjangoProductChunkRepository(BaseDjangoRepository[ProductChunk], BaseModel
     def get_chunk_by_distance_for_data_set(self, data_set_id: int, distance: CosineDistance) -> QuerySet[ProductChunk]:
         embeddings_by_distance = self.model.objects.annotate(distance=distance).order_by("distance")
         embeddings_with_products = embeddings_by_distance.select_related("product").filter(
+            product__data_set_id__exact=data_set_id
+        )
+        return embeddings_with_products
+
+    def get_chunk_by_distance_and_keyword_for_data_set(
+        self, data_set_id: int, distance: CosineDistance, keyword: str
+    ) -> QuerySet[ProductChunk]:
+        embeddings_by_distance_and_keyword = (
+            self.model.objects.annotate(
+                rank=SearchRank(SearchVector("content"), SearchQuery(keyword)), distance=distance
+            )
+            .filter(rank__gt=0.07)
+            .order_by("distance")
+        )
+        embeddings_with_products = embeddings_by_distance_and_keyword.select_related("product").filter(
             product__data_set_id__exact=data_set_id
         )
         return embeddings_with_products

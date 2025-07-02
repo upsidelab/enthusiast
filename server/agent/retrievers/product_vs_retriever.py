@@ -10,9 +10,9 @@ from catalog.models import ProductChunk
 
 
 class ProductVectorStoreRetriever(BaseVectorStoreRetriever[ProductChunk]):
-    def find_model_matching_query(self, query: str) -> QuerySet[ProductChunk]:
+    def find_model_matching_query(self, query: str, keyword: str = "") -> QuerySet[ProductChunk]:
         embedding_vector = self._create_embedding_for_query(query)
-        relevant_products = self._find_products_matching_vector(embedding_vector)
+        relevant_products = self._find_products_matching_vector(embedding_vector, keyword)
         return relevant_products
 
     def _create_embedding_for_query(self, query: str) -> list[float]:
@@ -22,10 +22,10 @@ class ProductVectorStoreRetriever(BaseVectorStoreRetriever[ProductChunk]):
             query
         )
 
-    def _find_products_matching_vector(self, embedding_vector: list[float]) -> QuerySet[ProductChunk]:
+    def _find_products_matching_vector(self, embedding_vector: list[float], keyword: str) -> QuerySet[ProductChunk]:
         embedding_distance = CosineDistance("embedding", embedding_vector)
-        embeddings_with_products = self.model_chunk_repo.get_chunk_by_distance_for_data_set(
-            self.data_set_id, embedding_distance
+        embeddings_with_products = self.model_chunk_repo.get_chunk_by_distance_and_keyword_for_data_set(
+            self.data_set_id, embedding_distance, keyword
         )
         limited_embeddings_with_products = embeddings_with_products[: self.max_objects]
         return limited_embeddings_with_products

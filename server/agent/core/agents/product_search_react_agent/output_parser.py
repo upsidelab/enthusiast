@@ -20,7 +20,7 @@ class CustomReactOutputParser(ReActSingleInputOutputParser):
             return self._return_action(match, text)
         if match := re.search(self.JSON_PATTERN, text, re.DOTALL):
             return self._return_action(match, text)
-        return AgentFinish({"output": f"Final Answer: {text}"}, text)
+        raise OutputParserException(f"Could not parse LLM output: `{text}`")
 
     def _return_action(self, match: re.Match[str], text: str) -> AgentAction:
         json_str = match.group(1)

@@ -109,13 +109,7 @@ class Product(models.Model):
         constraints = [models.UniqueConstraint(fields=["data_set", "entry_id"], name="uq_product")]
 
     def get_content(self):
-        return f"""
-            NAME: {self.name}\n
-            DESCRIPTION: {self.description}\n
-            PROPERTIES: {self.properties}\n
-            CATEGORIES: {self.categories}\n
-            PRICE: {self.price}
-        """
+        return f"{self.name} {self.description}"
 
     def split(self, chunk_size, chunk_overlap):
         """

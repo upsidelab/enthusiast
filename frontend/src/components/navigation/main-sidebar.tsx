@@ -9,7 +9,10 @@ import {
   BookTextIcon,
   HistoryIcon,
   PlugZapIcon,
-  UserIcon, HelpCircleIcon, SparklesIcon
+  UserIcon, 
+  HelpCircleIcon, 
+  SparklesIcon,
+  LinkIcon
 } from "lucide-react";
 import { UserMenu } from "@/components/navigation/user-menu.tsx";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
@@ -18,6 +21,12 @@ export function MainSidebar() {
   const { account, dataSetId } = useApplicationContext()!;
 
   const synchronizeItems: SidebarSectionItemProps[] = [
+    {
+      title: "Sources",
+      link: `/data-sets/${dataSetId}/sources`,
+      key: "sources",
+      icon: <LinkIcon />
+    },
     {
       title: "Products",
       link: `/data-sets/${dataSetId}/products`,

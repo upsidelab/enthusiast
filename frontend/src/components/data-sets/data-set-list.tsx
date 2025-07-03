@@ -46,7 +46,7 @@ export function DataSetList() {
               </TableCell>
               <TableCell>
                 <Button onClick={() => {
-                  navigate(`/data-sets/${item.id}/catalog-sources`)
+                  navigate(`/data-sets/${item.id}/sources`)
                 }} variant="secondary">Sources</Button>
               </TableCell>
               <TableCell>

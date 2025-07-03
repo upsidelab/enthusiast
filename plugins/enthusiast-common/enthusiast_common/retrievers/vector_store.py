@@ -24,5 +24,5 @@ class BaseVectorStoreRetriever(BaseRetriever, ABC, Generic[T]):
         self.model_chunk_repo = model_chunk_repo
 
     @abstractmethod
-    def find_model_matching_query(self, query: str) -> Iterable[T]:
+    def find_content_matching_query(self, query: str) -> Iterable[T]:
         pass

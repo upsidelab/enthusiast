@@ -100,7 +100,7 @@ class CreateAnswerTool(BaseLLMTool):
     def run(self, full_user_request: str):
         document_retriever = self.injector.document_retriever
         product_retriever = self.injector.product_retriever
-        relevant_documents = document_retriever.find_model_matching_query(full_user_request)
+        relevant_documents = document_retriever.find_content_matching_query(full_user_request)
         relevant_products = product_retriever.find_products_matching_query(full_user_request)
 
         product_context = serializers.serialize("json", relevant_products)

@@ -1,6 +1,5 @@
 import logging
 
-import tiktoken
 from enthusiast_common.injectors import BaseInjector
 from enthusiast_common.tools import BaseLLMTool
 from langchain_core.language_models import BaseLanguageModel
@@ -30,8 +29,6 @@ class ProductVerificationTool(BaseLLMTool):
     ARGS_SCHEMA = ProductVerificationToolInput
     RETURN_DIRECT = False
 
-    ENCODING: tiktoken.encoding_for_model = None
-
     def __init__(
         self,
         data_set_id: int,
@@ -44,10 +41,6 @@ class ProductVerificationTool(BaseLLMTool):
         self.data_set_repo = data_set_repo
         self.llm = llm
         self.injector = injector
-        if llm.name in tiktoken.model.MODEL_TO_ENCODING:
-            self.ENCODING = tiktoken.encoding_for_model(llm.name)
-        else:
-            self.ENCODING = tiktoken.encoding_for_model("gpt-4o")
 
     def run(self, search_criteria: str, product: str, products_type: str) -> StructuredTool:
         prompt = PromptTemplate.from_template(VERIFY_PRODUCT_PROMPT_TEMPLATE)

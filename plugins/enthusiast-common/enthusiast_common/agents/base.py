@@ -7,7 +7,7 @@ from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import BaseTool
 
-from ..services import BaseConversationService
+from ..repositories import BaseConversationRepository
 
 
 class BaseAgent(ABC):
@@ -18,14 +18,14 @@ class BaseAgent(ABC):
         tools: list[BaseTool],
         llm: BaseLanguageModel,
         prompt: ChatPromptTemplate,
-        conversation_service: BaseConversationService,
+        conversation_repo: BaseConversationRepository,
         conversation_id: Any,
         memory: ConversationSummaryBufferMemory,
     ):
         self._tools = tools
         self._llm = llm
         self._prompt = prompt
-        self._conversation_service = conversation_service
+        self._conversation_repo = conversation_repo
         self._conversation_id = conversation_id
         self._memory = memory
 

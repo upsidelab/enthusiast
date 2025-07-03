@@ -1,9 +1,9 @@
-from dataclasses import dataclass, field
-from typing import Any, Dict, Generic, Optional, Type, TypeVar
+from typing import Any, Generic, Optional, Type, TypeVar
 
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
+from pydantic import BaseModel, ConfigDict, Field
 
 from ..agents import BaseAgent
 from ..injectors.base import BaseInjector
@@ -28,40 +28,38 @@ from ..tools import BaseAgentTool, BaseFunctionTool, BaseLLMTool
 InjectorT = TypeVar("InjectorT", bound=BaseInjector)
 
 
-@dataclass
-class EmbeddingsRegistryConfig:
+class ArbitraryTypeBaseModel(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+
+class EmbeddingsRegistryConfig(ArbitraryTypeBaseModel):
     registry_class: Type[BaseEmbeddingProviderRegistry]
     providers: Optional[dict[str, str]] = None
 
 
-@dataclass
-class LLMRegistryConfig:
+class LLMRegistryConfig(ArbitraryTypeBaseModel):
     registry_class: Type[BaseLanguageModelRegistry]
     providers: Optional[dict[str, str]] = None
 
 
-@dataclass
-class ModelsRegistryConfig:
+class ModelsRegistryConfig(ArbitraryTypeBaseModel):
     registry_class: Type[BaseDBModelsRegistry]
     models_config: Optional[dict[str, str]] = None
 
 
-@dataclass
-class RegistryConfig:
+class RegistryConfig(ArbitraryTypeBaseModel):
     llm: LLMRegistryConfig
     embeddings: EmbeddingsRegistryConfig
     model: ModelsRegistryConfig
 
 
-@dataclass
-class LLMConfig:
-    model_class: Type[BaseLLM] = field(default=BaseLLM)
-    callbacks: list[BaseCallbackHandler] = None
+class LLMConfig(ArbitraryTypeBaseModel):
+    model_class: Type[BaseLLM] = BaseLLM
+    callbacks: Optional[list[BaseCallbackHandler]] = None
     streaming: bool = False
 
 
-@dataclass
-class RepositoriesConfig:
+class RepositoriesConfig(ArbitraryTypeBaseModel):
     user: Type[BaseUserRepository]
     message: Type[BaseMessageRepository]
     conversation: Type[BaseConversationRepository]
@@ -71,34 +69,29 @@ class RepositoriesConfig:
     product_chunk: Type[BaseModelChunkRepository]
 
 
-@dataclass
-class LLMToolConfig:
+class LLMToolConfig(ArbitraryTypeBaseModel):
     model_class: Type[BaseLLMTool]
-    data_set_id: int | None = None
-    llm: BaseLanguageModel | None = None
+    data_set_id: Optional[Any] = None
+    llm: Optional[BaseLanguageModel] = None
 
 
-@dataclass
-class AgentToolConfig:
+class AgentToolConfig(ArbitraryTypeBaseModel):
     model_class: Type[BaseAgentTool]
     agent: BaseAgent
 
 
-@dataclass
-class RetrieverConfig:
+class RetrieverConfig(ArbitraryTypeBaseModel):
     retriever_class: Type[BaseRetriever]
-    extra_kwargs: Dict[str, Any] = field(default_factory=dict)
+    extra_kwargs: dict[str, Any] = Field(default_factory=dict)
 
 
-@dataclass
-class RetrieversConfig:
+class RetrieversConfig(ArbitraryTypeBaseModel):
     document: RetrieverConfig
     product: RetrieverConfig
 
 
-@dataclass
-class AgentConfig(Generic[InjectorT]):
-    conversation_id: int
+class AgentConfig(BaseModel, Generic[InjectorT]):
+    conversation_id: Any
     prompt_template: PromptTemplate | ChatPromptTemplate
     agent_class: Type[BaseAgent]
     conversation_service: Type[BaseConversationService]
@@ -109,9 +102,8 @@ class AgentConfig(Generic[InjectorT]):
     function_tools: Optional[list[Type[BaseFunctionTool]]] = None
     llm_tools: Optional[list[LLMToolConfig]] = None
     agent_tools: Optional[list[AgentToolConfig]] = None
-    llm: LLMConfig = field(default_factory=LLMConfig)
+    llm: LLMConfig = Field(default_factory=LLMConfig)
 
 
-@dataclass
 class ToolCallingAgentConfig(AgentConfig):
     prompt_template: ChatPromptTemplate

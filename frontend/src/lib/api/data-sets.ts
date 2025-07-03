@@ -118,13 +118,13 @@ export class DataSetsApiClient extends BaseApiClient {
     return (await response.json()).results as CatalogSource[];
   }
 
-  async addDataSetProductSource(dataSetId: number, pluginName: string): Promise<void> {
+  async addDataSetProductSource(dataSetId: number, pluginName: string, config: object): Promise<void> {
     await fetch(
       `${this.apiBase}/api/data_sets/${dataSetId}/product_sources`,
       {
         ...this._requestConfiguration(),
         method: "POST",
-        body: JSON.stringify({plugin_name: pluginName})
+        body: JSON.stringify({plugin_name: pluginName, config: config})
       }
     );
   }
@@ -199,13 +199,13 @@ export class DataSetsApiClient extends BaseApiClient {
     return (await response.json()).results as CatalogSource[];
   }
 
-  async addDataSetDocumentSource(dataSetId: number, pluginName: string): Promise<void> {
+  async addDataSetDocumentSource(dataSetId: number, pluginName: string, config: object): Promise<void> {
     await fetch(
       `${this.apiBase}/api/data_sets/${dataSetId}/document_sources`,
       {
         ...this._requestConfiguration(),
         method: "POST",
-        body: JSON.stringify({plugin_name: pluginName})
+        body: JSON.stringify({plugin_name: pluginName, config: config})
       }
     );
   }

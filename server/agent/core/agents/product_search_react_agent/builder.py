@@ -1,5 +1,4 @@
 from enthusiast_common.retrievers import BaseVectorStoreRetriever
-from enthusiast_common.services import BaseConversationService
 from enthusiast_common.tools.base import BaseTool
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatMessagePromptTemplate, PromptTemplate
@@ -15,14 +14,13 @@ class Builder(AgentBuilder):
         tools: list[BaseTool],
         llm: BaseLanguageModel,
         prompt: PromptTemplate | ChatMessagePromptTemplate,
-        conversation_service: BaseConversationService,
     ) -> ProductSearchReActAgent:
         dataset = self._repositories.data_set.get_by_id(pk=self._data_set_id)
         return self._config.agent_class(
             tools=tools,
             llm=llm,
             prompt=prompt,
-            conversation_service=conversation_service,
+            conversation_repo=self._repositories.conversation,
             conversation_id=self._config.conversation_id,
             products_type=dataset.products_type,
         )

@@ -18,7 +18,6 @@ from ..repositories import (
     BaseProductRepository,
     BaseUserRepository,
 )
-from ..services import BaseConversationService
 from ..tools import BaseAgentTool, BaseFunctionTool, BaseLLMTool
 
 
@@ -50,19 +49,14 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
         self._build_and_set_repositories(model_registry)
         self._data_set_id = self._repositories.conversation.get_data_set_id(self._config.conversation_id)
         self._llm = self._build_llm(self._config.llm)
-        conversation_service = self._build_conversation_service()
         self._embeddings_registry = self._build_embeddings_registry()
         injector = self._build_injector()
         tools = self._build_tools(default_llm=self._llm, injector=injector)
-        return self._build_agent(tools, self._llm, self._config.prompt_template, conversation_service)
+        return self._build_agent(tools, self._llm, self._config.prompt_template)
 
     @abstractmethod
     def _build_agent(
-        self,
-        tools: list[BaseTool],
-        llm: BaseLanguageModel,
-        prompt: PromptTemplate | ChatMessagePromptTemplate,
-        conversation_service: BaseConversationService,
+        self, tools: list[BaseTool], llm: BaseLanguageModel, prompt: PromptTemplate | ChatMessagePromptTemplate
     ) -> BaseAgent:
         pass
 
@@ -108,8 +102,4 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
 
     @abstractmethod
     def _build_agent_tools(self) -> list[BaseAgentTool]:
-        pass
-
-    @abstractmethod
-    def _build_conversation_service(self) -> BaseConversationService:
         pass

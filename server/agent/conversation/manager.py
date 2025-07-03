@@ -34,6 +34,7 @@ class ConversationManager:
     ) -> Message:
         conversation = self.get_conversation(user_id=user_id, data_set_id=data_set_id, conversation_id=conversation_id)
 
+        Message.objects.create(conversation=conversation, created_at=datetime.now(), role="human", text=message)
         # Set the conversation summary if it's the first message
         if not conversation.summary:
             conversation.summary = message

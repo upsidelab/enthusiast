@@ -13,7 +13,6 @@ from enthusiast_common.config import (
 from langchain_core.prompts import ChatPromptTemplate
 
 from agent.callbacks import ConversationWebSocketCallbackHandler
-from agent.conversation.service import ConversationService
 from agent.core.agents import ToolCallingAgent
 from agent.injector import Injector
 from agent.models import Conversation
@@ -49,7 +48,6 @@ def get_config(conversation: Conversation, streaming: bool) -> ToolCallingAgentC
             ]
         ),
         agent_class=ToolCallingAgent,
-        conversation_service=ConversationService,
         llm_tools=[
             LLMToolConfig(
                 model_class=CreateAnswerTool,

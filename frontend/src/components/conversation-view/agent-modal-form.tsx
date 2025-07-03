@@ -58,7 +58,7 @@ export function AgentSelectionForm({
                     <Select value={field.value} onValueChange={field.onChange} defaultValue={field.value}>
                       <SelectTrigger>
                         <FormControl>
-                          <SelectValue placeholder="Select a language model provider"/>
+                          <SelectValue placeholder="Select an Agent"/>
                         </FormControl>
                       </SelectTrigger>
                         <SelectContent>

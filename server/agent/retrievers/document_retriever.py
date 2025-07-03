@@ -10,7 +10,7 @@ from catalog.models import DocumentChunk
 
 
 class DocumentRetriever(BaseVectorStoreRetriever[DocumentChunk]):
-    def find_model_matching_query(self, query: str) -> QuerySet[DocumentChunk]:
+    def find_content_matching_query(self, query: str) -> QuerySet[DocumentChunk]:
         embedding_vector = self._create_embedding_for_query(query)
         relevant_documents = self._find_documents_matching_vector(embedding_vector)
         return relevant_documents

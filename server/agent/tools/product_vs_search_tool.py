@@ -88,7 +88,7 @@ class ProductVectorStoreSearchTool(BaseLLMTool):
 
     def run(self, full_user_request: str, keyword: str) -> str:
         product_retriever = self.injector.product_retriever
-        relevant_documents = product_retriever.find_model_matching_query(full_user_request, keyword)
+        relevant_documents = product_retriever.find_content_matching_query(full_user_request, keyword)
         retry = -1
         while retry < self.MAX_RETRY:
             try:

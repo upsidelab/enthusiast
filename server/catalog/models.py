@@ -134,7 +134,7 @@ class Product(models.Model):
             self.chunks.create(product=self, content=chunk)
 
 
-class ProductChunk(models.Model):
+class ProductContentChunk(models.Model):
     product = models.ForeignKey(Product, related_name="chunks", on_delete=models.CASCADE)
     content = models.TextField()
     embedding = VectorField(null=True)

@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Any
 
 from langchain.agents import AgentExecutor
 from langchain.memory import ConversationSummaryBufferMemory
@@ -18,7 +19,7 @@ class BaseAgent(ABC):
         llm: BaseLanguageModel,
         prompt: ChatPromptTemplate,
         conversation_service: BaseConversationService,
-        conversation_id: int,
+        conversation_id: Any,
         memory: ConversationSummaryBufferMemory,
     ):
         self._tools = tools

@@ -14,7 +14,8 @@ from enthusiast_common.config import (
 from langchain_core.callbacks import StdOutCallbackHandler
 from langchain_core.prompts import PromptTemplate
 
-from agent.callbacks import AgentActionWebsocketCallbackHandler, ReactAgentWebsocketCallbackHandler
+from agent.callbacks import AgentActionWebsocketCallbackHandler
+from agent.callbacks import ReactAgentWebsocketCallbackHandler
 from agent.core.agents.product_search_react_agent.agent import ProductSearchReActAgent
 from agent.core.agents.product_search_react_agent.prompt import PRODUCT_FINDER_AGENT_PROMPT
 from agent.injector import Injector

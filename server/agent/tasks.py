@@ -32,6 +32,14 @@ def respond_to_user_message_task(
 ):
     manager = ConversationManager()
     try:
+<<<<<<< HEAD
+=======
+        if self.request.retries == 0:
+            Message.objects.create(
+                conversation_id=conversation_id, created_at=datetime.now(), role="human", text=message
+            )
+
+>>>>>>> 384d602 (fix: Save user message once, filter user message out from agent history if run failed, refactor handlers)
         answer = manager.respond_to_user_message(
             conversation_id=conversation_id,
             data_set_id=data_set_id,

@@ -6,10 +6,11 @@ authors = ["Rafal Cymerys <rafal@upsidelab.io>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
+langchain-core = "^0.3.66"
 python = "^3.9"
 enthusiast-common = ">=1,<2"
-openai = "^1.59.6"
-langchain-openai = "^0.3.0"
+openai = "^1.86.0"
+langchain-openai = "^0.3.27"
 
 
 [build-system]

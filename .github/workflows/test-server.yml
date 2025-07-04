@@ -37,14 +37,15 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       - name: Install Poetry
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
           echo "$HOME/.local/bin" >> $GITHUB_PATH
+          poetry self add poetry-plugin-export
 
-      - name: install local plugins
+      - name: Build local plugins wheels
         run: |
           for dir in ../plugins/*; do
             if [ -d "$dir" ]; then
@@ -55,11 +56,31 @@ jobs:
             fi
           done
 
+      - name: Build plugins dependencies
+        run: |
+          for dir in ../plugins/*; do
+            if [ -d "$dir" ]; then
+              (
+                cd "$dir"
+                poetry lock
+                poetry export -f requirements.txt --without-hashes -o requirements.txt
+                python -m pip install --upgrade pip
+                pip install -r requirements.txt
+              )
+            fi
+          done
+
+      - name: Install local plugins
+        run: |
+          python -m pip install --upgrade pip
+          plugins_dist=$(find ../plugins -type d -name dist -exec printf -- '--find-links=%s ' {} \;)
+          readarray -t plugins_names < <(find ../plugins -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)
+          pip install --no-index $plugins_dist "${plugins_names[@]}"
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          plugins_dist=$(find ../plugins -type d -name dist -printf '--find-links=%p ')
-          pip install $plugins_dist -r requirements.txt
+          pip install -r requirements.txt
 
       - name: Prepare for tests
         run: cp sample.test.env .env

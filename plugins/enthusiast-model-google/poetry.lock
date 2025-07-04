@@ -244,14 +244,14 @@ files = [
 
 [[package]]
 name = "enthusiast-common"
-version = "0.6.0"
-description = ""
+version = "1.1.0"
+description = "Core interfaces for developing custom Enthusiast plugins and integrations."
 optional = false
 python-versions = "<4.0,>=3.9"
 groups = ["main"]
 files = [
-    {file = "enthusiast_common-0.6.0-py3-none-any.whl", hash = "sha256:26e871923635bacaaec745edf250e18f870518c036c5fcd12dfbccb266ef5b3f"},
-    {file = "enthusiast_common-0.6.0.tar.gz", hash = "sha256:0da37e3b20b93ea133ead20dae2ab2c98a4c49639375d8e836686030b70724e3"},
+    {file = "enthusiast_common-1.1.0-py3-none-any.whl", hash = "sha256:895ac4fa30b4e42fcbb2421d80e8ea4aa4ff4eed837d7b6f47e69306743cc7af"},
+    {file = "enthusiast_common-1.1.0.tar.gz", hash = "sha256:fcbef6922028bad1e953ec2520a48c742ae4cb38ece3980b1eec89dc308df750"},
 ]
 
 [package.dependencies]
@@ -595,19 +595,19 @@ files = [
 
 [[package]]
 name = "langchain-core"
-version = "0.3.63"
+version = "0.3.68"
 description = "Building applications with LLMs through composability"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "langchain_core-0.3.63-py3-none-any.whl", hash = "sha256:f91db8221b1bc6808f70b2e72fded1a94d50ee3f1dff1636fb5a5a514c64b7f5"},
-    {file = "langchain_core-0.3.63.tar.gz", hash = "sha256:e2e30cfbb7684a5a0319f6cbf065fc3c438bfd1060302f085a122527890fb01e"},
+    {file = "langchain_core-0.3.68-py3-none-any.whl", hash = "sha256:5e5c1fbef419590537c91b8c2d86af896fbcbaf0d5ed7fdcdd77f7d8f3467ba0"},
+    {file = "langchain_core-0.3.68.tar.gz", hash = "sha256:312e1932ac9aa2eaf111b70fdc171776fa571d1a86c1f873dcac88a094b19c6f"},
 ]
 
 [package.dependencies]
 jsonpatch = ">=1.33,<2.0"
-langsmith = ">=0.1.126,<0.4"
+langsmith = ">=0.3.45"
 packaging = ">=23.2,<25"
 pydantic = ">=2.7.4"
 PyYAML = ">=5.3"
@@ -634,24 +634,21 @@ pydantic = ">=2,<3"
 
 [[package]]
 name = "langsmith"
-version = "0.3.44"
+version = "0.4.4"
 description = "Client library to connect to the LangSmith LLM Tracing and Evaluation Platform."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "langsmith-0.3.44-py3-none-any.whl", hash = "sha256:fa57afc1a3b1688f8970a5082dae8c271fdbd611cee013d412921eef926fcd78"},
-    {file = "langsmith-0.3.44.tar.gz", hash = "sha256:0a72dfe87aa2f464ebbfb94937f57101bed9e0b1d6d26401d5e422b0e8867b40"},
+    {file = "langsmith-0.4.4-py3-none-any.whl", hash = "sha256:014c68329bd085bd6c770a6405c61bb6881f82eb554ce8c4d1984b0035fd1716"},
+    {file = "langsmith-0.4.4.tar.gz", hash = "sha256:70c53bbff24a7872e88e6fa0af98270f4986a6e364f9e85db1cc5636defa4d66"},
 ]
 
 [package.dependencies]
 httpx = ">=0.23.0,<1"
 orjson = {version = ">=3.9.14,<4.0.0", markers = "platform_python_implementation != \"PyPy\""}
 packaging = ">=23.2"
-pydantic = [
-    {version = ">=2.7.4,<3.0.0", markers = "python_full_version >= \"3.12.4\""},
-    {version = ">=1,<3", markers = "python_full_version < \"3.12.4\""},
-]
+pydantic = ">=1,<3"
 requests = ">=2,<3"
 requests-toolbelt = ">=1.0.0,<2.0.0"
 zstandard = ">=0.23.0,<0.24.0"
@@ -1351,4 +1348,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.9"
-content-hash = "5190ef36b8295a861f22d1780b7e4cc82fb9b1f598a403f179961ed8b5e3a314"
+content-hash = "57203e37bfb986e02eaf5a570abf0051dfc9993e53e03c66fc16781094ca9ad6"

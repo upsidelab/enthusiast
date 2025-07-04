@@ -6,6 +6,7 @@ authors = ["Rafal Cymerys <rafal@upsidelab.io>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
+langchain-core = "^0.3.66"
 python = "^3.12"
 enthusiast-common = ">=1,<2"
 langchain-ollama = "^0.3.3"

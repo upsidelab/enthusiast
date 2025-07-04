@@ -65,8 +65,7 @@ jobs:
                 poetry lock
                 poetry export -f requirements.txt --without-hashes -o requirements.txt
                 python -m pip install --upgrade pip
-                plugins_dist=$(find ../plugins -type d -name dist -exec printf -- '--find-links=%s ' {} \;)
-                pip install $plugins_dist -r requirements.txt
+                pip install --find-links=../plugins/enthusiast-common/dist -r requirements.txt
               )
             fi
           done

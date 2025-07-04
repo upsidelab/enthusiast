@@ -44,7 +44,7 @@ jobs:
           curl -sSL https://install.python-poetry.org | python3 -
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: install local plugins
+      - name: Build local plugins wheels
         run: |
           for dir in ../plugins/*; do
             if [ -d "$dir" ]; then
@@ -55,11 +55,16 @@ jobs:
             fi
           done
 
+      - name: Install local plugins
+        run: |
+          python -m pip install --upgrade pip
+          plugins_dist=$(find ../plugins -type d -name dist -exec printf -- '--find-links=%s ' {} \;)
+          readarray -t plugins_names < <(find ../plugins -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)
+          pip install --no-index $plugins_dist "${plugins_names[@]}"
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          plugins_dist=$(find ../plugins -type d -name dist -printf '--find-links=%p ')
-          pip install --no-index $plugins_dist
           pip install -r requirements.txt
 
       - name: Prepare for tests

@@ -16,6 +16,7 @@ from langchain_core.prompts import PromptTemplate
 from agent.callbacks import ReactAgentWebsocketCallbackHandler
 from agent.conversation.service import ConversationService
 from agent.core.agents.product_search_react_agent.agent import ProductSearchReActAgent
+from agent.core.agents.product_search_react_agent.agent_product_search_tool import AgentProductSearchTool
 from agent.core.agents.product_search_react_agent.prompt import PRODUCT_FINDER_AGENT_PROMPT
 from agent.injector import Injector
 from agent.models import Conversation
@@ -31,7 +32,8 @@ from agent.repositories import (
     DjangoProductRepository,
     DjangoUserRepository,
 )
-from agent.retrievers import DocumentRetriever
+from agent.retrievers import DocumentRetriever, ProductRetriever
+from agent.retrievers.product_retriever import QUERY_PROMPT_TEMPLATE
 from agent.retrievers.product_vs_retriever import ProductVectorStoreRetriever
 from agent.tools import ProductVectorStoreSearchTool
 from agent.tools.verify_product_tool import ProductVerificationTool
@@ -47,7 +49,7 @@ def get_config(conversation: Conversation, streaming: bool) -> AgentConfig:
         conversation_service=ConversationService,
         llm_tools=[
             LLMToolConfig(
-                model_class=ProductVectorStoreSearchTool,
+                model_class=AgentProductSearchTool,
             ),
             LLMToolConfig(model_class=ProductVerificationTool),
         ],
@@ -67,7 +69,11 @@ def get_config(conversation: Conversation, streaming: bool) -> AgentConfig:
         ),
         retrievers=RetrieversConfig(
             document=RetrieverConfig(retriever_class=DocumentRetriever),
-            product=RetrieverConfig(retriever_class=ProductVectorStoreRetriever, extra_kwargs={"max_objects": 30}),
+            product=RetrieverConfig(retriever_class=ProductRetriever, extra_kwargs={
+                    "prompt_template": QUERY_PROMPT_TEMPLATE,
+                    "max_sample_products": 12,
+                    "number_of_products": 12,
+            }),
         ),
         registry=RegistryConfig(
             llm=LLMRegistryConfig(registry_class=LanguageModelRegistry),

@@ -58,12 +58,12 @@ jobs:
 
       - name: Build plugins dependencies
         run: |
+          python -m pip install --upgrade pip
           cd ../plugins/enthusiast-common
           poetry lock
           poetry export -f requirements.txt --without-hashes -o requirements.txt
-          python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install --no-index --find-links=/dist enthusiast-common
+          pip install --no-index --find-links=dist enthusiast-common
           cd -
           for dir in ../plugins/*; do
             if [ -d "$dir" ]; then
@@ -71,7 +71,6 @@ jobs:
                 cd "$dir"
                 poetry lock
                 poetry export -f requirements.txt --without-hashes -o requirements.txt
-                python -m pip install --upgrade pip
                 pip install -r requirements.txt
               )
             fi

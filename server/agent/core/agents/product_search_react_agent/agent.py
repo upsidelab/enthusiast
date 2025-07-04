@@ -48,7 +48,7 @@ class ProductSearchReActAgent(BaseAgent):
         return [tool_class.as_tool() for tool_class in self._tools]
 
     def get_answer(self, input_text: str) -> str:
-        agent_output = self._agent_executor.invoke({"input": input_text, "products_type": "eSim card"})
+        agent_output = self._agent_executor.invoke({"input": input_text, "products_type": "Placeholder product"})
         return agent_output["output"]
 
     def _create_agent_memory(self) -> SummaryChatMemory:

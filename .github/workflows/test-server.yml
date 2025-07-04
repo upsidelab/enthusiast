@@ -51,6 +51,7 @@ jobs:
               (
                 cd "$dir"
                 poetry build -f wheel
+                poetry install
               )
             fi
           done

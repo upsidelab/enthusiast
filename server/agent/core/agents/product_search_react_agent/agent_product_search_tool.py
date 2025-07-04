@@ -38,12 +38,13 @@ class AgentProductSearchTool(BaseLLMTool):
     def run(self, sql_query: str):
         try:
             products = Product.objects.raw(sql_query)
+            products = list(products)
         except Exception as e:
             logger.info(e)
             return f"The query you provided is incorrect Error: {type(e).__name__} - {e}. Fix your query and try again."
 
         if len(products) > 0:
             serialized_products = serializers.serialize("json", products)
-            return f"Found the following products: {serialized_products}"
+            return f"Found the following products: {serialized_products}. Pick the one that matches the most and validate whether it's a good fit."
         else:
             return "No products were found, try loosening the criteria"

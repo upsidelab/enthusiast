@@ -1,6 +1,7 @@
 import logging
 
 from enthusiast_common.agents import BaseAgent
+from enthusiast_common.injectors import BaseInjector
 from enthusiast_common.services import BaseConversationService
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain_core.language_models import BaseLanguageModel
@@ -22,6 +23,7 @@ class ProductSearchReActAgent(BaseAgent):
         prompt: ChatPromptTemplate,
         conversation_service: BaseConversationService,
         conversation_id: int,
+        injector: BaseInjector
     ):
         self._tools = tools
         self._llm = llm
@@ -31,6 +33,7 @@ class ProductSearchReActAgent(BaseAgent):
         memory = self._create_agent_memory()
         self._memory = memory
         self._agent_executor = self._create_agent_executor()
+        self._injector = injector
         super().__init__(tools, llm, prompt, conversation_service, conversation_id, memory)
 
     def _create_agent_executor(self, **kwargs):
@@ -48,7 +51,8 @@ class ProductSearchReActAgent(BaseAgent):
         return [tool_class.as_tool() for tool_class in self._tools]
 
     def get_answer(self, input_text: str) -> str:
-        agent_output = self._agent_executor.invoke({"input": input_text, "products_type": "any"})
+        sample_products = self._injector.product_retriever._get_sample_products_json()
+        agent_output = self._agent_executor.invoke({"input": input_text, "products_type": "any", "sample_products": sample_products})
         return agent_output["output"]
 
     def _create_agent_memory(self) -> SummaryChatMemory:

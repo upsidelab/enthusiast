@@ -1,6 +1,3 @@
-from datetime import datetime
-
-from account.models import User
 from agent.models import Conversation, Message
 from agent.registries.agents.agent_registry import AgentRegistry
 

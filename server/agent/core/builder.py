@@ -26,6 +26,7 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
             prompt=prompt,
             conversation_service=conversation_service,
             conversation_id=self._config.conversation_id,
+            injector=self._build_injector()
         )
 
     def _build_llm_registry(self) -> BaseLanguageModelRegistry:

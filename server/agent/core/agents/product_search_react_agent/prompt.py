@@ -60,6 +60,9 @@ Final Answer: What operating system you prefer Windows or MacOS?
 
 Do not came up with any other types of JSON than specified above.
 Your output to user should always begin with '''Final Answer: <output>'''
+
+Here are some sample products available in the catalog: {sample_products}
+
 Begin!
 Chat history: {chat_history}
 User query: {input}

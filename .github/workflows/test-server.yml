@@ -43,6 +43,7 @@ jobs:
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
           echo "$HOME/.local/bin" >> $GITHUB_PATH
+          poetry self add poetry-plugin-export
 
       - name: Build local plugins wheels
         run: |
@@ -51,7 +52,10 @@ jobs:
               (
                 cd "$dir"
                 poetry build -f wheel
-                poetry install
+                poetry export -f requirements.txt --without-hashes -o requirements.txt
+                python -m pip install --upgrade pip
+                pip install -r requirements.txt
+                
               )
             fi
           done

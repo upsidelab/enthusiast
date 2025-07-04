@@ -829,6 +829,21 @@ socks = ["pysocks (>=1.5.6,!=1.5.7,<2.0)"]
 zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
+name = "woocommerce"
+version = "3.0.0"
+description = "A Python wrapper for the WooCommerce REST API"
+optional = false
+python-versions = ">=3.6"
+groups = ["main"]
+files = [
+    {file = "WooCommerce-3.0.0-py3-none-any.whl", hash = "sha256:be054cf47fbe1ce9e88f380c546835b2e725716cfd91fb8188659b2cb282fe77"},
+    {file = "WooCommerce-3.0.0.tar.gz", hash = "sha256:fcb7498e01dcdf618051fca86168bd198c14ff6dc5d02a41d27805832ad79d35"},
+]
+
+[package.dependencies]
+requests = "*"
+
+[[package]]
 name = "zstandard"
 version = "0.23.0"
 description = "Zstandard bindings for Python"
@@ -944,4 +959,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.9"
-content-hash = "bfa90742bbc3abde06d3f201673a6b9bdf1e41290df49bbcdd480e88e415ae11"
+content-hash = "654dba41dcefd9c611bdc6075f793655bea631c27b14a594e708da164c89947a"

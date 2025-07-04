@@ -25,6 +25,7 @@ files = [
 ]
 
 [package.dependencies]
+exceptiongroup = {version = ">=1.0.2", markers = "python_version < \"3.11\""}
 idna = ">=2.8"
 sniffio = ">=1.1"
 typing_extensions = {version = ">=4.5", markers = "python_version < \"3.13\""}
@@ -36,14 +37,14 @@ trio = ["trio (>=0.26.1)"]
 
 [[package]]
 name = "certifi"
-version = "2025.4.26"
+version = "2025.6.15"
 description = "Python package for providing Mozilla's CA Bundle."
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.7"
 groups = ["main"]
 files = [
-    {file = "certifi-2025.4.26-py3-none-any.whl", hash = "sha256:30350364dfe371162649852c63336a15c70c6510c2ad5015b21c2345311805f3"},
-    {file = "certifi-2025.4.26.tar.gz", hash = "sha256:0a816057ea3cdefcef70270d2c515e4506bbc954f417fa5ade2021213bb8f0c6"},
+    {file = "certifi-2025.6.15-py3-none-any.whl", hash = "sha256:2e0c7ce7cb5d8f8634ca55d2ba7e6ec2689a2fd6537d8dec1296a477a4910057"},
+    {file = "certifi-2025.6.15.tar.gz", hash = "sha256:d747aa5a8b9bbbb1bb8c22bb13e22bd1f18e9796defa16bab421f7f7a317323b"},
 ]
 
 [[package]]
@@ -245,6 +246,25 @@ files = [
 langchain-core = ">=0.3.29,<0.4.0"
 
 [[package]]
+name = "exceptiongroup"
+version = "1.3.0"
+description = "Backport of PEP 654 (exception groups)"
+optional = false
+python-versions = ">=3.7"
+groups = ["main"]
+markers = "python_version < \"3.11\""
+files = [
+    {file = "exceptiongroup-1.3.0-py3-none-any.whl", hash = "sha256:4d111e6e0c13d0644cad6ddaa7ed0261a0b36971f6d23e7ec9b4b9097da78a10"},
+    {file = "exceptiongroup-1.3.0.tar.gz", hash = "sha256:b241f5885f560bc56a59ee63ca4c6a8bfa46ae4ad651af316d4e81817bb9fd88"},
+]
+
+[package.dependencies]
+typing-extensions = {version = ">=4.6.0", markers = "python_version < \"3.13\""}
+
+[package.extras]
+test = ["pytest (>=6)"]
+
+[[package]]
 name = "h11"
 version = "0.16.0"
 description = "A pure-Python, bring-your-own-I/O implementation of HTTP/1.1"
@@ -347,19 +367,19 @@ files = [
 
 [[package]]
 name = "langchain-core"
-version = "0.3.61"
+version = "0.3.68"
 description = "Building applications with LLMs through composability"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "langchain_core-0.3.61-py3-none-any.whl", hash = "sha256:62cddbda7fb6085b6096bb4f3ad69642ebb0585bde7b210edc61dd0af33f2ea4"},
-    {file = "langchain_core-0.3.61.tar.gz", hash = "sha256:67ba08d4cf58616050047ef3a07887a72607fea9b6b4522dff9e7579a1adbe75"},
+    {file = "langchain_core-0.3.68-py3-none-any.whl", hash = "sha256:5e5c1fbef419590537c91b8c2d86af896fbcbaf0d5ed7fdcdd77f7d8f3467ba0"},
+    {file = "langchain_core-0.3.68.tar.gz", hash = "sha256:312e1932ac9aa2eaf111b70fdc171776fa571d1a86c1f873dcac88a094b19c6f"},
 ]
 
 [package.dependencies]
 jsonpatch = ">=1.33,<2.0"
-langsmith = ">=0.1.126,<0.4"
+langsmith = ">=0.3.45"
 packaging = ">=23.2,<25"
 pydantic = ">=2.7.4"
 PyYAML = ">=5.3"
@@ -367,41 +387,22 @@ tenacity = ">=8.1.0,<8.4.0 || >8.4.0,<10.0.0"
 typing-extensions = ">=4.7"
 
 [[package]]
-name = "langchain-ollama"
-version = "0.3.3"
-description = "An integration package connecting Ollama and LangChain"
-optional = false
-python-versions = ">=3.9"
-groups = ["main"]
-files = [
-    {file = "langchain_ollama-0.3.3-py3-none-any.whl", hash = "sha256:f1c745a4b59d36bb51995c23c6b0fbc20f71956715659425ab88639a14b213cd"},
-    {file = "langchain_ollama-0.3.3.tar.gz", hash = "sha256:7d6ed75bfb706751b83173fe886b72ae25bb0b1bd7f3eb2622821c4149f7807b"},
-]
-
-[package.dependencies]
-langchain-core = ">=0.3.60,<1.0.0"
-ollama = ">=0.4.8,<1.0.0"
-
-[[package]]
 name = "langsmith"
-version = "0.3.42"
+version = "0.4.4"
 description = "Client library to connect to the LangSmith LLM Tracing and Evaluation Platform."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "langsmith-0.3.42-py3-none-any.whl", hash = "sha256:18114327f3364385dae4026ebfd57d1c1cb46d8f80931098f0f10abe533475ff"},
-    {file = "langsmith-0.3.42.tar.gz", hash = "sha256:2b5cbc450ab808b992362aac6943bb1d285579aa68a3a8be901d30a393458f25"},
+    {file = "langsmith-0.4.4-py3-none-any.whl", hash = "sha256:014c68329bd085bd6c770a6405c61bb6881f82eb554ce8c4d1984b0035fd1716"},
+    {file = "langsmith-0.4.4.tar.gz", hash = "sha256:70c53bbff24a7872e88e6fa0af98270f4986a6e364f9e85db1cc5636defa4d66"},
 ]
 
 [package.dependencies]
 httpx = ">=0.23.0,<1"
 orjson = {version = ">=3.9.14,<4.0.0", markers = "platform_python_implementation != \"PyPy\""}
 packaging = ">=23.2"
-pydantic = [
-    {version = ">=1,<3", markers = "python_full_version < \"3.12.4\""},
-    {version = ">=2.7.4,<3.0.0", markers = "python_full_version >= \"3.12.4\""},
-]
+pydantic = ">=1,<3"
 requests = ">=2,<3"
 requests-toolbelt = ">=1.0.0,<2.0.0"
 zstandard = ">=0.23.0,<0.24.0"
@@ -411,22 +412,6 @@ langsmith-pyo3 = ["langsmith-pyo3 (>=0.1.0rc2,<0.2.0)"]
 openai-agents = ["openai-agents (>=0.0.3,<0.1)"]
 otel = ["opentelemetry-api (>=1.30.0,<2.0.0)", "opentelemetry-exporter-otlp-proto-http (>=1.30.0,<2.0.0)", "opentelemetry-sdk (>=1.30.0,<2.0.0)"]
 pytest = ["pytest (>=7.0.0)", "rich (>=13.9.4,<14.0.0)"]
-
-[[package]]
-name = "ollama"
-version = "0.4.8"
-description = "The official Python client for Ollama."
-optional = false
-python-versions = "<4.0,>=3.8"
-groups = ["main"]
-files = [
-    {file = "ollama-0.4.8-py3-none-any.whl", hash = "sha256:04312af2c5e72449aaebac4a2776f52ef010877c554103419d3f36066fe8af4c"},
-    {file = "ollama-0.4.8.tar.gz", hash = "sha256:1121439d49b96fa8339842965d0616eba5deb9f8c790786cdf4c0b3df4833802"},
-]
-
-[package.dependencies]
-httpx = ">=0.27,<0.29"
-pydantic = ">=2.9.0,<3.0.0"
 
 [[package]]
 name = "orjson"
@@ -538,14 +523,14 @@ files = [
 
 [[package]]
 name = "pydantic"
-version = "2.11.5"
+version = "2.11.7"
 description = "Data validation using Python type hints"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "pydantic-2.11.5-py3-none-any.whl", hash = "sha256:f9c26ba06f9747749ca1e5c94d6a85cb84254577553c8785576fd38fa64dc0f7"},
-    {file = "pydantic-2.11.5.tar.gz", hash = "sha256:7f853db3d0ce78ce8bbb148c401c2cdd6431b3473c0cdff2755c7690952a7b7a"},
+    {file = "pydantic-2.11.7-py3-none-any.whl", hash = "sha256:dde5df002701f6de26248661f6835bbe296a47bf73990135c7d07ce741b9623b"},
+    {file = "pydantic-2.11.7.tar.gz", hash = "sha256:d989c3c6cb79469287b1569f7447a17848c998458d49ebe294e975b9baf0f0db"},
 ]
 
 [package.dependencies]
@@ -735,19 +720,19 @@ files = [
 
 [[package]]
 name = "requests"
-version = "2.32.3"
+version = "2.32.4"
 description = "Python HTTP for Humans."
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "requests-2.32.3-py3-none-any.whl", hash = "sha256:70761cfe03c773ceb22aa2f671b4757976145175cdfca038c02654d061d6dcc6"},
-    {file = "requests-2.32.3.tar.gz", hash = "sha256:55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760"},
+    {file = "requests-2.32.4-py3-none-any.whl", hash = "sha256:27babd3cda2a6d50b30443204ee89830707d396671944c998b5975b031ac2b2c"},
+    {file = "requests-2.32.4.tar.gz", hash = "sha256:27d0316682c8a29834d3264820024b62a36942083d52caf2f14c0591336d3422"},
 ]
 
 [package.dependencies]
 certifi = ">=2017.4.17"
-charset-normalizer = ">=2,<4"
+charset_normalizer = ">=2,<4"
 idna = ">=2.5,<4"
 urllib3 = ">=1.21.1,<3"
 
@@ -800,14 +785,14 @@ test = ["pytest", "tornado (>=4.5)", "typeguard"]
 
 [[package]]
 name = "typing-extensions"
-version = "4.13.2"
-description = "Backported and Experimental Type Hints for Python 3.8+"
+version = "4.14.0"
+description = "Backported and Experimental Type Hints for Python 3.9+"
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "typing_extensions-4.13.2-py3-none-any.whl", hash = "sha256:a439e7c04b49fec3e5d3e2beaa21755cadbbdc391694e28ccdd36ca4a1408f8c"},
-    {file = "typing_extensions-4.13.2.tar.gz", hash = "sha256:e6c81219bd689f51865d9e372991c540bda33a0379d5573cddb9a3a23f7caaef"},
+    {file = "typing_extensions-4.14.0-py3-none-any.whl", hash = "sha256:a1514509136dd0b477638fc68d6a91497af5076466ad0fa6c338e44e359944af"},
+    {file = "typing_extensions-4.14.0.tar.gz", hash = "sha256:8676b788e32f02ab42d9e7c61324048ae4c6d844a399eebace3d4979d75ceef4"},
 ]
 
 [[package]]
@@ -827,14 +812,14 @@ typing-extensions = ">=4.12.0"
 
 [[package]]
 name = "urllib3"
-version = "2.4.0"
+version = "2.5.0"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "urllib3-2.4.0-py3-none-any.whl", hash = "sha256:4e16665048960a0900c702d4a66415956a584919c03361cac9f1df5c5dd7e813"},
-    {file = "urllib3-2.4.0.tar.gz", hash = "sha256:414bc6535b787febd7567804cc015fee39daab8ad86268f1310a9250697de466"},
+    {file = "urllib3-2.5.0-py3-none-any.whl", hash = "sha256:e6b01673c0fa6a13e374b50871808eb3bf7046c4b125b216f6bf1cc604cff0dc"},
+    {file = "urllib3-2.5.0.tar.gz", hash = "sha256:3fc47733c7e419d4bc3f6b3dc2b4f890bb743906a30d56ba4a5bfa4bbff92760"},
 ]
 
 [package.extras]
@@ -842,6 +827,21 @@ brotli = ["brotli (>=1.0.9) ; platform_python_implementation == \"CPython\"", "b
 h2 = ["h2 (>=4,<5)"]
 socks = ["pysocks (>=1.5.6,!=1.5.7,<2.0)"]
 zstd = ["zstandard (>=0.18.0)"]
+
+[[package]]
+name = "woocommerce"
+version = "3.0.0"
+description = "A Python wrapper for the WooCommerce REST API"
+optional = false
+python-versions = ">=3.6"
+groups = ["main"]
+files = [
+    {file = "WooCommerce-3.0.0-py3-none-any.whl", hash = "sha256:be054cf47fbe1ce9e88f380c546835b2e725716cfd91fb8188659b2cb282fe77"},
+    {file = "WooCommerce-3.0.0.tar.gz", hash = "sha256:fcb7498e01dcdf618051fca86168bd198c14ff6dc5d02a41d27805832ad79d35"},
+]
+
+[package.dependencies]
+requests = "*"
 
 [[package]]
 name = "zstandard"
@@ -958,5 +958,5 @@ cffi = ["cffi (>=1.11)"]
 
 [metadata]
 lock-version = "2.1"
-python-versions = "^3.12"
-content-hash = "f1193a828ef240f71f15d38a7ef0e523855644c5e802e4cfb6793c208150ad75"
+python-versions = "^3.9"
+content-hash = "654dba41dcefd9c611bdc6075f793655bea631c27b14a594e708da164c89947a"

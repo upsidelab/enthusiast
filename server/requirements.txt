@@ -34,8 +34,8 @@ enthusiast-model-openai==1.1.0
 enthusiast-source-sample==1.0.0
 frozenlist==1.4.1
 gunicorn==23.0.0
-h11==0.14.0
-httpcore==1.0.5
+h11==0.16.0
+httpcore==1.0.9
 httpx==0.27.2
 hyperlink==21.0.0
 idna==3.10

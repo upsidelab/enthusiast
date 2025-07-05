@@ -2,8 +2,8 @@ from dataclasses import fields
 
 from enthusiast_common.agents import BaseAgent
 from enthusiast_common.builder import BaseAgentBuilder, RepositoriesInstances
-from enthusiast_common.config import LLMConfig
-from enthusiast_common.injectors import BaseDocumentRetriever, BaseInjector, BaseProductRetriever
+from enthusiast_common.config import AgentConfig, LLMConfig
+from enthusiast_common.injectors import BaseInjector
 from enthusiast_common.registry import BaseDBModelsRegistry, BaseEmbeddingProviderRegistry, BaseLanguageModelRegistry
 from enthusiast_common.services import BaseConversationService
 from enthusiast_common.tools import BaseAgentTool, BaseFunctionTool, BaseLLMTool
@@ -12,9 +12,7 @@ from langchain_core.prompts import ChatMessagePromptTemplate, PromptTemplate
 from langchain_core.tools import BaseTool
 
 
-class AgentBuilder(BaseAgentBuilder):
-    _repositories: RepositoriesInstances
-
+class AgentBuilder(BaseAgentBuilder[AgentConfig]):
     def _build_agent(
         self,
         tools: list[BaseTool],
@@ -29,11 +27,6 @@ class AgentBuilder(BaseAgentBuilder):
             conversation_service=conversation_service,
             conversation_id=self._config.conversation_id,
         )
-
-    def _build_injector(self, embeddings_registry: BaseEmbeddingProviderRegistry) -> BaseInjector:
-        document_retriever = self._build_document_retriever(embeddings_registry=embeddings_registry)
-        product_retriever = self._build_product_retriever()
-        return self._config.injector(product_retriever=product_retriever, document_retriever=document_retriever)
 
     def _build_llm_registry(self) -> BaseLanguageModelRegistry:
         llm_registry_class = self._config.registry.llm.registry_class
@@ -131,26 +124,13 @@ class AgentBuilder(BaseAgentBuilder):
             user_repo=self._repositories.user,
         )
 
-    def _build_product_retriever(self) -> BaseProductRetriever:
-        if config := self._config.retrievers.product.llm:
-            llm = self._build_llm(config.llm)
-        else:
-            llm = self._build_default_llm()
-        return self._config.retrievers.product.retriever_class(
-            data_set_id=self._data_set_id,
-            data_set_repo=self._repositories.data_set,
-            product_repo=self._repositories.product,
-            prompt_template=self._config.retrievers.product.prompt_template,
-            number_of_products=self._config.retrievers.product.number_of_products,
-            max_sample_products=self._config.retrievers.product.max_sample_products,
-            llm=llm,
-        )
+    def _build_injector(self) -> BaseInjector:
+        document_retriever = self._build_document_retriever()
+        product_retriever = self._build_product_retriever()
+        return self._config.injector(product_retriever=product_retriever, document_retriever=document_retriever)
 
-    def _build_document_retriever(self, embeddings_registry: BaseEmbeddingProviderRegistry) -> BaseDocumentRetriever:
-        return self._config.retrievers.document.retriever_class(
-            data_set_id=self._data_set_id,
-            data_set_repo=self._repositories.data_set,
-            embeddings_registry=embeddings_registry,
-            max_documents=self._config.retrievers.document.max_documents,
-            document_chunk_repo=self._repositories.document_chunk,
-        )
+    def _build_document_retriever(self):
+        pass
+
+    def _build_product_retriever(self):
+        pass

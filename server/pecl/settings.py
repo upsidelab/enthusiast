@@ -230,6 +230,7 @@ CATALOG_MODELS = {
     "data_set": "catalog.models.DataSet",
     "document_chunk": "catalog.models.DocumentChunk",
     "product": "catalog.models.Product",
+    "product_chunk": "catalog.models.ProductContentChunk",
 }
 
 AGENT_TOOLS = {

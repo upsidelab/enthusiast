@@ -1,3 +1,3 @@
-from .base import BaseInjector  # noqa
-from .document import BaseDocumentRetriever  # noqa
-from .product import BaseProductRetriever  # noqa
+from .base import BaseInjector
+
+__all__ = ["BaseInjector"]

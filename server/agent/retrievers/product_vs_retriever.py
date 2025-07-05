@@ -6,14 +6,14 @@ from enthusiast_common.retrievers import BaseVectorStoreRetriever
 from langchain_core.language_models import BaseLanguageModel
 from pgvector.django import CosineDistance
 
-from catalog.models import DocumentChunk
+from catalog.models import ProductContentChunk
 
 
-class DocumentRetriever(BaseVectorStoreRetriever[DocumentChunk]):
-    def find_content_matching_query(self, query: str) -> QuerySet[DocumentChunk]:
+class ProductVectorStoreRetriever(BaseVectorStoreRetriever[ProductContentChunk]):
+    def find_content_matching_query(self, query: str, keyword: str = "") -> QuerySet[ProductContentChunk]:
         embedding_vector = self._create_embedding_for_query(query)
-        relevant_documents = self._find_documents_matching_vector(embedding_vector)
-        return relevant_documents
+        relevant_products = self._find_products_matching_vector(embedding_vector, keyword)
+        return relevant_products
 
     def _create_embedding_for_query(self, query: str) -> list[float]:
         data_set = self.data_set_repo.get_by_id(self.data_set_id)
@@ -22,13 +22,15 @@ class DocumentRetriever(BaseVectorStoreRetriever[DocumentChunk]):
             query
         )
 
-    def _find_documents_matching_vector(self, embedding_vector: list[float]) -> QuerySet[DocumentChunk]:
+    def _find_products_matching_vector(
+        self, embedding_vector: list[float], keyword: str
+    ) -> QuerySet[ProductContentChunk]:
         embedding_distance = CosineDistance("embedding", embedding_vector)
-        embeddings_with_documents = self.model_chunk_repo.get_chunk_by_distance_for_data_set(
-            self.data_set_id, embedding_distance
+        embeddings_with_products = self.model_chunk_repo.get_chunk_by_distance_and_keyword_for_data_set(
+            self.data_set_id, embedding_distance, keyword
         )
-        limited_embeddings_with_documents = embeddings_with_documents[: self.max_objects]
-        return limited_embeddings_with_documents
+        limited_embeddings_with_products = embeddings_with_products[: self.max_objects]
+        return limited_embeddings_with_products
 
     @classmethod
     def create(
@@ -38,11 +40,11 @@ class DocumentRetriever(BaseVectorStoreRetriever[DocumentChunk]):
         repositories: RepositoriesInstances,
         embeddings_registry: BaseEmbeddingProviderRegistry,
         llm: BaseLanguageModel,
-    ) -> BaseVectorStoreRetriever[DocumentChunk]:
+    ) -> BaseVectorStoreRetriever[ProductContentChunk]:
         return cls(
             data_set_id=data_set_id,
             data_set_repo=repositories.data_set,
-            model_chunk_repo=repositories.document_chunk,
+            model_chunk_repo=repositories.product_chunk,
             embeddings_registry=embeddings_registry,
-            **config.retrievers.document.extra_kwargs,
+            **config.retrievers.product.extra_kwargs,
         )

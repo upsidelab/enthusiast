@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if [ "$RUN_WORKER" = "True" ]; then
-    exec celery -A pecl.celery worker
+    exec celery -A pecl.celery worker --loglevel=info -E
 else
     if [ "$RUN_MIGRATIONS" = "True" ]; then
         python manage.py migrate

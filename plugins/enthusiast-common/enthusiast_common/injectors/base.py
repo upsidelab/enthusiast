@@ -1,16 +1,13 @@
 from abc import ABC, abstractmethod
 
-from .document import BaseDocumentRetriever
-from .product import BaseProductRetriever
-
 
 class BaseInjector(ABC):
     @property
     @abstractmethod
-    def document_retriever(self) -> BaseDocumentRetriever:
+    def document_retriever(self) -> "BaseRetriever":  # noqa: F821
         pass
 
     @property
     @abstractmethod
-    def product_retriever(self) -> BaseProductRetriever:
+    def product_retriever(self) -> "BaseRetriever":  # noqa: F821
         pass

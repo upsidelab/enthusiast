@@ -1,6 +1,6 @@
 import { FeedbackData, TaskHandle } from "@/lib/api.ts";
 import { BaseApiClient } from "@/lib/api/base.ts";
-import {AvailableAgents, Conversation, ConversationUpdateData, Message, PaginatedResult} from "@/lib/types.ts";
+import { Conversation, Message, PaginatedResult } from "@/lib/types.ts";
 
 export type CreateConversationPayload = {
   data_set_id: number;
@@ -111,24 +111,5 @@ export class ConversationsApiClient extends BaseApiClient {
     }
 
     return await response.json() as Promise<void>;
-  }
-  async getAvailableAgents(): Promise<AvailableAgents> {
-    const response = await fetch(`${this.apiBase}/api/conversations/agents`, {
-      ...this._requestConfiguration()
-    })
-    return await response.json() as Promise<AvailableAgents>
-  }
-  async patch(conversationId: number, conversationData: ConversationUpdateData): Promise<void> {
-    const response = await fetch(`${this.apiBase}/api/conversations/${conversationId}`, {
-      ...this._requestConfiguration(),
-      method: 'PATCH',
-      body: JSON.stringify(conversationData),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Could not update conversation of ID ${conversationId}`);
-    }
-
-    return
   }
 }

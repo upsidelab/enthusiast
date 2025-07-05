@@ -12,7 +12,6 @@ export type DataSet = {
   embeddingModel: string;
   embeddingVectorSize: number;
   systemMessage: string;
-  productsType: string;
 }
 
 export type Product = {
@@ -62,12 +61,8 @@ export type Conversation = {
   model: string;
   dimensions: number;
   data_set: string;
-  agent: string;
   summary?: string;
   history?: Message[];
-}
-export type ConversationUpdateData = {
-  agent: string
 }
 
 export type Message = {
@@ -87,7 +82,4 @@ export type ServiceAccount = {
 export type ProvidersConfig = {
   languageModelProviders: string[];
   embeddingProviders: string[];
-}
-export type AvailableAgents = {
-  choices: string[]
 }

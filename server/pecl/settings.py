@@ -219,6 +219,7 @@ CATALOG_EMBEDDING_PROVIDERS = {
 # Configuration of installed plugins {plugin_name: plugin_path}
 CATALOG_PRODUCT_SOURCE_PLUGINS = {
     "Sample Product Source": "enthusiast_source_sample.SampleProductSource",
+    "Furnitures": "agent.plugins.product.CustomProductSource",
 }
 CATALOG_DOCUMENT_SOURCE_PLUGINS = {
     "Sample Document Source": "enthusiast_source_sample.SampleDocumentSource",
@@ -235,6 +236,11 @@ CATALOG_MODELS = {
 
 AGENT_TOOLS = {
     "Create Answer Tool": "agent.tools.create_answer_tool.CreateAnswerTool",
+}
+
+AVAILABLE_AGENTS = {
+    "Product Search Agent": "agent.core.agents.product_search_react_agent",
+    "Question Answer Agent": "agent.core.agents.tool_calling_agent",
 }
 
 SERVICE_ACCOUNT_DOMAIN = env.str("SERVICE_ACCOUNT_DOMAIN", "enthusiast.internal")

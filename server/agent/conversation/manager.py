@@ -17,11 +17,11 @@ class ConversationManager:
 
         return response
 
-    def create_conversation(self, user_id: int, data_set_id: int) -> Conversation:
+    def create_conversation(self, user_id: int, data_set_id: int, agent_name: str) -> Conversation:
         user = User.objects.get(id=user_id)
         data_set = user.data_sets.get(id=data_set_id)
 
-        conversation = Conversation.objects.create(started_at=datetime.now(), user=user, data_set=data_set)
+        conversation = Conversation.objects.create(started_at=datetime.now(), user=user, data_set=data_set, agent=agent_name)
         return conversation
 
     def get_conversation(self, user_id: int, data_set_id: int, conversation_id: int) -> Conversation:

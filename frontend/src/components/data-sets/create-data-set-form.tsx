@@ -21,8 +21,7 @@ const formSchema = z.object({
   embeddingProvider: z.string().min(1),
   embeddingModel: z.string().min(1),
   embeddingVectorSize: z.number().min(1).max(3072),
-  systemMessage: z.string().min(1),
-  productsType: z.string()
+  systemMessage: z.string().min(1)
 });
 
 type CreateDataSetFormSchema = z.infer<typeof formSchema>;
@@ -43,8 +42,7 @@ export function CreateDataSetForm() {
       embeddingProvider: undefined,
       embeddingModel: undefined,
       embeddingVectorSize: 512,
-      systemMessage: "You are a sales support agent, and you know everything about a company and their products.",
-      productsType: ""
+      systemMessage: "You are a sales support agent, and you know everything about a company and their products."
     }
   });
 
@@ -266,21 +264,6 @@ export function CreateDataSetForm() {
                     </FormControl>
                     <FormDescription>
                       This message will be used by the agent as the system prompt.
-                    </FormDescription>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="productsType"
-                render={({field}) => (
-                  <FormItem>
-                    <FormLabel>Products type</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      The type of products Agent will work with
                     </FormDescription>
                   </FormItem>
                 )}

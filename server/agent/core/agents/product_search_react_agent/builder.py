@@ -24,7 +24,6 @@ class Builder(AgentBuilder):
             prompt=prompt,
             conversation_service=conversation_service,
             conversation_id=self._config.conversation_id,
-            products_type=dataset.products_type,
         )
 
     def _build_product_retriever(self) -> BaseVectorStoreRetriever[ProductContentChunk]:

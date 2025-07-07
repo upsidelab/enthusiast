@@ -102,16 +102,6 @@ class ConversationView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def patch(self, request, conversation_id):
-        conversation = Conversation.objects.get(id=conversation_id, user=request.user)
-
-        serializer = ConversationSerializer(conversation, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-
 
 class ConversationListView(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -147,7 +137,9 @@ class ConversationListView(ListAPIView):
             return Response(input_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         conversation = manager.create_conversation(
-            user_id=request.user.id, data_set_id=input_serializer.validated_data.get("data_set_id")
+            user_id=request.user.id, 
+            data_set_id=input_serializer.validated_data.get("data_set_id"),
+            agent_name=input_serializer.validated_data.get("agent")
         )
 
         conversation_data = ConversationSerializer(conversation).data

@@ -22,14 +22,12 @@ class ProductSearchReActAgent(BaseAgent):
         prompt: ChatPromptTemplate,
         conversation_service: BaseConversationService,
         conversation_id: int,
-        products_type: str,
     ):
         self._tools = tools
         self._llm = llm
         self._prompt = prompt
         self._conversation_service = conversation_service
         self._conversation_id = conversation_id
-        self._products_type = products_type
         memory = self._create_agent_memory()
         self._memory = memory
         self._agent_executor = self._create_agent_executor()
@@ -50,7 +48,7 @@ class ProductSearchReActAgent(BaseAgent):
         return [tool_class.as_tool() for tool_class in self._tools]
 
     def get_answer(self, input_text: str) -> str:
-        agent_output = self._agent_executor.invoke({"input": input_text, "products_type": self._products_type})
+        agent_output = self._agent_executor.invoke({"input": input_text, "products_type": "any"})
         return agent_output["output"]
 
     def _create_agent_memory(self) -> SummaryChatMemory:

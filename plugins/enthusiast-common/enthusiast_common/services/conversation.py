@@ -22,17 +22,17 @@ class BaseConversationService(ABC, Generic[T]):
         self.user_repo = user_repo
 
     @abstractmethod
-    def create_conversation(self, user_id: int, data_set_id: int) -> T:
+    def create_conversation(self, user_id: Any, data_set_id: Any) -> T:
         pass
 
     @abstractmethod
-    def save_user_message(self, conversation_id: int, message: str):
+    def save_user_message(self, conversation_id: Any, message: str):
         pass
 
     @abstractmethod
-    def get_messages(self, conversation_id: int) -> list[Any]:
+    def get_messages(self, conversation_id: Any) -> list[Any]:
         pass
 
     @abstractmethod
-    def record_error(self, conversation_id: int):
+    def record_error(self, conversation_id: Any):
         pass

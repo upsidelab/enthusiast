@@ -52,5 +52,5 @@ class BaseLanguageModelRegistry(ABC):
         pass
 
     @abstractmethod
-    def provider_for_dataset(self, data_set_id: int) -> Type[LanguageModelProvider]:
+    def provider_for_dataset(self, data_set_id: Any) -> Type[LanguageModelProvider]:
         pass

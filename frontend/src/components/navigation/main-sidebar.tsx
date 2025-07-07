@@ -16,9 +16,30 @@ import {
 } from "lucide-react";
 import { UserMenu } from "@/components/navigation/user-menu.tsx";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
+import { useEffect, useState } from "react";
+import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
+import { ApiClient } from "@/lib/api.ts";
 
 export function MainSidebar() {
   const { account, dataSetId } = useApplicationContext()!;
+  const [availableAgents, setAvailableAgents] = useState<string[]>([]);
+  const [isLoadingAgents, setIsLoadingAgents] = useState(true);
+
+  useEffect(() => {
+    const fetchAgents = async () => {
+      try {
+        const apiClient = new ApiClient(authenticationProviderInstance);
+        const agents = await apiClient.conversations().getAvailableAgents();
+        setAvailableAgents(agents);
+      } catch (error) {
+        console.error('Failed to fetch available agents:', error);
+      } finally {
+        setIsLoadingAgents(false);
+      }
+    };
+
+    fetchAgents();
+  }, []);
 
   const synchronizeItems: SidebarSectionItemProps[] = [
     {
@@ -42,12 +63,12 @@ export function MainSidebar() {
   ];
 
   const askItems: SidebarSectionItemProps[] = [
-    {
-      title: "Chat",
-      link: `/data-sets/${dataSetId}/chat`,
-      key: "chat",
+    ...(isLoadingAgents ? [] : availableAgents.map(agent => ({
+      title: agent,
+      link: `/data-sets/${dataSetId}/chat/new/${encodeURIComponent(agent)}`,
+      key: `agent-${agent}`,
       icon: <BotMessageSquareIcon />
-    },
+    }))),
     {
       title: "History",
       link: `/data-sets/${dataSetId}/history`,

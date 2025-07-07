@@ -4,6 +4,7 @@ import { Conversation, Message, PaginatedResult } from "@/lib/types.ts";
 
 export type CreateConversationPayload = {
   data_set_id: number;
+  agent?: string;
 }
 
 export type CreateMessagePayload = {
@@ -16,6 +17,10 @@ type TaskState = {
   state: string;
 }
 
+type AvailableAgentsResponse = {
+  choices: string[];
+}
+
 
 export class ConversationsApiClient extends BaseApiClient {
   async getConversations(dataSetId: number, page: number = 1): Promise<PaginatedResult<Conversation>> {
@@ -23,9 +28,21 @@ export class ConversationsApiClient extends BaseApiClient {
     return await response.json() as Promise<PaginatedResult<Conversation>>;
   }
 
-  async createConversation(dataSetId: number): Promise<number> {
+  async getAvailableAgents(): Promise<string[]> {
+    const response = await fetch(`${this.apiBase}/api/conversations/agents`, this._requestConfiguration());
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch available agents: ${response.statusText}`);
+    }
+    
+    const result = await response.json() as AvailableAgentsResponse;
+    return result.choices;
+  }
+
+  async createConversation(dataSetId: number, agent: string): Promise<number> {
     const requestBody: CreateConversationPayload = {
-      data_set_id: dataSetId
+      data_set_id: dataSetId,
+      agent: agent
     };
 
     const requestConfiguration = this._requestConfiguration();

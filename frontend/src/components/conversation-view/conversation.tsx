@@ -5,11 +5,12 @@ import {authenticationProviderInstance} from "@/lib/authentication-provider.ts";
 import {ApiClient, TaskHandle} from "@/lib/api.ts";
 import {useApplicationContext} from "@/lib/use-application-context.ts";
 import {MessageError} from "@/components/conversation-view/message-error.tsx";
-import {useNavigate} from "react-router-dom";
 import {MessageBubbleTyping} from "@/components/conversation-view/message-bubble-typing.tsx";
 
 export interface ConversationProps {
-    conversationId: number | null;
+    conversationId: number;
+    onPendingMessageSent: () => void;
+    pendingMessage: string | null;
 }
 
 export interface MessageProps {
@@ -28,7 +29,7 @@ interface ConversationUIProps {
 
 function ConversationUI({messages, isAgentLoading, lastMessageRef, onSubmit, isLoading}: ConversationUIProps) {
     return (
-        <div className="flex flex-col h-full px-4 pt-4">
+        <div className="flex flex-col h-full px-4 pt-16">
             <div className="grow flex-1 space-y-4">
                 {messages.map((message, index) =>
                     message.role === "system" ? (
@@ -58,18 +59,17 @@ const api = new ApiClient(authenticationProviderInstance);
 
 const streamingEnabled = Boolean(import.meta.env.VITE_WS_BASE);
 
-export function Conversation({ conversationId }: ConversationProps) {
+export function Conversation({ conversationId, pendingMessage, onPendingMessageSent }: ConversationProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [isAgentLoading, setIsAgentLoading] = useState(false);
     const [messages, setMessages] = useState<MessageProps[]>([]);
-    const [pendingMessage, setPendingMessage] = useState<string | null>(null);
+    const initialized = useRef(false);
 
     const usePolling = useRef(!streamingEnabled);
     const lastMessageRef = useRef<HTMLDivElement | null>(null);
     const ws = useRef<WebSocket | null>(null);
 
     const { dataSetId } = useApplicationContext()!;
-    const navigate = useNavigate();
 
     // Cleanup WebSocket on unmount
     useEffect(() => {
@@ -81,14 +81,12 @@ export function Conversation({ conversationId }: ConversationProps) {
     // Load messages when conversationId changes
     useEffect(() => {
         const loadMessages = async () => {
-            if (!conversationId) {
-                setMessages([]);
-                return;
-            }
-
-            if (pendingMessage) {
-                onMessageComposerSubmit(pendingMessage);
-                setPendingMessage(null);
+            if (pendingMessage && !initialized.current) {
+                // React StrictMode renders this component twice, but we can't execute this callback twice.
+                initialized.current = true;
+                await onMessageComposerSubmit(pendingMessage);
+                onPendingMessageSent();
+                setMessages([{role: "human", id: null, text: pendingMessage}]);
                 return;
             }
 
@@ -224,13 +222,6 @@ export function Conversation({ conversationId }: ConversationProps) {
     };
 
     const onMessageComposerSubmit = async (message: string) => {
-        if (!conversationId) {
-            const newConversationId = await api.conversations().createConversation(dataSetId!);
-            setPendingMessage(message);
-            navigate(`/data-sets/${dataSetId}/chat/${newConversationId}`);
-            return;
-        }
-
         setIsLoading(true);
         setIsAgentLoading(true);
         addUserMessage(message);

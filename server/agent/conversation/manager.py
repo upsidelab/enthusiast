@@ -1,9 +1,8 @@
 from datetime import datetime
 
 from account.models import User
-from agent.core.agents.tool_calling_agent.builder import Builder
-from agent.core.agents.tool_calling_agent.config import get_config
 from agent.models import Conversation, Message
+from agent.registries.agents.agent_registry import AgentRegistry
 
 
 class ConversationManager:
@@ -13,17 +12,16 @@ class ConversationManager:
         Engine calculates embedding for a question and using similarity search collects documents that may contain
         relevant content.
         """
-        config = get_config(conversation, streaming)
-        agent = Builder(config).build()
+        agent = AgentRegistry().get_agent_by_name(conversation, streaming)
         response = agent.get_answer(question_message)
 
         return response
 
-    def create_conversation(self, user_id: int, data_set_id: int) -> Conversation:
+    def create_conversation(self, user_id: int, data_set_id: int, agent_name: str) -> Conversation:
         user = User.objects.get(id=user_id)
         data_set = user.data_sets.get(id=data_set_id)
 
-        conversation = Conversation.objects.create(started_at=datetime.now(), user=user, data_set=data_set)
+        conversation = Conversation.objects.create(started_at=datetime.now(), user=user, data_set=data_set, agent=agent_name)
         return conversation
 
     def get_conversation(self, user_id: int, data_set_id: int, conversation_id: int) -> Conversation:

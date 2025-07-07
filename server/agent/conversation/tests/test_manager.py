@@ -26,7 +26,7 @@ class TestConversationManager:
         data_set_id = self.data_set.id
 
         # When
-        conversation = self.manager.create_conversation(user_id=user_id, data_set_id=data_set_id)
+        conversation = self.manager.create_conversation(user_id=user_id, data_set_id=data_set_id, agent_name="Question Answer Agent")
 
         # Then
         assert conversation is not None
@@ -44,7 +44,7 @@ class TestConversationManager:
 
         # When & Then
         with pytest.raises(ObjectDoesNotExist):
-            self.manager.create_conversation(user_id=invalid_user_id, data_set_id=data_set_id)
+            self.manager.create_conversation(user_id=invalid_user_id, data_set_id=data_set_id, agent_name="Question Answer Agent")
 
     def test_create_conversation_with_invalid_data_set_id(self):
         """Test conversation creation with invalid data set ID."""
@@ -54,7 +54,7 @@ class TestConversationManager:
 
         # When & Then
         with pytest.raises(ObjectDoesNotExist):
-            self.manager.create_conversation(user_id=user_id, data_set_id=invalid_data_set_id)
+            self.manager.create_conversation(user_id=user_id, data_set_id=invalid_data_set_id, agent_name="Question Answer Agent")
 
     def test_create_conversation_with_data_set_not_owned_by_user(self):
         """Test conversation creation with data set not owned by user."""
@@ -68,7 +68,7 @@ class TestConversationManager:
 
         # When & Then
         with pytest.raises(ObjectDoesNotExist):
-            self.manager.create_conversation(user_id=user_id, data_set_id=other_data_set_id)
+            self.manager.create_conversation(user_id=user_id, data_set_id=other_data_set_id, agent_name="Question Answer Agent")
 
     def test_get_conversation_success(self):
         """Test successful conversation retrieval."""

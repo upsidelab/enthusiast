@@ -29,7 +29,7 @@ interface ConversationUIProps {
 
 function ConversationUI({messages, isAgentLoading, lastMessageRef, onSubmit, isLoading}: ConversationUIProps) {
     return (
-        <div className="flex flex-col h-full px-4 pt-4">
+        <div className="flex flex-col h-full px-4 pt-16">
             <div className="grow flex-1 space-y-4">
                 {messages.map((message, index) =>
                     message.role === "system" ? (
@@ -63,6 +63,7 @@ export function Conversation({ conversationId, pendingMessage, onPendingMessageS
     const [isLoading, setIsLoading] = useState(false);
     const [isAgentLoading, setIsAgentLoading] = useState(false);
     const [messages, setMessages] = useState<MessageProps[]>([]);
+    const initialized = useRef(false);
 
     const usePolling = useRef(!streamingEnabled);
     const lastMessageRef = useRef<HTMLDivElement | null>(null);
@@ -80,9 +81,12 @@ export function Conversation({ conversationId, pendingMessage, onPendingMessageS
     // Load messages when conversationId changes
     useEffect(() => {
         const loadMessages = async () => {
-            if (pendingMessage) {
+            if (pendingMessage && !initialized.current) {
+                // React StrictMode renders this component twice, but we can't execute this callback twice.
+                initialized.current = true;
                 await onMessageComposerSubmit(pendingMessage);
-                onPendingMessageSent()
+                onPendingMessageSent();
+                setMessages([{role: "human", id: null, text: pendingMessage}]);
                 return;
             }
 

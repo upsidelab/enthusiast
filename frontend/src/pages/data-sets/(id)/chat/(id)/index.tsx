@@ -32,7 +32,7 @@ export function Chat() {
     <PageMain className="h-full">
       {conversation &&
         <>
-          <PageHeading title={pendingMessage || conversation.summary!} description={`Chat with ${conversation.agent}`} className="sticky top-4 bg-white" />
+          <PageHeading title={pendingMessage || conversation.summary!} description={`Chat with ${conversation.agent}`} className="sticky top-0 p-4 bg-white" />
           <Conversation conversationId={conversationId} onPendingMessageSent={onPendingMessageSent} pendingMessage={pendingMessage} />
         </>
       }

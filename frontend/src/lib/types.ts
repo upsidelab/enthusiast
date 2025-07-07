@@ -62,6 +62,7 @@ export type Conversation = {
   dimensions: number;
   data_set: string;
   summary?: string;
+  agent?: string;
   history?: Message[];
 }
 

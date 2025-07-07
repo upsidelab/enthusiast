@@ -5,11 +5,12 @@ import {authenticationProviderInstance} from "@/lib/authentication-provider.ts";
 import {ApiClient, TaskHandle} from "@/lib/api.ts";
 import {useApplicationContext} from "@/lib/use-application-context.ts";
 import {MessageError} from "@/components/conversation-view/message-error.tsx";
-import {useNavigate} from "react-router-dom";
 import {MessageBubbleTyping} from "@/components/conversation-view/message-bubble-typing.tsx";
 
 export interface ConversationProps {
-    conversationId: number | null;
+    conversationId: number;
+    onPendingMessageSent: () => void;
+    pendingMessage?: string;
 }
 
 export interface MessageProps {
@@ -58,18 +59,16 @@ const api = new ApiClient(authenticationProviderInstance);
 
 const streamingEnabled = Boolean(import.meta.env.VITE_WS_BASE);
 
-export function Conversation({ conversationId }: ConversationProps) {
+export function Conversation({ conversationId, pendingMessage, onPendingMessageSent }: ConversationProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [isAgentLoading, setIsAgentLoading] = useState(false);
     const [messages, setMessages] = useState<MessageProps[]>([]);
-    const [pendingMessage, setPendingMessage] = useState<string | null>(null);
 
     const usePolling = useRef(!streamingEnabled);
     const lastMessageRef = useRef<HTMLDivElement | null>(null);
     const ws = useRef<WebSocket | null>(null);
 
     const { dataSetId } = useApplicationContext()!;
-    const navigate = useNavigate();
 
     // Cleanup WebSocket on unmount
     useEffect(() => {
@@ -81,14 +80,9 @@ export function Conversation({ conversationId }: ConversationProps) {
     // Load messages when conversationId changes
     useEffect(() => {
         const loadMessages = async () => {
-            if (!conversationId) {
-                setMessages([]);
-                return;
-            }
-
             if (pendingMessage) {
-                onMessageComposerSubmit(pendingMessage);
-                setPendingMessage(null);
+                await onMessageComposerSubmit(pendingMessage);
+                onPendingMessageSent()
                 return;
             }
 
@@ -224,13 +218,6 @@ export function Conversation({ conversationId }: ConversationProps) {
     };
 
     const onMessageComposerSubmit = async (message: string) => {
-        if (!conversationId) {
-            const newConversationId = await api.conversations().createConversation(dataSetId!);
-            setPendingMessage(message);
-            navigate(`/data-sets/${dataSetId}/chat/${newConversationId}`);
-            return;
-        }
-
         setIsLoading(true);
         setIsAgentLoading(true);
         addUserMessage(message);

@@ -37,11 +37,12 @@ class AgentProductSearchTool(BaseLLMTool):
 
     def run(self, sql_query: str):
         try:
+            sql_query = sql_query.replace("%", "%%")
             products = Product.objects.raw(sql_query)
             products = list(products)
         except Exception as e:
             logger.info(e)
-            return f"The query you provided is incorrect Error: {type(e).__name__} - {e}. Fix your query and try again."
+            return f"The query you provided is incorrect Error: {type(e).__name__} - {e}. Fix your query and try again. Make sure it's a valid SQL.w "
 
         if len(products) > 0:
             serialized_products = serializers.serialize("json", products)

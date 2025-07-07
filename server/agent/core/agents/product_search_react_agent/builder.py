@@ -17,7 +17,6 @@ class Builder(AgentBuilder):
         prompt: PromptTemplate | ChatMessagePromptTemplate,
         conversation_service: BaseConversationService,
     ) -> ProductSearchReActAgent:
-        dataset = self._repositories.data_set.get_by_id(pk=self._data_set_id)
         return self._config.agent_class(
             tools=tools,
             llm=llm,

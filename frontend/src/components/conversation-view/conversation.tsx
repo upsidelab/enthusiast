@@ -10,7 +10,7 @@ import {MessageBubbleTyping} from "@/components/conversation-view/message-bubble
 export interface ConversationProps {
     conversationId: number;
     onPendingMessageSent: () => void;
-    pendingMessage?: string;
+    pendingMessage: string | null;
 }
 
 export interface MessageProps {

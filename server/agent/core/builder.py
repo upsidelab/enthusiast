@@ -1,5 +1,3 @@
-from dataclasses import fields
-
 from enthusiast_common.agents import BaseAgent
 from enthusiast_common.builder import BaseAgentBuilder, RepositoriesInstances
 from enthusiast_common.config import AgentConfig, LLMConfig
@@ -47,8 +45,7 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
 
     def _build_and_set_repositories(self, models_registry: BaseDBModelsRegistry) -> None:
         repositories = {}
-        for field in fields(self._config.repositories):
-            name = field.name
+        for name in self._config.repositories.__class__.model_fields.keys():
             repo_class = getattr(self._config.repositories, name)
             model_class = models_registry.get_model_class_by_name(name)
             repositories[name] = repo_class(model_class)

@@ -20,7 +20,6 @@ from ..repositories import (
 )
 from ..services import BaseConversationService
 from ..tools import BaseAgentTool, BaseFunctionTool, BaseLLMTool
-from .validator import AgentConfigValidator
 
 
 @dataclass
@@ -44,8 +43,6 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
         self._llm = None
         self._embeddings_registry = None
         self._data_set_id = None
-        self.validator = AgentConfigValidator()
-        self.validator.validate_or_raise(config)
         self._config = config
 
     def build(self) -> BaseAgent:

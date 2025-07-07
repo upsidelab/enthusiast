@@ -1,6 +1,6 @@
 import inspect
 from abc import ABC, ABCMeta, abstractmethod
-from typing import Type
+from typing import Any, Type
 
 from enthusiast_common.agents import BaseAgent
 from enthusiast_common.repositories import BaseDataSetRepository
@@ -71,7 +71,7 @@ class BaseFunctionTool(BaseTool, ABC):
 class BaseLLMTool(BaseTool, ABC):
     def __init__(
         self,
-        data_set_id: int,
+        data_set_id: Any,
         data_set_repo: BaseDataSetRepository,
         llm: BaseLanguageModel,
         injector: BaseInjector | None,

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Generic, Iterable, TypeVar
+from typing import Any, Generic, Iterable, TypeVar
 
 from ..registry import BaseEmbeddingProviderRegistry
 from ..repositories import BaseDataSetRepository, BaseModelChunkRepository
@@ -11,7 +11,7 @@ T = TypeVar("T")
 class BaseVectorStoreRetriever(BaseRetriever, ABC, Generic[T]):
     def __init__(
         self,
-        data_set_id: int,
+        data_set_id: Any,
         data_set_repo: BaseDataSetRepository,
         model_chunk_repo: BaseModelChunkRepository[T],
         embeddings_registry: BaseEmbeddingProviderRegistry,

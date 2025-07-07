@@ -36,5 +36,5 @@ class BaseEmbeddingProviderRegistry(ABC):
         pass
 
     @abstractmethod
-    def provider_for_dataset(self, data_set_id: int) -> Type[EmbeddingProvider]:
+    def provider_for_dataset(self, data_set_id: Any) -> Type[EmbeddingProvider]:
         pass

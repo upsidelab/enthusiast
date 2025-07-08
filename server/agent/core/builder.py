@@ -27,6 +27,7 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
             conversation_repo=self._repositories.conversation,
             conversation_id=self._config.conversation_id,
             callback_handler=callback_handler,
+            injector=self._injector
         )
 
     def _build_llm_registry(self) -> BaseLanguageModelRegistry:
@@ -107,7 +108,6 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
             tools.append(
                 tool_config.tool_class(
                     data_set_id=data_set_id,
-                    data_set_repo=self._repositories.data_set,
                     llm=llm,
                     injector=injector,
                 )
@@ -120,7 +120,9 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
     def _build_injector(self) -> BaseInjector:
         document_retriever = self._build_document_retriever()
         product_retriever = self._build_product_retriever()
-        return self._config.injector(product_retriever=product_retriever, document_retriever=document_retriever)
+        return self._config.injector(
+            product_retriever=product_retriever, document_retriever=document_retriever, repositories=self._repositories
+        )
 
     def _build_agent_callback_handler(self) -> Optional[BaseCallbackHandler]:
         if self._config.agent_callback_handler:

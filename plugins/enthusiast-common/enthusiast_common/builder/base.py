@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from typing import Generic, TypeVar, Optional
 
 from langchain_core.callbacks import BaseCallbackHandler
@@ -11,27 +10,8 @@ from ..agents import BaseAgent
 from ..config import AgentConfig, LLMConfig
 from ..injectors import BaseInjector
 from ..registry import BaseDBModelsRegistry, BaseEmbeddingProviderRegistry, BaseLanguageModelRegistry
-from ..repositories import (
-    BaseConversationRepository,
-    BaseDataSetRepository,
-    BaseMessageRepository,
-    BaseModelChunkRepository,
-    BaseProductRepository,
-    BaseUserRepository,
-)
+from ..structures import RepositoriesInstances
 from ..tools import BaseAgentTool, BaseFunctionTool, BaseLLMTool
-
-
-@dataclass
-class RepositoriesInstances:
-    user: BaseUserRepository
-    message: BaseMessageRepository
-    conversation: BaseConversationRepository
-    data_set: BaseDataSetRepository
-    document_chunk: BaseModelChunkRepository
-    product: BaseProductRepository
-    product_chunk: BaseModelChunkRepository
-
 
 ConfigT = TypeVar("ConfigT", bound=AgentConfig)
 
@@ -57,6 +37,7 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
         return self._build_agent(
             tools, self._llm, self._config.prompt_template, agent_callback_handler
         )
+
 
     @abstractmethod
     def _build_agent(

@@ -8,8 +8,6 @@ from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import BaseTool
 
-from ..repositories import BaseConversationRepository
-
 
 class BaseAgent(ABC):
     _agent_executor: AgentExecutor
@@ -19,18 +17,16 @@ class BaseAgent(ABC):
         tools: list[BaseTool],
         llm: BaseLanguageModel,
         prompt: ChatPromptTemplate,
-        conversation_repo: BaseConversationRepository,
         conversation_id: Any,
-        memory: ConversationSummaryBufferMemory,
+        injector: "BaseInjector",  # noqa: F821
         callback_handler: BaseCallbackHandler | None = None,
     ):
         self._tools = tools
         self._llm = llm
         self._prompt = prompt
-        self._conversation_repo = conversation_repo
         self._conversation_id = conversation_id
-        self._memory = memory
         self._callback_handler = callback_handler
+        self._injector = injector
 
     @abstractmethod
     def get_answer(self, input_text: str) -> str:

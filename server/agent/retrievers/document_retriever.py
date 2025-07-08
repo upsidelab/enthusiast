@@ -1,8 +1,8 @@
 from django.db.models import QuerySet
-from enthusiast_common.builder import RepositoriesInstances
 from enthusiast_common.config import AgentConfig
 from enthusiast_common.registry import BaseEmbeddingProviderRegistry
 from enthusiast_common.retrievers import BaseVectorStoreRetriever
+from enthusiast_common.structures import RepositoriesInstances
 from langchain_core.language_models import BaseLanguageModel
 from pgvector.django import CosineDistance
 

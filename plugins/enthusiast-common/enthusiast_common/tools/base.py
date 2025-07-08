@@ -3,7 +3,6 @@ from abc import ABC, ABCMeta, abstractmethod
 from typing import Any, Type
 
 from enthusiast_common.agents import BaseAgent
-from enthusiast_common.repositories import BaseDataSetRepository
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.tools import Tool
 from pydantic import BaseModel
@@ -72,12 +71,10 @@ class BaseLLMTool(BaseTool, ABC):
     def __init__(
         self,
         data_set_id: Any,
-        data_set_repo: BaseDataSetRepository,
         llm: BaseLanguageModel,
-        injector: BaseInjector | None,
+        injector: BaseInjector,
     ):
         self._data_set_id = data_set_id
-        self._data_set_repo = data_set_repo
         self._llm = llm
         self._injector = injector
 

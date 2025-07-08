@@ -43,7 +43,7 @@ function ConversationUI({messages, isAgentLoading, lastMessageRef, onSubmit, isL
                         />
                     )
                 )}
-                {isAgentLoading && <MessageBubbleTyping/>}
+                {(<MessageBubbleTyping text="Thinking..."/>)}
                 <div className="mb-4"/>
                 <div ref={lastMessageRef}/>
             </div>

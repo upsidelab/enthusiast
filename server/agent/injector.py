@@ -1,13 +1,18 @@
 from enthusiast_common.injectors import BaseInjector
 from enthusiast_common.retrievers import BaseRetriever
 from enthusiast_common.structures import RepositoriesInstances
+from langchain_core.memory import BaseMemory
 
 
 class Injector(BaseInjector):
     def __init__(
-        self, document_retriever: BaseRetriever, product_retriever: BaseRetriever, repositories: RepositoriesInstances
+        self,
+        document_retriever: BaseRetriever,
+        product_retriever: BaseRetriever,
+        repositories: RepositoriesInstances,
+        memory: BaseMemory,
     ):
-        super().__init__(repositories)
+        super().__init__(repositories, memory)
         self._document_retriever = document_retriever
         self._product_retriever = product_retriever
 

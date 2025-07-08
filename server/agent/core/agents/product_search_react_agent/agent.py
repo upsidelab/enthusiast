@@ -8,8 +8,6 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import BaseTool, render_text_description_and_args
 
 from agent.core.agents.product_search_react_agent.output_parser import CustomReactOutputParser
-from agent.core.persistent_chat_history import PersistentChatHistory
-from agent.core.summary_chat_memory import SummaryChatMemory
 from agent.injector import Injector
 from agent.repositories import DjangoConversationRepository
 
@@ -32,8 +30,7 @@ class ProductSearchReActAgent(BaseAgent):
         self._prompt = prompt
         self._conversation_id = conversation_id
         self._callback_handler = callback_handler
-        memory = self._create_agent_memory()
-        self._memory = memory
+        self._injector = injector
         self._agent_executor = self._create_agent_executor()
         super().__init__(tools=tools, llm=llm, prompt=prompt, conversation_repo=conversation_repo, conversation_id=conversation_id, memory=memory, callback_handler=callback_handler, injector=injector)
 
@@ -46,7 +43,9 @@ class ProductSearchReActAgent(BaseAgent):
             tools_renderer=render_text_description_and_args,
             output_parser=CustomReactOutputParser(),
         )
-        return AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True, memory=self._memory, **kwargs)
+        return AgentExecutor.from_agent_and_tools(
+            agent=agent, tools=tools, verbose=True, memory=self._injector.memory, **kwargs
+        )
 
     def _create_tools(self):
         return [tool_class.as_tool() for tool_class in self._tools]
@@ -57,16 +56,3 @@ class ProductSearchReActAgent(BaseAgent):
             config={"callbacks": [self._callback_handler] if self._callback_handler else []},
         )
         return agent_output["output"]
-
-    def _create_agent_memory(self) -> SummaryChatMemory:
-        conversation = self._injector.repositories.conversation.get_by_id(self._conversation_id)
-        history = PersistentChatHistory(conversation)
-        memory = SummaryChatMemory(
-            llm=self._llm,
-            memory_key="chat_history",
-            return_messages=True,
-            max_token_limit=3000,
-            output_key="output",
-            chat_memory=history,
-        )
-        return memory

@@ -10,6 +10,7 @@ from langchain_core.tools import BaseTool, render_text_description_and_args
 from agent.core.agents.product_search_react_agent.output_parser import CustomReactOutputParser
 from agent.core.persistent_chat_history import PersistentChatHistory
 from agent.core.summary_chat_memory import SummaryChatMemory
+from agent.injector import Injector
 from agent.repositories import DjangoConversationRepository
 
 logger = logging.getLogger(__name__)
@@ -21,20 +22,20 @@ class ProductSearchReActAgent(BaseAgent):
         tools: list[BaseTool],
         llm: BaseLanguageModel,
         prompt: ChatPromptTemplate,
-        conversation_repo: DjangoConversationRepository,
         conversation_id: int,
+        conversation_repo: DjangoConversationRepository,
+        injector: Injector,
         callback_handler: BaseCallbackHandler | None = None,
     ):
         self._tools = tools
         self._llm = llm
         self._prompt = prompt
-        self._conversation_repo = conversation_repo
         self._conversation_id = conversation_id
         self._callback_handler = callback_handler
         memory = self._create_agent_memory()
         self._memory = memory
         self._agent_executor = self._create_agent_executor()
-        super().__init__(tools, llm, prompt, conversation_repo, conversation_id, memory, callback_handler)
+        super().__init__(tools=tools, llm=llm, prompt=prompt, conversation_repo=conversation_repo, conversation_id=conversation_id, memory=memory, callback_handler=callback_handler, injector=injector)
 
     def _create_agent_executor(self, **kwargs):
         tools = self._create_tools()
@@ -58,7 +59,7 @@ class ProductSearchReActAgent(BaseAgent):
         return agent_output["output"]
 
     def _create_agent_memory(self) -> SummaryChatMemory:
-        conversation = self._conversation_repo.get_by_id(self._conversation_id)
+        conversation = self._injector.repositories.conversation.get_by_id(self._conversation_id)
         history = PersistentChatHistory(conversation)
         memory = SummaryChatMemory(
             llm=self._llm,

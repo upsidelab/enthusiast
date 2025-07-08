@@ -7,8 +7,6 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.tools import StructuredTool
 from pydantic import BaseModel, Field
 
-from agent.repositories import DjangoDataSetRepository
-
 logger = logging.getLogger(__name__)
 
 VERIFY_PRODUCT_PROMPT_TEMPLATE = """
@@ -32,13 +30,11 @@ class ProductVerificationTool(BaseLLMTool):
     def __init__(
         self,
         data_set_id: int,
-        data_set_repo: DjangoDataSetRepository,
         llm: BaseLanguageModel,
         injector: BaseInjector | None,
     ):
-        super().__init__(data_set_id=data_set_id, data_set_repo=data_set_repo, llm=llm, injector=injector)
+        super().__init__(data_set_id=data_set_id, llm=llm, injector=injector)
         self.data_set_id = data_set_id
-        self.data_set_repo = data_set_repo
         self.llm = llm
         self.injector = injector
 

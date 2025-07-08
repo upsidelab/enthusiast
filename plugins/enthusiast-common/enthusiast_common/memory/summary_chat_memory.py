@@ -1,6 +1,6 @@
 from langchain.memory import ConversationSummaryBufferMemory
 
-from agent.core.persist_intermediate_steps_mixin import PersistIntermediateStepsMixin
+from .persist_intermediate_steps_mixin import PersistIntermediateStepsMixin
 
 
 class SummaryChatMemory(PersistIntermediateStepsMixin, ConversationSummaryBufferMemory):

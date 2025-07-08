@@ -3,6 +3,7 @@ from typing import Generic, TypeVar, Optional
 
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
+from langchain_core.memory import BaseMemory
 from langchain_core.prompts import ChatMessagePromptTemplate, PromptTemplate
 from langchain_core.tools import BaseTool
 
@@ -23,6 +24,8 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
         self._llm = None
         self._embeddings_registry = None
         self._data_set_id = None
+        self._memory = None
+        self._injector = None
         self._config = config
 
     def build(self) -> BaseAgent:

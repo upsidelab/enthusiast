@@ -121,7 +121,10 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         document_retriever = self._build_document_retriever()
         product_retriever = self._build_product_retriever()
         return self._config.injector(
-            product_retriever=product_retriever, document_retriever=document_retriever, repositories=self._repositories
+            product_retriever=product_retriever,
+            document_retriever=document_retriever,
+            repositories=self._repositories,
+            memory=self._memory,
         )
 
     def _build_agent_callback_handler(self) -> Optional[BaseCallbackHandler]:

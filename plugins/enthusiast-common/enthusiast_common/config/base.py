@@ -90,6 +90,11 @@ class RetrieversConfig(ArbitraryTypeBaseModel):
     product: RetrieverConfig
 
 
+class AgentCallbackHandlerConfig(ArbitraryTypeBaseModel):
+    handler_class: Type[BaseCallbackHandler]
+    args: dict[str, Any] = Field(default_factory=dict)
+
+
 class AgentConfig(BaseModel, Generic[InjectorT]):
     conversation_id: Any
     prompt_template: PromptTemplate | ChatPromptTemplate
@@ -102,6 +107,7 @@ class AgentConfig(BaseModel, Generic[InjectorT]):
     function_tools: Optional[list[Type[BaseFunctionTool]]] = None
     llm_tools: Optional[list[LLMToolConfig]] = None
     agent_tools: Optional[list[AgentToolConfig]] = None
+    agent_callback_handler: Optional[AgentCallbackHandlerConfig] = None
     llm: LLMConfig = Field(default_factory=LLMConfig)
 
 

@@ -1,14 +1,20 @@
+from typing import Any, Optional
+from uuid import UUID
+
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
+from langchain_core.agents import AgentAction
 from langchain_core.callbacks import BaseCallbackHandler
 
 
-class ConversationWebSocketCallbackHandler(BaseCallbackHandler):
-    def __init__(self, conversation):
-        self.group_name = f"conversation_{conversation.id}"
+class BaseWebSocketCallbackHandler(BaseCallbackHandler):
+    def __init__(self, conversation_id: int):
+        self.group_name = f"conversation_{conversation_id}"
         self.channel_layer = get_channel_layer()
         self.run_id = None
 
+
+class ConversationWebSocketCallbackHandler(BaseWebSocketCallbackHandler):
     def on_chain_start(self, serialized, inputs, run_id, **kwargs):
         self.run_id = run_id
         async_to_sync(self.channel_layer.group_send)(
@@ -84,3 +90,26 @@ class ReactAgentWebsocketCallbackHandler(ConversationWebSocketCallbackHandler):
                     "token": token,
                 },
             )
+
+
+class AgentActionWebsocketCallbackHandler(BaseWebSocketCallbackHandler):
+    def on_agent_action(
+        self,
+        action: AgentAction,
+        *,
+        run_id: UUID,
+        parent_run_id: Optional[UUID] = None,
+        **kwargs: Any,
+    ) -> Any:
+        output = action.log.split("Action:")[0]
+        output = output.split("Thought:")[-1]
+        output = output.strip()
+        async_to_sync(self.channel_layer.group_send)(
+            self.group_name,
+            {
+                "type": "chat_message",
+                "event": "action",
+                "run_id": self.run_id,
+                "output": output,
+            },
+        )

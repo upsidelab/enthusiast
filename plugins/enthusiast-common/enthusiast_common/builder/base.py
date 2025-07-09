@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from types import NoneType
 from typing import Generic, TypeVar
 
+from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatMessagePromptTemplate, PromptTemplate
 from langchain_core.tools import BaseTool
@@ -54,7 +56,10 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
         self._embeddings_registry = self._build_embeddings_registry()
         injector = self._build_injector()
         tools = self._build_tools(default_llm=self._llm, injector=injector)
-        return self._build_agent(tools, self._llm, self._config.prompt_template, conversation_service)
+        agent_callback_handler = self._build_agent_callback_handler()
+        return self._build_agent(
+            tools, self._llm, self._config.prompt_template, conversation_service, agent_callback_handler
+        )
 
     @abstractmethod
     def _build_agent(
@@ -63,6 +68,7 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
         llm: BaseLanguageModel,
         prompt: PromptTemplate | ChatMessagePromptTemplate,
         conversation_service: BaseConversationService,
+        callback_handler: BaseCallbackHandler,
     ) -> BaseAgent:
         pass
 
@@ -112,4 +118,8 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
 
     @abstractmethod
     def _build_conversation_service(self) -> BaseConversationService:
+        pass
+
+    @abstractmethod
+    def _build_agent_callback_handler(self) -> list[BaseCallbackHandler | NoneType]:
         pass

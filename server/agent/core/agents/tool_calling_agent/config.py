@@ -55,7 +55,7 @@ def get_config(conversation: Conversation, streaming: bool) -> ToolCallingAgentC
                 model_class=CreateAnswerTool,
             )
         ],
-        llm=LLMConfig(callbacks=[ConversationWebSocketCallbackHandler(conversation)], streaming=streaming),
+        llm=LLMConfig(callbacks=[ConversationWebSocketCallbackHandler(conversation.id)], streaming=streaming),
         injector=Injector,
         repositories=RepositoriesConfig(
             user=DjangoUserRepository,

@@ -31,6 +31,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         elif event_type == "message_created":
             output = event.get("answer_id")
             await self.send(text_data=json.dumps({"event": "message_id", "data": {"output": output}}))
+        elif event_type == "action":
+            await self.send(text_data=json.dumps({"event": "action", "data": {"output": event.get("output")}}))
 
     async def save_message(self, output):
         from .models import Conversation, Message

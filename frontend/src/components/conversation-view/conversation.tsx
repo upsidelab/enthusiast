@@ -21,13 +21,14 @@ export interface MessageProps {
 
 interface ConversationUIProps {
     messages: MessageProps[];
-    isAgentLoading: boolean;
+    isAgentLoading: boolean
+    agentAction: string;
     lastMessageRef: MutableRefObject<HTMLDivElement | null>
     onSubmit: (message: string) => void;
     isLoading: boolean;
 }
 
-function ConversationUI({messages, isAgentLoading, lastMessageRef, onSubmit, isLoading}: ConversationUIProps) {
+function ConversationUI({messages, isAgentLoading, agentAction, lastMessageRef, onSubmit, isLoading}: ConversationUIProps) {
     return (
         <div className="flex flex-col h-full px-4 pt-16">
             <div className="grow flex-1 space-y-4">
@@ -43,7 +44,7 @@ function ConversationUI({messages, isAgentLoading, lastMessageRef, onSubmit, isL
                         />
                     )
                 )}
-                {isAgentLoading && <MessageBubbleTyping/>}
+                {isAgentLoading && <MessageBubbleTyping text={agentAction}/>}
                 <div className="mb-4"/>
                 <div ref={lastMessageRef}/>
             </div>
@@ -62,6 +63,7 @@ const streamingEnabled = Boolean(import.meta.env.VITE_WS_BASE);
 export function Conversation({ conversationId, pendingMessage, onPendingMessageSent }: ConversationProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [isAgentLoading, setIsAgentLoading] = useState(false);
+    const [agentAction, setAgentAction] = useState<string>("Thinking...");
     const [messages, setMessages] = useState<MessageProps[]>([]);
     const initialized = useRef(false);
 
@@ -137,6 +139,8 @@ export function Conversation({ conversationId, pendingMessage, onPendingMessageS
                   lastMessage.id = data.data.output
                   return [... prevMessages.slice(0, -1), lastMessage];
               })
+        } else if (data.event === "action") {
+              setAgentAction(data.data.output)
         } else if (data.error) {
             setIsLoading(false);
         }
@@ -248,6 +252,7 @@ export function Conversation({ conversationId, pendingMessage, onPendingMessageS
         <ConversationUI
             messages={messages}
             isAgentLoading={isAgentLoading}
+            agentAction={agentAction}
             lastMessageRef={lastMessageRef}
             onSubmit={onMessageComposerSubmit}
             isLoading={isLoading}

@@ -1,4 +1,5 @@
 from enthusiast_common.config import (
+    AgentCallbackHandlerConfig,
     AgentConfig,
     EmbeddingsRegistryConfig,
     LLMConfig,
@@ -13,7 +14,7 @@ from enthusiast_common.config import (
 from langchain_core.callbacks import StdOutCallbackHandler
 from langchain_core.prompts import PromptTemplate
 
-from agent.callbacks import ReactAgentWebsocketCallbackHandler
+from agent.callbacks import AgentActionWebsocketCallbackHandler, ReactAgentWebsocketCallbackHandler
 from agent.conversation.service import ConversationService
 from agent.core.agents.product_search_react_agent.agent import ProductSearchReActAgent
 from agent.core.agents.product_search_react_agent.prompt import PRODUCT_FINDER_AGENT_PROMPT
@@ -52,7 +53,7 @@ def get_config(conversation: Conversation, streaming: bool) -> AgentConfig:
             LLMToolConfig(model_class=ProductVerificationTool),
         ],
         llm=LLMConfig(
-            callbacks=[ReactAgentWebsocketCallbackHandler(conversation), StdOutCallbackHandler()],
+            callbacks=[ReactAgentWebsocketCallbackHandler(conversation.id), StdOutCallbackHandler()],
             streaming=streaming,
         ),
         injector=Injector,
@@ -73,5 +74,8 @@ def get_config(conversation: Conversation, streaming: bool) -> AgentConfig:
             llm=LLMRegistryConfig(registry_class=LanguageModelRegistry),
             embeddings=EmbeddingsRegistryConfig(registry_class=EmbeddingProviderRegistry),
             model=ModelsRegistryConfig(registry_class=BaseDjangoSettingsDBModelRegistry),
+        ),
+        agent_callback_handler=AgentCallbackHandlerConfig(
+            handler_class=AgentActionWebsocketCallbackHandler, args={"conversation_id": conversation.id}
         ),
     )

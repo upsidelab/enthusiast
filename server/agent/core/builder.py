@@ -1,3 +1,5 @@
+from typing import Optional
+
 from enthusiast_common.agents import BaseAgent
 from enthusiast_common.builder import BaseAgentBuilder, RepositoriesInstances
 from enthusiast_common.config import AgentConfig, LLMConfig
@@ -5,6 +7,7 @@ from enthusiast_common.injectors import BaseInjector
 from enthusiast_common.registry import BaseDBModelsRegistry, BaseEmbeddingProviderRegistry, BaseLanguageModelRegistry
 from enthusiast_common.services import BaseConversationService
 from enthusiast_common.tools import BaseAgentTool, BaseFunctionTool, BaseLLMTool
+from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatMessagePromptTemplate, PromptTemplate
 from langchain_core.tools import BaseTool
@@ -17,6 +20,7 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         llm: BaseLanguageModel,
         prompt: PromptTemplate | ChatMessagePromptTemplate,
         conversation_service: BaseConversationService,
+        callback_handler: BaseCallbackHandler,
     ) -> BaseAgent:
         return self._config.agent_class(
             tools=tools,
@@ -24,6 +28,7 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
             prompt=prompt,
             conversation_service=conversation_service,
             conversation_id=self._config.conversation_id,
+            callback_handler=callback_handler,
         )
 
     def _build_llm_registry(self) -> BaseLanguageModelRegistry:
@@ -125,6 +130,11 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         document_retriever = self._build_document_retriever()
         product_retriever = self._build_product_retriever()
         return self._config.injector(product_retriever=product_retriever, document_retriever=document_retriever)
+
+    def _build_agent_callback_handler(self) -> Optional[BaseCallbackHandler]:
+        if self._config.agent_callback_handler:
+            return self._config.agent_callback_handler.handler_class(**self._config.agent_callback_handler.args)
+        return None
 
     def _build_document_retriever(self):
         pass

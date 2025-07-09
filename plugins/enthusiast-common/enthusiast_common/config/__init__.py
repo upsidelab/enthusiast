@@ -1,4 +1,5 @@
 from .base import (
+    AgentCallbackHandlerConfig,
     AgentConfig,
     AgentToolConfig,
     EmbeddingsRegistryConfig,
@@ -26,4 +27,5 @@ __all__ = [
     "LLMRegistryConfig",
     "ToolCallingAgentConfig",
     "RetrieverConfig",
+    "AgentCallbackHandlerConfig",
 ]

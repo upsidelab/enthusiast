@@ -33,7 +33,9 @@ class ToolCallingAgent(BaseAgent):
     def _create_agent_executor(self, **kwargs):
         tools = self._create_tools()
         agent = create_tool_calling_agent(self._llm, tools, self._prompt)
-        return AgentExecutor(agent=agent, tools=tools, verbose=True, memory=self._injector.memory, **kwargs)
+        return AgentExecutor(
+            agent=agent, tools=tools, verbose=True, memory=self._injector.chat_summary_memory, **kwargs
+        )
 
     def _create_tools(self):
         return [tool_class.as_tool() for tool_class in self._tools]

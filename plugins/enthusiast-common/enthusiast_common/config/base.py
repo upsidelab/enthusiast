@@ -1,9 +1,7 @@
 from typing import Any, Generic, Optional, Type, TypeVar
 
 from langchain_core.callbacks import BaseCallbackHandler
-from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.memory import BaseMemory
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from pydantic import BaseModel, ConfigDict, Field
 

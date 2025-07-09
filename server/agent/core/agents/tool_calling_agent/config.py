@@ -1,10 +1,8 @@
 from enthusiast_common.config import (
-    ConversationHistoryConfig,
     EmbeddingsRegistryConfig,
     LLMConfig,
     LLMRegistryConfig,
     LLMToolConfig,
-    MemoryConfig,
     ModelsRegistryConfig,
     RegistryConfig,
     RepositoriesConfig,
@@ -12,7 +10,6 @@ from enthusiast_common.config import (
     RetrieversConfig,
     ToolCallingAgentConfig,
 )
-from enthusiast_common.memory import PersistentChatHistory, SummaryChatMemory
 from langchain_core.prompts import ChatPromptTemplate
 
 from agent.callbacks import ConversationWebSocketCallbackHandler
@@ -82,16 +79,5 @@ def get_config(conversation: Conversation, streaming: bool) -> ToolCallingAgentC
             llm=LLMRegistryConfig(registry_class=LanguageModelRegistry),
             embeddings=EmbeddingsRegistryConfig(registry_class=EmbeddingProviderRegistry),
             model=ModelsRegistryConfig(registry_class=BaseDjangoSettingsDBModelRegistry),
-        ),
-        memory=MemoryConfig(
-            memory_class=SummaryChatMemory,
-            args={
-                "memory_key": "chat_history",
-                "return_messages": True,
-                "max_token_limit": 3000,
-                "output_key": "output",
-            },
-            llm_required=True,
-            history=ConversationHistoryConfig(history_class=PersistentChatHistory, db_history=True),
         ),
     )

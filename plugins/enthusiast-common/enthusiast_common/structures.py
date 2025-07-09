@@ -1,5 +1,14 @@
 from dataclasses import dataclass
 
+from .repositories import (
+    BaseConversationRepository,
+    BaseDataSetRepository,
+    BaseMessageRepository,
+    BaseModelChunkRepository,
+    BaseProductRepository,
+    BaseUserRepository,
+)
+
 
 @dataclass
 class ProductDetails:
@@ -18,3 +27,14 @@ class DocumentDetails:
     url: str
     title: str
     content: str
+
+
+@dataclass
+class RepositoriesInstances:
+    user: BaseUserRepository
+    message: BaseMessageRepository
+    conversation: BaseConversationRepository
+    data_set: BaseDataSetRepository
+    document_chunk: BaseModelChunkRepository
+    product: BaseProductRepository
+    product_chunk: BaseModelChunkRepository

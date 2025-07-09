@@ -12,27 +12,17 @@ from agent.repositories import DjangoDataSetRepository
 logger = logging.getLogger(__name__)
 
 VERIFY_DATA_PROMPT_TEMPLATE = """
-You are verifying extracted data for product.
-
-Given the following extracted data:
+You are verifying extracted data that describes a sofa.
 
 {data}
 
-It is intended to describe one {product}.
-
-
-Check if any **dimensions, quantities, or values are wildly unrealistic** for a single {product}.
-
-Examples of unrealistic data:
-- A sofa that's 11 meters wide.
-- A chair that weighs 300 kg.
-- A wardrobe with 20 doors.
+Check if any **dimensions, quantities, or values are realistic for a single sofa.
 
 Ignore minor deviations.
-Flag only when the data is extremely unlikely to be true for a {product}.
+Flag only when the data is extremely unlikely to be true for a sofa.
 
 Return:
-Brief explanation of anything that looks suspicious.
+Brief summary of anything that looks suspicious.
 """
 
 
@@ -72,7 +62,8 @@ class DataVerificationTool(BaseLLMTool):
                 "product": product,
             }
         )
-        return llm_result.content
+        print(llm_result)
+        return f"You received the following validation report {llm_result.content}. Respond with the product json, and if any field looks suspicious, add a field called <fieldname>_warning with description of the issue."
 
     def as_tool(self) -> StructuredTool:
         return StructuredTool.from_function(

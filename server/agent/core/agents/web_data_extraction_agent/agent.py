@@ -1,3 +1,4 @@
+import json
 import logging
 from urllib.parse import urlparse
 
@@ -62,12 +63,19 @@ class DataExtractionReActAgent(BaseAgent):
         agent_output = self._agent_executor.invoke(
             {
                 "input": web_page_text_data,
-                "output_format": """{'width': <number in cm>, 'height': <number in cm>, 'depth': <number in cm>, 'number_of_seats': <number of seats>, 'weight': <weight with unit>, 'color': <color>}""",
-                "products_type": "Furnitures",
+                "output_format": """{\"width_cm\": <number in cm>, \"height_cm\": <number in cm>, \"depth_cm\": <number in cm>, \"number_of_seats\": <number of seats>, \"weight_kg\": <weight in kg>, \"material\": \"<material>\"}""",
+                "products_type": "Furniture",
             },
             config={"callbacks": [self._callback_handler] if self._callback_handler else []},
         )
-        return agent_output["output"]
+        result = agent_output["output"]
+        try:
+            parsed = json.loads(result)
+            result = json.dumps(parsed, indent=4)
+        except json.JSONDecodeError:
+            pass
+
+        return result
 
     def _create_agent_memory(self) -> SummaryChatMemory:
         conversation = self._conversation_service.conversation_repo.get_by_id(self._conversation_id)

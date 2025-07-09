@@ -241,6 +241,7 @@ AGENT_TOOLS = {
 AVAILABLE_AGENTS = {
     "Product Search Agent": "agent.core.agents.product_search_react_agent",
     "Question Answer Agent": "agent.core.agents.tool_calling_agent",
+    "Web page Data Extraction Agent": "agent.core.agents.web_data_extraction_agent",
 }
 
 SERVICE_ACCOUNT_DOMAIN = env.str("SERVICE_ACCOUNT_DOMAIN", "enthusiast.internal")

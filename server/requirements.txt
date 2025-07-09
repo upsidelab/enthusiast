@@ -98,3 +98,4 @@ wcwidth==0.2.13
 whitenoise==6.7.0
 yarl==1.13.1
 zope.interface==7.2
+beautifulsoup4==4.13.4

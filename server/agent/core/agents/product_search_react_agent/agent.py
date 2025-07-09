@@ -9,7 +9,6 @@ from langchain_core.tools import BaseTool, render_text_description_and_args
 
 from agent.core.agents.product_search_react_agent.output_parser import CustomReactOutputParser
 from agent.injector import Injector
-from agent.repositories import DjangoConversationRepository
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +20,6 @@ class ProductSearchReActAgent(BaseAgent):
         llm: BaseLanguageModel,
         prompt: ChatPromptTemplate,
         conversation_id: int,
-        conversation_repo: DjangoConversationRepository,
         injector: Injector,
         callback_handler: BaseCallbackHandler | None = None,
     ):
@@ -32,7 +30,14 @@ class ProductSearchReActAgent(BaseAgent):
         self._callback_handler = callback_handler
         self._injector = injector
         self._agent_executor = self._create_agent_executor()
-        super().__init__(tools=tools, llm=llm, prompt=prompt, conversation_repo=conversation_repo, conversation_id=conversation_id, memory=memory, callback_handler=callback_handler, injector=injector)
+        super().__init__(
+            tools=tools,
+            llm=llm,
+            prompt=prompt,
+            conversation_id=conversation_id,
+            callback_handler=callback_handler,
+            injector=injector,
+        )
 
     def _create_agent_executor(self, **kwargs):
         tools = self._create_tools()

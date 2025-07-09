@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from langchain.agents import AgentExecutor
-from langchain.memory import ConversationSummaryBufferMemory
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
@@ -10,8 +8,6 @@ from langchain_core.tools import BaseTool
 
 
 class BaseAgent(ABC):
-    _agent_executor: AgentExecutor
-
     def __init__(
         self,
         tools: list[BaseTool],

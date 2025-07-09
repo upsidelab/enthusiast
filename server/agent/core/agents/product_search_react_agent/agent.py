@@ -44,7 +44,7 @@ class ProductSearchReActAgent(BaseAgent):
             output_parser=CustomReactOutputParser(),
         )
         return AgentExecutor.from_agent_and_tools(
-            agent=agent, tools=tools, verbose=True, memory=self._injector.memory, **kwargs
+            agent=agent, tools=tools, verbose=True, memory=self._injector.chat_summary_memory, **kwargs
         )
 
     def _create_tools(self):

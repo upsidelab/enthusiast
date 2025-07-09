@@ -6,7 +6,6 @@ from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
 
 from agent.injector import Injector
-from agent.repositories import DjangoConversationRepository
 
 
 class ToolCallingAgent(BaseAgent):
@@ -16,7 +15,6 @@ class ToolCallingAgent(BaseAgent):
         llm: BaseLanguageModel,
         prompt: ChatPromptTemplate,
         conversation_id: int,
-        conversation_repo: DjangoConversationRepository,
         injector: Injector,
         callback_handler: BaseCallbackHandler | None = None,
         **kwargs,
@@ -28,7 +26,14 @@ class ToolCallingAgent(BaseAgent):
         self._conversation_id = conversation_id
         self._callback_handler = callback_handler
         self._agent_executor = self._create_agent_executor(**kwargs)
-        super().__init__(tools=tools, llm=llm, prompt=prompt, conversation_repo=conversation_repo, conversation_id=conversation_id, callback_handler=callback_handler, injector=injector)
+        super().__init__(
+            tools=tools,
+            llm=llm,
+            prompt=prompt,
+            conversation_id=conversation_id,
+            callback_handler=callback_handler,
+            injector=injector,
+        )
 
     def _create_agent_executor(self, **kwargs):
         tools = self._create_tools()

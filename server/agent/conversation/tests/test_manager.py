@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 
 from agent.conversation.manager import ConversationManager
-from agent.models import Conversation
+from agent.models import Conversation, Message
 from catalog.models import DataSet
 
 
@@ -26,7 +26,9 @@ class TestConversationManager:
         data_set_id = self.data_set.id
 
         # When
-        conversation = self.manager.create_conversation(user_id=user_id, data_set_id=data_set_id, agent_name="Question Answer Agent")
+        conversation = self.manager.create_conversation(
+            user_id=user_id, data_set_id=data_set_id, agent_name="Question Answer Agent"
+        )
 
         # Then
         assert conversation is not None
@@ -44,7 +46,9 @@ class TestConversationManager:
 
         # When & Then
         with pytest.raises(ObjectDoesNotExist):
-            self.manager.create_conversation(user_id=invalid_user_id, data_set_id=data_set_id, agent_name="Question Answer Agent")
+            self.manager.create_conversation(
+                user_id=invalid_user_id, data_set_id=data_set_id, agent_name="Question Answer Agent"
+            )
 
     def test_create_conversation_with_invalid_data_set_id(self):
         """Test conversation creation with invalid data set ID."""
@@ -54,7 +58,9 @@ class TestConversationManager:
 
         # When & Then
         with pytest.raises(ObjectDoesNotExist):
-            self.manager.create_conversation(user_id=user_id, data_set_id=invalid_data_set_id, agent_name="Question Answer Agent")
+            self.manager.create_conversation(
+                user_id=user_id, data_set_id=invalid_data_set_id, agent_name="Question Answer Agent"
+            )
 
     def test_create_conversation_with_data_set_not_owned_by_user(self):
         """Test conversation creation with data set not owned by user."""
@@ -68,7 +74,9 @@ class TestConversationManager:
 
         # When & Then
         with pytest.raises(ObjectDoesNotExist):
-            self.manager.create_conversation(user_id=user_id, data_set_id=other_data_set_id, agent_name="Question Answer Agent")
+            self.manager.create_conversation(
+                user_id=user_id, data_set_id=other_data_set_id, agent_name="Question Answer Agent"
+            )
 
     def test_get_conversation_success(self):
         """Test successful conversation retrieval."""
@@ -230,6 +238,7 @@ class TestConversationManager:
         """Test that record_error creates a system error message."""
         # Given
         conversation = Conversation.objects.create(user=self.user, data_set=self.data_set, started_at=datetime.now())
+        user_message = Message.objects.create(conversation=conversation, role="human", text="User's message")
         user_id = self.user.id
         data_set_id = self.data_set.id
         conversation_id = conversation.id
@@ -241,11 +250,13 @@ class TestConversationManager:
         )
 
         # Then
-        assert conversation.messages.count() == 1
-        error_message = conversation.messages.first()
+        user_message.refresh_from_db()
+        assert conversation.messages.count() == 2
+        error_message = conversation.messages.last()
         assert error_message.role == "system"
         assert error_message.text == "We couldn't process your request at this time"
         assert error_message.created_at is not None
+        assert user_message.answer_failed is True
 
     def test_record_error_with_invalid_conversation(self):
         """Test record_error with invalid conversation."""
@@ -295,6 +306,7 @@ class TestConversationManager:
         """Test record_error with different types of exceptions."""
         # Given
         conversation = Conversation.objects.create(user=self.user, data_set=self.data_set, started_at=datetime.now())
+        Message.objects.create(conversation=conversation, role="human", text="User's message")
         user_id = self.user.id
         data_set_id = self.data_set.id
         conversation_id = conversation.id

@@ -18,7 +18,7 @@ class PersistentChatHistory(BaseChatMessageHistory):
 
     @property
     def messages(self) -> list[BaseMessage]:
-        messages = self._conversation.messages.order_by("created_at")
+        messages = self._conversation.messages.filter(answer_failed=False).order_by("created_at")
         message_dicts = [{"type": message.role, "data": {"content": message.text}} for message in messages]
         return messages_from_dict(message_dicts)
 

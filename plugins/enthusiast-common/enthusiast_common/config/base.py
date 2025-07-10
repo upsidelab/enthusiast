@@ -22,7 +22,6 @@ from ..repositories.base import (
     BaseUserRepository,
 )
 from ..retrievers import BaseRetriever
-from ..services.conversation import BaseConversationService
 from ..tools import BaseAgentTool, BaseFunctionTool, BaseLLMTool
 
 InjectorT = TypeVar("InjectorT", bound=BaseInjector)
@@ -99,7 +98,6 @@ class AgentConfig(BaseModel, Generic[InjectorT]):
     conversation_id: Any
     prompt_template: PromptTemplate | ChatPromptTemplate
     agent_class: Type[BaseAgent]
-    conversation_service: Type[BaseConversationService]
     repositories: RepositoriesConfig
     retrievers: RetrieversConfig
     injector: Type[InjectorT]

@@ -12,6 +12,8 @@ class Message(models.Model):
     rating = models.IntegerField(null=True)
     feedback = models.TextField(null=True)
 
+    answer_failed = models.BooleanField(default=False)
+
     class Meta:
         db_table_comment = (
             "A message sent during a conversation. Role describes category of a message, it may be "

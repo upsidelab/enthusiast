@@ -112,35 +112,54 @@ export function Conversation({ conversationId, pendingMessage, onPendingMessageS
 
     const handleWebSocketMessage = (event: MessageEvent) => {
         const data = JSON.parse(event.data);
+        const eventType = data.event;
 
-        if (data.event === "on_parser_start") {
-            setIsAgentLoading(true);
-        } else if (data.event === "on_parser_stream") {
-            setIsLoading(false);
-            setIsAgentLoading(false);
+        const handlers: Record<string, () => void> = {
+            on_parser_start: () => {
+                setIsAgentLoading(true);
+            },
+            on_parser_stream: () => {
+                setIsLoading(false);
+                setIsAgentLoading(false);
 
-            setMessages((prevMessages) => {
-                const lastMessage = prevMessages[prevMessages.length - 1];
+                setMessages((prevMessages) => {
+                    const lastMessage = prevMessages[prevMessages.length - 1];
 
-                if (lastMessage && lastMessage.role === "ai" && lastMessage.id === null) {
-                    return [
-                        ...prevMessages.slice(0, -1),
-                        { ...lastMessage, text: lastMessage.text + data.data.chunk }
-                    ];
-                } else {
-                    return [...prevMessages, { role: "ai", text: data.data.chunk, id: null }];
-                }
-            });
+                    if (lastMessage && lastMessage.role === "ai" && lastMessage.id === null) {
+                        return [
+                            ...prevMessages.slice(0, -1),
+                            { ...lastMessage, text: lastMessage.text + data.data.chunk }
+                        ];
+                    } else {
+                        return [...prevMessages, { role: "ai", text: data.data.chunk, id: null }];
+                    }
+                });
 
-            scrollToLastMessage();
-        } else if (data.event === "message_id") {
-              setMessages((prevMessages) => {
-                  const lastMessage = prevMessages[prevMessages.length - 1];
-                  lastMessage.id = data.data.output
-                  return [... prevMessages.slice(0, -1), lastMessage];
-              })
-        } else if (data.event === "action") {
-              setAgentAction(data.data.output)
+                scrollToLastMessage();
+            },
+            message_id: () => {
+                setMessages((prevMessages) => {
+                    const lastMessage = prevMessages[prevMessages.length - 1];
+                    lastMessage.id = data.data.output;
+                    return [...prevMessages.slice(0, -1), lastMessage];
+                });
+            },
+            action: () => {
+                setAgentAction(data.data.output);
+            },
+            error: () => {
+                setIsLoading(false);
+                setIsAgentLoading(false);
+                setMessages((prevMessages) => [
+                    ...prevMessages,
+                    { role: "system", text: data.data.output, id: null },
+                ]);
+            },
+        };
+
+        const handler = handlers[eventType];
+        if (handler) {
+            handler();
         } else if (data.error) {
             setIsLoading(false);
         }

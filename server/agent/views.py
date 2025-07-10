@@ -92,7 +92,13 @@ class ConversationView(APIView):
             data_set_repo = DjangoDataSetRepository(DataSet)
             language_model_provider_class = LanguageModelRegistry(data_set_repo).provider_for_dataset(data_set.id)
             task = respond_to_user_message_task.apply_async(
-                args=[conversation_id, data_set_id, request.user.id, question_message, streaming]
+                kwargs={
+                    "conversation_id": conversation_id,
+                    "data_set_id": data_set_id,
+                    "user_id": request.user.id,
+                    "message": question_message,
+                    "streaming": streaming,
+                }
             )
 
             return Response(
@@ -137,9 +143,9 @@ class ConversationListView(ListAPIView):
             return Response(input_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         conversation = manager.create_conversation(
-            user_id=request.user.id, 
+            user_id=request.user.id,
             data_set_id=input_serializer.validated_data.get("data_set_id"),
-            agent_name=input_serializer.validated_data.get("agent")
+            agent_name=input_serializer.validated_data.get("agent"),
         )
 
         conversation_data = ConversationSerializer(conversation).data

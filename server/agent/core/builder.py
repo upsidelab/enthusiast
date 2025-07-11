@@ -68,7 +68,7 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
     def _build_llm(self, llm_config: LLMConfig) -> BaseLanguageModel:
         data_set_repo = self._repositories.data_set
         llm_registry = self._build_llm_registry()
-        llm = self._config.llm.model_class(
+        llm = self._config.llm.llm_class(
             llm_registry=llm_registry,
             callbacks=llm_config.callbacks,
             streaming=llm_config.streaming,
@@ -84,7 +84,7 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         else:
             llm_registry = llm_registry_class(data_set_repo=data_set_repo)
 
-        llm = self._config.llm.model_class(
+        llm = self._config.llm.llm_class(
             llm_registry=llm_registry,
             data_set_repo=data_set_repo,
         )
@@ -107,7 +107,7 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
             if tool_config.llm:
                 llm = tool_config.llm
             tools.append(
-                tool_config.model_class(
+                tool_config.tool_class(
                     data_set_id=data_set_id,
                     data_set_repo=self._repositories.data_set,
                     llm=llm,
@@ -117,7 +117,7 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         return tools
 
     def _build_agent_tools(self) -> list[BaseAgentTool]:
-        return [tool_config.model_class(agent=tool_config.agent) for tool_config in self._config.agent_tools]
+        return [tool_config.tool_class(agent=tool_config.agent) for tool_config in self._config.agent_tools]
 
     def _build_conversation_service(self) -> BaseConversationService:
         return self._config.conversation_service(

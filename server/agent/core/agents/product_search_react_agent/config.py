@@ -48,9 +48,9 @@ def get_config(conversation: Conversation, streaming: bool) -> AgentConfig:
         conversation_service=ConversationService,
         llm_tools=[
             LLMToolConfig(
-                model_class=ProductVectorStoreSearchTool,
+                tool_class=ProductVectorStoreSearchTool,
             ),
-            LLMToolConfig(model_class=ProductVerificationTool),
+            LLMToolConfig(tool_class=ProductVerificationTool),
         ],
         llm=LLMConfig(
             callbacks=[ReactAgentWebsocketCallbackHandler(conversation.id), StdOutCallbackHandler()],

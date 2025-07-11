@@ -54,7 +54,7 @@ class RegistryConfig(ArbitraryTypeBaseModel):
 
 
 class LLMConfig(ArbitraryTypeBaseModel):
-    model_class: Type[BaseLLM] = BaseLLM
+    llm_class: Type[BaseLLM] = BaseLLM
     callbacks: Optional[list[BaseCallbackHandler]] = None
     streaming: bool = False
 
@@ -70,13 +70,13 @@ class RepositoriesConfig(ArbitraryTypeBaseModel):
 
 
 class LLMToolConfig(ArbitraryTypeBaseModel):
-    model_class: Type[BaseLLMTool]
+    tool_class: Type[BaseLLMTool]
     data_set_id: Optional[Any] = None
     llm: Optional[BaseLanguageModel] = None
 
 
 class AgentToolConfig(ArbitraryTypeBaseModel):
-    model_class: Type[BaseAgentTool]
+    tool_class: Type[BaseAgentTool]
     agent: BaseAgent
 
 

@@ -52,7 +52,7 @@ def get_config(conversation: Conversation, streaming: bool) -> ToolCallingAgentC
         conversation_service=ConversationService,
         llm_tools=[
             LLMToolConfig(
-                model_class=CreateAnswerTool,
+                tool_class=CreateAnswerTool,
             )
         ],
         llm=LLMConfig(callbacks=[ConversationWebSocketCallbackHandler(conversation.id)], streaming=streaming),

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional, Type
+from typing import Optional, Type, Any
 
 from enthusiast_common.structures import DocumentDetails, ProductDetails
 from langchain_core.callbacks import BaseCallbackHandler
@@ -104,7 +104,7 @@ class CustomTool(BaseTool):
     description: str
     args_schema: Type[BaseModel]
     return_direct: bool
-    data_set: any  # TODO use a proper type definition
+    data_set: Any  # TODO use a proper type definition
     chat_model: Optional[str]
 
     def __init__(

@@ -53,7 +53,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry install
+          POETRY_VIRTUALENVS_CREATE=false poetry install
 
       - name: Prepare for tests
         run: cp sample.test.env .env

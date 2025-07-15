@@ -1,7 +1,8 @@
+from typing import Any
+
+from enthusiast_common.repositories import BaseConversationRepository
 from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_core.messages import BaseMessage, messages_from_dict
-
-from agent.models import Conversation
 
 
 class PersistentChatHistory(BaseChatMessageHistory):
@@ -10,8 +11,8 @@ class PersistentChatHistory(BaseChatMessageHistory):
     Inject it to agent's memory, to enable conversation persistence.
     """
 
-    def __init__(self, conversation: Conversation):
-        self._conversation = conversation
+    def __init__(self, conversation_repo: BaseConversationRepository, conversation_id: Any):
+        self._conversation = conversation_repo.get_by_id(conversation_id)
 
     def add_message(self, message: BaseMessage) -> None:
         self._conversation.messages.create(role=message.type, text=message.content)

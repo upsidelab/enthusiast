@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from typing import Generic, TypeVar, Optional
 
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
+from langchain_core.memory import BaseMemory
 from langchain_core.prompts import ChatMessagePromptTemplate, PromptTemplate
 from langchain_core.tools import BaseTool
 
@@ -11,27 +11,8 @@ from ..agents import BaseAgent
 from ..config import AgentConfig, LLMConfig
 from ..injectors import BaseInjector
 from ..registry import BaseDBModelsRegistry, BaseEmbeddingProviderRegistry, BaseLanguageModelRegistry
-from ..repositories import (
-    BaseConversationRepository,
-    BaseDataSetRepository,
-    BaseMessageRepository,
-    BaseModelChunkRepository,
-    BaseProductRepository,
-    BaseUserRepository,
-)
+from ..structures import RepositoriesInstances
 from ..tools import BaseAgentTool, BaseFunctionTool, BaseLLMTool
-
-
-@dataclass
-class RepositoriesInstances:
-    user: BaseUserRepository
-    message: BaseMessageRepository
-    conversation: BaseConversationRepository
-    data_set: BaseDataSetRepository
-    document_chunk: BaseModelChunkRepository
-    product: BaseProductRepository
-    product_chunk: BaseModelChunkRepository
-
 
 ConfigT = TypeVar("ConfigT", bound=AgentConfig)
 
@@ -43,6 +24,9 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
         self._llm = None
         self._embeddings_registry = None
         self._data_set_id = None
+        self._injector = None
+        self._chat_summary_memory = None
+        self._chat_limited_memory = None
         self._config = config
 
     def build(self) -> BaseAgent:
@@ -51,12 +35,12 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
         self._data_set_id = self._repositories.conversation.get_data_set_id(self._config.conversation_id)
         self._llm = self._build_llm(self._config.llm)
         self._embeddings_registry = self._build_embeddings_registry()
-        injector = self._build_injector()
-        tools = self._build_tools(default_llm=self._llm, injector=injector)
+        self._chat_summary_memory = self._build_chat_summary_memory()
+        self._chat_limited_memory = self._build_chat_limited_memory()
+        self._injector = self._build_injector()
+        tools = self._build_tools(default_llm=self._llm, injector=self._injector)
         agent_callback_handler = self._build_agent_callback_handler()
-        return self._build_agent(
-            tools, self._llm, self._config.prompt_template, agent_callback_handler
-        )
+        return self._build_agent(tools, self._llm, self._config.prompt_template, agent_callback_handler)
 
     @abstractmethod
     def _build_agent(
@@ -114,4 +98,12 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
 
     @abstractmethod
     def _build_agent_callback_handler(self) -> Optional[BaseCallbackHandler]:
+        pass
+
+    @abstractmethod
+    def _build_chat_summary_memory(self) -> BaseMemory:
+        pass
+
+    @abstractmethod
+    def _build_chat_limited_memory(self) -> BaseMemory:
         pass

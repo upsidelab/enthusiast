@@ -95,6 +95,10 @@ plugin/**/*.egg-info
 plugins/*/dist
 
 
+.DS_Store
+
+server/.DS_Store
+
 .env
 
 .DS_Store

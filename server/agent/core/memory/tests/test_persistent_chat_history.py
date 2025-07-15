@@ -2,8 +2,9 @@ import pytest
 from django.contrib.auth import get_user_model
 from langchain_core.messages import AIMessage, HumanMessage
 
-from agent.core.persistent_chat_history import PersistentChatHistory
+from agent.core.memory.persistent_chat_history import PersistentChatHistory
 from agent.models import Conversation
+from agent.repositories import DjangoConversationRepository
 from catalog.models import DataSet
 
 
@@ -14,7 +15,8 @@ class TestPersistentChatHistory:
         user = get_user_model().objects.create_user(email="test@example.com")
         data_set = DataSet.objects.create(name="Test DataSet")
         conversation = Conversation.objects.create(user=user, data_set=data_set)
-        history = PersistentChatHistory(conversation)
+        conversation_repo = DjangoConversationRepository(Conversation)
+        history = PersistentChatHistory(conversation_repo=conversation_repo, conversation_id=conversation.id)
         message = HumanMessage(content="Hello")
 
         # When
@@ -31,7 +33,8 @@ class TestPersistentChatHistory:
         user = get_user_model().objects.create_user(email="test@example.com")
         data_set = DataSet.objects.create(name="Test DataSet")
         conversation = Conversation.objects.create(user=user, data_set=data_set)
-        history = PersistentChatHistory(conversation)
+        conversation_repo = DjangoConversationRepository(Conversation)
+        history = PersistentChatHistory(conversation_repo=conversation_repo, conversation_id=conversation.id)
         history.add_message(HumanMessage(content="Message 1"))
         history.add_message(AIMessage(content="Message 2"))
 
@@ -50,7 +53,8 @@ class TestPersistentChatHistory:
         user = get_user_model().objects.create_user(email="test@example.com")
         data_set = DataSet.objects.create(name="Test DataSet")
         conversation = Conversation.objects.create(user=user, data_set=data_set)
-        history = PersistentChatHistory(conversation)
+        conversation_repo = DjangoConversationRepository(Conversation)
+        history = PersistentChatHistory(conversation_repo=conversation_repo, conversation_id=conversation.id)
         history.add_message(HumanMessage(content="You will be deleted"))
 
         # When

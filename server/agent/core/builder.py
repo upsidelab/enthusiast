@@ -11,6 +11,9 @@ from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatMessagePromptTemplate, PromptTemplate
 from langchain_core.tools import BaseTool
 
+from agent.core.memory import PersistentChatHistory, SummaryChatMemory
+from agent.core.memory.limited_chat_memory import LimitedChatMemory
+
 
 class AgentBuilder(BaseAgentBuilder[AgentConfig]):
     def _build_agent(
@@ -24,9 +27,9 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
             tools=tools,
             llm=llm,
             prompt=prompt,
-            conversation_repo=self._repositories.conversation,
             conversation_id=self._config.conversation_id,
             callback_handler=callback_handler,
+            injector=self._injector,
         )
 
     def _build_llm_registry(self) -> BaseLanguageModelRegistry:
@@ -107,7 +110,6 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
             tools.append(
                 tool_config.tool_class(
                     data_set_id=data_set_id,
-                    data_set_repo=self._repositories.data_set,
                     llm=llm,
                     injector=injector,
                 )
@@ -120,7 +122,13 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
     def _build_injector(self) -> BaseInjector:
         document_retriever = self._build_document_retriever()
         product_retriever = self._build_product_retriever()
-        return self._config.injector(product_retriever=product_retriever, document_retriever=document_retriever)
+        return self._config.injector(
+            product_retriever=product_retriever,
+            document_retriever=document_retriever,
+            repositories=self._repositories,
+            chat_summary_memory=self._chat_summary_memory,
+            chat_limited_memory=self._chat_limited_memory,
+        )
 
     def _build_agent_callback_handler(self) -> Optional[BaseCallbackHandler]:
         if self._config.agent_callback_handler:
@@ -132,3 +140,25 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
 
     def _build_product_retriever(self):
         pass
+
+    def _build_chat_summary_memory(self) -> SummaryChatMemory:
+        history = PersistentChatHistory(self._repositories.conversation, self._config.conversation_id)
+        return SummaryChatMemory(
+            llm=self._llm,
+            memory_key="chat_history",
+            return_messages=True,
+            max_token_limit=3000,
+            output_key="output",
+            chat_memory=history,
+        )
+
+    def _build_chat_limited_memory(self) -> LimitedChatMemory:
+        history = PersistentChatHistory(self._repositories.conversation, self._config.conversation_id)
+        return LimitedChatMemory(
+            llm=self._llm,
+            memory_key="chat_history",
+            return_messages=True,
+            max_token_limit=3000,
+            output_key="output",
+            chat_memory=history,
+        )

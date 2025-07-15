@@ -6,7 +6,7 @@ from langchain_core.language_models import BaseLanguageModel
 from langchain_core.messages import AIMessage, FunctionMessage, HumanMessage
 from langchain_core.tools import BaseTool
 
-from agent.core.summary_chat_memory import SummaryChatMemory
+from agent.core.memory.summary_chat_memory import SummaryChatMemory
 
 
 @pytest.mark.django_db

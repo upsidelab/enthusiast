@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 import pytest
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.messages import AIMessage, FunctionMessage
+from langchain_core.messages import AIMessage, FunctionMessage, HumanMessage
 from langchain_core.tools import BaseTool
 
 from agent.core.memory.limited_chat_memory import LimitedChatMemory
@@ -34,9 +34,11 @@ class TestLimitedChatMemory:
 
         # Then
         messages = memory.chat_memory.messages
-        assert len(messages) == 1
-        assert isinstance(messages[0], AIMessage)
-        assert messages[0].content == "I'm doing well, thank you!"
+        assert len(messages) == 2
+        assert isinstance(messages[0], HumanMessage)
+        assert messages[0].content == "Hello, how are you?"
+        assert isinstance(messages[1], AIMessage)
+        assert messages[1].content == "I'm doing well, thank you!"
 
     def test_save_context_with_intermediate_steps(self):
         # Given
@@ -62,20 +64,24 @@ class TestLimitedChatMemory:
 
         # Then
         messages = memory.chat_memory.messages
-        assert len(messages) == 3
+        assert len(messages) == 4
+
+        # Human message
+        assert isinstance(messages[0], HumanMessage)
+        assert messages[0].content == "What's the weather like?"
 
         # AI action message
-        assert isinstance(messages[0], AIMessage)
-        assert messages[0].content == "I'll check the weather for you"
+        assert isinstance(messages[1], AIMessage)
+        assert messages[1].content == "I'll check the weather for you"
 
         # Function message
-        assert isinstance(messages[1], FunctionMessage)
-        assert messages[1].name == "weather_tool"
-        assert messages[1].content == "Temperature: 25°C, Condition: Sunny"
+        assert isinstance(messages[2], FunctionMessage)
+        assert messages[2].name == "weather_tool"
+        assert messages[2].content == "Temperature: 25°C, Condition: Sunny"
 
         # Final AI response
-        assert isinstance(messages[2], AIMessage)
-        assert messages[2].content == "The weather is sunny today!"
+        assert isinstance(messages[3], AIMessage)
+        assert messages[3].content == "The weather is sunny today!"
 
     def test_save_context_with_multiple_intermediate_steps(self):
         # Given
@@ -105,16 +111,17 @@ class TestLimitedChatMemory:
 
         # Then
         messages = memory.chat_memory.messages
-        assert len(messages) == 5
+        assert len(messages) == 6
 
-        # Verify the sequence: AI -> Function -> AI -> Function -> AI
-        assert isinstance(messages[0], AIMessage)
-        assert isinstance(messages[1], FunctionMessage)
-        assert messages[1].name == "search_tool"
-        assert isinstance(messages[2], AIMessage)
-        assert isinstance(messages[3], FunctionMessage)
-        assert messages[3].name == "process_tool"
-        assert isinstance(messages[4], AIMessage)
+        # Verify the sequence: Human -> AI -> Function -> AI -> Function -> AI
+        assert isinstance(messages[0], HumanMessage)
+        assert isinstance(messages[1], AIMessage)
+        assert isinstance(messages[2], FunctionMessage)
+        assert messages[2].name == "search_tool"
+        assert isinstance(messages[3], AIMessage)
+        assert isinstance(messages[4], FunctionMessage)
+        assert messages[4].name == "process_tool"
+        assert isinstance(messages[5], AIMessage)
 
     def test_save_context_without_intermediate_steps(self):
         # Given
@@ -128,8 +135,9 @@ class TestLimitedChatMemory:
 
         # Then
         messages = memory.chat_memory.messages
-        assert len(messages) == 1
-        assert isinstance(messages[0], AIMessage)
+        assert len(messages) == 2
+        assert isinstance(messages[0], HumanMessage)
+        assert isinstance(messages[1], AIMessage)
 
     def test_token_limiting_functionality(self):
         # Given

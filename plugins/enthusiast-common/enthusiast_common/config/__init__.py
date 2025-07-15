@@ -1,6 +1,7 @@
 from .base import (
     AgentCallbackHandlerConfig,
     AgentConfig,
+    AgentConfigWithDefaults,
     AgentToolConfig,
     EmbeddingsRegistryConfig,
     LLMConfig,
@@ -11,11 +12,11 @@ from .base import (
     RepositoriesConfig,
     RetrieverConfig,
     RetrieversConfig,
-    ToolCallingAgentConfig,
 )
 
 __all__ = [
     "AgentConfig",
+    "AgentConfigWithDefaults",
     "AgentToolConfig",
     "RegistryConfig",
     "LLMConfig",
@@ -25,7 +26,6 @@ __all__ = [
     "ModelsRegistryConfig",
     "EmbeddingsRegistryConfig",
     "LLMRegistryConfig",
-    "ToolCallingAgentConfig",
     "RetrieverConfig",
     "AgentCallbackHandlerConfig",
 ]

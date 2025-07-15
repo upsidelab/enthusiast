@@ -2,7 +2,7 @@ from typing import Any, Generic, Optional, Type, TypeVar
 
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
+from langchain_core.prompts import BasePromptTemplate
 from pydantic import BaseModel, ConfigDict, Field
 
 from ..agents import BaseAgent
@@ -94,14 +94,10 @@ class AgentCallbackHandlerConfig(ArbitraryTypeBaseModel):
     args: dict[str, Any] = Field(default_factory=dict)
 
 
-class AgentConfig(BaseModel, Generic[InjectorT]):
+class BaseAgentConfig(ArbitraryTypeBaseModel):
     conversation_id: Any
-    prompt_template: PromptTemplate | ChatPromptTemplate
+    prompt_template: BasePromptTemplate
     agent_class: Type[BaseAgent]
-    repositories: RepositoriesConfig
-    retrievers: RetrieversConfig
-    injector: Type[InjectorT]
-    registry: RegistryConfig
     function_tools: Optional[list[Type[BaseFunctionTool]]] = None
     llm_tools: Optional[list[LLMToolConfig]] = None
     agent_tools: Optional[list[AgentToolConfig]] = None
@@ -109,5 +105,15 @@ class AgentConfig(BaseModel, Generic[InjectorT]):
     llm: LLMConfig = Field(default_factory=LLMConfig)
 
 
-class ToolCallingAgentConfig(AgentConfig):
-    prompt_template: ChatPromptTemplate
+class AgentConfigWithDefaults(BaseAgentConfig, Generic[InjectorT]):
+    repositories: Optional[RepositoriesConfig] = None
+    retrievers: Optional[RetrieversConfig] = None
+    injector: Optional[Type[InjectorT]] = None
+    registry: Optional[RegistryConfig] = None
+
+
+class AgentConfig(BaseAgentConfig, Generic[InjectorT]):
+    repositories: RepositoriesConfig
+    retrievers: RetrieversConfig
+    injector: Type[InjectorT]
+    registry: RegistryConfig

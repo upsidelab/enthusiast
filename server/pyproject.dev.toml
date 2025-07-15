@@ -1,0 +1,34 @@
+[project]
+name = "enthusiast"
+
+requires-python = ">=3.10, <4.0"
+dependencies = [
+    "celery (==5.5.3)",
+    "channels (==4.2.2)",
+    "channels-redis (==4.2.1)",
+    "daphne (==4.2.1)",
+    "django (==5.2.4)",
+    "django-cors-headers (==4.7.0)",
+    "django-environ (==0.12.0)",
+    "djangorestframework (==3.16.0)",
+    "drf-yasg (==1.21.10)",
+    "enthusiast-common (==1.1.0)",
+    "enthusiast-source-sample (==1.0.0)",
+    "enthusiast-model-openai (==1.1.0)",
+    "langchain (==0.3.26)",
+    "pgvector (==0.4.1)",
+    "psycopg2 (==2.9.10)",
+    "pytest-django (==4.11.1)",
+    "redis (==6.2.0)",
+    "uvicorn (==0.30.6)",
+    "whitenoise (==6.9.0)",
+]
+
+
+[tool.poetry.group.dev.dependencies]
+enthusiast-common = { path="../plugins/enthusiast-common" }
+enthusiast-source-sample = { path="../plugins/enthusiast-source-sample" }
+enthusiast-model-openai = { path="../plugins/enthusiast-model-openai" }
+
+[tool.poetry]
+package-mode = false

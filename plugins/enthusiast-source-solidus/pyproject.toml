@@ -6,7 +6,7 @@ authors = ["Rafal Cymerys <rafal@upsidelab.io>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 enthusiast-common = ">=1,<2"
 requests = "^2.32.3"
 

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "enthusiast-source-medusa"
-version = "1.0.0"
+version = "1.0.1"
 description = "A plugin for Enthusiast that provides a Medusa products importer."
 authors = ["Kuba Szczęśniak <kuba.szczęśniak@upsidelab.io>"]
 readme = "README.md"

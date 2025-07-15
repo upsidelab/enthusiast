@@ -16,7 +16,9 @@ class SaveMessageOnFailureTask(Task):
         user_id = kwargs.get("user_id")
         message = kwargs.get("message")
 
-        Message.objects.create(conversation_id=conversation_id, created_at=datetime.now(), role="human", text=message)
+        Message.objects.create(
+            conversation_id=conversation_id, created_at=datetime.now(), role="human", text=message, answer_failed=True
+        )
 
         manager = ConversationManager()
         manager.record_error(conversation_id, user_id, data_set_id, exc)

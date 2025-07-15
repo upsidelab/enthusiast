@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from types import NoneType
-from typing import Generic, TypeVar
+from typing import Generic, TypeVar, Optional
 
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
@@ -20,7 +19,6 @@ from ..repositories import (
     BaseProductRepository,
     BaseUserRepository,
 )
-from ..services import BaseConversationService
 from ..tools import BaseAgentTool, BaseFunctionTool, BaseLLMTool
 
 
@@ -52,13 +50,12 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
         self._build_and_set_repositories(model_registry)
         self._data_set_id = self._repositories.conversation.get_data_set_id(self._config.conversation_id)
         self._llm = self._build_llm(self._config.llm)
-        conversation_service = self._build_conversation_service()
         self._embeddings_registry = self._build_embeddings_registry()
         injector = self._build_injector()
         tools = self._build_tools(default_llm=self._llm, injector=injector)
         agent_callback_handler = self._build_agent_callback_handler()
         return self._build_agent(
-            tools, self._llm, self._config.prompt_template, conversation_service, agent_callback_handler
+            tools, self._llm, self._config.prompt_template, agent_callback_handler
         )
 
     @abstractmethod
@@ -67,8 +64,7 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
         tools: list[BaseTool],
         llm: BaseLanguageModel,
         prompt: PromptTemplate | ChatMessagePromptTemplate,
-        conversation_service: BaseConversationService,
-        callback_handler: BaseCallbackHandler,
+        callback_handler: BaseCallbackHandler
     ) -> BaseAgent:
         pass
 
@@ -117,9 +113,5 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
         pass
 
     @abstractmethod
-    def _build_conversation_service(self) -> BaseConversationService:
-        pass
-
-    @abstractmethod
-    def _build_agent_callback_handler(self) -> list[BaseCallbackHandler | NoneType]:
+    def _build_agent_callback_handler(self) -> Optional[BaseCallbackHandler]:
         pass

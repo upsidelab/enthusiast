@@ -5,7 +5,6 @@ from enthusiast_common.builder import BaseAgentBuilder, RepositoriesInstances
 from enthusiast_common.config import AgentConfig, LLMConfig
 from enthusiast_common.injectors import BaseInjector
 from enthusiast_common.registry import BaseDBModelsRegistry, BaseEmbeddingProviderRegistry, BaseLanguageModelRegistry
-from enthusiast_common.services import BaseConversationService
 from enthusiast_common.tools import BaseAgentTool, BaseFunctionTool, BaseLLMTool
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
@@ -19,14 +18,13 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         tools: list[BaseTool],
         llm: BaseLanguageModel,
         prompt: PromptTemplate | ChatMessagePromptTemplate,
-        conversation_service: BaseConversationService,
         callback_handler: BaseCallbackHandler,
     ) -> BaseAgent:
         return self._config.agent_class(
             tools=tools,
             llm=llm,
             prompt=prompt,
-            conversation_service=conversation_service,
+            conversation_repo=self._repositories.conversation,
             conversation_id=self._config.conversation_id,
             callback_handler=callback_handler,
         )
@@ -118,13 +116,6 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
 
     def _build_agent_tools(self) -> list[BaseAgentTool]:
         return [tool_config.tool_class(agent=tool_config.agent) for tool_config in self._config.agent_tools]
-
-    def _build_conversation_service(self) -> BaseConversationService:
-        return self._config.conversation_service(
-            conversation_repo=self._repositories.conversation,
-            message_repo=self._repositories.message,
-            user_repo=self._repositories.user,
-        )
 
     def _build_injector(self) -> BaseInjector:
         document_retriever = self._build_document_retriever()

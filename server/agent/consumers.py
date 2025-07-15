@@ -18,21 +18,38 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def chat_message(self, event):
         event_type = event.get("event")
-        if event_type == "start":
-            await self.send(text_data=json.dumps({"event": "on_parser_start", "data": {"run_id": event.get("run_id")}}))
-        elif event_type == "stream":
-            # Forward the token to the client
-            await self.send(text_data=json.dumps({"event": "on_parser_stream", "data": {"chunk": event.get("token")}}))
-        elif event_type == "end":
-            output = event.get("output")
-            await self.send(text_data=json.dumps({"event": "on_parser_end", "data": {"output": output}}))
-            # Save the streamed response to the database
-            await self.save_message(output)
-        elif event_type == "message_created":
-            output = event.get("answer_id")
-            await self.send(text_data=json.dumps({"event": "message_id", "data": {"output": output}}))
-        elif event_type == "action":
-            await self.send(text_data=json.dumps({"event": "action", "data": {"output": event.get("output")}}))
+        handlers = {
+            "start": self.handle_start,
+            "stream": self.handle_stream,
+            "end": self.handle_end,
+            "message_created": self.handle_message_created,
+            "action": self.handle_action,
+            "error": self.handle_error,
+        }
+
+        handler = handlers.get(event_type)
+        if handler:
+            await handler(event)
+
+    async def handle_start(self, event):
+        await self.send(json.dumps({"event": "on_parser_start", "data": {"run_id": event.get("run_id")}}))
+
+    async def handle_stream(self, event):
+        await self.send(json.dumps({"event": "on_parser_stream", "data": {"chunk": event.get("token")}}))
+
+    async def handle_end(self, event):
+        output = event.get("output")
+        await self.send(json.dumps({"event": "on_parser_end", "data": {"output": output}}))
+        await self.save_message(output)
+
+    async def handle_message_created(self, event):
+        await self.send(json.dumps({"event": "message_id", "data": {"output": event.get("answer_id")}}))
+
+    async def handle_action(self, event):
+        await self.send(json.dumps({"event": "action", "data": {"output": event.get("output")}}))
+
+    async def handle_error(self, event):
+        await self.send(json.dumps({"event": "error", "data": {"output": event.get("output")}}))
 
     async def save_message(self, output):
         from .models import Conversation, Message

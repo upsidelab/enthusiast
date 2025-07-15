@@ -15,7 +15,6 @@ from langchain_core.callbacks import StdOutCallbackHandler
 from langchain_core.prompts import PromptTemplate
 
 from agent.callbacks import AgentActionWebsocketCallbackHandler, ReactAgentWebsocketCallbackHandler
-from agent.conversation.service import ConversationService
 from agent.core.agents.product_search_react_agent.agent import ProductSearchReActAgent
 from agent.core.agents.product_search_react_agent.prompt import PRODUCT_FINDER_AGENT_PROMPT
 from agent.injector import Injector
@@ -45,7 +44,6 @@ def get_config(conversation: Conversation, streaming: bool) -> AgentConfig:
             input_variables=["tools", "tool_names", "input", "agent_scratchpad"], template=PRODUCT_FINDER_AGENT_PROMPT
         ),
         agent_class=ProductSearchReActAgent,
-        conversation_service=ConversationService,
         llm_tools=[
             LLMToolConfig(
                 tool_class=ProductVectorStoreSearchTool,

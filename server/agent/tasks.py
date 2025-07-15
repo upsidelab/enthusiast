@@ -14,6 +14,10 @@ class SaveMessageOnFailureTask(Task):
         conversation_id = kwargs.get("conversation_id")
         data_set_id = kwargs.get("data_set_id")
         user_id = kwargs.get("user_id")
+        message = kwargs.get("message")
+
+        Message.objects.create(conversation_id=conversation_id, created_at=datetime.now(), role="human", text=message)
+
         manager = ConversationManager()
         manager.record_error(conversation_id, user_id, data_set_id, exc)
         ws_handler = BaseWebSocketHandler(conversation_id=conversation_id)
@@ -26,11 +30,6 @@ def respond_to_user_message_task(
 ):
     manager = ConversationManager()
     try:
-        if self.request.retries == 0:
-            Message.objects.create(
-                conversation_id=conversation_id, created_at=datetime.now(), role="human", text=message
-            )
-
         answer = manager.respond_to_user_message(
             conversation_id=conversation_id,
             data_set_id=data_set_id,

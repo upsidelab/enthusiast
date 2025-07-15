@@ -95,11 +95,15 @@ class TestSummaryChatMemory:
 
         # Then
         # Verify that messages were added to chat_memory
-        assert mock_chat_memory.add_message.call_count == 1
-        # First call should be AiMessage
+        assert mock_chat_memory.add_message.call_count == 2
+        # First call should be HumanMessage
         first_call_args = mock_chat_memory.add_message.call_args_list[0][0][0]
-        assert isinstance(first_call_args, AIMessage)
-        assert first_call_args.content == "I'm doing well, thank you!"
+        assert isinstance(first_call_args, HumanMessage)
+        assert first_call_args.content == "Hello, how are you?"
+        # Second call should be AIMessage
+        second_call_args = mock_chat_memory.add_message.call_args_list[1][0][0]
+        assert isinstance(second_call_args, AIMessage)
+        assert second_call_args.content == "I'm doing well, thank you!"
 
     def test_save_context_with_intermediate_steps(self):
         # Given
@@ -133,24 +137,28 @@ class TestSummaryChatMemory:
         memory.save_context(inputs, outputs)
 
         # Then
-        # Should have 3 calls: AI action, Function, Final AI
-        assert mock_chat_memory.add_message.call_count == 3
+        # Should have 4 calls: Human, AI action, Function, Final AI
+        assert mock_chat_memory.add_message.call_count == 4
 
         # Verify the sequence of calls
         call_args_list = mock_chat_memory.add_message.call_args_list
 
+        # Human message
+        assert isinstance(call_args_list[0][0][0], HumanMessage)
+        assert call_args_list[0][0][0].content == "What's the weather like?"
+
         # AI action message
-        assert isinstance(call_args_list[0][0][0], AIMessage)
-        assert call_args_list[0][0][0].content == "I'll check the weather for you"
+        assert isinstance(call_args_list[1][0][0], AIMessage)
+        assert call_args_list[1][0][0].content == "I'll check the weather for you"
 
         # Function message
-        assert isinstance(call_args_list[1][0][0], FunctionMessage)
-        assert call_args_list[1][0][0].name == "weather_tool"
-        assert call_args_list[1][0][0].content == "Temperature: 25°C, Condition: Sunny"
+        assert isinstance(call_args_list[2][0][0], FunctionMessage)
+        assert call_args_list[2][0][0].name == "weather_tool"
+        assert call_args_list[2][0][0].content == "Temperature: 25°C, Condition: Sunny"
 
         # Final AI response
-        assert isinstance(call_args_list[2][0][0], AIMessage)
-        assert call_args_list[2][0][0].content == "The weather is sunny today!"
+        assert isinstance(call_args_list[3][0][0], AIMessage)
+        assert call_args_list[3][0][0].content == "The weather is sunny today!"
 
     def test_save_context_with_multiple_intermediate_steps(self):
         # Given
@@ -188,30 +196,33 @@ class TestSummaryChatMemory:
         memory.save_context(inputs, outputs)
 
         # Then
-        # Should have 5 calls: 2 AI + 2 Function + Final AI
-        assert mock_chat_memory.add_message.call_count == 5
+        # Should have 6 calls: Human + 2 AI + 2 Function + Final AI
+        assert mock_chat_memory.add_message.call_count == 6
 
         # Verify the sequence of calls
         call_args_list = mock_chat_memory.add_message.call_args_list
 
+        # Human message
+        assert isinstance(call_args_list[0][0][0], HumanMessage)
+
         # First AI action
-        assert isinstance(call_args_list[0][0][0], AIMessage)
-        assert call_args_list[0][0][0].content == "Searching for data..."
+        assert isinstance(call_args_list[1][0][0], AIMessage)
+        assert call_args_list[1][0][0].content == "Searching for data..."
 
         # First Function message
-        assert isinstance(call_args_list[1][0][0], FunctionMessage)
-        assert call_args_list[1][0][0].name == "search_tool"
+        assert isinstance(call_args_list[2][0][0], FunctionMessage)
+        assert call_args_list[2][0][0].name == "search_tool"
 
         # Second AI action
-        assert isinstance(call_args_list[2][0][0], AIMessage)
-        assert call_args_list[2][0][0].content == "Processing data..."
+        assert isinstance(call_args_list[3][0][0], AIMessage)
+        assert call_args_list[3][0][0].content == "Processing data..."
 
         # Second Function message
-        assert isinstance(call_args_list[3][0][0], FunctionMessage)
-        assert call_args_list[3][0][0].name == "process_tool"
+        assert isinstance(call_args_list[4][0][0], FunctionMessage)
+        assert call_args_list[4][0][0].name == "process_tool"
 
         # Final AI response
-        assert isinstance(call_args_list[4][0][0], AIMessage)
+        assert isinstance(call_args_list[5][0][0], AIMessage)
 
     def test_save_context_without_intermediate_steps(self):
         # Given
@@ -233,9 +244,10 @@ class TestSummaryChatMemory:
         memory.save_context(inputs, outputs)
 
         # Then
-        assert mock_chat_memory.add_message.call_count == 1
+        assert mock_chat_memory.add_message.call_count == 2
         call_args_list = mock_chat_memory.add_message.call_args_list
-        assert isinstance(call_args_list[0][0][0], AIMessage)
+        assert isinstance(call_args_list[0][0][0], HumanMessage)
+        assert isinstance(call_args_list[1][0][0], AIMessage)
 
     def test_save_context_with_empty_intermediate_steps(self):
         # Given
@@ -257,9 +269,10 @@ class TestSummaryChatMemory:
         memory.save_context(inputs, outputs)
 
         # Then
-        assert mock_chat_memory.add_message.call_count == 1
+        assert mock_chat_memory.add_message.call_count == 2
         call_args_list = mock_chat_memory.add_message.call_args_list
-        assert isinstance(call_args_list[0][0][0], AIMessage)
+        assert isinstance(call_args_list[0][0][0], HumanMessage)
+        assert isinstance(call_args_list[1][0][0], AIMessage)
 
     def test_save_context_with_missing_intermediate_steps_key(self):
         # Given
@@ -281,9 +294,10 @@ class TestSummaryChatMemory:
         memory.save_context(inputs, outputs)
 
         # Then
-        assert mock_chat_memory.add_message.call_count == 1
+        assert mock_chat_memory.add_message.call_count == 2
         call_args_list = mock_chat_memory.add_message.call_args_list
-        assert isinstance(call_args_list[0][0][0], AIMessage)
+        assert isinstance(call_args_list[0][0][0], HumanMessage)
+        assert isinstance(call_args_list[1][0][0], AIMessage)
 
     def test_load_memory_variables_with_short_history(self):
         # Given
@@ -380,16 +394,18 @@ class TestSummaryChatMemory:
 
         # Then
         # Should have 4 total calls (2 messages per conversation)
-        assert mock_chat_memory.add_message.call_count == 2
+        assert mock_chat_memory.add_message.call_count == 4
 
         # Verify the sequence of calls
         call_args_list = mock_chat_memory.add_message.call_args_list
 
         # First conversation
-        assert call_args_list[0][0][0].content == "2+2 equals 4"
+        assert call_args_list[0][0][0].content == "What's 2+2?"
+        assert call_args_list[1][0][0].content == "2+2 equals 4"
 
         # Second conversation
-        assert call_args_list[1][0][0].content == "3+3 equals 6"
+        assert call_args_list[2][0][0].content == "What about 3+3?"
+        assert call_args_list[3][0][0].content == "3+3 equals 6"
 
     def test_memory_with_complex_intermediate_steps(self):
         # Given
@@ -432,8 +448,8 @@ class TestSummaryChatMemory:
         memory.save_context(inputs, outputs)
 
         # Then
-        # Should have 8 calls: 3 AI + 3 Function + Final AI
-        assert mock_chat_memory.add_message.call_count == 7
+        # Should have 8 calls: Human + 3 AI + 3 Function + Final AI
+        assert mock_chat_memory.add_message.call_count == 8
 
         # Verify tool names in function messages
         call_args_list = mock_chat_memory.add_message.call_args_list
@@ -461,7 +477,7 @@ class TestSummaryChatMemory:
         memory.save_context(inputs, outputs)
 
         # Verify messages were saved
-        assert mock_chat_memory.add_message.call_count == 1
+        assert mock_chat_memory.add_message.call_count == 2
 
         # When
         memory.clear()
@@ -489,9 +505,10 @@ class TestSummaryChatMemory:
         memory.save_context(inputs, outputs)
 
         # Then
-        assert mock_chat_memory.add_message.call_count == 1
+        assert mock_chat_memory.add_message.call_count == 2
         call_args_list = mock_chat_memory.add_message.call_args_list
-        assert call_args_list[0][0][0].content == "Response with emojis: 😀🎉🚀"
+        assert call_args_list[0][0][0].content == "Message with special chars: !@#$%^&*()"
+        assert call_args_list[1][0][0].content == "Response with emojis: 😀🎉🚀"
 
     def test_memory_with_empty_input_output(self):
         # Given
@@ -513,6 +530,7 @@ class TestSummaryChatMemory:
         memory.save_context(inputs, outputs)
 
         # Then
-        assert mock_chat_memory.add_message.call_count == 1
+        assert mock_chat_memory.add_message.call_count == 2
         call_args_list = mock_chat_memory.add_message.call_args_list
         assert call_args_list[0][0][0].content == ""
+        assert call_args_list[1][0][0].content == ""

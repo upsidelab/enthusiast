@@ -25,6 +25,7 @@ class DataSetObjectEmbeddingsGenerator(Generic[T]):
                 data_set.embedding_model, data_set.embedding_vector_dimensions
             )
             chunk.set_embedding(embedding_provider.generate_embeddings(chunk.content))
+            chunk.save()
 
 
 class ProductEmbeddingGenerator(DataSetObjectEmbeddingsGenerator[Product]):

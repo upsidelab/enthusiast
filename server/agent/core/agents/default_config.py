@@ -4,6 +4,7 @@ from enthusiast_common.config import (
     AgentConfig,
     AgentConfigWithDefaults,
     EmbeddingsRegistryConfig,
+    LLMConfig,
     LLMRegistryConfig,
     ModelsRegistryConfig,
     RegistryConfig,
@@ -13,6 +14,7 @@ from enthusiast_common.config import (
 )
 from pydantic import BaseModel
 
+from agent.callbacks import ConversationWebSocketCallbackHandler
 from agent.injector import Injector
 from agent.registries.embeddings import EmbeddingProviderRegistry
 from agent.registries.language_models import LanguageModelRegistry
@@ -31,47 +33,61 @@ from agent.retrievers.product_retriever import QUERY_PROMPT_TEMPLATE
 
 
 class DefaultAgentConfig(BaseModel):
-    repositories: RepositoriesConfig = RepositoriesConfig(
-        user=DjangoUserRepository,
-        data_set=DjangoDataSetRepository,
-        conversation=DjangoConversationRepository,
-        message=DjangoMessageRepository,
-        product=DjangoProductRepository,
-        document_chunk=DjangoDocumentChunkRepository,
-        product_chunk=DjangoProductChunkRepository,
-    )
-    retrievers: RetrieversConfig = RetrieversConfig(
-        document=RetrieverConfig(retriever_class=DocumentRetriever),
-        product=RetrieverConfig(
-            retriever_class=ProductRetriever,
-            extra_kwargs={
-                "prompt_template": QUERY_PROMPT_TEMPLATE,
-                "max_sample_products": 12,
-                "number_of_products": 12,
-            },
+    repositories: RepositoriesConfig
+    retrievers: RetrieversConfig
+    injector: Type[Injector]
+    registry: RegistryConfig
+    llm: LLMConfig
+
+
+def get_default_config(conversation_id: int, streaming: bool) -> DefaultAgentConfig:
+    return DefaultAgentConfig(
+        repositories=RepositoriesConfig(
+            user=DjangoUserRepository,
+            data_set=DjangoDataSetRepository,
+            conversation=DjangoConversationRepository,
+            message=DjangoMessageRepository,
+            product=DjangoProductRepository,
+            document_chunk=DjangoDocumentChunkRepository,
+            product_chunk=DjangoProductChunkRepository,
         ),
-    )
-    injector: Type[Injector] = Injector
-    registry: RegistryConfig = RegistryConfig(
-        llm=LLMRegistryConfig(registry_class=LanguageModelRegistry),
-        embeddings=EmbeddingsRegistryConfig(registry_class=EmbeddingProviderRegistry),
-        model=ModelsRegistryConfig(registry_class=BaseDjangoSettingsDBModelRegistry),
+        retrievers=RetrieversConfig(
+            document=RetrieverConfig(retriever_class=DocumentRetriever),
+            product=RetrieverConfig(
+                retriever_class=ProductRetriever,
+                extra_kwargs={
+                    "prompt_template": QUERY_PROMPT_TEMPLATE,
+                    "max_sample_products": 12,
+                    "number_of_products": 12,
+                },
+            ),
+        ),
+        injector=Injector,
+        registry=RegistryConfig(
+            llm=LLMRegistryConfig(registry_class=LanguageModelRegistry),
+            embeddings=EmbeddingsRegistryConfig(registry_class=EmbeddingProviderRegistry),
+            model=ModelsRegistryConfig(registry_class=BaseDjangoSettingsDBModelRegistry),
+        ),
+        llm=LLMConfig(
+            callbacks=[ConversationWebSocketCallbackHandler(conversation_id=conversation_id)],
+            streaming=streaming,
+        ),
     )
 
 
 def merge_config(
     partial: AgentConfigWithDefaults,
-    defaults: type[DefaultAgentConfig] = DefaultAgentConfig,
+    conversation_id: int,
+    streaming: bool,
 ) -> AgentConfig:
-    default_values = defaults()
     merged: dict[str, object] = {}
-
+    defaults = get_default_config(conversation_id=conversation_id, streaming=streaming)
     for name in AgentConfig.model_fields:
         value = getattr(partial, name, None)
 
         if value is not None:
             merged[name] = value
         else:
-            merged[name] = getattr(default_values, name, None)
+            merged[name] = getattr(defaults, name, None)
 
     return AgentConfig(**merged)

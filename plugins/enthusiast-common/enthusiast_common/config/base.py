@@ -94,26 +94,24 @@ class AgentCallbackHandlerConfig(ArbitraryTypeBaseModel):
     args: dict[str, Any] = Field(default_factory=dict)
 
 
-class BaseAgentConfig(ArbitraryTypeBaseModel):
+class AgentConfig(ArbitraryTypeBaseModel, Generic[InjectorT]):
     conversation_id: Any
     prompt_template: BasePromptTemplate
     agent_class: Type[BaseAgent]
-    function_tools: Optional[list[Type[BaseFunctionTool]]] = None
-    llm_tools: Optional[list[LLMToolConfig]] = None
-    agent_tools: Optional[list[AgentToolConfig]] = None
-    agent_callback_handler: Optional[AgentCallbackHandlerConfig] = None
-    llm: LLMConfig = Field(default_factory=LLMConfig)
-
-
-class AgentConfigWithDefaults(BaseAgentConfig, Generic[InjectorT]):
-    repositories: Optional[RepositoriesConfig] = None
-    retrievers: Optional[RetrieversConfig] = None
-    injector: Optional[Type[InjectorT]] = None
-    registry: Optional[RegistryConfig] = None
-
-
-class AgentConfig(BaseAgentConfig, Generic[InjectorT]):
+    llm: LLMConfig
     repositories: RepositoriesConfig
     retrievers: RetrieversConfig
     injector: Type[InjectorT]
     registry: RegistryConfig
+    function_tools: Optional[list[Type[BaseFunctionTool]]] = None
+    llm_tools: Optional[list[LLMToolConfig]] = None
+    agent_tools: Optional[list[AgentToolConfig]] = None
+    agent_callback_handler: Optional[AgentCallbackHandlerConfig] = None
+
+
+class AgentConfigWithDefaults(AgentConfig, Generic[InjectorT]):
+    repositories: Optional[RepositoriesConfig] = None
+    retrievers: Optional[RetrieversConfig] = None
+    injector: Optional[Type[InjectorT]] = None
+    registry: Optional[RegistryConfig] = None
+    llm: Optional[LLMConfig] = None

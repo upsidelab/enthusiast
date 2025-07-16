@@ -34,7 +34,7 @@ class AgentRegistry(BaseAgentRegistry):
     def get_agent_by_name(self, conversation: Conversation, streaming: bool) -> BaseAgent:
         builder = self._get_builder_class_by_name(conversation.agent)
         config = self._get_config_by_name(name=conversation.agent, conversation=conversation, streaming=streaming)
-        config = merge_config(partial=config)
+        config = merge_config(partial=config, conversation_id=conversation.id, streaming=streaming)
         return builder(config).build()
 
     def _get_agent_directory_path(self, name: str) -> str:

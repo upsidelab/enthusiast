@@ -1,16 +1,14 @@
-from enthusiast_common.config import AgentConfig, AgentConfigWithDefaults, LLMConfig, LLMToolConfig
+from enthusiast_common.config import AgentConfigWithDefaults, LLMConfig, LLMToolConfig
 from langchain_core.prompts import ChatPromptTemplate
 
 from agent.callbacks import ConversationWebSocketCallbackHandler
 from agent.core.agents import ToolCallingAgent
-from agent.core.agents.default_config import merge_config
-from agent.models import Conversation
 from agent.tools import CreateAnswerTool
 
 
-def get_config(conversation: Conversation, streaming: bool) -> AgentConfig:
-    base_config = AgentConfigWithDefaults(
-        conversation_id=conversation.id,
+def get_config(conversation_id: int, streaming: bool) -> AgentConfigWithDefaults:
+    return AgentConfigWithDefaults(
+        conversation_id=conversation_id,
         prompt_template=ChatPromptTemplate.from_messages(
             [
                 (
@@ -28,6 +26,5 @@ def get_config(conversation: Conversation, streaming: bool) -> AgentConfig:
                 tool_class=CreateAnswerTool,
             )
         ],
-        llm=LLMConfig(callbacks=[ConversationWebSocketCallbackHandler(conversation.id)], streaming=streaming),
+        llm=LLMConfig(callbacks=[ConversationWebSocketCallbackHandler(conversation_id)], streaming=streaming),
     )
-    return merge_config(base_config)

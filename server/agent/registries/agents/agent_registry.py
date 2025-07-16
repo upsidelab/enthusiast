@@ -7,6 +7,7 @@ from enthusiast_common.agents import BaseAgent
 from enthusiast_common.builder import BaseAgentBuilder
 from enthusiast_common.config import AgentConfig
 
+from agent.core.agents.default_config import merge_config
 from agent.models import Conversation
 
 T = TypeVar("T", bound=BaseAgentBuilder)
@@ -29,6 +30,7 @@ class AgentRegistry(BaseAgentRegistry):
     def get_agent_by_name(self, conversation: Conversation, streaming: bool) -> BaseAgent:
         builder = self._get_builder_class_by_name(conversation.agent)
         config = self._get_config_by_name(name=conversation.agent, conversation=conversation, streaming=streaming)
+        config = merge_config(partial=config)
         return builder(config).build()
 
     def _get_agent_directory_path(self, name: str) -> str:
@@ -50,7 +52,7 @@ class AgentRegistry(BaseAgentRegistry):
         except AttributeError:
             raise ImportError(f"Module '{config_module_path}' has no attribute 'get_config' for agent '{name}'.")
 
-        return get_config(conversation=conversation, streaming=streaming)
+        return get_config(conversation_id=conversation.id, streaming=streaming)
 
     def _get_builder_class_by_name(self, name) -> Type[BaseAgentBuilder]:
         agent_directory_path = self._get_agent_directory_path(name)

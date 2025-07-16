@@ -1,3 +1,4 @@
+import logging
 from abc import ABC, abstractmethod
 from importlib import import_module
 from typing import Any, Type, TypeVar
@@ -8,9 +9,12 @@ from enthusiast_common.builder import BaseAgentBuilder
 from enthusiast_common.config import AgentConfig
 
 from agent.core.agents.default_config import merge_config
+from agent.core.builder import AgentBuilder
 from agent.models import Conversation
 
 T = TypeVar("T", bound=BaseAgentBuilder)
+
+logger = logging.getLogger(__name__)
 
 
 class BaseAgentRegistry(ABC):
@@ -60,7 +64,8 @@ class AgentRegistry(BaseAgentRegistry):
         try:
             builder_module = import_module(builder_module_path)
         except ModuleNotFoundError:
-            raise ImportError(f"Cannot import module '{builder_module_path}' for agent '{name}'.")
+            logger.info(f"Cannot import module '{builder_module_path}' for agent '{name}'. Defaulting to AgentBuilder.")
+            return AgentBuilder
 
         try:
             builder_class = getattr(builder_module, "Builder")

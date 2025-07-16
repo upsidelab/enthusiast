@@ -5,6 +5,7 @@ from enthusiast_common.builder import BaseAgentBuilder, RepositoriesInstances
 from enthusiast_common.config import AgentConfig, LLMConfig
 from enthusiast_common.injectors import BaseInjector
 from enthusiast_common.registry import BaseDBModelsRegistry, BaseEmbeddingProviderRegistry, BaseLanguageModelRegistry
+from enthusiast_common.retrievers import BaseRetriever
 from enthusiast_common.tools import BaseAgentTool, BaseFunctionTool, BaseLLMTool
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
@@ -135,11 +136,24 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
             return self._config.agent_callback_handler.handler_class(**self._config.agent_callback_handler.args)
         return None
 
-    def _build_document_retriever(self):
-        pass
+    def _build_product_retriever(self) -> BaseRetriever:
+        llm = self._build_default_llm()
+        return self._config.retrievers.product.retriever_class.create(
+            config=self._config,
+            data_set_id=self._data_set_id,
+            repositories=self._repositories,
+            embeddings_registry=self._embeddings_registry,
+            llm=llm,
+        )
 
-    def _build_product_retriever(self):
-        pass
+    def _build_document_retriever(self) -> BaseRetriever:
+        return self._config.retrievers.document.retriever_class.create(
+            config=self._config,
+            data_set_id=self._data_set_id,
+            repositories=self._repositories,
+            embeddings_registry=self._embeddings_registry,
+            llm=self._llm,
+        )
 
     def _build_chat_summary_memory(self) -> SummaryChatMemory:
         history = PersistentChatHistory(self._repositories.conversation, self._config.conversation_id)

@@ -3,6 +3,7 @@ from .base import (
     AgentConfig,
     AgentConfigWithDefaults,
     AgentToolConfig,
+    CallbackHandlerConfig,
     EmbeddingsRegistryConfig,
     LLMConfig,
     LLMRegistryConfig,
@@ -28,4 +29,5 @@ __all__ = [
     "LLMRegistryConfig",
     "RetrieverConfig",
     "AgentCallbackHandlerConfig",
+    "CallbackHandlerConfig",
 ]

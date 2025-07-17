@@ -1,7 +1,6 @@
-from enthusiast_common.config import AgentConfigWithDefaults, LLMConfig, LLMToolConfig
+from enthusiast_common.config import AgentConfigWithDefaults, LLMToolConfig
 from langchain_core.prompts import ChatPromptTemplate
 
-from agent.callbacks import ConversationWebSocketCallbackHandler
 from agent.core.agents import ToolCallingAgent
 from agent.tools import CreateAnswerTool
 
@@ -26,5 +25,4 @@ def get_config(conversation_id: int, streaming: bool) -> AgentConfigWithDefaults
                 tool_class=CreateAnswerTool,
             )
         ],
-        llm=LLMConfig(callbacks=[ConversationWebSocketCallbackHandler(conversation_id)], streaming=streaming),
     )

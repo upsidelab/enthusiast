@@ -52,9 +52,14 @@ class RegistryConfig(ArbitraryTypeBaseModel):
     model: ModelsRegistryConfig
 
 
+class CallbackHandlerConfig(ArbitraryTypeBaseModel):
+    handler_class: Type[BaseCallbackHandler]
+    args: dict[str, Any] = Field(default_factory=dict)
+
+
 class LLMConfig(ArbitraryTypeBaseModel):
     llm_class: Type[BaseLLM] = BaseLLM
-    callbacks: Optional[list[BaseCallbackHandler]] = None
+    callbacks: Optional[list[CallbackHandlerConfig]] = None
     streaming: bool = False
 
 

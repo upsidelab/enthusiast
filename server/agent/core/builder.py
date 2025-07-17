@@ -70,9 +70,10 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
     def _build_llm(self, llm_config: LLMConfig) -> BaseLanguageModel:
         data_set_repo = self._repositories.data_set
         llm_registry = self._build_llm_registry()
+        callbacks = self._build_llm_callback_handlers()
         llm = self._config.llm.llm_class(
             llm_registry=llm_registry,
-            callbacks=llm_config.callbacks,
+            callbacks=callbacks,
             streaming=llm_config.streaming,
             data_set_repo=data_set_repo,
         )
@@ -135,6 +136,18 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         if self._config.agent_callback_handler:
             return self._config.agent_callback_handler.handler_class(**self._config.agent_callback_handler.args)
         return None
+
+    def _build_llm_callback_handlers(self) -> Optional[list[BaseCallbackHandler]]:
+        if not self._config.llm.callbacks:
+            return None
+        handlers = []
+        for config in self._config.llm.callbacks:
+            if handler_args := config.args:
+                handler = config.handler_class(**handler_args)
+            else:
+                handler = config.handler_class()
+            handlers.append(handler)
+        return handlers
 
     def _build_product_retriever(self) -> BaseRetriever:
         llm = self._build_default_llm()

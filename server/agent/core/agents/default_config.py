@@ -3,6 +3,7 @@ from typing import Type
 from enthusiast_common.config import (
     AgentConfig,
     AgentConfigWithDefaults,
+    CallbackHandlerConfig,
     EmbeddingsRegistryConfig,
     LLMConfig,
     LLMRegistryConfig,
@@ -69,7 +70,11 @@ def get_default_config(conversation_id: int, streaming: bool) -> DefaultAgentCon
             model=ModelsRegistryConfig(registry_class=BaseDjangoSettingsDBModelRegistry),
         ),
         llm=LLMConfig(
-            callbacks=[ConversationWebSocketCallbackHandler(conversation_id=conversation_id)],
+            callbacks=[
+                CallbackHandlerConfig(
+                    handler_class=ConversationWebSocketCallbackHandler, args={"conversation_id": conversation_id}
+                ),
+            ],
             streaming=streaming,
         ),
     )

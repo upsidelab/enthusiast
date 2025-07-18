@@ -731,14 +731,14 @@ validation = ["swagger-spec-validator (>=2.1.0)"]
 
 [[package]]
 name = "enthusiast-common"
-version = "1.2.0"
+version = "1.2.1"
 description = "Core interfaces for developing custom Enthusiast plugins and integrations."
 optional = false
-python-versions = "<4.0,>=3.9"
+python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "enthusiast_common-1.2.0-py3-none-any.whl", hash = "sha256:2c015650da886ff91c70b4ade6669442933c11d994878cbbf13c9b6cea168a2f"},
-    {file = "enthusiast_common-1.2.0.tar.gz", hash = "sha256:3d08091deda15387f4c6eac7b9261aa64bfb2857d165625e3339fe98f1195f65"},
+    {file = "enthusiast_common-1.2.1-py3-none-any.whl", hash = "sha256:1fa46d534b8548cf9f9c98dbca98c022a7a2ed0a9df1f81ec33f24158b43fde0"},
+    {file = "enthusiast_common-1.2.1.tar.gz", hash = "sha256:cfcd9db3129d81ec9d843956909c776ffcd6cbca1cb6ae030c477625ce617e0c"},
 ]
 
 [package.dependencies]
@@ -746,20 +746,21 @@ langchain-core = ">=0.3.66,<0.4.0"
 
 [[package]]
 name = "enthusiast-model-openai"
-version = "1.1.0"
+version = "1.1.1"
 description = "A plugin for Enthusiast that provides an OpenAI connector."
 optional = false
 python-versions = "<4.0,>=3.9"
 groups = ["main"]
 files = [
-    {file = "enthusiast_model_openai-1.1.0-py3-none-any.whl", hash = "sha256:20f94af67c6b1de072a2932af0e68404192c2dc38e9f48640680fdffdc7eb13b"},
-    {file = "enthusiast_model_openai-1.1.0.tar.gz", hash = "sha256:b47c62ece0750856a9775486f77c909ed9eef3c90bf72482d19eb0a39bd03b77"},
+    {file = "enthusiast_model_openai-1.1.1-py3-none-any.whl", hash = "sha256:bc61fc269994d2d634ac81c20ef4544b14de57bfdc1677d3e583207e5c97aff7"},
+    {file = "enthusiast_model_openai-1.1.1.tar.gz", hash = "sha256:268b849ce6c494615bd19d2931c7d59742d58cdb9511b44524ca0a577916deb7"},
 ]
 
 [package.dependencies]
 enthusiast-common = ">=1,<2"
-langchain-openai = ">=0.3.0,<0.4.0"
-openai = ">=1.59.6,<2.0.0"
+langchain-core = ">=0.3.66,<0.4.0"
+langchain-openai = ">=0.3.27,<0.4.0"
+openai = ">=1.86.0,<2.0.0"
 
 [[package]]
 name = "enthusiast-source-sample"
@@ -2759,4 +2760,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10, <4.0"
-content-hash = "854f1b9dd411f9e6278f9ffc3f1475f2f22b86c13e51e46f23acb403c0732b37"
+content-hash = "c6163479cdc5bb44ddd702df836a481ace1f7002d9dbb65b195a933b5db2222e"

@@ -1,5 +1,5 @@
 ---
-sidebar_position: 5
+sidebar_position: 2
 ---
 
 # Creating custom Agent
@@ -138,5 +138,5 @@ AVAILABLE_AGENTS = {
 
 ```
 Now Agent is available in UI to chat with it.
-![Agent chat](img/agent-chat.png)
+![Agent chat](./img/agent-chat.png)
 

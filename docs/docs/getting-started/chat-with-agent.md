@@ -2,13 +2,16 @@
 sidebar_position: 3
 ---
 
-# Chat with the Catalog
+# Chat with the Agent
 
-Once the test data set has been imported and indexed, you can start querying it.
+Once the test data set has been imported and indexed, you can start chatting with the agent.
+The enthusiast-starter package comes with a few example agents, that are pre-configured to execute different workflows. To learn more how to build custom agents, see the [customization](/tools/enthusiast/category/customzation) section of the documentation.
 
-In the left sidebar, go to “Ask” → “Chat”. This will open the chat interface, where you can interact with the AI agent.
+For now, let's try the "Default Agent". This is a general purpose RAG-based agent, configured to answer user's questions based on its knowledge of products and documents imported into the system.
 
-![Chat with your product catalog](./img/chat-with-product-catalog.png)
+In the left sidebar, go to “Ask” → “Default Agent”. This will open the chat interface, where you can interact with the AI agent.
+
+![Chat with default agent](./img/chat-with-default-agent.png)
 
 **Here are a few sample requests to try:**
 

@@ -1,6 +1,7 @@
 from enthusiast_common.config import (
     AgentCallbackHandlerConfig,
     AgentConfigWithDefaults,
+    CallbackHandlerConfig,
     LLMConfig,
     LLMToolConfig,
     RetrieverConfig,
@@ -32,7 +33,12 @@ def get_config(conversation_id: int, streaming: bool) -> AgentConfigWithDefaults
             LLMToolConfig(tool_class=ProductVerificationTool),
         ],
         llm=LLMConfig(
-            callbacks=[ReactAgentWebsocketCallbackHandler(conversation_id), StdOutCallbackHandler()],
+            callbacks=[
+                CallbackHandlerConfig(
+                    handler_class=ReactAgentWebsocketCallbackHandler, args={"conversation_id": conversation_id}
+                ),
+                CallbackHandlerConfig(handler_class=StdOutCallbackHandler),
+            ],
             streaming=streaming,
         ),
         retrievers=RetrieversConfig(

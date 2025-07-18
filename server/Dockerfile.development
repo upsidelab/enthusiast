@@ -2,29 +2,23 @@ FROM python:3.12
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV POETRY_VIRTUALENVS_CREATE=false
 
 WORKDIR /app
 
-COPY server/requirements.txt .
-COPY plugins/ /plugins/
 
 RUN apt-get update && apt-get install -y libpq-dev
 
 RUN curl -sSL https://install.python-poetry.org | python3 -
 RUN export PATH="/root/.local/bin:$PATH"
-RUN for dir in /plugins/*; do \
-      if [ -d "$dir" ]; then \
-        (cd "$dir" && /root/.local/bin/poetry build -f wheel); \
-      fi; \
-    done
 
-RUN plugins_dist=$(find ../plugins -type d -name dist -printf '--find-links=%p ')
+COPY server/pyproject.dev.toml pyproject.toml
+COPY plugins/ /plugins/
 
-RUN pip install --upgrade pip && \
-    pip install --no-cache-dir --find-links=/plugins/enthusiast-common/dist -r requirements.txt
+
+RUN /root/.local/bin/poetry install
 
 COPY server/ /app/
-
 
 RUN chmod u+x /app/docker-entrypoint-development.sh
 

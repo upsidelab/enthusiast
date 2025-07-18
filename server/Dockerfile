@@ -5,17 +5,19 @@ ARG PORT=8000
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PORT=$PORT
+ENV POETRY_VIRTUALENVS_CREATE=false
 
 WORKDIR /app
 
-COPY requirements.txt .
+COPY pyproject.toml .
+COPY poetry.lock .
 
 RUN apt-get update && apt-get install -y libpq-dev
 
-RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+RUN curl -sSL https://install.python-poetry.org | python3 -
+RUN export PATH="/root/.local/bin:$PATH"
 
-RUN pip install daphne
+RUN /root/.local/bin/poetry install
 
 COPY . .
 

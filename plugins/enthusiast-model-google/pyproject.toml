@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 langchain-core = ">=0.3.66,<1"
-python = "^3.9"
+python = "^3.10"
 enthusiast-common = ">=1,<2"
 google-genai = "=1.18.0"
 langchain-google-genai = "^2.1.5"

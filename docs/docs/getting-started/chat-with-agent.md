@@ -5,7 +5,7 @@ sidebar_position: 3
 # Chat with the Agent
 
 Once the test data set has been imported and indexed, you can start chatting with the agent.
-The enthusiast-starter package comes with a few example agents, that are pre-configured to execute different workflows. To learn more how to build custom agents, see the [customization](/tools/enthusiast/docs/category/customzation) section of the documentation.
+The enthusiast-starter package comes with a few example agents, that are pre-configured to execute different workflows. To learn more how to build custom agents, see the [customization](/tools/enthusiast/docs/category/customization/) section of the documentation.
 
 For now, let's try the "Default Agent". This is a general purpose RAG-based agent, configured to answer user's questions based on its knowledge of products and documents imported into the system.
 

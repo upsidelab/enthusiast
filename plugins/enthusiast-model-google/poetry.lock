@@ -244,18 +244,18 @@ files = [
 
 [[package]]
 name = "enthusiast-common"
-version = "1.1.0"
+version = "1.2.0"
 description = "Core interfaces for developing custom Enthusiast plugins and integrations."
 optional = false
 python-versions = "<4.0,>=3.9"
 groups = ["main"]
 files = [
-    {file = "enthusiast_common-1.1.0-py3-none-any.whl", hash = "sha256:895ac4fa30b4e42fcbb2421d80e8ea4aa4ff4eed837d7b6f47e69306743cc7af"},
-    {file = "enthusiast_common-1.1.0.tar.gz", hash = "sha256:fcbef6922028bad1e953ec2520a48c742ae4cb38ece3980b1eec89dc308df750"},
+    {file = "enthusiast_common-1.2.0-py3-none-any.whl", hash = "sha256:2c015650da886ff91c70b4ade6669442933c11d994878cbbf13c9b6cea168a2f"},
+    {file = "enthusiast_common-1.2.0.tar.gz", hash = "sha256:3d08091deda15387f4c6eac7b9261aa64bfb2857d165625e3339fe98f1195f65"},
 ]
 
 [package.dependencies]
-langchain-core = ">=0.3.29,<0.4.0"
+langchain-core = ">=0.3.66,<0.4.0"
 
 [[package]]
 name = "exceptiongroup"

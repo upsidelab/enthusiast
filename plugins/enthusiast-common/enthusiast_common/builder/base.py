@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar, Optional
+from typing import Generic, Optional, TypeVar
 
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
@@ -25,8 +25,6 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
         self._embeddings_registry = None
         self._data_set_id = None
         self._injector = None
-        self._chat_summary_memory = None
-        self._chat_limited_memory = None
         self._config = config
 
     def build(self) -> BaseAgent:
@@ -35,8 +33,6 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
         self._data_set_id = self._repositories.conversation.get_data_set_id(self._config.conversation_id)
         self._llm = self._build_llm(self._config.llm)
         self._embeddings_registry = self._build_embeddings_registry()
-        self._chat_summary_memory = self._build_chat_summary_memory()
-        self._chat_limited_memory = self._build_chat_limited_memory()
         self._injector = self._build_injector()
         tools = self._build_tools(default_llm=self._llm, injector=self._injector)
         agent_callback_handler = self._build_agent_callback_handler()
@@ -48,7 +44,7 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
         tools: list[BaseTool],
         llm: BaseLanguageModel,
         prompt: PromptTemplate | ChatMessagePromptTemplate,
-        callback_handler: BaseCallbackHandler
+        callback_handler: BaseCallbackHandler,
     ) -> BaseAgent:
         pass
 

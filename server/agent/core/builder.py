@@ -123,12 +123,14 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
     def _build_injector(self) -> BaseInjector:
         document_retriever = self._build_document_retriever()
         product_retriever = self._build_product_retriever()
+        chat_summary_memory = self._build_chat_summary_memory()
+        chat_limited_memory = self._build_chat_limited_memory()
         return self._config.injector(
             product_retriever=product_retriever,
             document_retriever=document_retriever,
             repositories=self._repositories,
-            chat_summary_memory=self._chat_summary_memory,
-            chat_limited_memory=self._chat_limited_memory,
+            chat_summary_memory=chat_summary_memory,
+            chat_limited_memory=chat_limited_memory,
         )
 
     def _build_agent_callback_handler(self) -> Optional[BaseCallbackHandler]:

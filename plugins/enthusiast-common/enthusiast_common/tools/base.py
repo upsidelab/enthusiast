@@ -4,7 +4,7 @@ from typing import Any, Type
 
 from enthusiast_common.agents import BaseAgent
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.tools import Tool
+from langchain_core.tools import StructuredTool, BaseTool as LCBaseTool
 from pydantic import BaseModel
 
 from ..injectors import BaseInjector
@@ -53,8 +53,8 @@ class BaseTool(metaclass=ToolMeta):
     def run(self, *args, **kwargs):
         pass
 
-    def as_tool(self) -> Tool:
-        return Tool.from_function(
+    def as_tool(self) -> LCBaseTool:
+        return StructuredTool.from_function(
             func=self.run,
             name=self.NAME,
             description=self.DESCRIPTION,

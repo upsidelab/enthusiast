@@ -1,8 +1,8 @@
-from typing import Any, Generic, Optional, Type, TypeVar
+from typing import Any, Generic, Optional, Sequence, Type, TypeVar
 
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.prompts import BasePromptTemplate
+from langchain_core.prompts.chat import MessageLikeRepresentation
 from pydantic import BaseModel, ConfigDict, Field
 
 from ..agents import BaseAgent
@@ -99,9 +99,18 @@ class AgentCallbackHandlerConfig(ArbitraryTypeBaseModel):
     args: dict[str, Any] = Field(default_factory=dict)
 
 
+class PromptTemplateConfig(ArbitraryTypeBaseModel):
+    input_variables: list[str]
+    template: str
+
+
+class ChatPromptTemplateConfig(ArbitraryTypeBaseModel):
+    messages: Sequence[MessageLikeRepresentation]
+
+
 class AgentConfig(ArbitraryTypeBaseModel, Generic[InjectorT]):
     conversation_id: Any
-    prompt_template: BasePromptTemplate
+    prompt_template: PromptTemplateConfig | ChatPromptTemplateConfig
     agent_class: Type[BaseAgent]
     llm: LLMConfig
     repositories: RepositoriesConfig

@@ -81,40 +81,7 @@ User query: {input}
 
 ````
 ### Output parser
-Because the prompt uses structured tool input, we need to create a custom output parser:
-```python
-import json
-import re
-from typing import Union
-
-from langchain.agents.chat.output_parser import FINAL_ANSWER_ACTION
-from langchain.agents.output_parsers import ReActSingleInputOutputParser
-from langchain_core.agents import AgentAction, AgentFinish
-from langchain_core.exceptions import OutputParserException
-
-
-class CustomReactOutputParser(ReActSingleInputOutputParser):
-    ACTION_PATTERN: str = r"Action:\s*\n(\{(?:[^{}]*|\{[^{}]*\})*\})"
-    JSON_PATTERN: str = r"```json\s*\n([\s\S]*?)\n```"
-
-    def parse(self, text: str) -> Union[AgentAction, AgentFinish]:
-        if FINAL_ANSWER_ACTION in text:
-            return AgentFinish({"output": text.split(FINAL_ANSWER_ACTION)[-1].strip()}, text)
-
-        if match := re.search(self.ACTION_PATTERN, text, re.DOTALL):
-            return self._return_action(match, text)
-        if match := re.search(self.JSON_PATTERN, text, re.DOTALL):
-            return self._return_action(match, text)
-        raise OutputParserException(f"Could not parse LLM output: `{text}`")
-
-    def _return_action(self, match: re.Match[str], text: str) -> AgentAction:
-        json_str = match.group(1)
-        action_response = json.loads(json_str)
-        if action := action_response.get("action", None):
-            return AgentAction(action, action_response.get("action_input", {}), text)
-        raise OutputParserException(f"Could not parse LLM output: `{text}`")
-
-```
+Because the prompt uses structured tool input, we need to use a custom output parser: `StructuredReActOutputParser` from `enthusiast-agent-re-act`
 
 ### Tools
 Create two tools
@@ -162,14 +129,6 @@ class ProductVectorStoreSearchTool(BaseLLMTool):
         context = [product.content for product in relevant_products]
         return context
 
-    def as_tool(self) -> StructuredTool:
-        return StructuredTool.from_function(
-            func=self.run,
-            name=self.NAME,
-            description=self.DESCRIPTION,
-            args_schema=self.ARGS_SCHEMA,
-            return_direct=self.RETURN_DIRECT,
-        )
 
 ```
 2. Product Verification Tool – verifies whether the retrieved products match the user’s criteria.
@@ -223,77 +182,22 @@ class ProductVerificationTool(BaseLLMTool):
         )
         return llm_result.content
 
-    def as_tool(self) -> StructuredTool:
-        return StructuredTool.from_function(
-            func=self.run,
-            name=self.NAME,
-            description=self.DESCRIPTION,
-            args_schema=self.ARGS_SCHEMA,
-            return_direct=self.RETURN_DIRECT,
-        )
 
 ```
 ### Agent
 ```python
-from enthusiast_common.agents import BaseAgent
-from enthusiast_common.injectors import BaseInjector
-from langchain.agents import AgentExecutor, create_react_agent
-from langchain_core.callbacks import BaseCallbackHandler
-from langchain_core.language_models import BaseLanguageModel
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.tools import BaseTool, render_text_description_and_args
-
-from .output_parser import CustomReactOutputParser
+from enthusiast_agent_re_act import BaseReActAgent
 
 
-class ProductSearchReActAgent(BaseAgent):
-    def __init__(
-        self,
-        tools: list[BaseTool],
-        llm: BaseLanguageModel,
-        prompt: ChatPromptTemplate,
-        conversation_id: int,
-        injector: BaseInjector,
-        callback_handler: BaseCallbackHandler | None = None,
-    ):
-        self._tools = tools
-        self._llm = llm
-        self._prompt = prompt
-        self._conversation_id = conversation_id
-        self._callback_handler = callback_handler
-        self._injector = injector
-        self._agent_executor = self._create_agent_executor()
-        super().__init__(
-            tools=tools,
-            llm=llm,
-            prompt=prompt,
-            conversation_id=conversation_id,
-            callback_handler=callback_handler,
-            injector=injector,
-        )
-
-    def _create_agent_executor(self, **kwargs):
-        tools = self._create_tools()
-        agent = create_react_agent(
-            tools=tools,
-            llm=self._llm,
-            prompt=self._prompt,
-            tools_renderer=render_text_description_and_args,
-            output_parser=CustomReactOutputParser(),
-        )
-        return AgentExecutor.from_agent_and_tools(
-            agent=agent, tools=tools, verbose=True, memory=self._injector.chat_summary_memory, **kwargs
-        )
-
-    def _create_tools(self):
-        return [tool_class.as_tool() for tool_class in self._tools]
-
+class ProductSearchReActAgent(BaseReActAgent):
     def get_answer(self, input_text: str) -> str:
-        agent_output = self._agent_executor.invoke(
+        agent_executor = self._build_agent_executor()
+        agent_output = agent_executor.invoke(
             {"input": input_text, "products_type": "any"},
-            config={"callbacks": [self._callback_handler] if self._callback_handler else []},
+            config=self._build_invoke_config(),
         )
         return agent_output["output"]
+
 
 ```
 

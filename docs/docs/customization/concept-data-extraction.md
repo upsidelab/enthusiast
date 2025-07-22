@@ -124,15 +124,6 @@ class DataExtractionTool(BaseLLMTool):
         response = requests.get(url)
         soup = BeautifulSoup(response.text, "html.parser")
         return soup.get_text(separator="\n", strip=True)
-
-    def as_tool(self) -> StructuredTool:
-        return StructuredTool.from_function(
-            func=self.run,
-            name=self.NAME,
-            description=self.DESCRIPTION,
-            args_schema=self.ARGS_SCHEMA,
-            return_direct=self.RETURN_DIRECT,
-        )
 ```
 2. Data Verification Tool – verifies whether the retrieved data it relevant.
 ```python
@@ -192,82 +183,34 @@ class DataVerificationTool(BaseLLMTool):
             }
         )
         return f"You received the following validation report {llm_result.content}. Respond with the product json, and if any field looks suspicious, add a field called <fieldname>_warning with description of the issue."
-
-    def as_tool(self) -> StructuredTool:
-        return StructuredTool.from_function(
-            func=self.run,
-            name=self.NAME,
-            description=self.DESCRIPTION,
-            args_schema=self.ARGS_SCHEMA,
-            return_direct=self.RETURN_DIRECT,
-        )
 ```
 ### Agent
 ```python
 import json
 
-import requests
-from enthusiast_common.agents import BaseAgent
-from enthusiast_common.injectors import BaseInjector
-from langchain.agents import AgentExecutor, create_react_agent
-from langchain_core.callbacks import BaseCallbackHandler
-from langchain_core.language_models import BaseLanguageModel
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.tools import BaseTool, render_text_description_and_args
+from enthusiast_agent_re_act import BaseReActAgent
 
-from .output_parser import CustomReactOutputParser
-
-
-class DataExtractionReActAgent(BaseAgent):
-    def __init__(
-            self,
-            tools: list[BaseTool],
-            llm: BaseLanguageModel,
-            prompt: ChatPromptTemplate,
-            conversation_id: int,
-            injector: BaseInjector,
-            callback_handler: BaseCallbackHandler | None = None,
-    ):
-        self._tools = tools
-        self._llm = llm
-        self._prompt = prompt
-        self._conversation_id = conversation_id
-        self._callback_handler = callback_handler
-        self._injector = injector
-        self._agent_executor = self._create_agent_executor()
-        super().__init__(
-            tools=tools,
-            llm=llm,
-            prompt=prompt,
-            conversation_id=conversation_id,
-            callback_handler=callback_handler,
-            injector=injector,
-        )
-
-    def _create_agent_executor(self, **kwargs):
-        tools = self._create_tools()
-        agent = create_react_agent(
-            tools=tools,
-            llm=self._llm,
-            prompt=self._prompt,
-            tools_renderer=render_text_description_and_args,
-            output_parser=CustomReactOutputParser(),
-        )
-        return AgentExecutor.from_agent_and_tools(
-            agent=agent, tools=tools, verbose=True, memory=self._injector.chat_summary_memory, **kwargs
-        )
-
-    def _create_tools(self):
-        return [tool_class.as_tool() for tool_class in self._tools]
-
+class DataExtractionReActAgent(BaseReActAgent):
     def get_answer(self, input_text: str) -> str:
-        agent_output = self._agent_executor.invoke(
+        agent_executor = self._build_agent_executor()
+        template_dict = {
+            "check_in_time": "<time>",
+            "checkout_time": "<time>",
+            "pets_allowed": "<boolean>",
+            "quite_hours": "<time-time>",
+            "address": "<full address string>",
+            "price": "<number with currency>",
+            "rating": "<number>"
+        }
+
+        output_format = json.dumps(template_dict)
+        agent_output = agent_executor.invoke(
             {
                 "input": input_text,
-                "output_format": """{\"check_in_time\": <time>, \"checkout_time\": <time>, \"pets_allowed\": <boolean>, \"quite_hours\": <time-time>, \"address\": <full address string>, \"price\": \"<number with currency>\", \"rating\": \"<number>\"}""",
+                "output_format": output_format,
                 "products_type": "Hotel",
             },
-            config={"callbacks": [self._callback_handler] if self._callback_handler else []},
+            config=self._build_invoke_config()
         )
         result = agent_output["output"]
         try:
@@ -277,7 +220,6 @@ class DataExtractionReActAgent(BaseAgent):
             pass
 
         return result
-
 ```
 
 ### Callback handlers

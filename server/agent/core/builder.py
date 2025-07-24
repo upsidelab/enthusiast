@@ -3,13 +3,14 @@ from typing import Optional
 from enthusiast_common.agents import BaseAgent
 from enthusiast_common.builder import BaseAgentBuilder, RepositoriesInstances
 from enthusiast_common.config import AgentConfig, LLMConfig
+from enthusiast_common.config.base import PromptTemplateConfig
 from enthusiast_common.injectors import BaseInjector
 from enthusiast_common.registry import BaseDBModelsRegistry, BaseEmbeddingProviderRegistry, BaseLanguageModelRegistry
 from enthusiast_common.retrievers import BaseRetriever
 from enthusiast_common.tools import BaseAgentTool, BaseFunctionTool, BaseLLMTool
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.prompts import ChatMessagePromptTemplate, PromptTemplate
+from langchain_core.prompts import BasePromptTemplate, ChatMessagePromptTemplate, ChatPromptTemplate, PromptTemplate
 from langchain_core.tools import BaseTool
 
 from agent.core.memory import PersistentChatHistory, SummaryChatMemory
@@ -191,3 +192,12 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
             output_key="output",
             chat_memory=history,
         )
+
+    def _build_prompt_template(self) -> BasePromptTemplate:
+        prompt_config_class = self._config.prompt_template
+        if isinstance(prompt_config_class, PromptTemplateConfig):
+            return PromptTemplate(
+                input_variables=prompt_config_class.input_variables, template=prompt_config_class.template
+            )
+        else:
+            return ChatPromptTemplate.from_messages(messages=prompt_config_class.messages)

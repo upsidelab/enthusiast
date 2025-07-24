@@ -7,8 +7,8 @@ from enthusiast_common.config import (
     RetrieverConfig,
     RetrieversConfig,
 )
+from enthusiast_common.config.base import PromptTemplateConfig
 from langchain_core.callbacks import StdOutCallbackHandler
-from langchain_core.prompts import PromptTemplate
 
 from agent.callbacks import AgentActionWebsocketCallbackHandler, ReactAgentWebsocketCallbackHandler
 from agent.core.agents.product_search_react_agent.agent import ProductSearchReActAgent
@@ -22,7 +22,7 @@ from agent.tools.verify_product_tool import ProductVerificationTool
 def get_config(conversation_id: int, streaming: bool) -> AgentConfigWithDefaults:
     return AgentConfigWithDefaults(
         conversation_id=conversation_id,
-        prompt_template=PromptTemplate(
+        prompt_template=PromptTemplateConfig(
             input_variables=["tools", "tool_names", "input", "agent_scratchpad"], template=PRODUCT_FINDER_AGENT_PROMPT
         ),
         agent_class=ProductSearchReActAgent,

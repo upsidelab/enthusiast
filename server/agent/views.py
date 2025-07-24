@@ -14,11 +14,13 @@ from agent.registries.language_models import LanguageModelRegistry
 from agent.repositories import DjangoDataSetRepository
 from agent.serializers import (
     AskQuestionSerializer,
+    ConfigSerializer,
     ConversationContentSerializer,
     ConversationCreationSerializer,
     ConversationSerializer,
     MessageFeedbackSerializer,
 )
+from agent.utils.functions import get_config
 from catalog.models import DataSet
 
 
@@ -193,3 +195,16 @@ class AvailableAgentsView(APIView):
     )
     def get(self, request):
         return Response({"choices": settings.AVAILABLE_AGENTS.keys()}, status=status.HTTP_200_OK)
+
+
+class ConfigView(APIView):
+    permission_classes = [IsAuthenticated]
+    """View to get all available configuration options (nested) with serializer."""
+
+    @swagger_auto_schema(
+        operation_description="Get all available configuration options.",
+        responses={200: ConfigSerializer()},
+    )
+    def get(self, request):
+        serializer = ConfigSerializer(get_config())
+        return Response(serializer.data, status=200)

@@ -80,3 +80,48 @@ class ConversationContentSerializer(ConversationSerializer):
 
     class Meta(ConversationSerializer.Meta):
         fields = ConversationSerializer.Meta.fields + ["history"]
+
+
+class NamePathSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    path = serializers.CharField()
+
+
+class RepositoriesConfigSerializer(serializers.Serializer):
+    user = NamePathSerializer(many=True)
+    message = NamePathSerializer(many=True)
+    conversation = NamePathSerializer(many=True)
+    data_set = NamePathSerializer(many=True)
+    document_chunk = NamePathSerializer(many=True)
+    product = NamePathSerializer(many=True)
+    product_chunk = NamePathSerializer(many=True)
+
+
+class RetrieversConfigSerializer(serializers.Serializer):
+    document = NamePathSerializer(many=True)
+    product = NamePathSerializer(many=True)
+
+
+class RegistriesConfigSerializer(serializers.Serializer):
+    llm = NamePathSerializer(many=True)
+    embeddings = NamePathSerializer(many=True)
+    model = NamePathSerializer(many=True)
+
+
+class ToolsConfigSerializer(serializers.Serializer):
+    function = NamePathSerializer(many=True)
+    llm = NamePathSerializer(many=True)
+    agent = NamePathSerializer(many=True)
+
+
+class ConfigSerializer(serializers.Serializer):
+    agents = NamePathSerializer(many=True)
+    prompt_templates = NamePathSerializer(many=True)
+    llm = NamePathSerializer(many=True)
+    llm_callback_handlers = NamePathSerializer(many=True)
+    agent_callback_handlers = NamePathSerializer(many=True)
+    repositories = RepositoriesConfigSerializer()
+    retrievers = RetrieversConfigSerializer()
+    injectors = NamePathSerializer(many=True)
+    registries = RegistriesConfigSerializer()
+    tools = ToolsConfigSerializer()

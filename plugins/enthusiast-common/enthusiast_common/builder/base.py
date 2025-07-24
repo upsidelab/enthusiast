@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar, Optional
+from typing import Generic, Optional, TypeVar
 
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
@@ -48,7 +48,7 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
         tools: list[BaseTool],
         llm: BaseLanguageModel,
         prompt: PromptTemplate | ChatMessagePromptTemplate,
-        callback_handler: BaseCallbackHandler
+        callback_handler: BaseCallbackHandler,
     ) -> BaseAgent:
         pass
 
@@ -98,6 +98,10 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
 
     @abstractmethod
     def _build_agent_callback_handler(self) -> Optional[BaseCallbackHandler]:
+        pass
+
+    @abstractmethod
+    def _build_llm_callback_handlers(self) -> Optional[BaseCallbackHandler]:
         pass
 
     @abstractmethod

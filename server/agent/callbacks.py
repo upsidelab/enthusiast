@@ -45,8 +45,8 @@ class ConversationWebSocketCallbackHandler(BaseWebSocketHandler):
 
 
 class ReactAgentWebsocketCallbackHandler(ConversationWebSocketCallbackHandler):
-    def __init__(self, conversation):
-        super().__init__(conversation)
+    def __init__(self, conversation_id: int):
+        super().__init__(conversation_id)
         self.first_final_answer_chunk = False
         self.second_final_answer_chunk = False
         self.third_final_answer_chunk = False

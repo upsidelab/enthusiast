@@ -2,7 +2,7 @@ from typing import Generic, TypeVar
 
 from django.db import models
 
-from agent.registries.embeddings import EmbeddingProviderRegistry
+from agent.core.registries.embeddings import EmbeddingProviderRegistry
 from catalog.models import Document, Product
 
 T = TypeVar("T", bound=models.Model)

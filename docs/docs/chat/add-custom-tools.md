@@ -39,9 +39,9 @@ Next, implement your custom tool. Let's create a file named `tool.py` that conta
 ```python title="my-custom-verification-tool/my_custom_verification_tool/tool.py"
 from pydantic import BaseModel
 from enthusiast_common import CustomTool
-from agent.retrievers import DocumentRetriever
-from agent.retrievers import ProductRetriever
-from agent.registries.language_models import LanguageModelRegistry
+from agent.core.retrievers import DocumentRetriever
+from agent.core.retrievers import ProductRetriever
+from agent.core.registries.language_models import LanguageModelRegistry
 
 VERIFY_CONTENT_PROMPT = """
     Based on the following documents delimited by three backticks
@@ -52,8 +52,10 @@ VERIFY_CONTENT_PROMPT = """
     ```{query}```
 """
 
+
 class MyCustomVerificationToolInput(BaseModel):
     statement: str
+
 
 class MyCustomVerificationTool(CustomTool):
     name: str = "verification_tool"

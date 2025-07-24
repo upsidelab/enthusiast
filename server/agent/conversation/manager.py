@@ -1,8 +1,8 @@
 from datetime import datetime
 
 from account.models import User
+from agent.core.registries.agents.agent_registry import AgentRegistry
 from agent.models import Conversation, Message
-from agent.registries.agents.agent_registry import AgentRegistry
 
 
 class ConversationManager:

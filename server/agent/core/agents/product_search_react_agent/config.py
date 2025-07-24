@@ -13,10 +13,9 @@ from langchain_core.callbacks import StdOutCallbackHandler
 from agent.callbacks import AgentActionWebsocketCallbackHandler, ReactAgentWebsocketCallbackHandler
 from agent.core.agents.product_search_react_agent.agent import ProductSearchReActAgent
 from agent.core.agents.product_search_react_agent.prompt import PRODUCT_FINDER_AGENT_PROMPT
-from agent.retrievers import DocumentRetriever
-from agent.retrievers.product_vs_retriever import ProductVectorStoreRetriever
-from agent.tools import ProductVectorStoreSearchTool
-from agent.tools.verify_product_tool import ProductVerificationTool
+from agent.core.retrievers import DocumentRetriever, ProductVectorStoreRetriever
+from agent.core.tools import ProductVectorStoreSearchTool
+from agent.core.tools.verify_product_tool import ProductVerificationTool
 
 
 def get_config(conversation_id: int, streaming: bool) -> AgentConfigWithDefaults:

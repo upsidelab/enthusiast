@@ -9,8 +9,8 @@ from rest_framework.response import Response
 
 from account.models import User
 from account.serializers import UserSerializer
-from agent.registries.embeddings import EmbeddingProviderRegistry
-from agent.registries.language_models import LanguageModelRegistry
+from agent.core.registries.embeddings import EmbeddingProviderRegistry
+from agent.core.registries.language_models import LanguageModelRegistry
 from pecl import settings
 from sync.tasks import (
     sync_all_document_sources,

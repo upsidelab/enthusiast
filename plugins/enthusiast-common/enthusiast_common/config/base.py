@@ -3,7 +3,7 @@ from typing import Any, Generic, Optional, Sequence, Type, TypeVar
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts.chat import MessageLikeRepresentation
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ..agents import BaseAgent
 from ..injectors.base import BaseInjector
@@ -54,13 +54,11 @@ class RegistryConfig(ArbitraryTypeBaseModel):
 
 class CallbackHandlerConfig(ArbitraryTypeBaseModel):
     handler_class: Type[BaseCallbackHandler]
-    args: dict[str, Any] = Field(default_factory=dict)
 
 
 class LLMConfig(ArbitraryTypeBaseModel):
     llm_class: Type[BaseLLM] = BaseLLM
     callbacks: Optional[list[CallbackHandlerConfig]] = None
-    streaming: bool = False
 
 
 class RepositoriesConfig(ArbitraryTypeBaseModel):
@@ -96,7 +94,6 @@ class RetrieversConfig(ArbitraryTypeBaseModel):
 
 class AgentCallbackHandlerConfig(ArbitraryTypeBaseModel):
     handler_class: Type[BaseCallbackHandler]
-    args: dict[str, Any] = Field(default_factory=dict)
 
 
 class PromptTemplateConfig(ArbitraryTypeBaseModel):
@@ -109,18 +106,26 @@ class ChatPromptTemplateConfig(ArbitraryTypeBaseModel):
 
 
 class AgentConfig(ArbitraryTypeBaseModel, Generic[InjectorT]):
-    conversation_id: Any
-    prompt_template: PromptTemplateConfig | ChatPromptTemplateConfig
     agent_class: Type[BaseAgent]
     llm: LLMConfig
     repositories: RepositoriesConfig
     retrievers: RetrieversConfig
     injector: Type[InjectorT]
     registry: RegistryConfig
+    prompt_template: Optional[PromptTemplateConfig] = None
+    chat_prompt_template: Optional[ChatPromptTemplateConfig] = None
     function_tools: Optional[list[Type[BaseFunctionTool]]] = None
     llm_tools: Optional[list[LLMToolConfig]] = None
     agent_tools: Optional[list[AgentToolConfig]] = None
     agent_callback_handler: Optional[AgentCallbackHandlerConfig] = None
+
+    @model_validator(mode="after")
+    def prompt_validation(self):
+        prompt_template = self.prompt_template is not None
+        chat_prompt_template = self.chat_prompt_template is not None
+        if prompt_template == chat_prompt_template:
+            raise ValueError("Exactly one of 'prompt_template' or 'chat_prompt_template' must be provided")
+        return self
 
 
 class AgentConfigWithDefaults(AgentConfig, Generic[InjectorT]):

@@ -2,8 +2,8 @@ from typing import Optional
 
 from enthusiast_common.agents import BaseAgent
 from enthusiast_common.builder import BaseAgentBuilder, RepositoriesInstances
+from enthusiast_common.callbacks import ConversationCallbackHandler
 from enthusiast_common.config import AgentConfig, LLMConfig
-from enthusiast_common.config.base import PromptTemplateConfig
 from enthusiast_common.injectors import BaseInjector
 from enthusiast_common.registry import BaseDBModelsRegistry, BaseEmbeddingProviderRegistry, BaseLanguageModelRegistry
 from enthusiast_common.retrievers import BaseRetriever
@@ -29,7 +29,7 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
             tools=tools,
             llm=llm,
             prompt=prompt,
-            conversation_id=self._config.conversation_id,
+            conversation_id=self.conversation_id,
             callback_handler=callback_handler,
             injector=self._injector,
         )
@@ -75,7 +75,7 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         llm = self._config.llm.llm_class(
             llm_registry=llm_registry,
             callbacks=callbacks,
-            streaming=llm_config.streaming,
+            streaming=self.streaming,
             data_set_repo=data_set_repo,
         )
         return llm.create(self._data_set_id)
@@ -136,17 +136,20 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         )
 
     def _build_agent_callback_handler(self) -> Optional[BaseCallbackHandler]:
-        if self._config.agent_callback_handler:
-            return self._config.agent_callback_handler.handler_class(**self._config.agent_callback_handler.args)
-        return None
+        if not self._config.agent_callback_handler:
+            return None
+        if issubclass(self._config.agent_callback_handler.handler_class, ConversationCallbackHandler):
+            return self._config.agent_callback_handler.handler_class(conversation_id=self.conversation_id)
+        else:
+            return self._config.agent_callback_handler.handler_class()
 
     def _build_llm_callback_handlers(self) -> Optional[list[BaseCallbackHandler]]:
         if not self._config.llm.callbacks:
             return None
         handlers = []
         for config in self._config.llm.callbacks:
-            if handler_args := config.args:
-                handler = config.handler_class(**handler_args)
+            if issubclass(config.handler_class, ConversationCallbackHandler):
+                handler = config.handler_class(conversation_id=self.conversation_id)
             else:
                 handler = config.handler_class()
             handlers.append(handler)
@@ -172,7 +175,7 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         )
 
     def _build_chat_summary_memory(self) -> SummaryChatMemory:
-        history = PersistentChatHistory(self._repositories.conversation, self._config.conversation_id)
+        history = PersistentChatHistory(self._repositories.conversation, self.conversation_id)
         return SummaryChatMemory(
             llm=self._llm,
             memory_key="chat_history",
@@ -183,7 +186,7 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         )
 
     def _build_chat_limited_memory(self) -> LimitedChatMemory:
-        history = PersistentChatHistory(self._repositories.conversation, self._config.conversation_id)
+        history = PersistentChatHistory(self._repositories.conversation, self.conversation_id)
         return LimitedChatMemory(
             llm=self._llm,
             memory_key="chat_history",
@@ -194,10 +197,10 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         )
 
     def _build_prompt_template(self) -> BasePromptTemplate:
-        prompt_config_class = self._config.prompt_template
-        if isinstance(prompt_config_class, PromptTemplateConfig):
+        if self._config.prompt_template:
             return PromptTemplate(
-                input_variables=prompt_config_class.input_variables, template=prompt_config_class.template
+                input_variables=self._config.prompt_template.input_variables,
+                template=self._config.prompt_template.template,
             )
         else:
-            return ChatPromptTemplate.from_messages(messages=prompt_config_class.messages)
+            return ChatPromptTemplate.from_messages(messages=self._config.chat_prompt_template.messages)

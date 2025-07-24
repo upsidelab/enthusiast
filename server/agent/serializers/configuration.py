@@ -69,14 +69,13 @@ class RepositoriesConfigSerializer(serializers.Serializer):
     product_chunk = serializers.CharField()
 
 
+class CallbackHandlerConfigSerializer(serializers.Serializer):
+    handler_class = serializers.CharField()
+
+
 class LLMConfigSerializer(serializers.Serializer):
     llm_class = serializers.CharField()
-    callbacks = serializers.ListField(child=serializers.CharField(), required=False, allow_null=True)
-
-
-class AgentCallbackHandlerConfigSerializer(serializers.Serializer):
-    handler_class = serializers.CharField()
-    args = serializers.DictField(child=serializers.CharField(), required=False)
+    callbacks = serializers.ListField(child=CallbackHandlerConfigSerializer(), required=False, allow_null=True)
 
 
 class LLMToolConfigSerializer(serializers.Serializer):
@@ -111,18 +110,49 @@ class RegistryConfigSerializer(serializers.Serializer):
     model = ModelsRegistryConfigSerializer()
 
 
+class PromptTemplateSerializer(serializers.Serializer):
+    input_variables = serializers.ListField(child=serializers.CharField(), allow_empty=True)
+    template = serializers.CharField()
+
+
+class ChatPromptTemplateSerializer(serializers.Serializer):
+    messages = serializers.ListField(
+        child=serializers.ListField(child=serializers.CharField(), min_length=2, max_length=2)
+    )
+
+    def validate_messages(self, value):
+        allowed_roles = {"system", "human", "placeholder", "assistant"}
+        for role, content in value:
+            if role not in allowed_roles:
+                raise serializers.ValidationError(f"Invalid role: {role}")
+            if not isinstance(content, str):
+                raise serializers.ValidationError("Content must be a string.")
+        return value
+
+
 class AgentConfigSerializer(serializers.Serializer):
-    prompt_template = serializers.CharField()
     agent_class = serializers.CharField()
     llm = LLMConfigSerializer()
     repositories = RepositoriesConfigSerializer()
     retrievers = RetrieversConfigSerializer()
     injector = serializers.CharField()
     registry = RegistryConfigSerializer()
+    prompt_template = PromptTemplateSerializer(required=False, allow_null=True)
+    chat_prompt_template = ChatPromptTemplateSerializer(required=False, allow_null=True)
     function_tools = serializers.ListField(child=serializers.CharField(), required=False, allow_null=True)
     llm_tools = LLMToolConfigSerializer(many=True, required=False, allow_null=True)
     agent_tools = AgentToolConfigSerializer(many=True, required=False, allow_null=True)
-    agent_callback_handler = AgentCallbackHandlerConfigSerializer(required=False, allow_null=True)
+    agent_callback_handler = CallbackHandlerConfigSerializer(required=False, allow_null=True)
+
+    def validate(self, attrs):
+        prompt = attrs.get("prompt_template")
+        chat_prompt = attrs.get("chat_prompt_template")
+
+        if (prompt is None and chat_prompt is None) or (prompt is not None and chat_prompt is not None):
+            raise serializers.ValidationError(
+                "Exactly one of 'prompt_template' or 'chat_prompt_template' must be provided."
+            )
+        return attrs
 
 
 class AgentConfigurationModelSerializer(serializers.ModelSerializer):

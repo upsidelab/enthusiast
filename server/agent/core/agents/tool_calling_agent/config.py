@@ -8,7 +8,7 @@ from agent.core.tools import CreateAnswerTool
 def get_config(conversation_id: int, streaming: bool) -> AgentConfigWithDefaults:
     return AgentConfigWithDefaults(
         conversation_id=conversation_id,
-        prompt_template=ChatPromptTemplateConfig(
+        chat_prompt_template=ChatPromptTemplateConfig(
             messages=[
                 (
                     "system",

@@ -239,7 +239,7 @@ CATALOG_MODELS = {
 AGENT_TOOLS = {
     "Create Answer Tool": "agent.tools.create_answer_tool.CreateAnswerTool",
 }
-EXTEND_AVAILABLE_AGENTS = {}
+EXTEND_AVAILABLE_AGENT = {}
 EXTEND_AVAILABLE_PROMPT_TEMPLATES = {}
 EXTEND_AVAILABLE_LLM = {}
 EXTEND_AVAILABLE_LLM_CALLBACK_HANDLERS = {}
@@ -255,9 +255,14 @@ AVAILABLE_AGENTS: dict[str, str] = {
     "Question Answer Agent": "agent.core.agents.tool_calling_agent",
 }
 
+AVAILABLE_AGENT: dict[str, str] = {
+    "Product Search Agent": "agent.core.agents.product_search_react_agent.agent.ProductSearchReactAgent",
+    "Question Answer Agent": "agent.core.agents.tool_calling_agent.agent.QuestionAnswerAgent",
+}
+
 AVAILABLE_PROMPT_TEMPLATES: dict[str, str] = {
-    "PromptTemplate": "langchain_core.prompts.templates.PromptTemplate",
-    "ChatPromptTemplate": "langchain_core.prompts.templates.ChatPromptTemplate",
+    "PromptTemplate": "langchain_core.prompts.PromptTemplate",
+    "ChatPromptTemplate": "langchain_core.prompts.ChatPromptTemplate",
 }
 
 AVAILABLE_LLM: dict[str, str] = {
@@ -278,16 +283,16 @@ AVAILABLE_REPOSITORIES: dict[str, dict[str, str]] = {
     "message": {"DjangoMessageRepository": "agent.repositories.DjangoMessageRepository"},
     "conversation": {"DjangoConversationRepository": "agent.repositories.DjangoConversationRepository"},
     "data_set": {"DjangoDataSetRepository": "agent.repositories.DjangoDataSetRepository"},
-    "document_chunk": {"DjangoModelChunkRepository": "agent.repositories.DjangoModelChunkRepository"},
+    "document_chunk": {"DjangoModelChunkRepository": "agent.repositories.DjangoDocumentChunkRepository"},
     "product": {"DjangoProductRepository": "agent.repositories.DjangoProductRepository"},
-    "product_chunk": {"DjangoModelChunkRepository": "agent.repositories.DjangoModelChunkRepository"},
+    "product_chunk": {"DjangoModelChunkRepository": "agent.repositories.DjangoProductChunkRepository"},
 }
 
 AVAILABLE_RETRIEVERS: dict[str, dict[str, str]] = {
-    "document": {"DocumentRetriever": "agent.retrievers.DocumentRetriever"},
+    "document": {"DocumentRetriever": "agent.core.retrievers.DocumentRetriever"},
     "product": {
-        "ProductVectorStoreRetriever": "agent.retrievers.ProductVectorStoreRetriever",
-        "ProductRetriever": "agent.retrievers.ProductRetriever",
+        "ProductVectorStoreRetriever": "agent.core.retrievers.ProductVectorStoreRetriever",
+        "ProductRetriever": "agent.core.retrievers.ProductRetriever",
     },
 }
 
@@ -297,28 +302,28 @@ AVAILABLE_INJECTORS: dict[str, str] = {
 
 AVAILABLE_REGISTRIES: dict[str, dict[str, str]] = {
     "llm": {
-        "LanguageModelRegistry": "agent.registries.language_models.LanguageModelRegistry",
+        "LanguageModelRegistry": "agent.core.registries.language_models.LanguageModelRegistry",
     },
     "embeddings": {
-        "EmbeddingProviderRegistry": "agent.registries.embeddings.EmbeddingProviderRegistry",
+        "EmbeddingProviderRegistry": "agent.core.registries.embeddings.EmbeddingProviderRegistry",
     },
     "model": {
-        "BaseDjangoSettingsDBModelRegistry": "agent.registries.models.BaseDjangoSettingsDBModelRegistry",
+        "BaseDjangoSettingsDBModelRegistry": "agent.core.registries.models.BaseDjangoSettingsDBModelRegistry",
     },
 }
 
 AVAILABLE_TOOLS: dict[str, dict[str, str]] = {
     "function": {},
     "llm": {
-        "Create Answer": "agent.tools.CreateAnswerTool",
-        "Product Search": "agent.tools.ProductSearchTool",
-        "Verify Product": "agent.tools.ProductVerificationTool",
+        "Create Answer": "agent.core.tools.create_answer_tool.CreateAnswerTool",
+        "Product Search": "agent.core.tools.product_search_tool.ProductSearchTool",
+        "Verify Product": "agent.core.tools.verify_product_tool.ProductVerificationTool",
     },
     "agent": {},
 }
 from .settings_override import *  # noqa
 
-AVAILABLE_AGENTS = merge_settings(AVAILABLE_AGENTS, EXTEND_AVAILABLE_AGENTS)
+AVAILABLE_AGENT = merge_settings(AVAILABLE_AGENT, EXTEND_AVAILABLE_AGENT)
 AVAILABLE_PROMPT_TEMPLATES = merge_settings(AVAILABLE_PROMPT_TEMPLATES, EXTEND_AVAILABLE_PROMPT_TEMPLATES)
 AVAILABLE_LLM = merge_settings(AVAILABLE_LLM, EXTEND_AVAILABLE_LLM)
 AVAILABLE_LLM_CALLBACK_HANDLERS = merge_settings(

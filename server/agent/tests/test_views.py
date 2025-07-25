@@ -17,9 +17,9 @@ def api_client():
 @pytest.fixture
 def config():
     return {
-        "prompt_template": "prompt_template",
+        "prompt_template": {"template": "template", "input_variables": ["var"]},
         "agent_class": "agent_class",
-        "llm": {"llm_class": "llm_class", "callbacks": ["callbacks"], "streaming": True},
+        "llm": {"llm_class": "llm_class", "callbacks": [{"handler_class": "handler"}], "streaming": True},
         "repositories": {
             "user": "user",
             "message": "message",

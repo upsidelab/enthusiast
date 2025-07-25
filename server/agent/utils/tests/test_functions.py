@@ -1,7 +1,4 @@
-from django.test import override_settings
-
 from agent.utils.functions import (
-    get_config,
     merge_settings,
     nested_dict_to_list,
 )
@@ -92,31 +89,3 @@ class TestMergeSettings:
         result = merge_settings(base, extend)
 
         assert result == expected
-
-
-class TestGetConfig:
-    @override_settings(
-        AVAILABLE_AGENTS={"AgentA": "path.agent.a"},
-        AVAILABLE_PROMPT_TEMPLATES={"PromptA": "path.prompt.a"},
-        AVAILABLE_LLM={"LLMA": "path.llm.a"},
-        AVAILABLE_LLM_CALLBACK_HANDLERS={"HandlerA": "path.handler.a"},
-        AVAILABLE_AGENT_CALLBACK_HANDLERS={"AgentHandlerA": "path.agent.handler.a"},
-        AVAILABLE_REPOSITORIES={"group1": {"RepoA": "path.repo.a"}},
-        AVAILABLE_RETRIEVERS={"groupX": {"RetrieverA": "path.ret.a"}},
-        AVAILABLE_INJECTORS={"InjA": "path.inj.a"},
-        AVAILABLE_REGISTRIES={"reg": {"RegA": "path.reg.a"}},
-        AVAILABLE_TOOLS={"llm": {"ToolA": "path.tool.a"}},
-    )
-    def test_get_config(self):
-        cfg = get_config()
-
-        assert cfg["agents"] == [{"name": "AgentA", "path": "path.agent.a"}]
-        assert cfg["prompt_templates"] == [{"name": "PromptA", "path": "path.prompt.a"}]
-        assert cfg["llm"] == [{"name": "LLMA", "path": "path.llm.a"}]
-        assert cfg["llm_callback_handlers"] == [{"name": "HandlerA", "path": "path.handler.a"}]
-        assert cfg["agent_callback_handlers"] == [{"name": "AgentHandlerA", "path": "path.agent.handler.a"}]
-        assert cfg["repositories"]["group1"] == [{"name": "RepoA", "path": "path.repo.a"}]
-        assert cfg["retrievers"]["groupX"] == [{"name": "RetrieverA", "path": "path.ret.a"}]
-        assert cfg["injectors"] == [{"name": "InjA", "path": "path.inj.a"}]
-        assert cfg["registries"]["reg"] == [{"name": "RegA", "path": "path.reg.a"}]
-        assert cfg["tools"]["llm"] == [{"name": "ToolA", "path": "path.tool.a"}]

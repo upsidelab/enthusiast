@@ -25,7 +25,7 @@ from agent.serializers.conversation import (
     ConversationSerializer,
     MessageFeedbackSerializer,
 )
-from agent.utils.functions import get_config
+from agent.services.configuration.service import configuration_service
 from catalog.models import DataSet
 
 
@@ -211,7 +211,7 @@ class ConfigOptionsView(APIView):
         responses={200: ListConfigSerializer()},
     )
     def get(self, request):
-        serializer = ListConfigSerializer(get_config())
+        serializer = ListConfigSerializer(configuration_service.get_config_options())
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -226,7 +226,7 @@ class ConfigView(APIView):
     def get(self, request):
         queryset = AgentConfiguration.objects.all().order_by("created_at")
         serializer = AgentConfigurationDetailsSerializer(queryset, many=True)
-        return Response(serializer.data, status=200)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         operation_description="Create a new configuration.",
@@ -249,7 +249,6 @@ class ConfigDetailsView(APIView):
     )
     def get(self, request, pk):
         instance = get_object_or_404(AgentConfiguration, pk=pk)
-
         serializer = AgentConfigurationModelSerializer(instance)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

@@ -1,4 +1,3 @@
-from abc import ABC
 from typing import Any
 
 from enthusiast_common.agents import BaseAgent
@@ -9,7 +8,12 @@ from langchain_core.tools import BaseTool, render_text_description_and_args
 from .structured_re_act_output_parser import StructuredReActOutputParser
 
 
-class BaseReActAgent(BaseAgent, ABC):
+class BaseReActAgent(BaseAgent):
+    def get_answer(self, input_text: str) -> str:
+        agent_executor = self._build_agent_executor()
+        response = agent_executor.invoke({"input": input_text}, config=self._build_invoke_config())
+        return response["output"]
+
     def _build_tools(self) -> list[BaseTool]:
         return [tool.as_tool() for tool in self._tools]
 

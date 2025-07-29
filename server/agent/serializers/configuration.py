@@ -1,5 +1,10 @@
 from rest_framework import serializers
 
+from agent.models.configuration import AgentConfiguration
+from agent.serializers.customs.fields import PydanticModelField, PydanticModelToolListField
+from agent.serializers.customs.serializers import ParentDataContextSerializerMixin
+from catalog.models import DataSet
+
 
 class TypeInfoSerializer(serializers.Serializer):
     container = serializers.CharField(
@@ -18,6 +23,7 @@ class ExtraArgDetailSerializer(serializers.Serializer):
 
 
 class AgentChoiceSerializer(serializers.Serializer):
+    key = serializers.CharField()
     name = serializers.CharField()
     key = serializers.CharField()
     agent_args = serializers.DictField(child=ExtraArgDetailSerializer(), allow_empty=True)
@@ -28,3 +34,26 @@ class AgentChoiceSerializer(serializers.Serializer):
 
 class AvailableAgentsResponseSerializer(serializers.Serializer):
     choices = serializers.ListField(child=AgentChoiceSerializer())
+
+
+class AgentConfigSerializer(ParentDataContextSerializerMixin, serializers.Serializer):
+    agent_args = PydanticModelField(agent_field_name="AGENT_ARGS")
+    prompt_inputs = PydanticModelField(agent_field_name="PROMPT_INPUT_SCHEMA")
+    prompt_extension = PydanticModelField(agent_field_name="PROMPT_EXTENSION")
+    tools = PydanticModelToolListField(agent_field_name="TOOLS", tool_field_name="CONFIGURATION_ARGS")
+
+
+class AgentConfigurationSerializer(ParentDataContextSerializerMixin, serializers.ModelSerializer):
+    config = AgentConfigSerializer()
+    dataset = serializers.PrimaryKeyRelatedField(queryset=DataSet.objects.all())
+
+    class Meta:
+        model = AgentConfiguration
+        fields = ["id", "name", "config", "dataset", "agent_key", "created_at", "updated_at"]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+
+class AgentConfigurationDetailsSerializer(ParentDataContextSerializerMixin, serializers.ModelSerializer):
+    class Meta:
+        model = AgentConfiguration
+        fields = ["id", "name", "dataset", "created_at", "updated_at"]

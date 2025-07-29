@@ -44,7 +44,7 @@ def validate_required_vars(cls, name: str, required_vars: dict[str, type]):
     return cls
 
 
-class NoUnionOptionalMeta(ModelMetaclass):
+class RequiredFieldsMeta(ModelMetaclass):
     MAX_DEPTH = 2
 
     def __new__(cls, name, bases, namespace):
@@ -73,5 +73,5 @@ class NoUnionOptionalMeta(ModelMetaclass):
         return new_cls
 
 
-class NoUnionOptionalModel(BaseModel, metaclass=NoUnionOptionalMeta):
+class RequiredFieldsModel(BaseModel, metaclass=RequiredFieldsMeta):
     pass

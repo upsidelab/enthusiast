@@ -1,5 +1,6 @@
 from celery.result import AsyncResult
 from django.conf import settings
+from django.shortcuts import get_object_or_404
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
@@ -12,8 +13,13 @@ from agent.conversation import ConversationManager
 from agent.core.repositories import DjangoDataSetRepository
 from agent.models import Conversation, Message
 from agent.registries.agents.agent_registry import AgentRegistry
+from agent.models.configuration import AgentConfiguration
 from agent.registries.language_models import LanguageModelRegistry
-from agent.serializers.configuration import AvailableAgentsResponseSerializer
+from agent.serializers.configuration import (
+    AgentConfigurationDetailsSerializer,
+    AgentConfigurationSerializer,
+    AvailableAgentsResponseSerializer,
+)
 from agent.serializers.conversation import (
     AskQuestionSerializer,
     ConversationContentSerializer,
@@ -189,6 +195,7 @@ class MessageFeedbackView(APIView):
 
 class AvailableAgentsView(APIView):
     permission_classes = [IsAuthenticated]
+
     """View to get available agents."""
 
     @swagger_auto_schema(
@@ -216,3 +223,62 @@ class AvailableAgentsView(APIView):
         response_serializer.is_valid(raise_exception=True)
 
         return Response(response_serializer.data, status=status.HTTP_200_OK)
+
+
+class ConfigView(APIView):
+    permission_classes = [IsAuthenticated]
+    """View to get manage configurations"""
+
+    @swagger_auto_schema(
+        operation_description="Get list of all configurations",
+        responses={200: AgentConfigurationDetailsSerializer(many=True)},
+    )
+    def get(self, request):
+        queryset = AgentConfiguration.objects.all().order_by("created_at")
+        serializer = AgentConfigurationDetailsSerializer(queryset, many=True)
+        return Response(serializer.data, status=200)
+
+    @swagger_auto_schema(
+        operation_description="Create a new configuration.",
+        request_body=AgentConfigurationSerializer,
+        responses={201: AgentConfigurationSerializer()},
+    )
+    def post(self, request):
+        serializer = AgentConfigurationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save()
+        return Response(AgentConfigurationSerializer(instance).data, status=status.HTTP_201_CREATED)
+
+
+class ConfigDetailsView(APIView):
+    permission_classes = [IsAuthenticated]
+    """View to get manage configuration"""
+
+    @swagger_auto_schema(
+        operation_description="Get a single configuration by id.", responses={200: AgentConfigurationSerializer()}
+    )
+    def get(self, request, pk):
+        instance = get_object_or_404(AgentConfiguration, pk=pk)
+        serializer = AgentConfigurationSerializer(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        operation_description="Update an existing configuration by id.",
+        request_body=AgentConfigurationSerializer,
+        responses={200: AgentConfigurationSerializer()},
+    )
+    def put(self, request, pk=None):
+        instance = get_object_or_404(AgentConfiguration, pk=pk)
+
+        serializer = AgentConfigurationSerializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        operation_description="Delete a configuration by id.", responses={204: "No Content", 404: "Not Found"}
+    )
+    def delete(self, request, pk=None):
+        instance = get_object_or_404(AgentConfiguration, pk=pk)
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

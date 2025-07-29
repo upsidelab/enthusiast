@@ -5,7 +5,7 @@ from enthusiast_common.interfaces import LanguageModelProvider
 from enthusiast_common.registry import BaseLanguageModelRegistry
 from enthusiast_common.repositories import BaseDataSetRepository
 
-from agent.repositories import DjangoDataSetRepository
+from agent.core.repositories import DjangoDataSetRepository
 from pecl import settings
 
 

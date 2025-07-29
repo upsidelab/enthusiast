@@ -5,10 +5,15 @@ from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
 
-from agent.injector import Injector
+from agent.core.injector import Injector
 
 
 class ToolCallingAgent(BaseAgent):
+    AGENT_ARGS = None
+    PROMPT_INPUT_SCHEMA = None
+    PROMPT_EXTENSION = None
+    TOOLS = []
+
     def __init__(
         self,
         tools: list[BaseTool],

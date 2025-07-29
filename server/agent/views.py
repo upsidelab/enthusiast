@@ -9,16 +9,19 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from agent.conversation import ConversationManager
+from agent.core.repositories import DjangoDataSetRepository
 from agent.models import Conversation, Message
+from agent.registries.agents.agent_registry import AgentRegistry
 from agent.registries.language_models import LanguageModelRegistry
-from agent.repositories import DjangoDataSetRepository
-from agent.serializers import (
+from agent.serializers.configuration import AvailableAgentsResponseSerializer
+from agent.serializers.conversation import (
     AskQuestionSerializer,
     ConversationContentSerializer,
     ConversationCreationSerializer,
     ConversationSerializer,
     MessageFeedbackSerializer,
 )
+from agent.utils.functions import get_model_descriptor_from_class_field
 from catalog.models import DataSet
 
 
@@ -145,7 +148,7 @@ class ConversationListView(ListAPIView):
         conversation = manager.create_conversation(
             user_id=request.user.id,
             data_set_id=input_serializer.validated_data.get("data_set_id"),
-            agent_name=input_serializer.validated_data.get("agent"),
+            agent_key=input_serializer.validated_data.get("agent_key"),
         )
 
         conversation_data = ConversationSerializer(conversation).data
@@ -189,7 +192,27 @@ class AvailableAgentsView(APIView):
     """View to get available agents."""
 
     @swagger_auto_schema(
-        operation_description="Get available Agents",
+        operation_description="Get available Agents", responses={200: AvailableAgentsResponseSerializer()}
     )
     def get(self, request):
-        return Response({"choices": settings.AVAILABLE_AGENTS.keys()}, status=status.HTTP_200_OK)
+        agent_registry = AgentRegistry()
+        choices = []
+        for key, value in settings.AVAILABLE_AGENTS.items():
+            agent_class = agent_registry.get_agent_class_by_key(agent_key=key)
+            choices.append(
+                {
+                    "name": value["name"],
+                    "key": key,
+                    "agent_args": get_model_descriptor_from_class_field(agent_class, "AGENT_ARGS"),
+                    "prompt_inputs": get_model_descriptor_from_class_field(agent_class, "PROMPT_INPUT_SCHEMA"),
+                    "prompt_extension": get_model_descriptor_from_class_field(agent_class, "PROMPT_EXTENSION"),
+                    "tools": [
+                        get_model_descriptor_from_class_field(tool_class, "CONFIGURATION_ARGS")
+                        for tool_class in agent_class.TOOLS
+                    ],
+                }
+            )
+        response_serializer = AvailableAgentsResponseSerializer(data={"choices": choices})
+        response_serializer.is_valid(raise_exception=True)
+
+        return Response(response_serializer.data, status=status.HTTP_200_OK)

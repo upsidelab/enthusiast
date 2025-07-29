@@ -5,7 +5,7 @@ from enthusiast_common import EmbeddingProvider
 from enthusiast_common.registry import BaseEmbeddingProviderRegistry
 from enthusiast_common.repositories import BaseDataSetRepository
 
-from agent.repositories import DjangoDataSetRepository
+from agent.core.repositories import DjangoDataSetRepository
 from pecl import settings
 
 

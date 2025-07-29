@@ -38,6 +38,7 @@ class CreateAnswerTool(BaseLLMTool):
     DESCRIPTION = "use it when asked to generate content or answer a question about products"
     ARGS_SCHEMA = CreateAnswerToolInput
     RETURN_DIRECT = True
+    CONFIGURATION_ARGS = None
 
     ENCODING: tiktoken.encoding_for_model = None
     MAX_TOKENS: int = 30000

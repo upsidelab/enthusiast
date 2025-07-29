@@ -9,7 +9,7 @@ class Conversation(models.Model):
     started_at = models.DateTimeField(auto_now_add=True)
     data_set = models.ForeignKey(DataSet, on_delete=models.PROTECT, null=False)
     summary = models.CharField(null=True)
-    agent = models.CharField(blank=False, max_length=255, default="Question Answer Agent")
+    agent_key = models.CharField(blank=False, max_length=255, default="question_answer_agent")
 
     class Meta:
         db_table_comment = (

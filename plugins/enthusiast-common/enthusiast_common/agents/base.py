@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC, ABCMeta, abstractmethod
 from typing import Any
 
 from langchain_core.callbacks import BaseCallbackHandler
@@ -8,8 +8,29 @@ from langchain_core.tools import BaseTool
 
 from enthusiast_common.injectors import BaseInjector
 
+from ..utils import NoUnionOptionalModel, validate_required_vars
 
-class BaseAgent(ABC):
+
+class ExtraArgsClassBaseMeta(ABCMeta):
+    REQUIRED_VARS = {
+        "AGENT_ARGS": NoUnionOptionalModel,
+        "PROMPT_INPUT_SCHEMA": NoUnionOptionalModel,
+        "PROMPT_EXTENSION": NoUnionOptionalModel,
+        "TOOLS": list[BaseTool],
+    }
+
+    def __new__(mcs, name, bases, namespace, **kwargs):
+        cls = super().__new__(mcs, name, bases, namespace, **kwargs)
+        if not namespace.get("__abstract__", False):
+            return validate_required_vars(cls, name, cls.REQUIRED_VARS)
+        return cls
+
+
+class ExtraArgsClassBase(metaclass=ExtraArgsClassBaseMeta):
+    __abstract__ = True
+
+
+class BaseAgent(ABC, ExtraArgsClassBase):
     def __init__(
         self,
         tools: list[BaseTool],

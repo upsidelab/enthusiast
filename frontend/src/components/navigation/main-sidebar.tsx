@@ -67,6 +67,12 @@ export function MainSidebar() {
       icon: <DatabaseIcon />
     },
     {
+      title: "Agents",
+      link: "/agents",
+      key: "agents",
+      icon: <BotMessageSquareIcon />
+    },
+    {
       title: "Users",
       link: "/users",
       key: "users",

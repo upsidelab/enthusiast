@@ -1,4 +1,5 @@
 import {BaseApiClient} from "@/lib/api/base.ts";
+import {AgentInstance} from "@/lib/types.ts";
 
 type AgentChoice = {
   key: string;
@@ -14,7 +15,7 @@ type AvailableAgentsResponse = {
 };
 
 export class AgentsApiClient extends BaseApiClient {
-    async getAvailableAgents(): Promise<AgentChoice[]> {
+    async getAvailableAgentTypes(): Promise<AgentChoice[]> {
         const response = await fetch(`${this.apiBase}/api/agents/types`, this._requestConfiguration());
 
         if (!response.ok) {
@@ -23,5 +24,14 @@ export class AgentsApiClient extends BaseApiClient {
 
         const result = await response.json() as AvailableAgentsResponse;
         return result.choices;
+    }
+    async getDatasetAvailableAgents(dataSetId: number): Promise<AgentInstance[]> {
+   const response = await fetch(`${this.apiBase}/api/agents/dataset/${dataSetId}`, this._requestConfiguration());
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch available agent instances: ${response.statusText}`);
+    }
+
+    return await response.json() as AgentInstance[];
     }
 }

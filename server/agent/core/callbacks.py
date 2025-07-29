@@ -3,11 +3,11 @@ from uuid import UUID
 
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
+from enthusiast_common.callbacks import ConversationCallbackHandler
 from langchain_core.agents import AgentAction
-from langchain_core.callbacks import BaseCallbackHandler
 
 
-class BaseWebSocketHandler(BaseCallbackHandler):
+class BaseWebSocketHandler(ConversationCallbackHandler):
     def __init__(self, conversation_id: int):
         self.group_name = f"conversation_{conversation_id}"
         self.channel_layer = get_channel_layer()

@@ -21,14 +21,14 @@ class DummyTestSerializer(ParentDataContextSerializerMixin, serializers.Serializ
 @pytest.mark.parametrize(
     "initial_context, expected_context",
     [
-        ({}, {"agent_key": "abc123"}),
-        ({"agent_key": "pre_existing"}, {"agent_key": "pre_existing"}),
+        ({}, {"agent_type": "abc123"}),
+        ({"agent_type": "pre_existing"}, {"agent_type": "pre_existing"}),
     ],
 )
 def test_context_propagation_from_data(initial_context, expected_context):
     serializer = DummyTestSerializer(context=initial_context.copy())
     data = {
-        "agent_key": "abc123",
+        "agent_type": "abc123",
         "child": {"dummy": "x"},
         "children": [{"dummy": "y"}],
         "regular": "z",
@@ -43,7 +43,7 @@ def test_context_propagation_from_data(initial_context, expected_context):
 def test_context_propagated_to_nested_serializer_fields():
     serializer = DummyTestSerializer(context={})
     data = {
-        "agent_key": "xyz",
+        "agent_type": "xyz",
         "child": {"dummy": "value"},
         "children": [{"dummy": "val1"}, {"dummy": "val2"}],
         "regular": "something",
@@ -52,8 +52,8 @@ def test_context_propagated_to_nested_serializer_fields():
     serializer.is_valid = lambda: True
     serializer.to_internal_value(data)
 
-    assert serializer.fields["child"].context["agent_key"] == "xyz"
-    assert serializer.fields["children"].child.context["agent_key"] == "xyz"
+    assert serializer.fields["child"].context["agent_type"] == "xyz"
+    assert serializer.fields["children"].child.context["agent_type"] == "xyz"
 
 
 def test_context_propagated_to_non_serializer_fields():
@@ -62,14 +62,14 @@ def test_context_propagated_to_non_serializer_fields():
         text = serializers.CharField()
 
     serializer = PlainSerializer(context={})
-    data = {"agent_key": "key", "number": 1, "text": "ok"}
+    data = {"agent_type": "key", "number": 1, "text": "ok"}
 
     serializer.is_valid = lambda: True
     serializer.to_internal_value(data)
 
-    assert serializer.context["agent_key"] == "key"
-    assert serializer.fields["number"].context.get("agent_key") == "key"
-    assert serializer.fields["text"].context.get("agent_key") == "key"
+    assert serializer.context["agent_type"] == "key"
+    assert serializer.fields["number"].context.get("agent_type") == "key"
+    assert serializer.fields["text"].context.get("agent_type") == "key"
 
 
 def test_no_context_propagation_if_not_in_data():
@@ -79,6 +79,6 @@ def test_no_context_propagation_if_not_in_data():
     serializer.is_valid = lambda: True
     serializer.to_internal_value(data)
 
-    assert "agent_key" not in serializer.context
-    assert "agent_key" not in serializer.fields["child"].context
-    assert "agent_key" not in serializer.fields["children"].child.context
+    assert "agent_type" not in serializer.context
+    assert "agent_type" not in serializer.fields["child"].context
+    assert "agent_type" not in serializer.fields["children"].child.context

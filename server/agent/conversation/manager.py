@@ -1,8 +1,11 @@
 from datetime import datetime
 
+from rest_framework.exceptions import PermissionDenied
+
 from account.models import User
+from agent.core.registries.agents.agent_registry import AgentRegistry
 from agent.models import Conversation, Message
-from agent.registries.agents.agent_registry import AgentRegistry
+from agent.models.agent import Agent
 
 
 class ConversationManager:
@@ -19,19 +22,24 @@ class ConversationManager:
 
         return response
 
-    def create_conversation(self, user_id: int, data_set_id: int, agent_key: str) -> Conversation:
+    def create_conversation(self, user_id: int, agent_id: int) -> Conversation:
         user = User.objects.get(id=user_id)
-        data_set = user.data_sets.get(id=data_set_id)
+        agent = Agent.objects.filter(id=agent_id, dataset__in=user.data_sets.all()).first()
+        if not agent:
+            raise PermissionDenied("Invalid or unauthorized agent configuration.")
 
         conversation = Conversation.objects.create(
-            started_at=datetime.now(), user=user, data_set=data_set, agent_key=agent_key
+            started_at=datetime.now(),
+            user=user,
+            data_set=agent.dataset,
+            agent=agent,
         )
         return conversation
 
     def get_conversation(self, user_id: int, data_set_id: int, conversation_id: int) -> Conversation:
         user = User.objects.get(id=user_id)
         data_set = user.data_sets.get(id=data_set_id)
-        return Conversation.objects.get(id=conversation_id, data_set=data_set, user=user)
+        return Conversation.objects.select_related("agent").get(id=conversation_id, data_set=data_set, user=user)
 
     def respond_to_user_message(
         self, conversation_id: int, data_set_id: int, user_id: int, message: str, streaming: bool

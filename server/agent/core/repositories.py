@@ -1,9 +1,10 @@
-from typing import Optional, Type, TypeVar
+from typing import Any, Optional, Type, TypeVar
 
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from django.db import models
 from django.db.models import QuerySet
 from enthusiast_common.repositories import (
+    BaseAgentRepository,
     BaseConversationRepository,
     BaseDataSetRepository,
     BaseMessageRepository,
@@ -16,6 +17,7 @@ from pgvector.django import CosineDistance
 
 from account.models import User
 from agent.models import Conversation, Message
+from agent.models.agent import Agent
 from catalog.models import DataSet, DocumentChunk, Product, ProductContentChunk
 
 T = TypeVar("T", bound=models.Model)
@@ -115,6 +117,14 @@ class DjangoConversationRepository(BaseDjangoRepository[Conversation], BaseConve
     def get_data_set_id(self, conversation_id: int) -> int:
         return self.get_by_id(pk=conversation_id).data_set.id
 
+    def get_agent_id(self, conversation_id: int) -> int:
+        return self.get_by_id(pk=conversation_id).agent.id
+
 
 class DjangoDataSetRepository(BaseDjangoRepository[DataSet], BaseDataSetRepository[DataSet]):
     pass
+
+
+class DjangoAgentRepository(BaseDjangoRepository[Agent], BaseAgentRepository[Agent]):
+    def get_agent_configuration_by_id(self, agent_id: int) -> Any:
+        return self.get_by_id(agent_id).config

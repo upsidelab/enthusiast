@@ -4,7 +4,7 @@ from pydantic import ValidationError as PydanticValidationError
 from rest_framework import serializers
 from rest_framework.exceptions import APIException
 
-from agent.registries.agents.agent_registry import AgentRegistry
+from agent.core.registries.agents.agent_registry import AgentRegistry
 
 
 class BasePydanticModelField(serializers.Field):
@@ -22,12 +22,12 @@ class PydanticModelField(BasePydanticModelField):
         super().__init__(**kwargs)
 
     def to_internal_value(self, data):
-        agent_key = self.context.get("agent_key")
-        if not agent_key:
-            raise AssertionError("Missing 'agent_key' in field context")
+        agent_type = self.context.get("agent_type")
+        if not agent_type:
+            raise AssertionError("Missing 'agent_type' in field context")
 
         try:
-            class_obj = AgentRegistry().get_agent_class_by_key(agent_key)
+            class_obj = AgentRegistry().get_agent_class_by_type(agent_type)
         except Exception as e:
             raise APIException(f"Error loading agent: {str(e)}")
 
@@ -49,8 +49,8 @@ class PydanticModelField(BasePydanticModelField):
             return value.model_dump()
         return value
 
-    def get_schema(self, **kwargs):
-        return openapi.Schema(type=openapi.TYPE_OBJECT)
+    class Meta:
+        swagger_schema_fields = {"type": openapi.TYPE_OBJECT}
 
 
 class PydanticModelToolListField(BasePydanticModelField):
@@ -60,34 +60,34 @@ class PydanticModelToolListField(BasePydanticModelField):
         super().__init__(**kwargs)
 
     def to_internal_value(self, data):
-        agent_key = self.context.get("agent_key")
-        if not agent_key:
-            raise AssertionError("Missing 'agent_key' in field context")
+        agent_type = self.context.get("agent_type")
+        if not agent_type:
+            raise AssertionError("Missing 'agent_type' in field context")
 
         try:
-            class_obj = AgentRegistry().get_agent_class_by_key(agent_key)
-            tool_list = getattr(class_obj, self.agent_field_name)
+            class_obj = AgentRegistry().get_agent_class_by_type(agent_type)
+            tool_config_list = getattr(class_obj, self.agent_field_name)
         except Exception as e:
             raise serializers.ValidationError(f"Error loading agent or field: {str(e)}")
 
         if not isinstance(data, list):
             raise serializers.ValidationError("Expected a list of tool configurations.")
-        if len(tool_list) != len(data):
+        if len(tool_config_list) != len(data):
             raise serializers.ValidationError("Mismatch between number of tools and provided configs.")
 
         validated = []
         all_errors = []
         has_errors = False
 
-        for idx, (tool_class, tool_config) in enumerate(zip(tool_list, data)):
-            config_schema = getattr(tool_class, self.tool_field_name, None)
+        for idx, (tool_config_obj, tool_config_dict) in enumerate(zip(tool_config_list, data)):
+            config_schema = getattr(tool_config_obj.tool_class, self.tool_field_name, None)
             if not config_schema or not isinstance(config_schema, type) or not issubclass(config_schema, BaseModel):
                 all_errors.append({})
                 validated.append({})
                 continue
 
             try:
-                instance = config_schema(**tool_config)
+                instance = config_schema(**tool_config_dict)
                 validated.append(instance.model_dump())
                 all_errors.append({})
             except PydanticValidationError as e:
@@ -105,5 +105,8 @@ class PydanticModelToolListField(BasePydanticModelField):
             return [v.model_dump() for v in value]
         return value
 
-    def get_schema(self, **kwargs):
-        return openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_OBJECT))
+    class Meta:
+        swagger_schema_fields = {
+            "type": openapi.TYPE_ARRAY,
+            "items": {"type": openapi.TYPE_OBJECT},
+        }

@@ -232,6 +232,7 @@ CATALOG_MODELS = {
     "document_chunk": "catalog.models.DocumentChunk",
     "product": "catalog.models.Product",
     "product_chunk": "catalog.models.ProductContentChunk",
+    "agent": "agent.models.Agent",
 }
 
 AGENT_TOOLS = {

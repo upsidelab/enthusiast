@@ -1,6 +1,7 @@
 import logging
 
 from enthusiast_common.agents import BaseAgent
+from enthusiast_common.config import LLMToolConfig
 from enthusiast_common.utils import RequiredFieldsModel
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain_core.callbacks import BaseCallbackHandler
@@ -11,7 +12,7 @@ from pydantic import Field
 
 from agent.core.agents.product_search_react_agent.output_parser import CustomReactOutputParser
 from agent.core.injector import Injector
-from agent.tools import ProductsSearchTool, ProductVerificationTool
+from agent.core.tools import ProductsSearchTool, ProductVerificationTool
 
 logger = logging.getLogger(__name__)
 
@@ -22,9 +23,9 @@ class ProductSearchReActAgentInput(RequiredFieldsModel):
 
 class ProductSearchReActAgent(BaseAgent):
     AGENT_ARGS = None
-    PROMPT_INPUT_SCHEMA = ProductSearchReActAgentInput
+    PROMPT_INPUT = ProductSearchReActAgentInput
     PROMPT_EXTENSION = None
-    TOOLS = [ProductsSearchTool, ProductVerificationTool]
+    TOOLS = [LLMToolConfig(tool_class=ProductsSearchTool), LLMToolConfig(tool_class=ProductVerificationTool)]
 
     def __init__(
         self,
@@ -69,7 +70,7 @@ class ProductSearchReActAgent(BaseAgent):
 
     def get_answer(self, input_text: str) -> str:
         agent_output = self._agent_executor.invoke(
-            {"input": input_text, "products_type": "any"},
+            {"input": input_text, "products_type": self.PROMPT_INPUT.products_type},
             config={"callbacks": [self._callback_handler] if self._callback_handler else []},
         )
         return agent_output["output"]

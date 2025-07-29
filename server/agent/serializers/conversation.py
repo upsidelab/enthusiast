@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from agent.models import Conversation, Message
+from agent.serializers.configuration import AgentListSerializer
 
 
 class AskQuestionSerializer(serializers.Serializer):
@@ -34,24 +35,18 @@ class AskQuestionSerializer(serializers.Serializer):
 
 
 class ConversationCreationSerializer(serializers.Serializer):
-    data_set_id = serializers.IntegerField(
-        required=False,
+    agent_id = serializers.IntegerField(
+        required=True,
         allow_null=False,
-        error_messages={
-            "null": "Data Set ID cannot be blank. Either skip this parameter, or provide a valid ID of a data set"
-        },
-    )
-    agent_key = serializers.CharField(
-        required=False,
-        allow_null=False,
-        allow_blank=False,
     )
 
 
 class ConversationSerializer(serializers.ModelSerializer):
+    agent = AgentListSerializer()
+
     class Meta:
         model = Conversation
-        fields = ["id", "started_at", "summary", "agent_key"]
+        fields = ["id", "started_at", "summary", "agent"]
 
 
 class MessageFeedbackSerializer(serializers.ModelSerializer):
@@ -74,9 +69,12 @@ class MessagesSerializer(serializers.ModelSerializer):
         fields = ["id", "text", "role"]
 
 
-class ConversationContentSerializer(ConversationSerializer):
+class ConversationContentSerializer(serializers.ModelSerializer):
     # This serializer returns conversation details extended with history.
-    history = MessagesSerializer(many=True)
+    history = MessagesSerializer(many=True, source="messages")
 
-    class Meta(ConversationSerializer.Meta):
-        fields = ConversationSerializer.Meta.fields + ["history"]
+    agent = AgentListSerializer()
+
+    class Meta:
+        model = Conversation
+        fields = ["id", "started_at", "summary", "history", "agent"]

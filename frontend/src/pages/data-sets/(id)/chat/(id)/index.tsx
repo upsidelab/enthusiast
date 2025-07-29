@@ -21,7 +21,7 @@ export function Chat() {
   const [conversation, setConversation] = useState<ConversationSchema | null>(null);
   const navigate = useNavigate();
 
-  const agentOrDefault = (conversation ? conversation.agent : null) || 'Question Answer Agent';
+  const agentOrDefault = (conversation ? conversation.agent.name : null) || 'Question Answer Agent';
   const onPendingMessageSent = () => {
     setSearchParams({});
   }
@@ -38,7 +38,7 @@ export function Chat() {
     <PageMain className="h-full py-0">
       {conversation &&
         <>
-          <PageHeading title={pendingMessage || conversation.summary!} description={`Chat with ${conversation.agent}`} className="sticky top-0 pt-4 bg-white">
+          <PageHeading title={pendingMessage || conversation.summary!} description={`Chat with ${conversation.agent.name}`} className="sticky top-0 pt-4 bg-white">
             <Button className="ml-auto mr-0" variant="outline" onClick={() => navigate(`/data-sets/${dataSetId}/chat/new/${encodeURIComponent(agentOrDefault)}`)}>
               <PlusIcon />
               New Chat

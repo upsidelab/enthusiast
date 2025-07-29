@@ -1,14 +1,12 @@
-from enthusiast_common.config import AgentConfigWithDefaults, LLMToolConfig
+from enthusiast_common.config import AgentConfigWithDefaults
 from enthusiast_common.config.base import ChatPromptTemplateConfig
 
 from agent.core.agents import ToolCallingAgent
-from agent.tools import CreateAnswerTool
 
 
-def get_config(conversation_id: int, streaming: bool) -> AgentConfigWithDefaults:
+def get_config() -> AgentConfigWithDefaults:
     return AgentConfigWithDefaults(
-        conversation_id=conversation_id,
-        prompt_template=ChatPromptTemplateConfig(
+        chat_prompt_template=ChatPromptTemplateConfig(
             messages=[
                 (
                     "system",
@@ -20,9 +18,5 @@ def get_config(conversation_id: int, streaming: bool) -> AgentConfigWithDefaults
             ]
         ),
         agent_class=ToolCallingAgent,
-        llm_tools=[
-            LLMToolConfig(
-                tool_class=CreateAnswerTool,
-            )
-        ],
+        tools=ToolCallingAgent.TOOLS,
     )

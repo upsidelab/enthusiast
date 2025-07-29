@@ -75,3 +75,10 @@ class RequiredFieldsMeta(ModelMetaclass):
 
 class RequiredFieldsModel(BaseModel, metaclass=RequiredFieldsMeta):
     pass
+
+
+class AgentAdditionalArguments(BaseModel):
+    AGENT_ARGS: dict[str, str]
+    PROMPT_INPUT: dict[str, str]
+    PROMPT_EXTENSION: dict[str, str]
+    TOOLS: list[dict[str, str]]

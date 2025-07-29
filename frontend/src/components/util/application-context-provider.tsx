@@ -27,7 +27,7 @@ function buildNewUrl(path: string, newDataSetId: number): string {
 export function ApplicationContextProvider({ children }: ApplicationContextProviderProps) {
   const [dataSets, setDataSets] = useState<DataSet[]>([]);
   const [dataSetId, setDataSetId] = useState<number | null>(null);
-  const [availableAgents, setAvailableAgents] = useState<{ name: string; key: string; }[]>([]);
+  const [availableAgentInstances, setAvailableAgentInstances] = useState<{ name: string; id: number; }[]>([]);
   const [isLoadingAgents, setIsLoadingAgents] = useState(true);
   const [account, setAccount] = useState<Account | null>(null);
   const location = useLocation();
@@ -57,13 +57,32 @@ export function ApplicationContextProvider({ children }: ApplicationContextProvi
     fetchDataSets();
   }, [location.pathname, navigate]);
 
+  useEffect(() => {
+  const fetchAgentsForDataSet = async () => {
+    if (!dataSetId) return;
+
+    setIsLoadingAgents(true);
+    try {
+      const instances = await api.agents().getDatasetAvailableAgents(dataSetId);
+      setAvailableAgentInstances(instances);
+    } catch (error) {
+      console.error("Failed to load agent instances:", error);
+      setAvailableAgentInstances([]);
+    } finally {
+      setIsLoadingAgents(false);
+    }
+  };
+
+  fetchAgentsForDataSet();
+}, [dataSetId]);
+
   const value: ApplicationContextValue = {
     dataSets,
     setDataSets,
     dataSetId,
     setDataSetId,
-    availableAgents,
-    setAvailableAgents,
+    availableAgentInstances,
+    setAvailableAgentInstances,
     isLoadingAgents,
     setIsLoadingAgents,
     account,

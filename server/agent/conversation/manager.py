@@ -1,7 +1,5 @@
 from datetime import datetime
 
-from rest_framework.exceptions import PermissionDenied
-
 from account.models import User
 from agent.core.registries.agents.agent_registry import AgentRegistry
 from agent.models import Conversation, Message
@@ -24,9 +22,7 @@ class ConversationManager:
 
     def create_conversation(self, user_id: int, agent_id: int) -> Conversation:
         user = User.objects.get(id=user_id)
-        agent = Agent.objects.filter(id=agent_id, dataset__in=user.data_sets.all()).first()
-        if not agent:
-            raise PermissionDenied("Invalid or unauthorized agent configuration.")
+        agent = Agent.objects.get(id=agent_id, dataset__in=user.data_sets.all())
 
         conversation = Conversation.objects.create(
             started_at=datetime.now(),

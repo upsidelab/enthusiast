@@ -7,11 +7,12 @@ import { Textarea } from "@/components/ui/textarea.tsx";
 export interface MessageComposerProps {
   onSubmit: (message: string) => void;
   isLoading: boolean;
+  conversationLocked?: boolean;
 }
 
 const maxHeight = 300;
 
-export function MessageComposer({ onSubmit, isLoading }: MessageComposerProps) {
+export function MessageComposer({ onSubmit, isLoading, conversationLocked = false }: MessageComposerProps) {
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const inputLength = input.trim().length;
@@ -62,16 +63,16 @@ export function MessageComposer({ onSubmit, isLoading }: MessageComposerProps) {
         <Textarea
           id="message"
           ref={inputRef}
-          placeholder="Type your message..."
+          placeholder={conversationLocked ? "This agent is no longer available." : "Type your message..."}
           className="w-full resize-none"
           autoComplete="off"
           value={input}
           onChange={handleTextAreaInput}
           onKeyDown={handleTextAreaKeyDown}
-          disabled={isLoading}
+          disabled={isLoading || conversationLocked}
         />
       </div>
-      <Button type="submit" size="icon" disabled={isLoading || inputLength === 0}>
+      <Button type="submit" size="icon" disabled={isLoading || inputLength === 0 || conversationLocked}>
         {isLoading ? (
           <Loader className="h-4 w-4 animate-spin text-gray-500" />
         ) : (

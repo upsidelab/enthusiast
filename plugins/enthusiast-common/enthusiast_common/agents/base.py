@@ -6,6 +6,8 @@ from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import BaseTool
 
+from enthusiast_common.injectors import BaseInjector
+
 
 class BaseAgent(ABC):
     def __init__(
@@ -14,7 +16,7 @@ class BaseAgent(ABC):
         llm: BaseLanguageModel,
         prompt: ChatPromptTemplate,
         conversation_id: Any,
-        injector: "BaseInjector",  # noqa: F821
+        injector: BaseInjector,
         callback_handler: BaseCallbackHandler | None = None,
     ):
         self._tools = tools

@@ -12,7 +12,7 @@ dependencies = [
     "django-environ (==0.12.0)",
     "djangorestframework (==3.16.0)",
     "drf-yasg (==1.21.10)",
-    "enthusiast-common (==1.2.2)",
+    "enthusiast-common (==1.2.3)",
     "enthusiast-source-sample (==1.0.0)",
     "enthusiast-model-openai (==1.1.1)",
     "langchain (==0.3.26)",

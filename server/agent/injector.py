@@ -1,16 +1,17 @@
 from enthusiast_common.injectors import BaseInjector
-from enthusiast_common.retrievers import BaseRetriever
+from enthusiast_common.retrievers import BaseProductRetriever, BaseVectorStoreRetriever
 from enthusiast_common.structures import RepositoriesInstances
 
 from agent.core.memory import SummaryChatMemory
 from agent.core.memory.limited_chat_memory import LimitedChatMemory
+from catalog.models import DocumentChunk
 
 
 class Injector(BaseInjector):
     def __init__(
         self,
-        document_retriever: BaseRetriever,
-        product_retriever: BaseRetriever,
+        document_retriever: BaseVectorStoreRetriever[DocumentChunk],
+        product_retriever: BaseProductRetriever,
         repositories: RepositoriesInstances,
         chat_summary_memory: SummaryChatMemory,
         chat_limited_memory: LimitedChatMemory,
@@ -22,11 +23,11 @@ class Injector(BaseInjector):
         self._chat_limited_memory = chat_limited_memory
 
     @property
-    def document_retriever(self) -> BaseRetriever:
+    def document_retriever(self) -> BaseVectorStoreRetriever[DocumentChunk]:
         return self._document_retriever
 
     @property
-    def product_retriever(self) -> BaseRetriever:
+    def product_retriever(self) -> BaseProductRetriever:
         return self._product_retriever
 
     @property

@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
-from enthusiast_common.structures import RepositoriesInstances
+from enthusiast_common.retrievers import BaseProductRetriever, BaseVectorStoreRetriever
+from enthusiast_common.structures import RepositoriesInstances, DocumentChunkDetails
 from langchain_core.memory import BaseMemory
 
 
@@ -10,12 +11,12 @@ class BaseInjector(ABC):
 
     @property
     @abstractmethod
-    def document_retriever(self) -> "BaseRetriever":  # noqa: F821
+    def document_retriever(self) -> BaseVectorStoreRetriever[DocumentChunkDetails]:
         pass
 
     @property
     @abstractmethod
-    def product_retriever(self) -> "BaseRetriever":  # noqa: F821
+    def product_retriever(self) -> BaseProductRetriever:
         pass
 
     @property

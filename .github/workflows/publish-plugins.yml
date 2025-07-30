@@ -19,7 +19,7 @@ jobs:
       - name: Get changed plugin directories
         id: changed
         run: |
-          CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^plugins/' | cut -d/ -f2 | sort -u | uniq)
+          CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^plugins/' | grep 'pyproject.toml$' | cut -d/ -f2 | sort -u | uniq)
           
           JSON_ARRAY=$(printf '%s\n' $CHANGED | jq -R . | jq -s -c .)
 

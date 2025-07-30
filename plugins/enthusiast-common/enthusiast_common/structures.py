@@ -30,6 +30,11 @@ class DocumentDetails:
 
 
 @dataclass
+class DocumentChunkDetails:
+    content: str
+
+
+@dataclass
 class RepositoriesInstances:
     user: BaseUserRepository
     message: BaseMessageRepository

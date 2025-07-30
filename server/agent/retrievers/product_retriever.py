@@ -1,12 +1,11 @@
 from typing import Self
 
 from django.core import serializers
-from django.db.models import QuerySet
 from enthusiast_common.builder import RepositoriesInstances
 from enthusiast_common.config import AgentConfig
 from enthusiast_common.registry import BaseEmbeddingProviderRegistry
 from enthusiast_common.repositories import BaseDataSetRepository, BaseProductRepository
-from enthusiast_common.retrievers import BaseRetriever
+from enthusiast_common.retrievers import BaseProductRetriever
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import PromptTemplate
 
@@ -41,7 +40,7 @@ QUERY_PROMPT_TEMPLATE = """
 """
 
 
-class ProductRetriever(BaseRetriever):
+class ProductRetriever(BaseProductRetriever):
     def __init__(
         self,
         data_set_id: int,
@@ -60,20 +59,20 @@ class ProductRetriever(BaseRetriever):
         self.prompt_template = prompt_template
         self.llm = llm
 
-    def find_products_matching_query(self, user_query: str) -> QuerySet[Product]:
+    def find_products_matching_query(self, user_query: str) -> list[Product]:
         agent_where_clause = self._build_where_clause_for_query(user_query)
         where_conditions = [f"data_set_id = {self.data_set_id}"]
         if agent_where_clause:
             where_conditions.append(agent_where_clause)
         return self.product_repo.extra(where_conditions=where_conditions)[: self.number_of_products]
 
-    def _get_sample_products_json(self) -> str:
+    def get_sample_products_json(self) -> str:
         sample_products = self.product_repo.filter(data_set_id__exact=self.data_set_id)[: self.max_sample_products]
         return serializers.serialize("json", sample_products)
 
     def _build_where_clause_for_query(self, query: str) -> str:
         chain = PromptTemplate.from_template(self.prompt_template) | self.llm
-        llm_result = chain.invoke({"sample_products_json": self._get_sample_products_json(), "query": query})
+        llm_result = chain.invoke({"sample_products_json": self.get_sample_products_json(), "query": query})
         sanitized_result = llm_result.content.strip("`").removeprefix("sql").strip("\n").replace("%", "%%")
         return sanitized_result
 

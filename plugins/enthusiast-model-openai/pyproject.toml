@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "enthusiast-model-openai"
-version = "1.1.1"
+version = "1.1.2"
 description = "A plugin for Enthusiast that provides an OpenAI connector."
 authors = ["Rafal Cymerys <rafal@upsidelab.io>"]
 readme = "README.md"

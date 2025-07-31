@@ -96,7 +96,7 @@ def config():
 class TestAvailableAgentsView:
     def test_get_available_agents_returns_200(self, api_client):
         url = reverse("available-agents")
-        with patch("agent.views.import_from_string", return_value=DummyAgent):
+        with patch("agent.views.AgentRegistry.get_agent_class_by_key", return_value=DummyAgent):
             response = api_client.get(url)
 
             assert response.status_code == 200

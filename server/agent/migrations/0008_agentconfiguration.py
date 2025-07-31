@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("agent", "0006_message_answer_failed"),
+        ("agent", "0007_remove_conversation_agent_conversation_agent_key"),
         ("catalog", "0007_rename_productchunk_productcontentchunk"),
     ]
 

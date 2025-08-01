@@ -4,8 +4,8 @@ from asgiref.sync import async_to_sync
 from celery import Task, shared_task
 from channels.layers import get_channel_layer
 
-from agent.callbacks import BaseWebSocketHandler
 from agent.conversation import ConversationManager
+from agent.core.callbacks import BaseWebSocketHandler
 from agent.models import Message
 
 

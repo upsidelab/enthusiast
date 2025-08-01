@@ -41,7 +41,7 @@ class ConversationCreationSerializer(serializers.Serializer):
             "null": "Data Set ID cannot be blank. Either skip this parameter, or provide a valid ID of a data set"
         },
     )
-    agent = serializers.CharField(
+    agent_key = serializers.CharField(
         required=False,
         allow_null=False,
         allow_blank=False,
@@ -51,7 +51,7 @@ class ConversationCreationSerializer(serializers.Serializer):
 class ConversationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Conversation
-        fields = ["id", "started_at", "summary", "agent"]
+        fields = ["id", "started_at", "summary", "agent_key"]
 
 
 class MessageFeedbackSerializer(serializers.ModelSerializer):

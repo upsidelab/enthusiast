@@ -26,6 +26,7 @@ class ProductVerificationTool(BaseLLMTool):
     DESCRIPTION = "Always use this tool. Use this tool to verify if a product fulfills user criteria."
     ARGS_SCHEMA = ProductVerificationToolInput
     RETURN_DIRECT = False
+    CONFIGURATION_ARGS = None
 
     def __init__(
         self,

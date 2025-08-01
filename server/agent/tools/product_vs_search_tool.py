@@ -24,6 +24,7 @@ class ProductVectorStoreSearchTool(BaseLLMTool):
     )
     ARGS_SCHEMA = ProductVectorStoreSearchInput
     RETURN_DIRECT = False
+    CONFIGURATION_ARGS = None
 
     ENCODING: tiktoken.encoding_for_model = None
     MAX_TOKENS: int = 30000

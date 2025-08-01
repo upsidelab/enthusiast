@@ -3,8 +3,8 @@ from django.contrib.auth import get_user_model
 from langchain_core.messages import AIMessage, HumanMessage
 
 from agent.core.memory.persistent_chat_history import PersistentChatHistory
+from agent.core.repositories import DjangoConversationRepository
 from agent.models import Conversation
-from agent.repositories import DjangoConversationRepository
 from catalog.models import DataSet
 
 

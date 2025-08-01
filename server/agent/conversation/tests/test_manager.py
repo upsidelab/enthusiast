@@ -27,7 +27,7 @@ class TestConversationManager:
 
         # When
         conversation = self.manager.create_conversation(
-            user_id=user_id, data_set_id=data_set_id, agent_name="Question Answer Agent"
+            user_id=user_id, data_set_id=data_set_id, agent_key="question_answer_agent"
         )
 
         # Then
@@ -47,7 +47,7 @@ class TestConversationManager:
         # When & Then
         with pytest.raises(ObjectDoesNotExist):
             self.manager.create_conversation(
-                user_id=invalid_user_id, data_set_id=data_set_id, agent_name="Question Answer Agent"
+                user_id=invalid_user_id, data_set_id=data_set_id, agent_key="question_answer_agent"
             )
 
     def test_create_conversation_with_invalid_data_set_id(self):
@@ -59,7 +59,7 @@ class TestConversationManager:
         # When & Then
         with pytest.raises(ObjectDoesNotExist):
             self.manager.create_conversation(
-                user_id=user_id, data_set_id=invalid_data_set_id, agent_name="Question Answer Agent"
+                user_id=user_id, data_set_id=invalid_data_set_id, agent_key="question_answer_agent"
             )
 
     def test_create_conversation_with_data_set_not_owned_by_user(self):
@@ -75,7 +75,7 @@ class TestConversationManager:
         # When & Then
         with pytest.raises(ObjectDoesNotExist):
             self.manager.create_conversation(
-                user_id=user_id, data_set_id=other_data_set_id, agent_name="Question Answer Agent"
+                user_id=user_id, data_set_id=other_data_set_id, agent_key="question_answer_agent"
             )
 
     def test_get_conversation_success(self):

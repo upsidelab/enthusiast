@@ -1,39 +1,33 @@
 import inspect
 from abc import ABC, ABCMeta, abstractmethod
-from typing import Any, Type
+from typing import TYPE_CHECKING, Any, Type
 
-from enthusiast_common.agents import BaseAgent
+if TYPE_CHECKING:
+    from ..agents import BaseAgent
+
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.tools import StructuredTool, BaseTool as LCBaseTool
+from langchain_core.tools import BaseTool as LCBaseTool
+from langchain_core.tools import StructuredTool
 from pydantic import BaseModel
 
 from ..injectors import BaseInjector
+from ..utils import NoUnionOptionalModel, validate_required_vars
 
 
 class ToolMeta(ABCMeta):
-    REQUIRED_CLASS_VARS = {
+    REQUIRED_VARS = {
         "NAME": str,
         "DESCRIPTION": str,
         "ARGS_SCHEMA": type,
         "RETURN_DIRECT": bool,
+        "CONFIGURATION_ARGS": NoUnionOptionalModel,
     }
 
     def __new__(mcs, name, bases, namespace, **kwargs):
         cls = super().__new__(mcs, name, bases, namespace, **kwargs)
-
         if inspect.isabstract(cls):
             return cls
-
-        for var_name, expected_type in mcs.REQUIRED_CLASS_VARS.items():
-            if not hasattr(cls, var_name):
-                raise TypeError(f"Class '{name}' must define class variable '{var_name}'")
-            value = getattr(cls, var_name)
-            if not isinstance(value, expected_type):
-                raise TypeError(
-                    f"Class variable '{var_name}' in '{name}' must be of type {expected_type.__name__}, "
-                    f"but got {type(value).__name__}"
-                )
-        return cls
+        return validate_required_vars(cls, name, cls.REQUIRED_VARS)
 
 
 class BaseTool(metaclass=ToolMeta):
@@ -47,6 +41,7 @@ class BaseTool(metaclass=ToolMeta):
         "DESCRIPTION": str,
         "ARGS_SCHEMA": type,
         "RETURN_DIRECT": bool,
+        "CONFIGURATION_ARGS": NoUnionOptionalModel,
     }
 
     @abstractmethod
@@ -80,5 +75,8 @@ class BaseLLMTool(BaseTool, ABC):
 
 
 class BaseAgentTool(BaseTool, ABC):
-    def __init__(self, agent: BaseAgent):
+    def __init__(
+        self,
+        agent: "BaseAgent",  # noqa: F821
+    ):
         self._agent = agent

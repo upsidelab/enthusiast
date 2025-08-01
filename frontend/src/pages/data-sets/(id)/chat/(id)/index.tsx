@@ -22,7 +22,6 @@ export function Chat() {
   const navigate = useNavigate();
 
   const agentOrDefault = (conversation ? conversation.agent : null) || 'Question Answer Agent';
-
   const onPendingMessageSent = () => {
     setSearchParams({});
   }

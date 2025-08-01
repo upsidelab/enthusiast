@@ -19,6 +19,7 @@ class ProductsSearchTool(BaseLLMTool):
     DESCRIPTION = "use it for initial products fetch"
     ARGS_SCHEMA = ProductsSearchInput
     RETURN_DIRECT = False
+    CONFIGURATION_ARGS = None
 
     ENCODING: tiktoken.encoding_for_model = None
 

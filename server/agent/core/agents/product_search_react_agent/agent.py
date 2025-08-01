@@ -1,19 +1,31 @@
 import logging
 
 from enthusiast_common.agents import BaseAgent
+from enthusiast_common.utils import NoUnionOptionalModel
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import BaseTool, render_text_description_and_args
+from pydantic import Field
 
 from agent.core.agents.product_search_react_agent.output_parser import CustomReactOutputParser
-from agent.injector import Injector
+from agent.core.injector import Injector
+from agent.tools import ProductsSearchTool, ProductVerificationTool
 
 logger = logging.getLogger(__name__)
 
 
+class ProductSearchReActAgentInput(NoUnionOptionalModel):
+    products_type: str = Field(description="Type of product to search for")
+
+
 class ProductSearchReActAgent(BaseAgent):
+    AGENT_ARGS = None
+    PROMPT_INPUT_SCHEMA = ProductSearchReActAgentInput
+    PROMPT_EXTENSION = None
+    TOOLS = [ProductsSearchTool, ProductVerificationTool]
+
     def __init__(
         self,
         tools: list[BaseTool],

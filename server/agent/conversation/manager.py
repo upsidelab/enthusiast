@@ -14,17 +14,17 @@ class ConversationManager:
         Engine calculates embedding for a question and using similarity search collects documents that may contain
         relevant content.
         """
-        agent = AgentRegistry().get_agent_by_name(conversation, streaming)
+        agent = AgentRegistry().get_conversation_agent(conversation, streaming)
         response = agent.get_answer(question_message)
 
         return response
 
-    def create_conversation(self, user_id: int, data_set_id: int, agent_name: str) -> Conversation:
+    def create_conversation(self, user_id: int, data_set_id: int, agent_key: str) -> Conversation:
         user = User.objects.get(id=user_id)
         data_set = user.data_sets.get(id=data_set_id)
 
         conversation = Conversation.objects.create(
-            started_at=datetime.now(), user=user, data_set=data_set, agent=agent_name
+            started_at=datetime.now(), user=user, data_set=data_set, agent_key=agent_key
         )
         return conversation
 

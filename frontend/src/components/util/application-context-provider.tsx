@@ -27,6 +27,8 @@ function buildNewUrl(path: string, newDataSetId: number): string {
 export function ApplicationContextProvider({ children }: ApplicationContextProviderProps) {
   const [dataSets, setDataSets] = useState<DataSet[]>([]);
   const [dataSetId, setDataSetId] = useState<number | null>(null);
+  const [availableAgents, setAvailableAgents] = useState<{ name: string; key: string; }[]>([]);
+  const [isLoadingAgents, setIsLoadingAgents] = useState(true);
   const [account, setAccount] = useState<Account | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
@@ -60,6 +62,10 @@ export function ApplicationContextProvider({ children }: ApplicationContextProvi
     setDataSets,
     dataSetId,
     setDataSetId,
+    availableAgents,
+    setAvailableAgents,
+    isLoadingAgents,
+    setIsLoadingAgents,
     account,
     setAccount
   };

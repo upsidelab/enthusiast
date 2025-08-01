@@ -10,9 +10,9 @@ from enthusiast_common.config import (
 from enthusiast_common.config.base import PromptTemplateConfig
 from langchain_core.callbacks import StdOutCallbackHandler
 
-from agent.callbacks import AgentActionWebsocketCallbackHandler, ReactAgentWebsocketCallbackHandler
 from agent.core.agents.product_search_react_agent.agent import ProductSearchReActAgent
 from agent.core.agents.product_search_react_agent.prompt import PRODUCT_FINDER_AGENT_PROMPT
+from agent.core.callbacks import AgentActionWebsocketCallbackHandler, ReactAgentWebsocketCallbackHandler
 from agent.retrievers import DocumentRetriever
 from agent.retrievers.product_vs_retriever import ProductVectorStoreRetriever
 from agent.tools import ProductVectorStoreSearchTool

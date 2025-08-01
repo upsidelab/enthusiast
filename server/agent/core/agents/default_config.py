@@ -15,12 +15,9 @@ from enthusiast_common.config import (
 )
 from pydantic import BaseModel
 
-from agent.callbacks import ConversationWebSocketCallbackHandler
-from agent.injector import Injector
-from agent.registries.embeddings import EmbeddingProviderRegistry
-from agent.registries.language_models import LanguageModelRegistry
-from agent.registries.models import BaseDjangoSettingsDBModelRegistry
-from agent.repositories import (
+from agent.core.callbacks import ConversationWebSocketCallbackHandler
+from agent.core.injector import Injector
+from agent.core.repositories import (
     DjangoConversationRepository,
     DjangoDataSetRepository,
     DjangoDocumentChunkRepository,
@@ -29,6 +26,9 @@ from agent.repositories import (
     DjangoProductRepository,
     DjangoUserRepository,
 )
+from agent.registries.embeddings import EmbeddingProviderRegistry
+from agent.registries.language_models import LanguageModelRegistry
+from agent.registries.models import BaseDjangoSettingsDBModelRegistry
 from agent.retrievers import DocumentRetriever, ProductRetriever
 from agent.retrievers.product_retriever import QUERY_PROMPT_TEMPLATE
 

@@ -11,7 +11,7 @@ from langchain_core.tools import StructuredTool
 from pydantic import BaseModel
 
 from ..injectors import BaseInjector
-from ..utils import NoUnionOptionalModel, validate_required_vars
+from ..utils import RequiredFieldsModel, validate_required_vars
 
 
 class ToolMeta(ABCMeta):
@@ -20,7 +20,7 @@ class ToolMeta(ABCMeta):
         "DESCRIPTION": str,
         "ARGS_SCHEMA": type,
         "RETURN_DIRECT": bool,
-        "CONFIGURATION_ARGS": NoUnionOptionalModel,
+        "CONFIGURATION_ARGS": RequiredFieldsModel,
     }
 
     def __new__(mcs, name, bases, namespace, **kwargs):
@@ -41,7 +41,7 @@ class BaseTool(metaclass=ToolMeta):
         "DESCRIPTION": str,
         "ARGS_SCHEMA": type,
         "RETURN_DIRECT": bool,
-        "CONFIGURATION_ARGS": NoUnionOptionalModel,
+        "CONFIGURATION_ARGS": RequiredFieldsModel,
     }
 
     @abstractmethod

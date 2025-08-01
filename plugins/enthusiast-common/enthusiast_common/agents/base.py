@@ -8,14 +8,14 @@ from langchain_core.tools import BaseTool
 
 from enthusiast_common.injectors import BaseInjector
 
-from ..utils import NoUnionOptionalModel, validate_required_vars
+from ..utils import RequiredFieldsModel, validate_required_vars
 
 
 class ExtraArgsClassBaseMeta(ABCMeta):
     REQUIRED_VARS = {
-        "AGENT_ARGS": NoUnionOptionalModel,
-        "PROMPT_INPUT_SCHEMA": NoUnionOptionalModel,
-        "PROMPT_EXTENSION": NoUnionOptionalModel,
+        "AGENT_ARGS": RequiredFieldsModel,
+        "PROMPT_INPUT_SCHEMA": RequiredFieldsModel,
+        "PROMPT_EXTENSION": RequiredFieldsModel,
         "TOOLS": list[BaseTool],
     }
 

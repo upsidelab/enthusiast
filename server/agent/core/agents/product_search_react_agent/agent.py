@@ -1,7 +1,7 @@
 import logging
 
 from enthusiast_common.agents import BaseAgent
-from enthusiast_common.utils import NoUnionOptionalModel
+from enthusiast_common.utils import RequiredFieldsModel
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
@@ -16,8 +16,8 @@ from agent.tools import ProductsSearchTool, ProductVerificationTool
 logger = logging.getLogger(__name__)
 
 
-class ProductSearchReActAgentInput(NoUnionOptionalModel):
-    products_type: str = Field(description="Type of product to search for")
+class ProductSearchReActAgentInput(RequiredFieldsModel):
+    products_type: str = Field(title="Products type", description="Type of product to search for")
 
 
 class ProductSearchReActAgent(BaseAgent):

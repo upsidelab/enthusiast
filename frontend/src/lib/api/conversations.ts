@@ -24,7 +24,6 @@ type AgentChoice = {
   prompt_inputs: Record<string, string>;
   prompt_extension: Record<string, string>;
   tools: Record<string, string>[];
-
 };
 
 type AvailableAgentsResponse = {

@@ -113,10 +113,14 @@ class TestAvailableAgentsView:
         assert response.status_code == 401
 
 
-class TestConfigView:
+class TestDatasetConfigView:
     @pytest.fixture
-    def url(self):
-        return reverse("configs")
+    def dataset_instance(self):
+        return baker.make(DataSet)
+
+    @pytest.fixture
+    def url(self, dataset_instance):
+        return reverse("dataset-configs", kwargs={"pk": dataset_instance.pk})
 
     def test_get_empty_list(self, api_client, url):
         response = api_client.get(url)
@@ -124,26 +128,38 @@ class TestConfigView:
         assert response.status_code == 200
         assert response.data == []
 
-    def test_get_multiple_configurations(self, api_client, url):
-        config_1 = baker.make(AgentConfiguration, name="cfg1", config={"a": 1})
-        config_2 = baker.make(AgentConfiguration, name="cfg2", config={"b": 2})
+    def test_get_multiple_configurations(self, api_client, url, dataset_instance):
+        config_1 = baker.make(AgentConfiguration, name="cfg1", config={"a": 1}, dataset=dataset_instance)
+        config_2 = baker.make(AgentConfiguration, name="cfg2", config={"b": 2}, dataset=dataset_instance)
 
         response = api_client.get(url)
 
         assert response.status_code == 200
+        assert len(response.data) == 2
         ids = {item["id"] for item in response.data}
         assert config_1.id in ids
         assert config_2.id in ids
 
-    def test_get_returns_ordered_by_created_at(self, api_client, url):
-        older = baker.make(AgentConfiguration, name="older")
-        newer = baker.make(AgentConfiguration, name="newer")
+    def test_get_returns_ordered_by_created_at(self, api_client, url, dataset_instance):
+        older = baker.make(AgentConfiguration, name="older", dataset=dataset_instance)
+        newer = baker.make(AgentConfiguration, name="newer", dataset=dataset_instance)
 
         response = api_client.get(url)
 
         assert response.status_code == 200
         response.data[0]["id"] = older.id
         response.data[1]["id"] = newer.id
+
+    def test_dataset_not_found(self, api_client):
+        response = api_client.get(reverse("dataset-configs", kwargs={"pk": 1}))
+
+        assert response.status_code == 404
+
+
+class TestConfigView:
+    @pytest.fixture
+    def url(self):
+        return reverse("configs")
 
     def test_post_creates_configuration(self, api_client, url, config):
         dataset = baker.make(DataSet)

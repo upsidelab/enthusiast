@@ -53,7 +53,7 @@ class AgentConfigurationSerializer(ParentDataContextSerializerMixin, serializers
         read_only_fields = ["id", "created_at", "updated_at"]
 
 
-class AgentConfigurationDetailsSerializer(ParentDataContextSerializerMixin, serializers.ModelSerializer):
+class AgentConfigurationListSerializer(ParentDataContextSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = AgentConfiguration
         fields = ["id", "name", "dataset", "created_at", "updated_at"]

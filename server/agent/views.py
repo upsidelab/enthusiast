@@ -16,7 +16,7 @@ from agent.models.configuration import AgentConfiguration
 from agent.registries.agents.agent_registry import AgentRegistry
 from agent.registries.language_models import LanguageModelRegistry
 from agent.serializers.configuration import (
-    AgentConfigurationDetailsSerializer,
+    AgentConfigurationListSerializer,
     AgentConfigurationSerializer,
     AvailableAgentsResponseSerializer,
 )
@@ -225,18 +225,24 @@ class AvailableAgentsView(APIView):
         return Response(response_serializer.data, status=status.HTTP_200_OK)
 
 
-class ConfigView(APIView):
+class DatasetConfigView(APIView):
     permission_classes = [IsAuthenticated]
-    """View to get manage configurations"""
+    """View to get dataset configurations"""
 
     @swagger_auto_schema(
-        operation_description="Get list of all configurations",
-        responses={200: AgentConfigurationDetailsSerializer(many=True)},
+        operation_description="Get list of all dataset's configurations",
+        responses={200: AgentConfigurationListSerializer(many=True)},
     )
-    def get(self, request):
-        queryset = AgentConfiguration.objects.all().order_by("created_at")
-        serializer = AgentConfigurationDetailsSerializer(queryset, many=True)
+    def get(self, request, pk):
+        get_object_or_404(DataSet, pk=pk)
+        queryset = AgentConfiguration.objects.filter(dataset_id=pk).order_by("created_at")
+        serializer = AgentConfigurationListSerializer(queryset, many=True)
         return Response(serializer.data, status=200)
+
+
+class ConfigView(APIView):
+    permission_classes = [IsAuthenticated]
+    """View to get create configurations"""
 
     @swagger_auto_schema(
         operation_description="Create a new configuration.",

@@ -12,8 +12,8 @@ from rest_framework.views import APIView
 from agent.conversation import ConversationManager
 from agent.core.repositories import DjangoDataSetRepository
 from agent.models import Conversation, Message
-from agent.registries.agents.agent_registry import AgentRegistry
 from agent.models.configuration import AgentConfiguration
+from agent.registries.agents.agent_registry import AgentRegistry
 from agent.registries.language_models import LanguageModelRegistry
 from agent.serializers.configuration import (
     AgentConfigurationDetailsSerializer,

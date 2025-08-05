@@ -8,7 +8,7 @@ from pydantic import Field
 from rest_framework.test import APIClient
 
 from account.models import User
-from agent.models.configuration import AgentConfiguration
+from agent.models.agent import Agent
 from catalog.models import DataSet
 
 pytestmark = pytest.mark.django_db
@@ -129,8 +129,8 @@ class TestDatasetConfigView:
         assert response.data == []
 
     def test_get_multiple_configurations(self, api_client, url, dataset_instance):
-        config_1 = baker.make(AgentConfiguration, name="cfg1", config={"a": 1}, dataset=dataset_instance)
-        config_2 = baker.make(AgentConfiguration, name="cfg2", config={"b": 2}, dataset=dataset_instance)
+        config_1 = baker.make(Agent, name="cfg1", config={"a": 1}, dataset=dataset_instance)
+        config_2 = baker.make(Agent, name="cfg2", config={"b": 2}, dataset=dataset_instance)
 
         response = api_client.get(url)
 
@@ -141,8 +141,8 @@ class TestDatasetConfigView:
         assert config_2.id in ids
 
     def test_get_returns_ordered_by_created_at(self, api_client, url, dataset_instance):
-        older = baker.make(AgentConfiguration, name="older", dataset=dataset_instance)
-        newer = baker.make(AgentConfiguration, name="newer", dataset=dataset_instance)
+        older = baker.make(Agent, name="older", dataset=dataset_instance)
+        newer = baker.make(Agent, name="newer", dataset=dataset_instance)
 
         response = api_client.get(url)
 
@@ -185,13 +185,13 @@ class TestConfigView:
         payload = {"name": "name", "config": config, "dataset": dataset.id, "agent_key": "agent_1"}
 
         with patch(
-            "agent.serializers.customs.fields.import_from_string",
+            "agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_key",
             side_effect=[DummyAgent, DummyAgent, DummyAgent, DummyAgent],
         ):
             response = api_client.post(url, payload, format="json")
 
             assert response.status_code == 201
-            created = AgentConfiguration.objects.get(pk=response.data["id"])
+            created = Agent.objects.get(pk=response.data["id"])
             assert created.name == "name"
 
     def test_post_creates_configuration_optional_fields_saved(self, api_client, url, config):
@@ -217,13 +217,13 @@ class TestConfigView:
         payload = {"name": "name", "config": config, "dataset": dataset.id, "agent_key": "agent_1"}
 
         with patch(
-            "agent.serializers.customs.fields.import_from_string",
+            "agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_key",
             side_effect=[DummyAgent, DummyAgent, DummyAgent, DummyAgent],
         ):
             response = api_client.post(url, payload, format="json")
 
             assert response.status_code == 201
-            created = AgentConfiguration.objects.get(pk=response.data["id"])
+            created = Agent.objects.get(pk=response.data["id"])
             assert created.name == "name"
             assert created.config["tools"][0].get("optional_test") == "optional_test"
             assert created.config["tools"][1].get("optional_test") == "optional_test"
@@ -257,13 +257,13 @@ class TestConfigView:
             TOOLS = [NoArgsDummyTool, DummyTool]
 
         with patch(
-            "agent.serializers.customs.fields.import_from_string",
+            "agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_key",
             side_effect=[NoArgsDummyAgent, NoArgsDummyAgent, NoArgsDummyAgent, NoArgsDummyAgent],
         ):
             response = api_client.post(url, payload, format="json")
 
             assert response.status_code == 201
-            created = AgentConfiguration.objects.get(pk=response.data["id"])
+            created = Agent.objects.get(pk=response.data["id"])
             assert created.name == "name"
             assert created.config["agent_args"] == {}
             assert created.config["tools"][0] == {}
@@ -273,7 +273,7 @@ class TestConfigView:
 class TestConfigDetailsView:
     @pytest.fixture
     def config_instance(self, config):
-        return baker.make(AgentConfiguration, name="cfg1", config=config)
+        return baker.make(Agent, name="cfg1", config=config)
 
     @pytest.fixture
     def url(self, config_instance):
@@ -315,7 +315,7 @@ class TestConfigDetailsView:
         }
         payload = {"name": "updated", "config": updated_config, "dataset": dataset.id, "agent_key": "agent_1"}
         with patch(
-            "agent.serializers.customs.fields.import_from_string",
+            "agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_key",
             side_effect=[DummyAgent, DummyAgent, DummyAgent, DummyAgent],
         ):
             response = api_client.put(url, payload, format="json")
@@ -345,7 +345,7 @@ class TestConfigDetailsView:
         response = api_client.delete(url)
 
         assert response.status_code == 204
-        assert not AgentConfiguration.objects.filter(pk=config_instance.pk).exists()
+        assert not Agent.objects.filter(pk=config_instance.pk).exists()
 
     def test_delete_nonexistent_configuration_returns_404(self, api_client, url):
         url = reverse("config-details", kwargs={"pk": 9999})

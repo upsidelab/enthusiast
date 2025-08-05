@@ -51,8 +51,8 @@ def available_agents():
     }
 
 
-@patch("agent.serializers.customs.fields.settings")
-@patch("agent.serializers.customs.fields.import_from_string")
+@patch("agent.registries.agents.agent_registry.settings")
+@patch("agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_key")
 def test_pydantic_model_field_valid(mock_import, mock_settings, available_agents):
     mock_settings.AVAILABLE_AGENTS = available_agents
     mock_import.return_value = type("Agent", (), {"AGENT_ARGS": DummySchema})
@@ -63,8 +63,8 @@ def test_pydantic_model_field_valid(mock_import, mock_settings, available_agents
     assert serializer.is_valid(raise_exception=True)
 
 
-@patch("agent.serializers.customs.fields.settings")
-@patch("agent.serializers.customs.fields.import_from_string")
+@patch("agent.registries.agents.agent_registry.settings")
+@patch("agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_key")
 def test_pydantic_model_field_invalid_data(mock_import, mock_settings, available_agents):
     mock_settings.AVAILABLE_AGENTS = available_agents
     mock_import.return_value = type("Agent", (), {"AGENT_ARGS": DummySchema})
@@ -83,8 +83,8 @@ def test_pydantic_model_field_missing_context():
     assert "agent_key" in str(e.value)
 
 
-@patch("agent.serializers.customs.fields.settings")
-@patch("agent.serializers.customs.fields.import_from_string", side_effect=ImportError("failed"))
+@patch("agent.registries.agents.agent_registry.settings")
+@patch("agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_key", side_effect=ImportError("failed"))
 def test_pydantic_model_field_import_error(mock_import, mock_settings, available_agents):
     mock_settings.AVAILABLE_AGENTS = available_agents
     input_data = {"config": {}}
@@ -95,8 +95,8 @@ def test_pydantic_model_field_import_error(mock_import, mock_settings, available
     assert "Error loading agent" in str(e.value)
 
 
-@patch("agent.serializers.customs.fields.settings")
-@patch("agent.serializers.customs.fields.import_from_string")
+@patch("agent.registries.agents.agent_registry.settings")
+@patch("agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_key")
 def test_pydantic_model_tool_list_field_valid(mock_import, mock_settings, available_agents):
     mock_settings.AVAILABLE_AGENTS = available_agents
     mock_import.return_value = type("Agent", (), {"TOOLS": [DummyTool, DummyTool]})
@@ -108,8 +108,8 @@ def test_pydantic_model_tool_list_field_valid(mock_import, mock_settings, availa
     assert serializer.data == input_data
 
 
-@patch("agent.serializers.customs.fields.settings")
-@patch("agent.serializers.customs.fields.import_from_string")
+@patch("agent.registries.agents.agent_registry.settings")
+@patch("agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_key")
 def test_pydantic_model_tool_list_field_invalid_configs_number(mock_import, mock_settings, available_agents):
     mock_settings.AVAILABLE_AGENTS = available_agents
     mock_import.return_value = type("Agent", (), {"TOOLS": [DummyTool]})
@@ -121,8 +121,8 @@ def test_pydantic_model_tool_list_field_invalid_configs_number(mock_import, mock
     assert "Mismatch between number of tools and provided configs." in str(e.value)
 
 
-@patch("agent.serializers.customs.fields.settings")
-@patch("agent.serializers.customs.fields.import_from_string")
+@patch("agent.registries.agents.agent_registry.settings")
+@patch("agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_key")
 def test_pydantic_model_tool_list_field_invalid_config_type(mock_import, mock_settings, available_agents):
     mock_settings.AVAILABLE_AGENTS = available_agents
     mock_import.return_value = type("Agent", (), {"TOOLS": [DummyTool]})
@@ -134,8 +134,8 @@ def test_pydantic_model_tool_list_field_invalid_config_type(mock_import, mock_se
     assert "Expected a list of tool configurations." in str(e.value)
 
 
-@patch("agent.serializers.customs.fields.settings")
-@patch("agent.serializers.customs.fields.import_from_string")
+@patch("agent.registries.agents.agent_registry.settings")
+@patch("agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_key")
 def test_pydantic_model_tool_list_field_invalid_data(mock_import, mock_settings, agent_context, available_agents):
     mock_settings.AVAILABLE_AGENTS = available_agents
     mock_import.return_value = type("Agent", (), {"TOOLS": [DummyTool, DummyTool]})

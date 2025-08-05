@@ -3,7 +3,7 @@ from django.db import models
 from catalog.models import DataSet
 
 
-class AgentConfiguration(models.Model):
+class Agent(models.Model):
     name = models.CharField(max_length=255, unique=True)
     agent_key = models.CharField(max_length=255, blank=False)
     config = models.JSONField()

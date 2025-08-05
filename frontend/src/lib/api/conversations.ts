@@ -38,7 +38,7 @@ export class ConversationsApiClient extends BaseApiClient {
   }
 
   async getAvailableAgents(): Promise<AgentChoice[]> {
-    const response = await fetch(`${this.apiBase}/api/conversations/agents`, this._requestConfiguration());
+    const response = await fetch(`${this.apiBase}/api/agents`, this._requestConfiguration());
     
     if (!response.ok) {
       throw new Error(`Failed to fetch available agents: ${response.statusText}`);

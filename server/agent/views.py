@@ -12,12 +12,12 @@ from rest_framework.views import APIView
 from agent.conversation import ConversationManager
 from agent.core.repositories import DjangoDataSetRepository
 from agent.models import Conversation, Message
-from agent.models.configuration import AgentConfiguration
+from agent.models.agent import Agent
 from agent.registries.agents.agent_registry import AgentRegistry
 from agent.registries.language_models import LanguageModelRegistry
 from agent.serializers.configuration import (
-    AgentConfigurationListSerializer,
-    AgentConfigurationSerializer,
+    AgentListSerializer,
+    AgentSerializer,
     AvailableAgentsResponseSerializer,
 )
 from agent.serializers.conversation import (
@@ -231,12 +231,12 @@ class DatasetConfigView(APIView):
 
     @swagger_auto_schema(
         operation_description="Get list of all dataset's configurations",
-        responses={200: AgentConfigurationListSerializer(many=True)},
+        responses={200: AgentListSerializer(many=True)},
     )
     def get(self, request, pk):
         get_object_or_404(DataSet, pk=pk)
-        queryset = AgentConfiguration.objects.filter(dataset_id=pk).order_by("created_at")
-        serializer = AgentConfigurationListSerializer(queryset, many=True)
+        queryset = Agent.objects.filter(dataset_id=pk).order_by("created_at")
+        serializer = AgentListSerializer(queryset, many=True)
         return Response(serializer.data, status=200)
 
 
@@ -246,37 +246,35 @@ class ConfigView(APIView):
 
     @swagger_auto_schema(
         operation_description="Create a new configuration.",
-        request_body=AgentConfigurationSerializer,
-        responses={201: AgentConfigurationSerializer()},
+        request_body=AgentSerializer,
+        responses={201: AgentSerializer()},
     )
     def post(self, request):
-        serializer = AgentConfigurationSerializer(data=request.data)
+        serializer = AgentSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         instance = serializer.save()
-        return Response(AgentConfigurationSerializer(instance).data, status=status.HTTP_201_CREATED)
+        return Response(AgentSerializer(instance).data, status=status.HTTP_201_CREATED)
 
 
 class ConfigDetailsView(APIView):
     permission_classes = [IsAuthenticated]
     """View to get manage configuration"""
 
-    @swagger_auto_schema(
-        operation_description="Get a single configuration by id.", responses={200: AgentConfigurationSerializer()}
-    )
+    @swagger_auto_schema(operation_description="Get a single configuration by id.", responses={200: AgentSerializer()})
     def get(self, request, pk):
-        instance = get_object_or_404(AgentConfiguration, pk=pk)
-        serializer = AgentConfigurationSerializer(instance)
+        instance = get_object_or_404(Agent, pk=pk)
+        serializer = AgentSerializer(instance)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         operation_description="Update an existing configuration by id.",
-        request_body=AgentConfigurationSerializer,
-        responses={200: AgentConfigurationSerializer()},
+        request_body=AgentSerializer,
+        responses={200: AgentSerializer()},
     )
     def put(self, request, pk=None):
-        instance = get_object_or_404(AgentConfiguration, pk=pk)
+        instance = get_object_or_404(Agent, pk=pk)
 
-        serializer = AgentConfigurationSerializer(instance, data=request.data)
+        serializer = AgentSerializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -285,6 +283,6 @@ class ConfigDetailsView(APIView):
         operation_description="Delete a configuration by id.", responses={204: "No Content", 404: "Not Found"}
     )
     def delete(self, request, pk=None):
-        instance = get_object_or_404(AgentConfiguration, pk=pk)
+        instance = get_object_or_404(Agent, pk=pk)
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

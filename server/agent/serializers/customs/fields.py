@@ -1,11 +1,10 @@
-from django.conf import settings
 from drf_yasg import openapi
 from pydantic import BaseModel
 from pydantic import ValidationError as PydanticValidationError
 from rest_framework import serializers
 from rest_framework.exceptions import APIException
 
-from agent.utils.functions import import_from_string
+from agent.registries.agents.agent_registry import AgentRegistry
 
 
 class BasePydanticModelField(serializers.Field):
@@ -28,8 +27,7 @@ class PydanticModelField(BasePydanticModelField):
             raise AssertionError("Missing 'agent_key' in field context")
 
         try:
-            agent_path = settings.AVAILABLE_AGENTS[agent_key]["agent"]
-            class_obj = import_from_string(agent_path)
+            class_obj = AgentRegistry().get_agent_class_by_key(agent_key)
         except Exception as e:
             raise APIException(f"Error loading agent: {str(e)}")
 
@@ -67,8 +65,7 @@ class PydanticModelToolListField(BasePydanticModelField):
             raise AssertionError("Missing 'agent_key' in field context")
 
         try:
-            agent_path = settings.AVAILABLE_AGENTS[agent_key]["agent"]
-            class_obj = import_from_string(agent_path)
+            class_obj = AgentRegistry().get_agent_class_by_key(agent_key)
             tool_list = getattr(class_obj, self.agent_field_name)
         except Exception as e:
             raise serializers.ValidationError(f"Error loading agent or field: {str(e)}")

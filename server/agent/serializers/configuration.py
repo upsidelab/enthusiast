@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from agent.models.configuration import AgentConfiguration
+from agent.models.agent import Agent
 from agent.serializers.customs.fields import PydanticModelField, PydanticModelToolListField
 from agent.serializers.customs.serializers import ParentDataContextSerializerMixin
 from catalog.models import DataSet
@@ -43,17 +43,17 @@ class AgentConfigSerializer(ParentDataContextSerializerMixin, serializers.Serial
     tools = PydanticModelToolListField(agent_field_name="TOOLS", tool_field_name="CONFIGURATION_ARGS")
 
 
-class AgentConfigurationSerializer(ParentDataContextSerializerMixin, serializers.ModelSerializer):
+class AgentSerializer(ParentDataContextSerializerMixin, serializers.ModelSerializer):
     config = AgentConfigSerializer()
     dataset = serializers.PrimaryKeyRelatedField(queryset=DataSet.objects.all())
 
     class Meta:
-        model = AgentConfiguration
+        model = Agent
         fields = ["id", "name", "config", "dataset", "agent_key", "created_at", "updated_at"]
         read_only_fields = ["id", "created_at", "updated_at"]
 
 
-class AgentConfigurationListSerializer(ParentDataContextSerializerMixin, serializers.ModelSerializer):
+class AgentListSerializer(ParentDataContextSerializerMixin, serializers.ModelSerializer):
     class Meta:
-        model = AgentConfiguration
+        model = Agent
         fields = ["id", "name", "dataset", "created_at", "updated_at"]

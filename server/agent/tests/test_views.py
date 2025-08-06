@@ -95,7 +95,7 @@ def config():
 
 class TestAvailableAgentsView:
     def test_get_available_agents_returns_200(self, api_client):
-        url = reverse("available-agents")
+        url = reverse("agent-types")
         with patch("agent.views.AgentRegistry.get_agent_class_by_key", return_value=DummyAgent):
             response = api_client.get(url)
 
@@ -108,7 +108,7 @@ class TestAvailableAgentsView:
             assert list(response.data["choices"][0]["tools"][0].keys()) == ["required_test", "optional_test"]
 
     def test_get_available_agents_returns_401(self):
-        response = APIClient().get(reverse("available-agents"))
+        response = APIClient().get(reverse("agent-types"))
 
         assert response.status_code == 401
 
@@ -120,7 +120,7 @@ class TestDatasetConfigView:
 
     @pytest.fixture
     def url(self, dataset_instance):
-        return reverse("dataset-configs", kwargs={"pk": dataset_instance.pk})
+        return reverse("dataset-agents", kwargs={"pk": dataset_instance.pk})
 
     def test_get_empty_list(self, api_client, url):
         response = api_client.get(url)
@@ -151,7 +151,7 @@ class TestDatasetConfigView:
         response.data[1]["id"] = newer.id
 
     def test_dataset_not_found(self, api_client):
-        response = api_client.get(reverse("dataset-configs", kwargs={"pk": 1}))
+        response = api_client.get(reverse("dataset-agents", kwargs={"pk": 1}))
 
         assert response.status_code == 404
 
@@ -159,7 +159,7 @@ class TestDatasetConfigView:
 class TestConfigView:
     @pytest.fixture
     def url(self):
-        return reverse("configs")
+        return reverse("agent-create")
 
     def test_post_creates_configuration(self, api_client, url, config):
         dataset = baker.make(DataSet)
@@ -277,7 +277,7 @@ class TestConfigDetailsView:
 
     @pytest.fixture
     def url(self, config_instance):
-        return reverse("config-details", kwargs={"pk": config_instance.pk})
+        return reverse("agent-details", kwargs={"pk": config_instance.pk})
 
     def test_get_existing_configuration(self, api_client, config_instance, url):
         response = api_client.get(url)
@@ -287,7 +287,7 @@ class TestConfigDetailsView:
         assert response.data["config"]
 
     def test_get_nonexistent_configuration_returns_404(self, api_client):
-        url = reverse("config-details", kwargs={"pk": 9999})
+        url = reverse("agent-details", kwargs={"pk": 9999})
 
         response = api_client.get(url)
 
@@ -326,7 +326,7 @@ class TestConfigDetailsView:
             assert config_instance.config == updated_config
 
     def test_put_nonexistent_returns_404(self, api_client):
-        url = reverse("config-details", kwargs={"pk": 9999})
+        url = reverse("agent-details", kwargs={"pk": 9999})
         payload = {"name": "anything", "config": {"x": "y"}}
 
         response = api_client.put(url, payload, format="json")
@@ -348,6 +348,6 @@ class TestConfigDetailsView:
         assert not Agent.objects.filter(pk=config_instance.pk).exists()
 
     def test_delete_nonexistent_configuration_returns_404(self, api_client, url):
-        url = reverse("config-details", kwargs={"pk": 9999})
+        url = reverse("agent-details", kwargs={"pk": 9999})
         response = api_client.delete(url)
         assert response.status_code == 404

@@ -29,7 +29,7 @@ export function MainSidebar() {
     const fetchAgents = async () => {
       try {
         const apiClient = new ApiClient(authenticationProviderInstance);
-        const agents = await apiClient.conversations().getAvailableAgents();
+        const agents = await apiClient.agents().getAvailableAgents();
         setAvailableAgents(agents);
       } catch (error) {
         console.error('Failed to fetch available agents:', error);

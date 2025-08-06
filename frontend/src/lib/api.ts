@@ -6,6 +6,7 @@ import { ConversationsApiClient } from "@/lib/api/conversations.ts";
 import { ServiceAccountsApiClient } from "@/lib/api/service-accounts.ts";
 import { Account, SourcePlugin, User } from "@/lib/types.ts";
 import { ConfigApiClient } from "@/lib/api/config.ts";
+import {AgentsApiClient} from "@/lib/api/agents.ts";
 
 export type Token = {
   token: string;
@@ -95,6 +96,10 @@ export class ApiClient {
 
   config(): ConfigApiClient {
     return new ConfigApiClient(this.apiBase, this.authenticationProvider);
+  }
+
+  agents(): AgentsApiClient {
+    return new AgentsApiClient(this.apiBase, this.authenticationProvider);
   }
 
   _requestConfiguration(): RequestInit {

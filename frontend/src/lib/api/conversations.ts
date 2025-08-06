@@ -17,36 +17,11 @@ type TaskState = {
   state: string;
 }
 
-type AgentChoice = {
-  key: string;
-  name: string;
-  agent_args: Record<string, string>;
-  prompt_inputs: Record<string, string>;
-  prompt_extension: Record<string, string>;
-  tools: Record<string, string>[];
-
-};
-
-type AvailableAgentsResponse = {
-  choices: AgentChoice[];
-};
-
 
 export class ConversationsApiClient extends BaseApiClient {
   async getConversations(dataSetId: number, page: number = 1): Promise<PaginatedResult<Conversation>> {
     const response = await fetch(`${this.apiBase}/api/conversations?data_set_id=${dataSetId}&page=${page}`, this._requestConfiguration());
     return await response.json() as Promise<PaginatedResult<Conversation>>;
-  }
-
-  async getAvailableAgents(): Promise<AgentChoice[]> {
-    const response = await fetch(`${this.apiBase}/api/conversations/agents`, this._requestConfiguration());
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch available agents: ${response.statusText}`);
-    }
-    
-    const result = await response.json() as AvailableAgentsResponse;
-    return result.choices;
   }
 
   async createConversation(dataSetId: number, agent_key: string): Promise<number> {

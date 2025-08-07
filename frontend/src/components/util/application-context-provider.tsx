@@ -63,8 +63,8 @@ export function ApplicationContextProvider({ children }: ApplicationContextProvi
 
     setIsLoadingAgents(true);
     try {
-      const instances = await api.agents().getDatasetAvailableAgents(dataSetId);
-      setAvailableAgents(instances);
+      const agents = await api.agents().getDatasetAvailableAgents(dataSetId);
+      setAvailableAgents(agents);
     } catch (error) {
       console.error("Failed to load agent instances:", error);
       setAvailableAgents([]);

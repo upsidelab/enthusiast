@@ -55,7 +55,7 @@ export type SourcePlugin = {
   plugin_name: string;
 }
 
-export type AgentInstance = {
+export type Agent = {
   id: number;
   name: string;
   created_at: string;
@@ -69,7 +69,7 @@ export type Conversation = {
   dimensions: number;
   data_set: string;
   summary?: string;
-  agent: AgentInstance;
+  agent: Agent;
   history?: Message[];
 }
 

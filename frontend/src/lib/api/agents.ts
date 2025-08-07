@@ -1,5 +1,5 @@
 import {BaseApiClient} from "@/lib/api/base.ts";
-import {AgentInstance} from "@/lib/types.ts";
+import {Agent} from "@/lib/types.ts";
 
 type AgentChoice = {
   key: string;
@@ -25,7 +25,7 @@ export class AgentsApiClient extends BaseApiClient {
         const result = await response.json() as AvailableAgentsResponse;
         return result.choices;
     }
-    async getDatasetAvailableAgents(dataSetId: number): Promise<AgentInstance[]> {
+    async getDatasetAvailableAgents(dataSetId: number): Promise<Agent[]> {
         const query = new URLSearchParams({ dataset: dataSetId.toString() });
         const response = await fetch(
             `${this.apiBase}/api/agents?${query.toString()}`,
@@ -33,9 +33,9 @@ export class AgentsApiClient extends BaseApiClient {
         );
 
         if (!response.ok) {
-            throw new Error(`Failed to fetch available agent instances: ${response.statusText}`);
+            throw new Error(`Failed to fetch available agents: ${response.statusText}`);
         }
 
-        return await response.json() as AgentInstance[];
+        return await response.json() as Agent[];
     }
 }

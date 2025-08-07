@@ -266,7 +266,6 @@ export function Conversation({ conversationId, pendingMessage, onPendingMessageS
             setIsAgentLoading(false);
         }
     };
-
     return (
         <ConversationUI
             messages={messages}

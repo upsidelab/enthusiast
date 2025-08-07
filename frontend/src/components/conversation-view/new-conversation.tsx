@@ -7,15 +7,16 @@ import { authenticationProviderInstance } from "@/lib/authentication-provider.ts
 const api = new ApiClient(authenticationProviderInstance);
 
 export interface NewConversationProps {
-  agent: string;
+  agentId: string;
 }
 
-export function NewConversation({ agent }: NewConversationProps) {
+export function NewConversation({ agentId }: NewConversationProps) {
   const { dataSetId } = useApplicationContext()!;
   const navigate = useNavigate();
 
   const onSubmit = async (message: string) => {
-    const newConversationId = await api.conversations().createConversation(dataSetId!, agent);
+    const newConversationId = await api.conversations().createConversation(agentId);
+
     navigate(`/data-sets/${dataSetId}/chat/${newConversationId}?pending=${message}`);
   }
 

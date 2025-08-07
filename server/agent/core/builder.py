@@ -2,8 +2,8 @@ from typing import Optional
 
 from enthusiast_common.agents import BaseAgent
 from enthusiast_common.builder import BaseAgentBuilder, RepositoriesInstances
-from enthusiast_common.config import AgentConfig, LLMConfig
-from enthusiast_common.config.base import PromptTemplateConfig
+from enthusiast_common.callbacks import ConversationCallbackHandler
+from enthusiast_common.config import AgentConfig, AgentToolConfig, FunctionToolConfig, LLMConfig, LLMToolConfig
 from enthusiast_common.injectors import BaseInjector
 from enthusiast_common.registry import BaseDBModelsRegistry, BaseEmbeddingProviderRegistry, BaseLanguageModelRegistry
 from enthusiast_common.retrievers import BaseRetriever
@@ -29,7 +29,7 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
             tools=tools,
             llm=llm,
             prompt=prompt,
-            conversation_id=self._config.conversation_id,
+            conversation_id=self.conversation_id,
             callback_handler=callback_handler,
             injector=self._injector,
         )
@@ -72,10 +72,10 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         data_set_repo = self._repositories.data_set
         llm_registry = self._build_llm_registry()
         callbacks = self._build_llm_callback_handlers()
-        llm = self._config.llm.llm_class(
+        llm = llm_config.llm_class(
             llm_registry=llm_registry,
             callbacks=callbacks,
-            streaming=llm_config.streaming,
+            streaming=self.streaming,
             data_set_repo=data_set_repo,
         )
         return llm.create(self._data_set_id)
@@ -95,32 +95,38 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         return llm.create(self._data_set_id)
 
     def _build_tools(self, default_llm: BaseLanguageModel, injector: BaseInjector) -> list[BaseTool]:
-        function_tools = self._build_function_tools() if self._config.function_tools else []
-        llm_tools = self._build_llm_tools(default_llm, injector) if self._config.llm_tools else []
-        agent_tools = self._build_agent_tools() if self._config.agent_tools else []
-        return [*function_tools, *llm_tools, *agent_tools]
-
-    def _build_function_tools(self) -> list[BaseFunctionTool]:
-        return [tool() for tool in self._config.function_tools]
-
-    def _build_llm_tools(self, default_llm: BaseLanguageModel, injector: BaseInjector) -> list[BaseLLMTool]:
         tools = []
-        for tool_config in self._config.llm_tools:
-            llm = default_llm
-            data_set_id = tool_config.data_set_id or self._data_set_id
-            if tool_config.llm:
-                llm = tool_config.llm
-            tools.append(
-                tool_config.tool_class(
-                    data_set_id=data_set_id,
-                    llm=llm,
-                    injector=injector,
-                )
-            )
+
+        for tool_config in self._config.tools:
+            if isinstance(tool_config, FunctionToolConfig):
+                tools.append(self._build_function_tool(config=tool_config))
+            elif isinstance(tool_config, LLMToolConfig):
+                tools.append(self._build_llm_tool(config=tool_config, injector=injector, default_llm=default_llm))
+            elif isinstance(tool_config, AgentToolConfig):
+                tools.append(self._build_agent_tool(config=tool_config))
+            else:
+                continue
         return tools
 
-    def _build_agent_tools(self) -> list[BaseAgentTool]:
-        return [tool_config.tool_class(agent=tool_config.agent) for tool_config in self._config.agent_tools]
+    def _build_function_tool(self, config: FunctionToolConfig) -> BaseFunctionTool:
+        return config.tool_class()
+
+    def _build_llm_tool(
+        self, config: LLMToolConfig, default_llm: BaseLanguageModel, injector: BaseInjector
+    ) -> BaseLLMTool:
+        llm = default_llm
+        if config.llm:
+            llm = config.llm
+        return config.tool_class(
+            data_set_id=self._data_set_id,
+            llm=llm,
+            injector=injector,
+        )
+
+    def _build_agent_tool(self, config: AgentToolConfig) -> BaseAgentTool:
+        builder = self.__init__(config.agent, self.conversation_id, self.streaming)
+        agent = builder.build()
+        return config.tool_class(agent=agent)
 
     def _build_injector(self) -> BaseInjector:
         document_retriever = self._build_document_retriever()
@@ -136,17 +142,20 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         )
 
     def _build_agent_callback_handler(self) -> Optional[BaseCallbackHandler]:
-        if self._config.agent_callback_handler:
-            return self._config.agent_callback_handler.handler_class(**self._config.agent_callback_handler.args)
-        return None
+        if not self._config.agent_callback_handler:
+            return None
+        if issubclass(self._config.agent_callback_handler.handler_class, ConversationCallbackHandler):
+            return self._config.agent_callback_handler.handler_class(conversation_id=self.conversation_id)
+        else:
+            return self._config.agent_callback_handler.handler_class()
 
     def _build_llm_callback_handlers(self) -> Optional[list[BaseCallbackHandler]]:
         if not self._config.llm.callbacks:
             return None
         handlers = []
         for config in self._config.llm.callbacks:
-            if handler_args := config.args:
-                handler = config.handler_class(**handler_args)
+            if issubclass(config.handler_class, ConversationCallbackHandler):
+                handler = config.handler_class(conversation_id=self.conversation_id)
             else:
                 handler = config.handler_class()
             handlers.append(handler)
@@ -172,7 +181,7 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         )
 
     def _build_chat_summary_memory(self) -> SummaryChatMemory:
-        history = PersistentChatHistory(self._repositories.conversation, self._config.conversation_id)
+        history = PersistentChatHistory(self._repositories.conversation, self.conversation_id)
         return SummaryChatMemory(
             llm=self._llm,
             memory_key="chat_history",
@@ -183,7 +192,7 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         )
 
     def _build_chat_limited_memory(self) -> LimitedChatMemory:
-        history = PersistentChatHistory(self._repositories.conversation, self._config.conversation_id)
+        history = PersistentChatHistory(self._repositories.conversation, self.conversation_id)
         return LimitedChatMemory(
             llm=self._llm,
             memory_key="chat_history",
@@ -194,10 +203,10 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         )
 
     def _build_prompt_template(self) -> BasePromptTemplate:
-        prompt_config_class = self._config.prompt_template
-        if isinstance(prompt_config_class, PromptTemplateConfig):
+        if self._config.prompt_template:
             return PromptTemplate(
-                input_variables=prompt_config_class.input_variables, template=prompt_config_class.template
+                input_variables=self._config.prompt_template.input_variables,
+                template=self._config.prompt_template.template,
             )
         else:
-            return ChatPromptTemplate.from_messages(messages=prompt_config_class.messages)
+            return ChatPromptTemplate.from_messages(messages=self._config.chat_prompt_template.messages)

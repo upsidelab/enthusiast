@@ -1,12 +1,12 @@
 from abc import ABC, ABCMeta, abstractmethod
 from typing import Any
 
+from enthusiast_common.injectors import BaseInjector
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import BaseTool
-
-from enthusiast_common.injectors import BaseInjector
+from pydantic import BaseModel
 
 from ..utils import RequiredFieldsModel, validate_required_vars
 
@@ -14,9 +14,9 @@ from ..utils import RequiredFieldsModel, validate_required_vars
 class ExtraArgsClassBaseMeta(ABCMeta):
     REQUIRED_VARS = {
         "AGENT_ARGS": RequiredFieldsModel,
-        "PROMPT_INPUT_SCHEMA": RequiredFieldsModel,
+        "PROMPT_INPUT": RequiredFieldsModel,
         "PROMPT_EXTENSION": RequiredFieldsModel,
-        "TOOLS": list[BaseTool],
+        "TOOLS": list[BaseModel],
     }
 
     def __new__(mcs, name, bases, namespace, **kwargs):
@@ -31,6 +31,11 @@ class ExtraArgsClassBase(metaclass=ExtraArgsClassBaseMeta):
 
 
 class BaseAgent(ABC, ExtraArgsClassBase):
+    AGENT_ARGS = None
+    PROMPT_INPUT = None
+    PROMPT_EXTENSION = None
+    TOOLS = []
+
     def __init__(
         self,
         tools: list[BaseTool],
@@ -50,3 +55,14 @@ class BaseAgent(ABC, ExtraArgsClassBase):
     @abstractmethod
     def get_answer(self, input_text: str) -> str:
         pass
+
+    def set_runtime_arguments(self, runtime_arguments: Any) -> None:
+        tools_runtime_arguments = runtime_arguments.pop("tools")
+        for key, value in runtime_arguments.items():
+            class_field_key = key.upper()
+            field = getattr(self, class_field_key)
+            if field is None:
+                continue
+            setattr(self, key.upper(), field(**value))
+        for index, tool in enumerate(self._tools):
+            tool.set_runtime_arguments(tools_runtime_arguments[index])

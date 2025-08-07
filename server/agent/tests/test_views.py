@@ -2,6 +2,8 @@ from unittest.mock import patch
 
 import pytest
 from django.urls import reverse
+from enthusiast_common.config import FunctionToolConfig
+from enthusiast_common.tools import BaseFunctionTool
 from enthusiast_common.utils import RequiredFieldsModel
 from model_bakery import baker
 from pydantic import Field
@@ -27,7 +29,7 @@ class ToolArgs(RequiredFieldsModel):
     optional_test: str = Field(description="description", title="title", default="default")
 
 
-class DummyTool:
+class DummyTool(BaseFunctionTool):
     CONFIGURATION_ARGS = ToolArgs
 
 
@@ -48,9 +50,9 @@ class PromptExtension(RequiredFieldsModel):
 
 class DummyAgent:
     AGENT_ARGS = AgentArgs
-    PROMPT_INPUT_SCHEMA = PromptInput
+    PROMPT_INPUT = PromptInput
     PROMPT_EXTENSION = PromptExtension
-    TOOLS = [DummyTool, DummyTool]
+    TOOLS = [FunctionToolConfig(tool_class=DummyTool), FunctionToolConfig(tool_class=DummyTool)]
 
 
 @pytest.fixture(autouse=True)
@@ -78,7 +80,7 @@ def config():
             "required_test": "required_test",
             "optional_test": "optional_test",
         },
-        "prompt_inputs": {
+        "prompt_input": {
             "required_test": "required_test",
             "optional_test": "optional_test",
         },
@@ -93,10 +95,10 @@ def config():
     }
 
 
-class TestAvailableAgentsView:
-    def test_get_available_agents_returns_200(self, api_client):
+class TestAgentTypesView:
+    def test_get_agent_types_returns_200(self, api_client):
         url = reverse("agent-types")
-        with patch("agent.views.AgentRegistry.get_agent_class_by_key", return_value=DummyAgent):
+        with patch("agent.views.AgentRegistry.get_agent_class_by_type", return_value=DummyAgent):
             response = api_client.get(url)
 
             assert response.status_code == 200
@@ -107,32 +109,32 @@ class TestAvailableAgentsView:
             assert len(response.data["choices"][1]["tools"]) == 2
             assert list(response.data["choices"][0]["tools"][0].keys()) == ["required_test", "optional_test"]
 
-    def test_get_available_agents_returns_401(self):
+    def test_get_agent_types_returns_401(self):
         response = APIClient().get(reverse("agent-types"))
 
         assert response.status_code == 401
 
 
-class TestDatasetConfigView:
+class TestAgentView:
+    @pytest.fixture
+    def url(self):
+        return reverse("agents")
+
     @pytest.fixture
     def dataset_instance(self):
         return baker.make(DataSet)
 
-    @pytest.fixture
-    def url(self, dataset_instance):
-        return reverse("dataset-agents", kwargs={"pk": dataset_instance.pk})
-
-    def test_get_empty_list(self, api_client, url):
-        response = api_client.get(url)
+    def test_get_empty_list(self, api_client, url, dataset_instance):
+        response = api_client.get(f"{url}?dataset={dataset_instance.pk}")
 
         assert response.status_code == 200
         assert response.data == []
 
-    def test_get_multiple_configurations(self, api_client, url, dataset_instance):
+    def test_get_multiple_agents(self, api_client, url, dataset_instance):
         config_1 = baker.make(Agent, name="cfg1", config={"a": 1}, dataset=dataset_instance)
         config_2 = baker.make(Agent, name="cfg2", config={"b": 2}, dataset=dataset_instance)
 
-        response = api_client.get(url)
+        response = api_client.get(f"{url}?dataset={dataset_instance.pk}")
 
         assert response.status_code == 200
         assert len(response.data) == 2
@@ -144,30 +146,25 @@ class TestDatasetConfigView:
         older = baker.make(Agent, name="older", dataset=dataset_instance)
         newer = baker.make(Agent, name="newer", dataset=dataset_instance)
 
-        response = api_client.get(url)
+        response = api_client.get(f"{url}?dataset={dataset_instance.pk}")
 
         assert response.status_code == 200
-        response.data[0]["id"] = older.id
-        response.data[1]["id"] = newer.id
+        assert response.data[0]["id"] == older.id
+        assert response.data[1]["id"] == newer.id
 
-    def test_dataset_not_found(self, api_client):
-        response = api_client.get(reverse("dataset-agents", kwargs={"pk": 1}))
+    def test_dataset_not_found(self, api_client, url):
+        response = api_client.get(f"{url}?dataset=9999")
 
-        assert response.status_code == 404
+        assert response.status_code == 200
+        assert response.data == []
 
-
-class TestConfigView:
-    @pytest.fixture
-    def url(self):
-        return reverse("agent-create")
-
-    def test_post_creates_configuration(self, api_client, url, config):
+    def test_post_creates_agent(self, api_client, url, config):
         dataset = baker.make(DataSet)
         config = {
             "agent_args": {
                 "required_test": "required_test",
             },
-            "prompt_inputs": {
+            "prompt_input": {
                 "required_test": "required_test",
             },
             "prompt_extension": {
@@ -182,10 +179,10 @@ class TestConfigView:
                 },
             ],
         }
-        payload = {"name": "name", "config": config, "dataset": dataset.id, "agent_key": "agent_1"}
+        payload = {"name": "name", "config": config, "dataset": dataset.id, "agent_type": "agent_1"}
 
         with patch(
-            "agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_key",
+            "agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_type",
             side_effect=[DummyAgent, DummyAgent, DummyAgent, DummyAgent],
         ):
             response = api_client.post(url, payload, format="json")
@@ -194,14 +191,14 @@ class TestConfigView:
             created = Agent.objects.get(pk=response.data["id"])
             assert created.name == "name"
 
-    def test_post_creates_configuration_optional_fields_saved(self, api_client, url, config):
+    def test_post_creates_agent_optional_fields_saved(self, api_client, url, config):
         dataset = baker.make(DataSet)
         config = {
             "agent_args": {
                 "required_test": "required_test",
                 "optional_test": "optional_test",
             },
-            "prompt_inputs": {
+            "prompt_input": {
                 "required_test": "required_test",
                 "optional_test": "optional_test",
             },
@@ -214,10 +211,10 @@ class TestConfigView:
                 {"required_test": "required_test", "optional_test": "optional_test"},
             ],
         }
-        payload = {"name": "name", "config": config, "dataset": dataset.id, "agent_key": "agent_1"}
+        payload = {"name": "name", "config": config, "dataset": dataset.id, "agent_type": "agent_1"}
 
         with patch(
-            "agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_key",
+            "agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_type",
             side_effect=[DummyAgent, DummyAgent, DummyAgent, DummyAgent],
         ):
             response = api_client.post(url, payload, format="json")
@@ -228,16 +225,16 @@ class TestConfigView:
             assert created.config["tools"][0].get("optional_test") == "optional_test"
             assert created.config["tools"][1].get("optional_test") == "optional_test"
             assert created.config["agent_args"].get("optional_test") == "optional_test"
-            assert created.config["prompt_inputs"].get("optional_test") == "optional_test"
+            assert created.config["prompt_input"].get("optional_test") == "optional_test"
             assert created.config["prompt_extension"].get("optional_test") == "optional_test"
 
-    def test_post_creates_configuration_do_not_save_empty_field(self, api_client, url, config):
+    def test_post_creates_agent_do_not_save_empty_field(self, api_client, url, config):
         dataset = baker.make(DataSet)
         config = {
             "agent_args": {
                 "required_test": "required_test",
             },
-            "prompt_inputs": {
+            "prompt_input": {
                 "required_test": "required_test",
             },
             "prompt_extension": {
@@ -245,19 +242,19 @@ class TestConfigView:
             },
             "tools": [{"required_test": "required_test"}, {"required_test": "required_test"}],
         }
-        payload = {"name": "name", "config": config, "dataset": dataset.id, "agent_key": "agent_1"}
+        payload = {"name": "name", "config": config, "dataset": dataset.id, "agent_type": "agent_1"}
 
-        class NoArgsDummyTool:
+        class NoArgsDummyTool(BaseFunctionTool):
             CONFIGURATION_ARGS = None
 
         class NoArgsDummyAgent:
             AGENT_ARGS = None
-            PROMPT_INPUT_SCHEMA = PromptInput
+            PROMPT_INPUT = PromptInput
             PROMPT_EXTENSION = PromptExtension
-            TOOLS = [NoArgsDummyTool, DummyTool]
+            TOOLS = [FunctionToolConfig(tool_class=NoArgsDummyTool), FunctionToolConfig(tool_class=DummyTool)]
 
         with patch(
-            "agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_key",
+            "agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_type",
             side_effect=[NoArgsDummyAgent, NoArgsDummyAgent, NoArgsDummyAgent, NoArgsDummyAgent],
         ):
             response = api_client.post(url, payload, format="json")
@@ -270,37 +267,37 @@ class TestConfigView:
             assert created.config["tools"][1] == {"required_test": "required_test", "optional_test": "default"}
 
 
-class TestConfigDetailsView:
+class TestAgentDetailsView:
     @pytest.fixture
-    def config_instance(self, config):
+    def agent_instance(self, config):
         return baker.make(Agent, name="cfg1", config=config)
 
     @pytest.fixture
-    def url(self, config_instance):
-        return reverse("agent-details", kwargs={"pk": config_instance.pk})
+    def url(self, agent_instance):
+        return reverse("agent-details", kwargs={"pk": agent_instance.pk})
 
-    def test_get_existing_configuration(self, api_client, config_instance, url):
+    def test_get_existing_agent(self, api_client, agent_instance, url):
         response = api_client.get(url)
 
         assert response.status_code == 200
-        assert response.data["name"] == config_instance.name
+        assert response.data["name"] == agent_instance.name
         assert response.data["config"]
 
-    def test_get_nonexistent_configuration_returns_404(self, api_client):
+    def test_get_nonexistent_agent_returns_404(self, api_client):
         url = reverse("agent-details", kwargs={"pk": 9999})
 
         response = api_client.get(url)
 
         assert response.status_code == 404
 
-    def test_put_updates_configuration(self, api_client, config_instance, url, config):
+    def test_put_updates_agent(self, api_client, agent_instance, url, config):
         dataset = baker.make(DataSet)
         updated_config = {
             "agent_args": {
                 "required_test": "required_updated",
                 "optional_test": "optional_updated",
             },
-            "prompt_inputs": {
+            "prompt_input": {
                 "required_test": "required_updated",
                 "optional_test": "optional_updated",
             },
@@ -313,17 +310,17 @@ class TestConfigDetailsView:
                 {"required_test": "required_updated", "optional_test": "optional_updated"},
             ],
         }
-        payload = {"name": "updated", "config": updated_config, "dataset": dataset.id, "agent_key": "agent_1"}
+        payload = {"name": "updated", "config": updated_config, "dataset": dataset.id, "agent_type": "agent_1"}
         with patch(
-            "agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_key",
+            "agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_type",
             side_effect=[DummyAgent, DummyAgent, DummyAgent, DummyAgent],
         ):
             response = api_client.put(url, payload, format="json")
 
             assert response.status_code == 200
-            config_instance.refresh_from_db()
-            assert config_instance.name == "updated"
-            assert config_instance.config == updated_config
+            agent_instance.refresh_from_db()
+            assert agent_instance.name == "updated"
+            assert agent_instance.config == updated_config
 
     def test_put_nonexistent_returns_404(self, api_client):
         url = reverse("agent-details", kwargs={"pk": 9999})
@@ -341,13 +338,13 @@ class TestConfigDetailsView:
         assert response.status_code == 400
         assert "config" in response.data
 
-    def test_delete_existing_configuration(self, api_client, config_instance, url):
+    def test_delete_existing_agent(self, api_client, agent_instance, url):
         response = api_client.delete(url)
 
         assert response.status_code == 204
-        assert not Agent.objects.filter(pk=config_instance.pk).exists()
+        assert not Agent.objects.filter(pk=agent_instance.pk).exists()
 
-    def test_delete_nonexistent_configuration_returns_404(self, api_client, url):
+    def test_delete_nonexistent_agent_returns_404(self, api_client, url):
         url = reverse("agent-details", kwargs={"pk": 9999})
         response = api_client.delete(url)
         assert response.status_code == 404

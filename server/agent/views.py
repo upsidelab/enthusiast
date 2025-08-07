@@ -1,5 +1,6 @@
 from celery.result import AsyncResult
 from django.conf import settings
+from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -10,11 +11,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from agent.conversation import ConversationManager
+from agent.core.registries.agents.agent_registry import AgentRegistry
+from agent.core.registries.language_models import LanguageModelRegistry
 from agent.core.repositories import DjangoDataSetRepository
+from agent.filters import AgentFilter
 from agent.models import Conversation, Message
 from agent.models.agent import Agent
-from agent.registries.agents.agent_registry import AgentRegistry
-from agent.registries.language_models import LanguageModelRegistry
 from agent.serializers.configuration import (
     AgentListSerializer,
     AgentSerializer,
@@ -65,18 +67,12 @@ class ConversationView(APIView):
         ],
     )
     def get(self, request, conversation_id):
-        conversation = Conversation.objects.get(id=conversation_id, user=request.user)
-
-        messages = Message.objects.filter(conversation=conversation).order_by("id")
-
-        conversation_data = ConversationSerializer(conversation).data
-
-        serializer = ConversationContentSerializer(
-            {
-                **conversation_data,  # Conversation details
-                "history": messages,
-            }
+        conversation = (
+            Conversation.objects.select_related("agent")
+            .prefetch_related(Prefetch("messages", queryset=Message.objects.order_by("id")))
+            .get(id=conversation_id, user=request.user)
         )
+        serializer = ConversationContentSerializer(conversation)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
@@ -153,13 +149,10 @@ class ConversationListView(ListAPIView):
 
         conversation = manager.create_conversation(
             user_id=request.user.id,
-            data_set_id=input_serializer.validated_data.get("data_set_id"),
-            agent_key=input_serializer.validated_data.get("agent_key"),
+            agent_id=input_serializer.validated_data.get("agent_id"),
         )
-
-        conversation_data = ConversationSerializer(conversation).data
-
-        serializer = ConversationContentSerializer({**conversation_data, "history": []})
+        conversation = Conversation.objects.select_related("agent").prefetch_related("messages").get(pk=conversation.pk)
+        serializer = ConversationContentSerializer(conversation)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
@@ -193,7 +186,7 @@ class MessageFeedbackView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class AvailableAgentsView(APIView):
+class AgentTypesView(APIView):
     permission_classes = [IsAuthenticated]
 
     """View to get available agents."""
@@ -205,17 +198,17 @@ class AvailableAgentsView(APIView):
         agent_registry = AgentRegistry()
         choices = []
         for key, value in settings.AVAILABLE_AGENTS.items():
-            agent_class = agent_registry.get_agent_class_by_key(agent_key=key)
+            agent_class = agent_registry.get_agent_class_by_type(agent_type=key)
             choices.append(
                 {
                     "name": value["name"],
                     "key": key,
                     "agent_args": get_model_descriptor_from_class_field(agent_class, "AGENT_ARGS"),
-                    "prompt_inputs": get_model_descriptor_from_class_field(agent_class, "PROMPT_INPUT_SCHEMA"),
+                    "prompt_input": get_model_descriptor_from_class_field(agent_class, "PROMPT_INPUT"),
                     "prompt_extension": get_model_descriptor_from_class_field(agent_class, "PROMPT_EXTENSION"),
                     "tools": [
-                        get_model_descriptor_from_class_field(tool_class, "CONFIGURATION_ARGS")
-                        for tool_class in agent_class.TOOLS
+                        get_model_descriptor_from_class_field(tool_config.tool_class, "CONFIGURATION_ARGS")
+                        for tool_config in agent_class.TOOLS
                     ],
                 }
             )
@@ -225,27 +218,24 @@ class AvailableAgentsView(APIView):
         return Response(response_serializer.data, status=status.HTTP_200_OK)
 
 
-class DatasetConfigView(APIView):
+class AgentView(APIView):
     permission_classes = [IsAuthenticated]
-    """View to get dataset configurations"""
+    """View to get/create agents"""
 
     @swagger_auto_schema(
-        operation_description="Get list of all dataset's configurations",
+        operation_description="Get list of all dataset's agents",
         responses={200: AgentListSerializer(many=True)},
     )
-    def get(self, request, pk):
-        get_object_or_404(DataSet, pk=pk)
-        queryset = Agent.objects.filter(dataset_id=pk).order_by("created_at")
-        serializer = AgentListSerializer(queryset, many=True)
+    def get(self, request):
+        queryset = Agent.objects.all().order_by("created_at")
+        filterset = AgentFilter(request.GET, queryset=queryset)
+        if not filterset.is_valid():
+            return Response(filterset.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = AgentListSerializer(filterset.qs, many=True)
         return Response(serializer.data, status=200)
 
-
-class ConfigView(APIView):
-    permission_classes = [IsAuthenticated]
-    """View to get create configurations"""
-
     @swagger_auto_schema(
-        operation_description="Create a new configuration.",
+        operation_description="Create a new agent.",
         request_body=AgentSerializer,
         responses={201: AgentSerializer()},
     )
@@ -256,9 +246,9 @@ class ConfigView(APIView):
         return Response(AgentSerializer(instance).data, status=status.HTTP_201_CREATED)
 
 
-class ConfigDetailsView(APIView):
+class AgentDetailsView(APIView):
     permission_classes = [IsAuthenticated]
-    """View to get manage configuration"""
+    """View to get manage agents"""
 
     @swagger_auto_schema(operation_description="Get a single configuration by id.", responses={200: AgentSerializer()})
     def get(self, request, pk):

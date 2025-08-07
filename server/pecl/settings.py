@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     "account",
     "sync",
     "drf_yasg",
+    "django_filters",
 ]
 
 MIDDLEWARE = [
@@ -193,6 +194,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework.authentication.TokenAuthentication"],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 25,
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
 }
 
 # SWAGGER
@@ -232,6 +234,7 @@ CATALOG_MODELS = {
     "document_chunk": "catalog.models.DocumentChunk",
     "product": "catalog.models.Product",
     "product_chunk": "catalog.models.ProductContentChunk",
+    "agent": "agent.models.Agent",
 }
 
 AGENT_TOOLS = {

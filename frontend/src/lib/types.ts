@@ -53,7 +53,14 @@ export type User = {
 
 export type SourcePlugin = {
   plugin_name: string;
-} 
+}
+
+export type Agent = {
+  id: number;
+  name: string;
+  created_at: string;
+  updated_at: string;
+};
 
 export type Conversation = {
   id: number;
@@ -62,7 +69,7 @@ export type Conversation = {
   dimensions: number;
   data_set: string;
   summary?: string;
-  agent?: string;
+  agent: Agent;
   history?: Message[];
 }
 

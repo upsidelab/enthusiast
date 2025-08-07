@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 
 class ParentDataContextSerializerMixin:
-    context_keys_to_propagate = ["agent_key"]
+    context_keys_to_propagate = ["agent_type"]
 
     def to_internal_value(self, data):
         for key in self.context_keys_to_propagate:

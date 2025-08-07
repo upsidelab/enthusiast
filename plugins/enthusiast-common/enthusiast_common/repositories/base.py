@@ -59,9 +59,19 @@ class BaseMessageRepository(BaseRepository[T], ABC):
 
 class BaseConversationRepository(BaseRepository[T], ABC):
     @abstractmethod
-    def get_data_set_id(self, conversation_id: Any) -> int:
+    def get_data_set_id(self, conversation_id: Any) -> Any:
+        pass
+
+    @abstractmethod
+    def get_agent_id(self, conversation_id: Any) -> Any:
         pass
 
 
 class BaseDataSetRepository(BaseRepository[T], ABC):
     pass
+
+
+class BaseAgentRepository(BaseRepository[T], ABC):
+    @abstractmethod
+    def get_agent_configuration_by_id(self, conversation_id: Any) -> Any:
+        pass

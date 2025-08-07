@@ -1,4 +1,5 @@
 from .base import (
+    BaseAgentRepository,
     BaseConversationRepository,
     BaseDataSetRepository,
     BaseMessageRepository,
@@ -9,6 +10,7 @@ from .base import (
 )
 
 __all__ = [
+    "BaseAgentRepository",
     "BaseRepository",
     "BaseProductRepository",
     "BaseUserRepository",

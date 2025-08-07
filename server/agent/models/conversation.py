@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
+from agent.models.agent import Agent
 from catalog.models import DataSet
 
 
@@ -9,7 +10,7 @@ class Conversation(models.Model):
     started_at = models.DateTimeField(auto_now_add=True)
     data_set = models.ForeignKey(DataSet, on_delete=models.PROTECT, null=False)
     summary = models.CharField(null=True)
-    agent_key = models.CharField(blank=False, max_length=255, default="question_answer_agent")
+    agent = models.ForeignKey(Agent, on_delete=models.PROTECT, null=False)
 
     class Meta:
         db_table_comment = (

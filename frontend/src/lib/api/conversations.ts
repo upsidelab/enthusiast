@@ -3,8 +3,7 @@ import { BaseApiClient } from "@/lib/api/base.ts";
 import { Conversation, Message, PaginatedResult } from "@/lib/types.ts";
 
 export type CreateConversationPayload = {
-  data_set_id: number;
-  agent_key?: string;
+  agent_id: string;
 }
 
 export type CreateMessagePayload = {
@@ -17,17 +16,15 @@ type TaskState = {
   state: string;
 }
 
-
 export class ConversationsApiClient extends BaseApiClient {
   async getConversations(dataSetId: number, page: number = 1): Promise<PaginatedResult<Conversation>> {
     const response = await fetch(`${this.apiBase}/api/conversations?data_set_id=${dataSetId}&page=${page}`, this._requestConfiguration());
     return await response.json() as Promise<PaginatedResult<Conversation>>;
   }
 
-  async createConversation(dataSetId: number, agent_key: string): Promise<number> {
+  async createConversation(agentId: string): Promise<number> {
     const requestBody: CreateConversationPayload = {
-      data_set_id: dataSetId,
-      agent_key: agent_key
+      agent_id: agentId
     };
 
     const requestConfiguration = this._requestConfiguration();

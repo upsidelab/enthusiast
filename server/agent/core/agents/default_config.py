@@ -17,7 +17,11 @@ from pydantic import BaseModel
 
 from agent.core.callbacks import ConversationWebSocketCallbackHandler
 from agent.core.injector import Injector
+from agent.core.registries.embeddings import EmbeddingProviderRegistry
+from agent.core.registries.language_models import LanguageModelRegistry
+from agent.core.registries.models import BaseDjangoSettingsDBModelRegistry
 from agent.core.repositories import (
+    DjangoAgentRepository,
     DjangoConversationRepository,
     DjangoDataSetRepository,
     DjangoDocumentChunkRepository,
@@ -26,11 +30,8 @@ from agent.core.repositories import (
     DjangoProductRepository,
     DjangoUserRepository,
 )
-from agent.registries.embeddings import EmbeddingProviderRegistry
-from agent.registries.language_models import LanguageModelRegistry
-from agent.registries.models import BaseDjangoSettingsDBModelRegistry
-from agent.retrievers import DocumentRetriever, ProductRetriever
-from agent.retrievers.product_retriever import QUERY_PROMPT_TEMPLATE
+from agent.core.retrievers import DocumentRetriever, ProductRetriever
+from agent.core.retrievers.product_retriever import QUERY_PROMPT_TEMPLATE
 
 
 class DefaultAgentConfig(BaseModel):
@@ -41,7 +42,7 @@ class DefaultAgentConfig(BaseModel):
     llm: LLMConfig
 
 
-def get_default_config(conversation_id: int, streaming: bool) -> DefaultAgentConfig:
+def get_default_config() -> DefaultAgentConfig:
     return DefaultAgentConfig(
         repositories=RepositoriesConfig(
             user=DjangoUserRepository,
@@ -51,6 +52,7 @@ def get_default_config(conversation_id: int, streaming: bool) -> DefaultAgentCon
             product=DjangoProductRepository,
             document_chunk=DjangoDocumentChunkRepository,
             product_chunk=DjangoProductChunkRepository,
+            agent=DjangoAgentRepository,
         ),
         retrievers=RetrieversConfig(
             document=RetrieverConfig(retriever_class=DocumentRetriever),
@@ -71,22 +73,17 @@ def get_default_config(conversation_id: int, streaming: bool) -> DefaultAgentCon
         ),
         llm=LLMConfig(
             callbacks=[
-                CallbackHandlerConfig(
-                    handler_class=ConversationWebSocketCallbackHandler, args={"conversation_id": conversation_id}
-                ),
+                CallbackHandlerConfig(handler_class=ConversationWebSocketCallbackHandler),
             ],
-            streaming=streaming,
         ),
     )
 
 
 def merge_config(
     partial: AgentConfigWithDefaults,
-    conversation_id: int,
-    streaming: bool,
 ) -> AgentConfig:
     merged: dict[str, object] = {}
-    defaults = get_default_config(conversation_id=conversation_id, streaming=streaming)
+    defaults = get_default_config()
     for name in AgentConfig.model_fields:
         value = getattr(partial, name, None)
 

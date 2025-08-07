@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from .repositories import (
+    BaseAgentRepository,
     BaseConversationRepository,
     BaseDataSetRepository,
     BaseMessageRepository,
@@ -43,3 +44,4 @@ class RepositoriesInstances:
     document_chunk: BaseModelChunkRepository
     product: BaseProductRepository
     product_chunk: BaseModelChunkRepository
+    agent: BaseAgentRepository

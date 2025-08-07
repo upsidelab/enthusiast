@@ -2,7 +2,7 @@ from django.db.models import Count
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIView, RetrieveAPIView, UpdateAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
@@ -61,6 +61,12 @@ class DataSetListView(ListCreateAPIView):
         data_set = serializer.save()
         data_set.users.add(self.request.user)
 
+
+class DataSetDetailView(RetrieveAPIView, UpdateAPIView):
+    serializer_class = DataSetSerializer
+    permission_classes = [IsAdminUser]
+    lookup_url_kwarg = 'data_set_id'
+    queryset = DataSet.objects.all()
 
 class DataSetUserListView(ListCreateAPIView):
     serializer_class = UserSerializer

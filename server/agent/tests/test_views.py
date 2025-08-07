@@ -115,17 +115,17 @@ class TestAgentTypesView:
         assert response.status_code == 401
 
 
-class TestDatasetAgentsView:
+class TestAgentView:
+    @pytest.fixture
+    def url(self):
+        return reverse("agents")
+
     @pytest.fixture
     def dataset_instance(self):
         return baker.make(DataSet)
 
-    @pytest.fixture
-    def url(self, dataset_instance):
-        return reverse("dataset-agents", kwargs={"pk": dataset_instance.pk})
-
-    def test_get_empty_list(self, api_client, url):
-        response = api_client.get(url)
+    def test_get_empty_list(self, api_client, url, dataset_instance):
+        response = api_client.get(f"{url}?dataset={dataset_instance.pk}")
 
         assert response.status_code == 200
         assert response.data == []
@@ -134,7 +134,7 @@ class TestDatasetAgentsView:
         config_1 = baker.make(Agent, name="cfg1", config={"a": 1}, dataset=dataset_instance)
         config_2 = baker.make(Agent, name="cfg2", config={"b": 2}, dataset=dataset_instance)
 
-        response = api_client.get(url)
+        response = api_client.get(f"{url}?dataset={dataset_instance.pk}")
 
         assert response.status_code == 200
         assert len(response.data) == 2
@@ -146,22 +146,17 @@ class TestDatasetAgentsView:
         older = baker.make(Agent, name="older", dataset=dataset_instance)
         newer = baker.make(Agent, name="newer", dataset=dataset_instance)
 
-        response = api_client.get(url)
+        response = api_client.get(f"{url}?dataset={dataset_instance.pk}")
 
         assert response.status_code == 200
-        response.data[0]["id"] = older.id
-        response.data[1]["id"] = newer.id
+        assert response.data[0]["id"] == older.id
+        assert response.data[1]["id"] == newer.id
 
-    def test_dataset_not_found(self, api_client):
-        response = api_client.get(reverse("dataset-agents", kwargs={"pk": 1}))
+    def test_dataset_not_found(self, api_client, url):
+        response = api_client.get(f"{url}?dataset=9999")
 
-        assert response.status_code == 404
-
-
-class TestAgentView:
-    @pytest.fixture
-    def url(self):
-        return reverse("agent-create")
+        assert response.status_code == 200
+        assert response.data == []
 
     def test_post_creates_agent(self, api_client, url, config):
         dataset = baker.make(DataSet)

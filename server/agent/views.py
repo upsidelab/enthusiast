@@ -14,6 +14,7 @@ from agent.conversation import ConversationManager
 from agent.core.registries.agents.agent_registry import AgentRegistry
 from agent.core.registries.language_models import LanguageModelRegistry
 from agent.core.repositories import DjangoDataSetRepository
+from agent.filters import AgentFilter
 from agent.models import Conversation, Message
 from agent.models.agent import Agent
 from agent.serializers.configuration import (
@@ -217,24 +218,21 @@ class AgentTypesView(APIView):
         return Response(response_serializer.data, status=status.HTTP_200_OK)
 
 
-class DatasetAgentView(APIView):
+class AgentView(APIView):
     permission_classes = [IsAuthenticated]
-    """View to get dataset agents"""
+    """View to get/create agents"""
 
     @swagger_auto_schema(
         operation_description="Get list of all dataset's agents",
         responses={200: AgentListSerializer(many=True)},
     )
-    def get(self, request, pk):
-        get_object_or_404(DataSet, pk=pk)
-        queryset = Agent.objects.filter(dataset_id=pk).order_by("created_at")
-        serializer = AgentListSerializer(queryset, many=True)
+    def get(self, request):
+        queryset = Agent.objects.all().order_by("created_at")
+        filterset = AgentFilter(request.GET, queryset=queryset)
+        if not filterset.is_valid():
+            return Response(filterset.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = AgentListSerializer(filterset.qs, many=True)
         return Response(serializer.data, status=200)
-
-
-class AgentView(APIView):
-    permission_classes = [IsAuthenticated]
-    """View to get create agents"""
 
     @swagger_auto_schema(
         operation_description="Create a new agent.",

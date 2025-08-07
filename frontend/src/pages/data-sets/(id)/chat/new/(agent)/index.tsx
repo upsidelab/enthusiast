@@ -5,16 +5,17 @@ import { NewConversation } from "@/components/conversation-view/new-conversation
 import {useApplicationContext} from "@/lib/use-application-context.ts";
 
 export function NewChat() {
-  const { availableAgentInstances } = useApplicationContext()!;
+  const { availableAgents } = useApplicationContext()!;
   const { agent } = useParams();
 
-  const selectedAgent = availableAgentInstances.find(agentObj => agentObj.id.toString() === agent);
+  const agentId = agent ? parseInt(agent, 10) : null;
+  const selectedAgent = availableAgents.find(agentObj => agentObj.id === agentId);
   const agentName = selectedAgent?.name ?? "Question Answer Agent";
 
   return (
     <PageMain className="h-full">
       <PageHeading title={agentName} description="Start a new conversation." className="sticky top-4 bg-white" />
-      <NewConversation agentInstanceId={agent!} />
+      <NewConversation agentId={agent!} />
     </PageMain>
   );
 }

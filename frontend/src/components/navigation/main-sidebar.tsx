@@ -20,7 +20,7 @@ import { useApplicationContext } from "@/lib/use-application-context.ts";
 export function MainSidebar() {
   const { account, dataSetId } = useApplicationContext()!;
   const { isLoadingAgents } = useApplicationContext()!;
-  const { availableAgentInstances } = useApplicationContext()!;
+  const { availableAgents } = useApplicationContext()!;
 
 
   const synchronizeItems: SidebarSectionItemProps[] = [
@@ -45,7 +45,7 @@ export function MainSidebar() {
   ];
 
   const askItems: SidebarSectionItemProps[] = [
-    ...(isLoadingAgents ? [] : availableAgentInstances.map(agent => ({
+    ...(isLoadingAgents ? [] : availableAgents.map(agent => ({
       title: agent.name,
       link: `/data-sets/${dataSetId}/chat/new/${encodeURIComponent(agent.id)}`,
       key: agent.id.toString(),

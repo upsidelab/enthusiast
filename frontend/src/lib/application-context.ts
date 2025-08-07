@@ -6,8 +6,8 @@ export interface ApplicationContextValue {
   setDataSets: (dataSets: DataSet[]) => void;
   dataSetId: number | null;
   setDataSetId: (id: number | null) => void;
-  availableAgentInstances: { name: string; id: number; }[];
-  setAvailableAgentInstances: (agents: { name: string; id: number; }[]) => void;
+  availableAgents: { name: string; id: number; }[];
+  setAvailableAgents: (agents: { name: string; id: number; }[]) => void;
   isLoadingAgents: boolean;
   setIsLoadingAgents: (value: boolean) => void;
   account: Account | null;

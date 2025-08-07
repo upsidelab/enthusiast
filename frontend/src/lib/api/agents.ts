@@ -26,12 +26,16 @@ export class AgentsApiClient extends BaseApiClient {
         return result.choices;
     }
     async getDatasetAvailableAgents(dataSetId: number): Promise<AgentInstance[]> {
-   const response = await fetch(`${this.apiBase}/api/agents/dataset/${dataSetId}`, this._requestConfiguration());
+        const query = new URLSearchParams({ dataset: dataSetId.toString() });
+        const response = await fetch(
+            `${this.apiBase}/api/agents?${query.toString()}`,
+            this._requestConfiguration()
+        );
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch available agent instances: ${response.statusText}`);
-    }
+        if (!response.ok) {
+            throw new Error(`Failed to fetch available agent instances: ${response.statusText}`);
+        }
 
-    return await response.json() as AgentInstance[];
+        return await response.json() as AgentInstance[];
     }
 }

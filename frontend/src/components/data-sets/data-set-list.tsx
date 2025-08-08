@@ -54,6 +54,11 @@ export function DataSetList() {
                   handleSyncDataSetAllSources(item)
                 }} variant="secondary">Sync</Button>
               </TableCell>
+              <TableCell>
+                <Button onClick={() => {
+                  navigate(`/data-sets/${item.id}/edit`)
+                }} variant="secondary">Edit</Button>
+              </TableCell>
              </TableRow>
           ))}
         </TableBody>

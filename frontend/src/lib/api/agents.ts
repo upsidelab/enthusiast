@@ -1,7 +1,8 @@
 import {BaseApiClient} from "@/lib/api/base.ts";
 import {Agent, AgentConfig, AgentDetails} from "@/lib/types.ts";
+import {ApiError} from "@/lib/api-error.ts";
 
-type AgentChoice = {
+export type AgentChoice = {
   key: string;
   name: string;
   agent_args: Record<string, string>;
@@ -54,9 +55,10 @@ export class AgentsApiClient extends BaseApiClient {
         });
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            const error = new Error(`Failed to create agent: ${response.statusText}`);
-            (error as any).response = { data: errorData, status: response.status };
-            throw error;
+            throw new ApiError(`Failed to create agent: ${response.statusText}`, {
+                data: errorData,
+                status: response.status
+            });
         }
         return await response.json() as AgentDetails;
     }
@@ -69,11 +71,13 @@ export class AgentsApiClient extends BaseApiClient {
         });
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            const error = new Error(`Failed to update agent: ${response.statusText}`);
-            (error as any).response = { data: errorData, status: response.status };
-            throw error;
+            throw new ApiError(`Failed to update agent: ${response.statusText}`, {
+                data: errorData,
+                status: response.status
+            });
         }
         return await response.json() as AgentDetails;
+
     }
 
     async deleteAgent(agentId: number): Promise<void> {
@@ -83,9 +87,10 @@ export class AgentsApiClient extends BaseApiClient {
         });
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            const error = new Error(`Failed to delete agent: ${response.statusText}`);
-            (error as any).response = { data: errorData, status: response.status };
-            throw error;
+            throw new ApiError(`Failed to delete agent: ${response.statusText}`, {
+                data: errorData,
+                status: response.status
+            });
         }
     }
 }

@@ -9,7 +9,7 @@ interface DynamicConfigInputProps {
   placeholder?: string;
   value: string | number | boolean;
   onChange: (value: string | number | boolean) => void;
-  typeInfo: TypeInfo;
+  typeInfo?: TypeInfo;
   description?: string;
   error?: string;
 }
@@ -25,6 +25,8 @@ export function DynamicConfigInput({
   error
 }: DynamicConfigInputProps) {
   const getInputType = () => {
+    if (!typeInfo) return 'text';
+    
     if (typeInfo.container === 'list') {
       return 'text'; // For now, handle lists as text input
     }

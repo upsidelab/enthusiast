@@ -29,6 +29,7 @@ export function useAgents(dataSetId: number | null) {
     };
 
     loadAgentsForDataset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataSetId]);
 
   return {

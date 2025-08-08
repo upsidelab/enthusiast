@@ -2,29 +2,35 @@ import { useState, useEffect } from "react";
 import { ApiClient } from "@/lib/api";
 import { authenticationProviderInstance } from "@/lib/authentication-provider";
 import { Agent } from "@/lib/types";
+import {AgentChoice} from "@/lib/api/agents.ts";
+import { ApiError } from "@/lib/api-error";
 
 const apiClient = new ApiClient(authenticationProviderInstance);
 
 export function useAgentForm(
   agent: Agent | null,
-  agentTypes: any[],
+  agentTypes: AgentChoice[],
   dataSetId: number | null,
   onSuccess: () => void
 ) {
   const [name, setName] = useState("");
   const [type, setType] = useState("");
   const [config, setConfig] = useState<Record<string, string | number | boolean>>({});
-  const [agentConfigSections, setAgentConfigSections] = useState<Record<string, Record<string, any> | Record<string, any>[]> >({});
+  const [agentConfigSections, setAgentConfigSections] = useState<Record<string, Record<string, unknown> | Record<string, unknown>[]> >({});
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [generalError, setGeneralError] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-      const flattenConfigForForm = (config: any): Record<string, string | number | boolean> => {
-    const flattenedConfig: Record<string, string | number | boolean> = {};
-    
-    Object.entries(config).forEach(([section, sectionData]) => {
+          const flattenConfigForForm = (config: unknown): Record<string, string | number | boolean> => {
+      const flattenedConfig: Record<string, string | number | boolean> = {};
+      
+      if (!config || typeof config !== 'object') {
+        return flattenedConfig;
+      }
+      
+      Object.entries(config as Record<string, unknown>).forEach(([section, sectionData]) => {
       if (Array.isArray(sectionData)) {
         sectionData.forEach(obj => {
           if (obj && typeof obj === 'object') {
@@ -63,6 +69,7 @@ export function useAgentForm(
     };
 
     loadAgentDetailsForEditing();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [agent?.id]);
 
   useEffect(() => {
@@ -92,8 +99,8 @@ export function useAgentForm(
       return false;
     };
 
-    const extractConfigSectionsFromType = (selectedType: any) => {
-      const configSections: Record<string, Record<string, any> | Record<string, any>[]> = {};
+    const extractConfigSectionsFromType = (selectedType: AgentChoice) => {
+      const configSections: Record<string, Record<string, unknown> | Record<string, unknown>[]> = {};
       Object.entries(selectedType).forEach(([section, value]) => {
         if (section !== 'key' && section !== 'name' && value && typeof value === 'object') {
           configSections[section] = value;
@@ -102,7 +109,7 @@ export function useAgentForm(
       return configSections;
     };
 
-    const initializeCollapsedSections = (configSections: Record<string, any>) => {
+    const initializeCollapsedSections = (configSections: Record<string, unknown>) => {
       const initialOpenSections: Record<string, boolean> = {};
       Object.keys(configSections).forEach(section => {
         initialOpenSections[section] = false;
@@ -110,7 +117,7 @@ export function useAgentForm(
       return initialOpenSections;
     };
 
-      const createDefaultConfigValues = (configSections: Record<string, any>) => {
+      const createDefaultConfigValues = (configSections: Record<string, unknown>) => {
     const defaults: Record<string, string | number | boolean> = {};
     Object.entries(configSections).forEach(([section, sectionData]) => {
       if (Array.isArray(sectionData)) {
@@ -130,7 +137,7 @@ export function useAgentForm(
       const wasCleared = clearFormWhenNoType();
       if (wasCleared) return;
 
-      const selected = agentTypes.find((t: any) => t.key === type);
+      const selected = agentTypes.find((t) => t.key === type);
       if (!selected) return;
 
       const configSections = extractConfigSectionsFromType(selected);
@@ -146,6 +153,7 @@ export function useAgentForm(
     };
 
     updateFormForSelectedType();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type, agentTypes, agent]);
 
   const handleConfigChange = (key: string, value: string) => {
@@ -153,7 +161,7 @@ export function useAgentForm(
   };
 
   const buildNestedConfigFromFlattened = () => {
-    const configObj: any = {};
+    const configObj: Record<string, unknown> = {};
     Object.entries(agentConfigSections).forEach(([section, fields]) => {
       if (Array.isArray(fields)) {
         configObj[section] = buildToolsArrayConfig(section, fields);
@@ -164,7 +172,7 @@ export function useAgentForm(
     return configObj;
   };
 
-  const buildToolsArrayConfig = (section: string, fields: Record<string, any>[]) => {
+  const buildToolsArrayConfig = (section: string, fields: Record<string, unknown>[]) => {
     return fields.map(obj => {
       const out: Record<string, string | number | boolean> = {};
       if (obj && typeof obj === 'object') {
@@ -177,7 +185,7 @@ export function useAgentForm(
     });
   };
 
-  const buildRegularSectionConfig = (section: string, fields: Record<string, any>) => {
+  const buildRegularSectionConfig = (section: string, fields: Record<string, unknown>) => {
     const out: Record<string, string | number | boolean> = {};
     Object.keys(fields).forEach(k => {
       const v = config[`${section}_${k}`];
@@ -186,7 +194,7 @@ export function useAgentForm(
     return out;
   };
 
-  const saveAgentToApi = async (configObj: any) => {
+  const saveAgentToApi = async (configObj: Record<string, unknown>) => {
     if (!dataSetId) return;
     
     const agentData = {
@@ -203,7 +211,7 @@ export function useAgentForm(
     }
   };
 
-  const parseFieldErrors = (errorData: any) => {
+  const parseFieldErrors = (errorData: unknown) => {
     const newFieldErrors: Record<string, string> = {};
     
     parseBasicFieldErrors(errorData, newFieldErrors);
@@ -212,42 +220,54 @@ export function useAgentForm(
     return newFieldErrors;
   };
 
-  const parseBasicFieldErrors = (errorData: any, newFieldErrors: Record<string, string>) => {
-    if (errorData.name) {
-      newFieldErrors.name = Array.isArray(errorData.name) ? errorData.name[0] : errorData.name;
+  const parseBasicFieldErrors = (errorData: unknown, newFieldErrors: Record<string, string>) => {
+    if (typeof errorData === 'object' && errorData && 'name' in errorData) {
+      const nameError = (errorData as { name: unknown }).name;
+      if (Array.isArray(nameError)) {
+        newFieldErrors.name = String(nameError[0]);
+      } else if (typeof nameError === 'string') {
+        newFieldErrors.name = nameError;
+      }
     }
-    if (errorData.agent_type) {
-      newFieldErrors.type = Array.isArray(errorData.agent_type) ? errorData.agent_type[0] : errorData.agent_type;
+    if (typeof errorData === 'object' && errorData && 'agent_type' in errorData) {
+      const typeError = (errorData as { agent_type: unknown }).agent_type;
+      if (Array.isArray(typeError)) {
+        newFieldErrors.type = String(typeError[0]);
+      } else if (typeof typeError === 'string') {
+        newFieldErrors.type = typeError;
+      }
     }
   };
 
-  const parseConfigSectionErrors = (errorData: any, newFieldErrors: Record<string, string>) => {
-    if (!errorData.config) return;
+  const parseConfigSectionErrors = (errorData: unknown, newFieldErrors: Record<string, string>) => {
+    if (typeof errorData !== 'object' || !errorData || !('config' in errorData)) return;
     
-    const configErrors = errorData.config;
+    const configErrors = (errorData as { config: unknown }).config;
+    if (typeof configErrors !== 'object' || !configErrors) return;
+    
     const sectionNames = ['agent_args', 'prompt_input', 'prompt_extension'];
     
     sectionNames.forEach(sectionName => {
-      parseSingleConfigSection(sectionName, configErrors[sectionName], newFieldErrors);
+      parseSingleConfigSection(sectionName, (configErrors as Record<string, unknown>)[sectionName], newFieldErrors);
     });
     
-    parseToolsArrayErrors(configErrors.tools, newFieldErrors);
+    parseToolsArrayErrors((configErrors as Record<string, unknown>).tools, newFieldErrors);
   };
 
-  const parseSingleConfigSection = (sectionName: string, sectionErrors: any, newFieldErrors: Record<string, string>) => {
+  const parseSingleConfigSection = (sectionName: string, sectionErrors: unknown, newFieldErrors: Record<string, string>) => {
     if (sectionErrors && typeof sectionErrors === 'object') {
-      Object.entries(sectionErrors).forEach(([field, error]: [string, any]) => {
-        newFieldErrors[`${sectionName}_${field}`] = Array.isArray(error) ? error[0] : error;
+              Object.entries(sectionErrors as Record<string, unknown>).forEach(([field, error]) => {
+        newFieldErrors[`${sectionName}_${field}`] = Array.isArray(error) ? String(error[0]) : String(error);
       });
     }
   };
 
-  const parseToolsArrayErrors = (toolsErrors: any, newFieldErrors: Record<string, string>) => {
+  const parseToolsArrayErrors = (toolsErrors: unknown, newFieldErrors: Record<string, string>) => {
     if (toolsErrors && Array.isArray(toolsErrors)) {
-      toolsErrors.forEach((toolErrors: any) => {
+              toolsErrors.forEach((toolErrors: unknown) => {
         if (toolErrors && typeof toolErrors === 'object') {
-          Object.entries(toolErrors).forEach(([field, error]: [string, any]) => {
-            newFieldErrors[`tools_${field}`] = Array.isArray(error) ? error[0] : error;
+                      Object.entries(toolErrors as Record<string, unknown>).forEach(([field, error]) => {
+                          newFieldErrors[`tools_${field}`] = Array.isArray(error) ? String(error[0]) : String(error);
           });
         }
       });
@@ -265,18 +285,20 @@ export function useAgentForm(
       const configObj = buildNestedConfigFromFlattened();
       await saveAgentToApi(configObj);
       onSuccess();
-    } catch (e: any) {
-      if (e.response?.data) {
+    } catch (e) {
+      if (e instanceof ApiError && e.response?.data) {
         const errorData = e.response.data;
         const newFieldErrors = parseFieldErrors(errorData);
         
         setFieldErrors(newFieldErrors);
         
         if (Object.keys(newFieldErrors).length === 0) {
-          setGeneralError(errorData.detail || errorData.message || 'Failed to save agent');
+          const errorDetail = typeof errorData === 'object' && errorData && 'detail' in errorData ? String(errorData.detail) : undefined;
+          const errorMessage = typeof errorData === 'object' && errorData && 'message' in errorData ? String(errorData.message) : undefined;
+          setGeneralError(errorDetail || errorMessage || 'Failed to save agent');
         }
       } else {
-        setGeneralError(e.message || 'Failed to save agent');
+        setGeneralError(e instanceof Error ? e.message : 'Failed to save agent');
       }
     } finally {
       setSubmitting(false);

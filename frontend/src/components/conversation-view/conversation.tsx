@@ -102,6 +102,7 @@ export function Conversation({ conversationId, pendingMessage, onPendingMessageS
         };
 
         loadMessages();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [conversationId]);
 
     const scrollToLastMessage = () => {

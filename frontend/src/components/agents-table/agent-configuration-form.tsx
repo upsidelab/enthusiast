@@ -3,9 +3,10 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ChevronDownIcon, ChevronRightIcon } from "lucide-react";
 import { useEffect } from "react";
 import { DynamicConfigInput } from "./dynamic-config-input";
+import { TypeInfo } from "@/lib/types";
 
 interface AgentConfigurationFormProps {
-  agentConfigSections: Record<string, Record<string, any> | Record<string, any>[]>;
+  agentConfigSections: Record<string, Record<string, unknown> | Record<string, unknown>[]>;
   openSections: Record<string, boolean>;
   setOpenSections: (sections: Record<string, boolean>) => void;
   config: Record<string, string | number | boolean>;
@@ -26,7 +27,7 @@ export function AgentConfigurationForm({
   };
 
   useEffect(() => {
-    const checkForSectionErrors = (section: string, fields: Record<string, any> | Record<string, any>[]) => {
+    const checkForSectionErrors = (section: string, fields: Record<string, unknown> | Record<string, unknown>[]) => {
       if (Array.isArray(fields)) {
         return fields.some(obj => {
           if (obj && typeof obj === 'object') {
@@ -72,11 +73,11 @@ export function AgentConfigurationForm({
     return false;
   });
 
-  const renderConfigField = (key: string, schema: any, configKey: string) => {
-    const s = schema as Record<string, any>;
+  const renderConfigField = (key: string, schema: unknown, configKey: string) => {
+    const s = schema as Record<string, unknown>;
     const fieldTitle = (s && typeof s.title === 'string') ? s.title || key : String(key);
-    const typeInfo = s?.type;
-    const description = s?.description;
+    const typeInfo = s?.type as TypeInfo | undefined;
+    const description = typeof s?.description === 'string' ? s.description : undefined;
     const currentValue = config[configKey] ?? '';
     
     return (
@@ -94,7 +95,7 @@ export function AgentConfigurationForm({
     );
   };
 
-  const renderToolsArrayFields = (section: string, fields: Record<string, any>[]) => {
+  const renderToolsArrayFields = (section: string, fields: Record<string, unknown>[]) => {
     return fields.map((obj, idx) => {
       const sObj = obj && typeof obj === 'object' ? obj : {};
       if (Object.keys(sObj).length === 0) return null;
@@ -112,14 +113,14 @@ export function AgentConfigurationForm({
     });
   };
 
-  const renderRegularFields = (section: string, fields: Record<string, any>) => {
+  const renderRegularFields = (section: string, fields: Record<string, unknown>) => {
     return Object.entries(fields).map(([key, schema]) => {
       const configKey = `${section}_${key}`;
       return typeof key === 'string' ? renderConfigField(key, schema, configKey) : null;
     });
   };
 
-  const renderConfigSection = (section: string, fields: Record<string, any> | Record<string, any>[]) => {
+  const renderConfigSection = (section: string, fields: Record<string, unknown> | Record<string, unknown>[]) => {
     let hasFields = false;
     if (Array.isArray(fields)) {
       hasFields = fields.some(obj => obj && typeof obj === 'object' && Object.keys(obj).length > 0);
@@ -150,7 +151,7 @@ export function AgentConfigurationForm({
           <div className="pl-4 space-y-4">
             {Array.isArray(fields)
               ? renderToolsArrayFields(section, fields)
-              : renderRegularFields(section, fields as Record<string, any>)}
+              : renderRegularFields(section, fields as Record<string, unknown>)}
           </div>
         </CollapsibleContent>
       </Collapsible>

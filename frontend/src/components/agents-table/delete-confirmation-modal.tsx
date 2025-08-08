@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ApiClient } from "@/lib/api";
 import { authenticationProviderInstance } from "@/lib/authentication-provider";
 import { Agent } from "@/lib/types";
+import { ApiError } from "@/lib/api-error";
 
 const apiClient = new ApiClient(authenticationProviderInstance);
 
@@ -29,9 +30,12 @@ export function DeleteConfirmationModal({
     try {
       await apiClient.agents().deleteAgent(agent.id);
       onConfirm();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Failed to delete agent:', error);
-      alert('Failed to delete agent. Please try again.');
+      const errorMessage = error instanceof ApiError 
+        ? `Failed to delete agent: ${(typeof error.response.data === 'object' && error.response.data && 'detail' in error.response.data) ? String(error.response.data.detail) : error.message}`
+        : 'Failed to delete agent. Please try again.';
+      alert(errorMessage);
     } finally {
       setDeleting(false);
     }

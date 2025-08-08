@@ -7,12 +7,13 @@ import { Agent } from "@/lib/types";
 import { useRef, useEffect, useState } from "react";
 import { useAgentForm } from "./hooks/use-agent-form";
 import { AgentConfigurationForm } from "./agent-configuration-form";
+import {AgentChoice} from "@/lib/api/agents.ts";
 
 interface AgentFormModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   agent: Agent | null;
-  agentTypes: any[];
+  agentTypes: AgentChoice[];
   loadingTypes: boolean;
   dataSetId: number | null;
   onSuccess: () => void;

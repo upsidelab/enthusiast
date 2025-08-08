@@ -61,6 +61,7 @@ export type Agent = {
   agent_type: string;
   created_at: string;
   updated_at: string;
+  deleted_at: string;
 };
 
 export type Conversation = {

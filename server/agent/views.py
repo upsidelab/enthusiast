@@ -274,5 +274,5 @@ class AgentDetailsView(APIView):
     )
     def delete(self, request, pk=None):
         instance = get_object_or_404(Agent, pk=pk)
-        instance.delete()
+        instance.set_deleted_at()
         return Response(status=status.HTTP_204_NO_CONTENT)

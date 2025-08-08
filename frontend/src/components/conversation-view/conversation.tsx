@@ -11,6 +11,7 @@ export interface ConversationProps {
     conversationId: number;
     onPendingMessageSent: () => void;
     pendingMessage: string | null;
+    conversationLocked?: boolean;
 }
 
 export interface MessageProps {
@@ -26,9 +27,10 @@ interface ConversationUIProps {
     lastMessageRef: MutableRefObject<HTMLDivElement | null>
     onSubmit: (message: string) => void;
     isLoading: boolean;
+    conversationLocked?: boolean;
 }
 
-function ConversationUI({messages, isAgentLoading, agentAction, lastMessageRef, onSubmit, isLoading}: ConversationUIProps) {
+function ConversationUI({messages, isAgentLoading, agentAction, lastMessageRef, onSubmit, isLoading, conversationLocked = false}: ConversationUIProps) {
     return (
         <div className="flex flex-col h-full px-4 pt-16">
             <div className="grow flex-1 space-y-4">
@@ -49,7 +51,7 @@ function ConversationUI({messages, isAgentLoading, agentAction, lastMessageRef, 
                 <div ref={lastMessageRef}/>
             </div>
             <div className="bottom-0 sticky flex-shrink-0 bg-white pb-4">
-                <MessageComposer onSubmit={onSubmit} isLoading={isLoading}/>
+                <MessageComposer onSubmit={onSubmit} isLoading={isLoading} conversationLocked={conversationLocked}/>
             </div>
         </div>
     );
@@ -60,7 +62,7 @@ const api = new ApiClient(authenticationProviderInstance);
 
 const streamingEnabled = Boolean(import.meta.env.VITE_WS_BASE);
 
-export function Conversation({ conversationId, pendingMessage, onPendingMessageSent }: ConversationProps) {
+export function Conversation({ conversationId, pendingMessage, onPendingMessageSent, conversationLocked = false }: ConversationProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [isAgentLoading, setIsAgentLoading] = useState(false);
     const [agentAction, setAgentAction] = useState<string>("Thinking...");
@@ -275,6 +277,7 @@ export function Conversation({ conversationId, pendingMessage, onPendingMessageS
             lastMessageRef={lastMessageRef}
             onSubmit={onMessageComposerSubmit}
             isLoading={isLoading}
+            conversationLocked={conversationLocked}
         />
     );
 }

@@ -342,7 +342,8 @@ class TestAgentDetailsView:
         response = api_client.delete(url)
 
         assert response.status_code == 204
-        assert not Agent.objects.filter(pk=agent_instance.pk).exists()
+        agent = Agent.all_objects.get(pk=agent_instance.pk)
+        assert agent.deleted_at is not None
 
     def test_delete_nonexistent_agent_returns_404(self, api_client, url):
         url = reverse("agent-details", kwargs={"pk": 9999})

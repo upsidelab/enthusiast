@@ -21,6 +21,7 @@ import { ConfigureDataSetDocumentSource } from "@/pages/data-sets/(id)/document-
 import { UsersIndex } from "@/pages/users";
 import { OnboardingIndex } from "@/pages/onboarding";
 import { NewChat } from "@/pages/data-sets/(id)/chat/new/(agent)/index.tsx";
+import AgentsPage from "@/pages/agents.tsx";
 
 const api = new ApiClient(authenticationProviderInstance);
 
@@ -107,6 +108,10 @@ const router = createBrowserRouter([
       {
         path: '/users',
         element: <UsersIndex />
+      },
+      {
+        path: '/agents',
+        element: <AgentsPage />
       }
     ]
   },

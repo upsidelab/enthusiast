@@ -1,7 +1,8 @@
 import {BaseApiClient} from "@/lib/api/base.ts";
-import {Agent} from "@/lib/types.ts";
+import {Agent, AgentConfig, AgentDetails} from "@/lib/types.ts";
+import {ApiError} from "@/lib/api-error.ts";
 
-type AgentChoice = {
+export type AgentChoice = {
   key: string;
   name: string;
   agent_args: Record<string, string>;
@@ -37,5 +38,59 @@ export class AgentsApiClient extends BaseApiClient {
         }
 
         return await response.json() as Agent[];
+    }
+    async getAgentById(agentId: number): Promise<AgentDetails> {
+        const response = await fetch(`${this.apiBase}/api/agents/${agentId}`, this._requestConfiguration());
+        if (!response.ok) {
+            throw new Error(`Failed to fetch agent: ${response.statusText}`);
+        }
+        return await response.json() as AgentDetails;
+    }
+
+    async createAgent(data: { name: string; agent_type: string; dataset: number; config: AgentConfig }): Promise<AgentDetails> {
+        const response = await fetch(`${this.apiBase}/api/agents`, {
+            ...this._requestConfiguration(),
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new ApiError(`Failed to create agent: ${response.statusText}`, {
+                data: errorData,
+                status: response.status
+            });
+        }
+        return await response.json() as AgentDetails;
+    }
+
+    async updateAgent(agentId: number, data: { name: string; agent_type: string; dataset: number; config: AgentConfig }): Promise<AgentDetails> {
+        const response = await fetch(`${this.apiBase}/api/agents/${agentId}`, {
+            ...this._requestConfiguration(),
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new ApiError(`Failed to update agent: ${response.statusText}`, {
+                data: errorData,
+                status: response.status
+            });
+        }
+        return await response.json() as AgentDetails;
+
+    }
+
+    async deleteAgent(agentId: number): Promise<void> {
+        const response = await fetch(`${this.apiBase}/api/agents/${agentId}`, {
+            ...this._requestConfiguration(),
+            method: 'DELETE',
+        });
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new ApiError(`Failed to delete agent: ${response.statusText}`, {
+                data: errorData,
+                status: response.status
+            });
+        }
     }
 }

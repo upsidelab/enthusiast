@@ -14,7 +14,13 @@ export type DataSetResponse = {
 
 export type CreateDataSetPayload = DataSetResponse;
 
-export type UpdateDataSetPayload = DataSetResponse;
+export type UpdateDataSetPayload = {
+  id: number | undefined;
+  name: string;
+  language_model_provider: string;
+  language_model: string;
+  system_message: string;
+}
 
 export type ProductSourceResponse = {
   id: number;
@@ -294,9 +300,6 @@ export class DataSetsApiClient extends BaseApiClient {
       name: dataSet.name,
       language_model_provider: dataSet.languageModelProvider,
       language_model: dataSet.languageModel,
-      embedding_provider: dataSet.embeddingProvider,
-      embedding_model: dataSet.embeddingModel,
-      embedding_vector_dimensions: dataSet.embeddingVectorSize,
       system_message: dataSet.systemMessage
     }
 

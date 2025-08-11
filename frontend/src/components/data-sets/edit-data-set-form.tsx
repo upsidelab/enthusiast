@@ -100,6 +100,7 @@ export function EditDataSetForm() {
       initialData={dataSet}
       onSubmit={handleSubmit}
       submitButtonText="Update"
+      disabledFields={['embeddingProvider', 'embeddingModel', 'embeddingVectorSize']}
     />
   );
 } 

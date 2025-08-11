@@ -14,7 +14,7 @@ import { DataSet, ProvidersConfig } from "@/lib/types.ts";
 import { Alert, AlertDescription } from "@/components/ui/alert.tsx";
 import { InfoIcon } from "lucide-react";
 
-const formSchema = z.object({
+export const formSchema = z.object({
   name: z.string().trim().min(1),
   languageModelProvider: z.string().min(1),
   languageModel: z.string().min(1),
@@ -24,7 +24,7 @@ const formSchema = z.object({
   systemMessage: z.string().min(1)
 });
 
-type DataSetFormSchema = z.infer<typeof formSchema>;
+export type DataSetFormSchema = z.infer<typeof formSchema>;
 const api = new ApiClient(authenticationProviderInstance);
 
 interface DataSetFormProps {

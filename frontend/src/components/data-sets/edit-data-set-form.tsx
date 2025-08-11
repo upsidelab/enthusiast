@@ -3,7 +3,7 @@ import { useApplicationContext } from "@/lib/use-application-context.ts";
 import { DataSet } from "@/lib/types.ts";
 import { ApiClient } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
-import { DataSetForm } from "./data-set-form.tsx";
+import { DataSetForm, DataSetFormSchema } from "./data-set-form.tsx";
 import { useEffect, useState } from "react";
 import { Spinner } from "@/components/util/spinner.tsx";
 import { Alert, AlertDescription } from "@/components/ui/alert.tsx";
@@ -34,7 +34,6 @@ export function EditDataSetForm() {
         console.error("Error fetching data set:", err);
         setError("Failed to load data set");
       } finally {
-        console.log(dataSet)
         setIsLoading(false);
       }
     };
@@ -42,7 +41,7 @@ export function EditDataSetForm() {
     fetchDataSet();
   }, [id]);
 
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = async (values: DataSetFormSchema) => {
     if (!id || !dataSet) {
       console.error("No data set ID or data available");
       return;

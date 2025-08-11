@@ -101,11 +101,11 @@ export function MainSidebar() {
   ];
   const configureItems: SidebarSectionItemProps[] = [
       {
-      title: "Agents",
-      link: "/agents",
-      key: "agents",
-      icon: <BotMessageSquareIcon />
-    },
+        title: "Agents",
+        link: `/data-sets/${dataSetId}/agents`,
+        key: "agents",
+        icon: <BotMessageSquareIcon />
+      },
   ]
 
   return (

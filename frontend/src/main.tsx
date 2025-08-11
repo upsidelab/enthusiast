@@ -110,7 +110,7 @@ const router = createBrowserRouter([
         element: <UsersIndex />
       },
       {
-        path: '/agents',
+        path: '/data-sets/:dataSetId/agents',
         element: <AgentsPage />
       }
     ]

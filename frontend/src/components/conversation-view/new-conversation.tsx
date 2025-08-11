@@ -16,7 +16,6 @@ export function NewConversation({ agentId }: NewConversationProps) {
 
   const onSubmit = async (message: string) => {
     const newConversationId = await api.conversations().createConversation(agentId);
-
     navigate(`/data-sets/${dataSetId}/chat/${newConversationId}?pending=${message}`);
   }
 

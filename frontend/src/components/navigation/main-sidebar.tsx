@@ -99,6 +99,14 @@ export function MainSidebar() {
       ]
     },
   ];
+  const configureItems: SidebarSectionItemProps[] = [
+      {
+        title: "Agents",
+        link: `/data-sets/${dataSetId}/agents`,
+        key: "agents",
+        icon: <BotMessageSquareIcon />
+      },
+  ]
 
   return (
     <Sidebar>
@@ -107,6 +115,7 @@ export function MainSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <MainSidebarSection title="Ask" items={askItems} />
+        <MainSidebarSection title="Configure" items={configureItems} />
         <MainSidebarSection title="Synchronize" items={synchronizeItems} />
         {account && account.isStaff && (
           <>

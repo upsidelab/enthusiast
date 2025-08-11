@@ -11,6 +11,8 @@ Enthusiast contains of two main components:
     - Worker - that executes agent requests and synchronization tasks in the background.
 2. Frontend - A React-based web application that can be used to use and configure Enthusiast.
 
+![System Architecture Diagram](./img/system-architecture.svg)
+
 ## Server Architecture
 
 The server is organized into a few separate modules that interact with each other:
@@ -19,6 +21,8 @@ The server is organized into a few separate modules that interact with each othe
 2. Catalog - manages processes of indexing product and document data
 3. Sync - tracks catalog synchronization status
 4. Account - handles user permissions and authentication
+
+![Server Architecture Diagram](./img/server-architecture.svg)
 
 ## Enthusiast Common
 

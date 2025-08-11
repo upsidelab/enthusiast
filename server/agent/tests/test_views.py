@@ -2,14 +2,17 @@ from unittest.mock import patch
 
 import pytest
 from django.urls import reverse
+from django.utils import timezone
 from enthusiast_common.config import FunctionToolConfig
 from enthusiast_common.tools import BaseFunctionTool
 from enthusiast_common.utils import RequiredFieldsModel
 from model_bakery import baker
 from pydantic import Field
+from rest_framework import status
 from rest_framework.test import APIClient
 
 from account.models import User
+from agent.models import Conversation
 from agent.models.agent import Agent
 from catalog.models import DataSet
 
@@ -17,8 +20,32 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def api_client():
-    user = baker.make(User)
+def user():
+    return baker.make(User)
+
+
+@pytest.fixture
+def dataset(user):
+    return baker.make(DataSet, users=[user])
+
+
+@pytest.fixture
+def agent(dataset):
+    return baker.make(Agent, deleted_at=None, dataset=dataset)
+
+
+@pytest.fixture
+def deleted_agent(dataset):
+    return baker.make(Agent, deleted_at=timezone.now(), dataset=dataset)
+
+
+@pytest.fixture
+def conversation(user, agent, dataset):
+    return baker.make(Conversation, user=user, agent=agent, data_set=dataset)
+
+
+@pytest.fixture
+def api_client(user):
     client = APIClient()
     client.force_authenticate(user=user)
     return client
@@ -101,7 +128,7 @@ class TestAgentTypesView:
         with patch("agent.views.AgentRegistry.get_agent_class_by_type", return_value=DummyAgent):
             response = api_client.get(url)
 
-            assert response.status_code == 200
+            assert response.status_code == status.HTTP_200_OK
             assert len(response.data["choices"]) == 2
             assert response.data["choices"][0]["key"] == "agent_1"
             assert response.data["choices"][1]["key"] == "agent_2"
@@ -112,7 +139,7 @@ class TestAgentTypesView:
     def test_get_agent_types_returns_401(self):
         response = APIClient().get(reverse("agent-types"))
 
-        assert response.status_code == 401
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 class TestAgentView:
@@ -127,7 +154,7 @@ class TestAgentView:
     def test_get_empty_list(self, api_client, url, dataset_instance):
         response = api_client.get(f"{url}?dataset={dataset_instance.pk}")
 
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
         assert response.data == []
 
     def test_get_multiple_agents(self, api_client, url, dataset_instance):
@@ -136,7 +163,7 @@ class TestAgentView:
 
         response = api_client.get(f"{url}?dataset={dataset_instance.pk}")
 
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
         assert len(response.data) == 2
         ids = {item["id"] for item in response.data}
         assert config_1.id in ids
@@ -148,14 +175,14 @@ class TestAgentView:
 
         response = api_client.get(f"{url}?dataset={dataset_instance.pk}")
 
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
         assert response.data[0]["id"] == older.id
         assert response.data[1]["id"] == newer.id
 
     def test_dataset_not_found(self, api_client, url):
         response = api_client.get(f"{url}?dataset=9999")
 
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
         assert response.data == []
 
     def test_post_creates_agent(self, api_client, url, config):
@@ -187,7 +214,7 @@ class TestAgentView:
         ):
             response = api_client.post(url, payload, format="json")
 
-            assert response.status_code == 201
+            assert response.status_code == status.HTTP_201_CREATED
             created = Agent.objects.get(pk=response.data["id"])
             assert created.name == "name"
 
@@ -219,7 +246,7 @@ class TestAgentView:
         ):
             response = api_client.post(url, payload, format="json")
 
-            assert response.status_code == 201
+            assert response.status_code == status.HTTP_201_CREATED
             created = Agent.objects.get(pk=response.data["id"])
             assert created.name == "name"
             assert created.config["tools"][0].get("optional_test") == "optional_test"
@@ -259,7 +286,7 @@ class TestAgentView:
         ):
             response = api_client.post(url, payload, format="json")
 
-            assert response.status_code == 201
+            assert response.status_code == status.HTTP_201_CREATED
             created = Agent.objects.get(pk=response.data["id"])
             assert created.name == "name"
             assert created.config["agent_args"] == {}
@@ -279,7 +306,7 @@ class TestAgentDetailsView:
     def test_get_existing_agent(self, api_client, agent_instance, url):
         response = api_client.get(url)
 
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
         assert response.data["name"] == agent_instance.name
         assert response.data["config"]
 
@@ -288,7 +315,7 @@ class TestAgentDetailsView:
 
         response = api_client.get(url)
 
-        assert response.status_code == 404
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_put_updates_agent(self, api_client, agent_instance, url, config):
         dataset = baker.make(DataSet)
@@ -317,7 +344,7 @@ class TestAgentDetailsView:
         ):
             response = api_client.put(url, payload, format="json")
 
-            assert response.status_code == 200
+            assert response.status_code == status.HTTP_200_OK
             agent_instance.refresh_from_db()
             assert agent_instance.name == "updated"
             assert agent_instance.config == updated_config
@@ -328,23 +355,108 @@ class TestAgentDetailsView:
 
         response = api_client.put(url, payload, format="json")
 
-        assert response.status_code == 404
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_put_invalid_payload_returns_400(self, api_client, url):
         payload = {"name": ""}
 
         response = api_client.put(url, payload, format="json")
 
-        assert response.status_code == 400
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "config" in response.data
 
     def test_delete_existing_agent(self, api_client, agent_instance, url):
         response = api_client.delete(url)
 
-        assert response.status_code == 204
-        assert not Agent.objects.filter(pk=agent_instance.pk).exists()
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+        agent_instance = Agent.all_objects.get(pk=agent_instance.pk)
+        assert agent_instance.deleted_at is not None
 
     def test_delete_nonexistent_agent_returns_404(self, api_client, url):
         url = reverse("agent-details", kwargs={"pk": 9999})
         response = api_client.delete(url)
-        assert response.status_code == 404
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+class TestConversationView:
+    @pytest.fixture
+    def url(self, conversation):
+        return reverse("conversation-details", kwargs={"conversation_id": conversation.id})
+
+    def test_valid_post_returns_202(self, api_client, url, conversation):
+        payload = {
+            "data_set_id": conversation.data_set.id,
+            "question_message": "Hello?",
+            "streaming": True,
+        }
+        with (
+            patch(
+                "agent.views.respond_to_user_message_task.apply_async",
+                return_value=type("obj", (), {"id": "fake-task-id"}),
+            ) as mock_task,
+            patch("agent.views.LanguageModelRegistry.provider_for_dataset") as mock_provider,
+        ):
+            mock_provider.return_value = type("obj", (), {"STREAMING_AVAILABLE": True})
+            response = api_client.post(url, payload, format="json")
+
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert response.data["task_id"] == "fake-task-id"
+        assert response.data["streaming"] is True
+        mock_task.assert_called_once()
+
+    def test_invalid_payload_returns_400(self, api_client, url):
+        payload = {"data_set_id": None}
+        response = api_client.post(url, payload, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "question_message" in response.data
+
+    def test_agent_soft_deleted_returns_400(self, api_client, conversation, url):
+        conversation.agent.deleted_at = timezone.now()
+        conversation.agent.save()
+
+        payload = {
+            "data_set_id": conversation.data_set.id,
+            "question_message": "Hello?",
+            "streaming": False,
+        }
+        response = api_client.post(url, payload, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data["detail"] == "Conversation locked."
+
+    def test_conversation_not_found_returns_404(self, api_client):
+        url = reverse("conversation-details", kwargs={"conversation_id": 99999})
+        payload = {
+            "data_set_id": 1,
+            "question_message": "Hello?",
+            "streaming": False,
+        }
+        response = api_client.post(url, payload, format="json")
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+class TestConversationListView:
+    def test_create_conversation_success(self, api_client, agent):
+        url = reverse("conversation-list")
+        payload = {"agent_id": agent.id}
+
+        response = api_client.post(url, payload, format="json")
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data["agent"]["id"] == agent.id
+
+    def test_create_conversation_invalid_payload(self, api_client):
+        url = reverse("conversation-list")
+        payload = {"wrong_field": 123}
+
+        response = api_client.post(url, payload, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "agent_id" in response.data
+
+    def test_create_conversation_with_deleted_agent(self, api_client, deleted_agent):
+        url = reverse("conversation-list")
+        payload = {"agent_id": deleted_agent.id}
+
+        response = api_client.post(url, payload, format="json")
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND

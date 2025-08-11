@@ -5,7 +5,6 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 from model_bakery import baker
-from rest_framework.exceptions import PermissionDenied
 
 from agent.conversation.manager import ConversationManager
 from agent.models import Agent, Conversation, Message
@@ -53,7 +52,7 @@ class TestConversationManager:
         invalid_agent_id = 99999
 
         # When & Then
-        with pytest.raises(PermissionDenied):
+        with pytest.raises(Agent.DoesNotExist):
             self.manager.create_conversation(user_id=user_id, agent_id=invalid_agent_id)
 
     def test_create_conversation_with_data_set_not_owned_by_user(self):
@@ -64,7 +63,7 @@ class TestConversationManager:
         other_agent = baker.make(Agent, dataset=other_data_set)
 
         # When & Then
-        with pytest.raises(PermissionDenied):
+        with pytest.raises(Agent.DoesNotExist):
             self.manager.create_conversation(user_id=self.user.id, agent_id=other_agent.id)
 
     def test_get_conversation_success(self):

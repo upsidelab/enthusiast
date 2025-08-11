@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
+from rest_framework.exceptions import NotFound
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -29,6 +30,7 @@ from agent.serializers.conversation import (
     ConversationSerializer,
     MessageFeedbackSerializer,
 )
+from agent.tasks import respond_to_user_message_task
 from agent.utils.functions import get_model_descriptor_from_class_field
 from catalog.models import DataSet
 
@@ -86,32 +88,34 @@ class ConversationView(APIView):
         ),
     )
     def post(self, request, conversation_id):
+        conversation = get_object_or_404(Conversation, id=conversation_id)
         serializer = AskQuestionSerializer(data=request.data)
-        if serializer.is_valid():
-            from agent.tasks import respond_to_user_message_task
-
-            data_set_id = serializer.validated_data.get("data_set_id")
-            question_message = serializer.validated_data.get("question_message")
-            streaming = serializer.validated_data.get("streaming")
-            data_set = Conversation.objects.get(id=conversation_id).data_set
-            data_set_repo = DjangoDataSetRepository(DataSet)
-            language_model_provider_class = LanguageModelRegistry(data_set_repo).provider_for_dataset(data_set.id)
-            task = respond_to_user_message_task.apply_async(
-                kwargs={
-                    "conversation_id": conversation_id,
-                    "data_set_id": data_set_id,
-                    "user_id": request.user.id,
-                    "message": question_message,
-                    "streaming": streaming,
-                }
-            )
-
-            return Response(
-                {"task_id": task.id, "streaming": language_model_provider_class.STREAMING_AVAILABLE and streaming},
-                status=status.HTTP_202_ACCEPTED,
-            )
-        else:
+        if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        if conversation.agent.deleted_at is not None:
+            return Response({"detail": "Conversation locked."}, status=status.HTTP_400_BAD_REQUEST)
+
+        data_set_id = serializer.validated_data.get("data_set_id")
+        question_message = serializer.validated_data.get("question_message")
+        streaming = serializer.validated_data.get("streaming")
+        data_set = Conversation.objects.get(id=conversation_id).data_set
+        data_set_repo = DjangoDataSetRepository(DataSet)
+        language_model_provider_class = LanguageModelRegistry(data_set_repo).provider_for_dataset(data_set.id)
+        task = respond_to_user_message_task.apply_async(
+            kwargs={
+                "conversation_id": conversation_id,
+                "data_set_id": data_set_id,
+                "user_id": request.user.id,
+                "message": question_message,
+                "streaming": streaming,
+            }
+        )
+
+        return Response(
+            {"task_id": task.id, "streaming": language_model_provider_class.STREAMING_AVAILABLE and streaming},
+            status=status.HTTP_202_ACCEPTED,
+        )
 
 
 class ConversationListView(ListAPIView):
@@ -146,11 +150,14 @@ class ConversationListView(ListAPIView):
         input_serializer = ConversationCreationSerializer(data=request.data)
         if not input_serializer.is_valid():
             return Response(input_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            conversation = manager.create_conversation(
+                user_id=request.user.id,
+                agent_id=input_serializer.validated_data.get("agent_id"),
+            )
+        except Agent.DoesNotExist:
+            raise NotFound("Agent not found.")
 
-        conversation = manager.create_conversation(
-            user_id=request.user.id,
-            agent_id=input_serializer.validated_data.get("agent_id"),
-        )
         conversation = Conversation.objects.select_related("agent").prefetch_related("messages").get(pk=conversation.pk)
         serializer = ConversationContentSerializer(conversation)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -274,5 +281,5 @@ class AgentDetailsView(APIView):
     )
     def delete(self, request, pk=None):
         instance = get_object_or_404(Agent, pk=pk)
-        instance.delete()
+        instance.set_deleted_at()
         return Response(status=status.HTTP_204_NO_CONTENT)

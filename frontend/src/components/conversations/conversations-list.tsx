@@ -4,6 +4,7 @@ import { authenticationProviderInstance } from "@/lib/authentication-provider.ts
 import { useApplicationContext } from "@/lib/use-application-context.ts";
 import { useNavigate } from "react-router-dom";
 import { PaginatedTable } from "@/components/util/paginated-table.tsx";
+import { Lock } from "lucide-react";
 
 const api = new ApiClient(authenticationProviderInstance);
 
@@ -37,9 +38,17 @@ export function ConversationsList() {
       noItemsMessage="You don't have any conversations yet"
       tableHeaders={["Name", "Time"]}
       tableRow={(item, index) => {
+        const isAgentDeleted = !!item.agent.deleted_at;
         return (
           <TableRow key={index} onClick={() => navigateToConversation(item.id)} className="cursor-pointer">
-            <TableCell>{truncateText(item.summary || "Unnamed Conversation", 180)}</TableCell>
+            <TableCell>
+              <div className="flex items-center gap-2">
+                {isAgentDeleted && <Lock className="h-4 w-4 text-muted-foreground" />}
+                <span className={isAgentDeleted ? "text-muted-foreground" : ""}>
+                  {truncateText(item.summary || "Unnamed Conversation", 180)}
+                </span>
+              </div>
+            </TableCell>
             <TableCell>{new Date(item.started_at).toLocaleString('en-US')}</TableCell>
           </TableRow>
         )

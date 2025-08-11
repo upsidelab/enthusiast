@@ -20,7 +20,7 @@ export const formSchema = z.object({
   languageModel: z.string().min(1),
   embeddingProvider: z.string().min(1),
   embeddingModel: z.string().min(1),
-  embeddingVectorSize: z.number().min(1).max(3072),
+  embeddingVectorSize: z.coerce.number().min(1).max(3072),
   systemMessage: z.string().min(1)
 });
 

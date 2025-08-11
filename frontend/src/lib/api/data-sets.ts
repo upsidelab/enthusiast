@@ -14,6 +14,14 @@ export type DataSetResponse = {
 
 export type CreateDataSetPayload = DataSetResponse;
 
+export type UpdateDataSetPayload = {
+  id: number | undefined;
+  name: string;
+  language_model_provider: string;
+  language_model: string;
+  system_message: string;
+}
+
 export type ProductSourceResponse = {
   id: number;
   plugin_name: string;
@@ -266,6 +274,40 @@ export class DataSetsApiClient extends BaseApiClient {
       {
         ...this._requestConfiguration(),
         method: "POST"
+      }
+    );
+  }
+
+  async getDataSet(dataSetId: number): Promise<DataSet> {
+    const response = await fetch(`${this.apiBase}/api/data_sets/${dataSetId}`, this._requestConfiguration());
+    const data = await response.json();
+    
+    return {
+      id: data.id,
+      name: data.name,
+      languageModelProvider: data.language_model_provider,
+      languageModel: data.language_model,
+      embeddingProvider: data.embedding_provider,
+      embeddingModel: data.embedding_model,
+      embeddingVectorSize: data.embedding_vector_dimensions,
+      systemMessage: data.system_message
+    } as DataSet;
+  }
+
+  async updateDataSet(dataSetId: number, dataSet: DataSet): Promise<void> {
+    const body: UpdateDataSetPayload = {
+      id: dataSet.id,
+      name: dataSet.name,
+      language_model_provider: dataSet.languageModelProvider,
+      language_model: dataSet.languageModel,
+      system_message: dataSet.systemMessage
+    }
+
+    await fetch(`${this.apiBase}/api/data_sets/${dataSetId}`,
+      {
+        ...this._requestConfiguration(),
+        method: 'PATCH',
+        body: JSON.stringify(body)
       }
     );
   }

@@ -2,7 +2,7 @@ from django.db.models import Count
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIView, RetrieveAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
@@ -61,6 +61,45 @@ class DataSetListView(ListCreateAPIView):
         data_set = serializer.save()
         data_set.users.add(self.request.user)
 
+
+class DataSetDetailView(RetrieveAPIView):
+    serializer_class = DataSetSerializer
+    permission_classes = [IsAdminUser]
+    lookup_url_kwarg = 'data_set_id'
+    queryset = DataSet.objects.all()
+
+    @swagger_auto_schema(
+        operation_description="Retrieve a data set by ID",
+        manual_parameters=[
+            openapi.Parameter(
+                "data_set_id", openapi.IN_PATH, description="ID of the data set", type=openapi.TYPE_INTEGER
+            )
+        ]
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Update a data set (embedding fields are ignored)",
+        request_body=DataSetSerializer,
+        manual_parameters=[
+            openapi.Parameter(
+                "data_set_id", openapi.IN_PATH, description="ID of the data set", type=openapi.TYPE_INTEGER
+            )
+        ]
+    )
+    def patch(self, request, *args, **kwargs):
+        instance = self.get_object()
+        
+        # Filter out embedding fields from the request data
+        filtered_data = {k: v for k, v in request.data.items() 
+                        if k not in ['embedding_provider', 'embedding_model', 'embedding_vector_dimensions']}
+        
+        serializer = self.get_serializer(instance, data=filtered_data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class DataSetUserListView(ListCreateAPIView):
     serializer_class = UserSerializer

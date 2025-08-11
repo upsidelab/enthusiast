@@ -5,6 +5,7 @@ from . import views
 urlpatterns = [
     path("api/sync", views.SyncAllSourcesView.as_view(), name="all_sources_sync"),
     path("api/data_sets", views.DataSetListView.as_view(), name="data_set_list"),
+    path("api/data_sets/<int:data_set_id>", views.DataSetDetailView.as_view(), name="data_set_detail"),
     path("api/data_sets/<int:data_set_id>/users", views.DataSetUserListView.as_view(), name="data_set_user_list"),
     path(
         "api/data_sets/<int:data_set_id>/users/<int:user_id>",

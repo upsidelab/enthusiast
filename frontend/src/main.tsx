@@ -14,6 +14,7 @@ import { NoDataSets } from "@/pages/no-data-sets.tsx";
 import { ApiClient } from "@/lib/api.ts";
 import { NewDataSet } from "@/pages/data-sets/new.tsx";
 import { DataSetsIndex } from "@/pages/data-sets";
+import { EditDataSet } from "@/pages/data-sets/(id)/edit.tsx";
 import { IndexDataSetUsers } from "@/pages/data-sets/(id)/users.tsx";
 import { IndexDataSetSources } from "@/pages/data-sets/(id)/sources.tsx";
 import { ConfigureDataSetProductSource } from "@/pages/data-sets/(id)/product-sources/(id)/config.tsx";
@@ -84,6 +85,10 @@ const router = createBrowserRouter([
       {
         path: '/data-sets/new',
         element: <NewDataSet />
+      },
+      {
+        path: '/data-sets/:id/edit',
+        element: <EditDataSet />
       },
       {
         path: '/data-sets/:id/users',

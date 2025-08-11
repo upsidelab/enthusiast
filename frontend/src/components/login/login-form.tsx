@@ -35,7 +35,7 @@ export function LoginForm({ className, ...props }: HTMLAttributes<HTMLDivElement
           navigate('/no-data-sets');
         }
       } else {
-        navigate(`/data-sets/${dataSets[0].id}/chat`);
+        navigate(`/data-sets/${dataSets[0].id}/chat/new/Default`);
       }
     } catch {
       setIsError(true);

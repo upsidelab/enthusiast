@@ -15,7 +15,7 @@ class AgentManager(models.Manager):
 
 
 class Agent(models.Model):
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255)
     description = models.TextField()
     agent_type = models.CharField(max_length=255, blank=False)
     config = models.JSONField()

@@ -7,7 +7,7 @@ else
         python manage.py migrate
 
         python manage.py ensuresuperuser --email=$ECL_ADMIN_EMAIL --password=$ECL_ADMIN_PASSWORD
-        python manage.py verify_agents
+        python manage.py verifyagents
     fi
 
     exec python manage.py runserver 0.0.0.0:$PORT

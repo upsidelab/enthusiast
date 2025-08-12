@@ -269,15 +269,15 @@ export function Conversation({ conversationId, pendingMessage, onPendingMessageS
             setIsAgentLoading(false);
         }
     };
-    return (
-        <ConversationUI
-            messages={messages}
-            isAgentLoading={isAgentLoading}
-            agentAction={agentAction}
-            lastMessageRef={lastMessageRef}
-            onSubmit={onMessageComposerSubmit}
-            isLoading={isLoading}
-            conversationLocked={conversationLocked}
-        />
-    );
+        return (
+            <ConversationUI
+                messages={messages}
+                isAgentLoading={isAgentLoading}
+                agentAction={agentAction}
+                lastMessageRef={lastMessageRef}
+                onSubmit={onMessageComposerSubmit}
+                isLoading={isLoading}
+                conversationLocked={conversationLocked}
+            />
+        );
 }

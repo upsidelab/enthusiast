@@ -39,12 +39,13 @@ export function ConversationsList() {
       tableHeaders={["Name", "Time"]}
       tableRow={(item, index) => {
         const isAgentDeleted = !!item.agent.deleted_at;
+        const isAgentCorrupted = !!item.agent.corrupted;
         return (
           <TableRow key={index} onClick={() => navigateToConversation(item.id)} className="cursor-pointer">
             <TableCell>
               <div className="flex items-center gap-2">
-                {isAgentDeleted && <Lock className="h-4 w-4 text-muted-foreground" />}
-                <span className={isAgentDeleted ? "text-muted-foreground" : ""}>
+                {(isAgentDeleted || isAgentCorrupted) && <Lock className="h-4 w-4 text-muted-foreground" />}
+                <span className={isAgentDeleted || isAgentCorrupted ? "text-muted-foreground" : ""}>
                   {truncateText(item.summary || "Unnamed Conversation", 180)}
                 </span>
               </div>

@@ -234,7 +234,10 @@ class AgentView(APIView):
         responses={200: AgentListSerializer(many=True)},
     )
     def get(self, request):
-        queryset = Agent.objects.all().order_by("created_at")
+        if request.user.is_staff:
+            queryset = Agent.objects.all().order_by("created_at")
+        else:
+            queryset = Agent.objects.filter(corrupted=False).order_by("created_at")
         filterset = AgentFilter(request.GET, queryset=queryset)
         if not filterset.is_valid():
             return Response(filterset.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -273,7 +276,7 @@ class AgentDetailsView(APIView):
 
         serializer = AgentSerializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        serializer.save(corrupted=False)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(

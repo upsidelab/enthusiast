@@ -179,6 +179,32 @@ class TestAgentView:
         assert response.data[0]["id"] == older.id
         assert response.data[1]["id"] == newer.id
 
+    def test_get_returns_corrupted_agents_to_admin(self, user, api_client, url, dataset_instance):
+        user.is_staff = True
+        user.save()
+        agent_1 = baker.make(Agent, dataset=dataset_instance)
+        agent_2 = baker.make(Agent, dataset=dataset_instance, corrupted=True)
+
+        response = api_client.get(f"{url}?dataset={dataset_instance.pk}")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 2
+        ids = {item["id"] for item in response.data}
+        assert agent_1.id in ids
+        assert agent_2.id in ids
+
+    def test_get_filter_out_corrupted_agents_to_user(self, api_client, url, dataset_instance):
+        agent_1 = baker.make(Agent, dataset=dataset_instance)
+        agent_2 = baker.make(Agent, dataset=dataset_instance, corrupted=True)
+
+        response = api_client.get(f"{url}?dataset={dataset_instance.pk}")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 1
+        ids = {item["id"] for item in response.data}
+        assert agent_1.id in ids
+        assert agent_2.id not in ids
+
     def test_dataset_not_found(self, api_client, url):
         response = api_client.get(f"{url}?dataset=9999")
 
@@ -348,6 +374,39 @@ class TestAgentDetailsView:
             agent_instance.refresh_from_db()
             assert agent_instance.name == "updated"
             assert agent_instance.config == updated_config
+
+    def test_put_removes_corrupted_flag_for_correct_data(self, api_client, url, config):
+        dataset = baker.make(DataSet)
+        agent_instance = baker.make(Agent, corrupted=True, deleted_at=None, dataset=dataset)
+        url = reverse("agent-details", kwargs={"pk": agent_instance.pk})
+        updated_config = {
+            "agent_args": {
+                "required_test": "required_updated",
+                "optional_test": "optional_updated",
+            },
+            "prompt_input": {
+                "required_test": "required_updated",
+                "optional_test": "optional_updated",
+            },
+            "prompt_extension": {
+                "required_test": "required_updated",
+                "optional_test": "optional_updated",
+            },
+            "tools": [
+                {"required_test": "required_upated", "optional_test": "optional_updated"},
+                {"required_test": "required_updated", "optional_test": "optional_updated"},
+            ],
+        }
+        payload = {"name": "updated", "config": updated_config, "dataset": dataset.id, "agent_type": "agent_1"}
+        with patch(
+            "agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_type",
+            side_effect=[DummyAgent, DummyAgent, DummyAgent, DummyAgent],
+        ):
+            response = api_client.put(url, payload, format="json")
+
+            assert response.status_code == status.HTTP_200_OK
+            agent_instance.refresh_from_db()
+            assert agent_instance.corrupted is False
 
     def test_put_nonexistent_returns_404(self, api_client):
         url = reverse("agent-details", kwargs={"pk": 9999})

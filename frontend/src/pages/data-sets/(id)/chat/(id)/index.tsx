@@ -21,7 +21,6 @@ export function Chat() {
   const [conversation, setConversation] = useState<ConversationSchema | null>(null);
   const navigate = useNavigate();
 
-  const agentOrDefault = (conversation ? conversation.agent.name : null) || 'Question Answer Agent';
   const isAgentDeleted = !!conversation?.agent.deleted_at;
   const isAgentCorrupted = !!conversation?.agent.corrupted;
   const onPendingMessageSent = () => {
@@ -45,7 +44,7 @@ export function Chat() {
               description={`Chat with ${conversation.agent.name}`}
               className="sticky top-0 pt-4 bg-white"
           >
-            <Button className="ml-auto mr-0" variant="outline" onClick={() => navigate(`/data-sets/${dataSetId}/chat/new/${encodeURIComponent(agentOrDefault)}`)}>
+            <Button className="ml-auto mr-0" variant="outline" onClick={() => navigate(`/data-sets/${dataSetId}/chat/new/${encodeURIComponent(conversation.agent.id)}`)}>
               <PlusIcon />
               New Chat
             </Button>

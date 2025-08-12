@@ -23,6 +23,7 @@ export function Chat() {
 
   const agentOrDefault = (conversation ? conversation.agent.name : null) || 'Question Answer Agent';
   const isAgentDeleted = !!conversation?.agent.deleted_at;
+  const isAgentCorrupted = !!conversation?.agent.corrupted;
   const onPendingMessageSent = () => {
     setSearchParams({});
   }
@@ -39,17 +40,17 @@ export function Chat() {
     <PageMain className="h-full py-0">
       {conversation &&
         <>
-          <PageHeading 
-            title={pendingMessage || conversation.summary!} 
-            description={`Chat with ${conversation.agent.name}${isAgentDeleted ? ' (Agent Deleted)' : ''}`} 
-            className="sticky top-0 pt-4 bg-white"
+          <PageHeading
+              title={pendingMessage || conversation.summary!}
+              description={`Chat with ${conversation.agent.name}`}
+              className="sticky top-0 pt-4 bg-white"
           >
             <Button className="ml-auto mr-0" variant="outline" onClick={() => navigate(`/data-sets/${dataSetId}/chat/new/${encodeURIComponent(agentOrDefault)}`)}>
               <PlusIcon />
               New Chat
             </Button>
           </PageHeading>
-          <Conversation conversationId={conversationId} onPendingMessageSent={onPendingMessageSent} pendingMessage={pendingMessage} conversationLocked={isAgentDeleted} />
+          <Conversation conversationId={conversationId} onPendingMessageSent={onPendingMessageSent} pendingMessage={pendingMessage} conversationLocked={isAgentDeleted || isAgentCorrupted} />
         </>
       }
     </PageMain>

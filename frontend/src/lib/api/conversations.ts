@@ -3,7 +3,7 @@ import { BaseApiClient } from "@/lib/api/base.ts";
 import { Conversation, Message, PaginatedResult } from "@/lib/types.ts";
 
 export type CreateConversationPayload = {
-  agent_id: string;
+  agent_id: number;
 }
 
 export type CreateMessagePayload = {
@@ -22,7 +22,7 @@ export class ConversationsApiClient extends BaseApiClient {
     return await response.json() as Promise<PaginatedResult<Conversation>>;
   }
 
-  async createConversation(agentId: string): Promise<number> {
+  async createConversation(agentId: number): Promise<number> {
     const requestBody: CreateConversationPayload = {
       agent_id: agentId
     };

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useApplicationContext } from "@/lib/use-application-context";
+import { AlertTriangle } from "lucide-react";
 
 import { DeleteConfirmationModal } from "./delete-confirmation-modal";
 import { useAgents } from "./hooks/use-agents";
@@ -73,7 +74,14 @@ export default function AgentsTable() {
           <TableBody>
             {agents.map(agent => (
               <TableRow key={agent.id}>
-                <TableCell>{agent.name}</TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    {agent.corrupted && <AlertTriangle className="h-4 w-4 text-yellow-500" />}
+                    <span className={agent.corrupted ? "text-muted-foreground" : ""}>
+                      {agent.name}
+                    </span>
+                  </div>
+                </TableCell>
                 <TableCell>
                   {agentTypes.find(t => t.key === agent.agent_type)?.name || agent.agent_type || 'Unknown'}
                 </TableCell>

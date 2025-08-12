@@ -7,7 +7,7 @@ import { authenticationProviderInstance } from "@/lib/authentication-provider.ts
 const api = new ApiClient(authenticationProviderInstance);
 
 export interface NewConversationProps {
-  agentId: string;
+  agentId: number;
 }
 
 export function NewConversation({ agentId }: NewConversationProps) {

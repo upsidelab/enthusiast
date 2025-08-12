@@ -62,6 +62,7 @@ export type Agent = {
   created_at: string;
   updated_at: string;
   deleted_at: string;
+  corrupted?: boolean;
 };
 
 export type Conversation = {

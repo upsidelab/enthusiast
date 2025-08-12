@@ -12,7 +12,7 @@ import {
   UserIcon, 
   HelpCircleIcon, 
   SparklesIcon,
-  LinkIcon
+  LinkIcon,
 } from "lucide-react";
 import { UserMenu } from "@/components/navigation/user-menu.tsx";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
@@ -45,7 +45,7 @@ export function MainSidebar() {
   ];
 
   const askItems: SidebarSectionItemProps[] = [
-    ...(isLoadingAgents ? [] : availableAgents.map(agent => ({
+    ...(isLoadingAgents ? [] : availableAgents.filter(agent => !agent.corrupted).map(agent => ({
       title: agent.name,
       link: `/data-sets/${dataSetId}/chat/new/${encodeURIComponent(agent.id)}`,
       key: agent.id.toString(),
@@ -65,12 +65,6 @@ export function MainSidebar() {
       link: "/data-sets",
       key: "data-sets",
       icon: <DatabaseIcon />
-    },
-    {
-      title: "Agents",
-      link: "/agents",
-      key: "agents",
-      icon: <BotMessageSquareIcon />
     },
     {
       title: "Users",
@@ -126,7 +120,7 @@ export function MainSidebar() {
         {account && account.isStaff && (
           <>
             <MainSidebarSection className="mt-auto" title="Manage" items={manageItems} />
-          </>
+        </>
         )}
       </SidebarContent>
       <SidebarFooter>

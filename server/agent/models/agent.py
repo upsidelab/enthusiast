@@ -25,6 +25,8 @@ class Agent(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
 
+    corrupted = models.BooleanField(default=False)
+
     objects = AgentManager()
     all_objects = models.Manager()
 

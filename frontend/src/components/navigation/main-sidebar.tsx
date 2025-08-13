@@ -45,7 +45,7 @@ export function MainSidebar() {
   ];
 
   const askItems: SidebarSectionItemProps[] = [
-    ...(isLoadingAgents ? [] : availableAgents.filter(agent => !agent.corrupted).map(agent => ({
+    ...(isLoadingAgents ? [] : availableAgents.map(agent => ({
       title: agent.name,
       link: `/data-sets/${dataSetId}/chat/new/${encodeURIComponent(agent.id)}`,
       key: agent.id.toString(),

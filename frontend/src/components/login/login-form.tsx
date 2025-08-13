@@ -35,7 +35,12 @@ export function LoginForm({ className, ...props }: HTMLAttributes<HTMLDivElement
           navigate('/no-data-sets');
         }
       } else {
-        navigate(`/data-sets/${dataSets[0].id}/chat`);
+        const dataSetAgents = await api.agents().getDatasetAvailableAgents(dataSets[0].id!)
+        const agentId = dataSetAgents?.[0]?.id;
+        const page = agentId
+          ? `/data-sets/${dataSets[0].id}/chat/new/${agentId}`
+          : `/data-sets/${dataSets[0].id}/chat/new`;
+        navigate(page);
       }
     } catch {
       setIsError(true);

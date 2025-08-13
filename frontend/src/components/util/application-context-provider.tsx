@@ -64,7 +64,7 @@ export function ApplicationContextProvider({ children }: ApplicationContextProvi
     setIsLoadingAgents(true);
     try {
       const agents = await api.agents().getDatasetAvailableAgents(dataSetId);
-      setAvailableAgents(agents);
+      setAvailableAgents(agents.filter(agent => !agent.corrupted));
     } catch (error) {
       console.error("Failed to load agents:", error);
       setAvailableAgents([]);

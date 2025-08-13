@@ -3,7 +3,8 @@ import { useApplicationContext } from "@/lib/use-application-context.ts";
 import { DataSet } from "@/lib/types.ts";
 import { ApiClient } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
-import { DataSetForm, DataSetFormSchema } from "./data-set-form.tsx";
+import { DataSetForm } from "./data-set-form.tsx";
+import { DataSetFormSchema } from "./data-set-form-schema.ts";
 
 const api = new ApiClient(authenticationProviderInstance);
 

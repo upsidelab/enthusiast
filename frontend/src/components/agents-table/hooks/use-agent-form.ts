@@ -14,6 +14,7 @@ export function useAgentForm(
   onSuccess: () => void
 ) {
   const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [type, setType] = useState("");
   const [config, setConfig] = useState<Record<string, string | number | boolean>>({});
   const [agentConfigSections, setAgentConfigSections] = useState<Record<string, Record<string, unknown> | Record<string, unknown>[]> >({});
@@ -59,6 +60,7 @@ export function useAgentForm(
       try {
         const agentDetails = await apiClient.agents().getAgentById(agent.id);
         setName(agentDetails.name);
+        setDescription(agentDetails.description || "");
         setType(agentDetails.agent_type);
         
         const flattenedConfig = flattenConfigForForm(agentDetails.config);
@@ -76,6 +78,7 @@ export function useAgentForm(
     const resetFormForNewAgent = () => {
       if (!agent) {
         setName("");
+        setDescription("");
         setType("");
         setConfig({});
         setAgentConfigSections({});
@@ -199,6 +202,7 @@ export function useAgentForm(
     
     const agentData = {
       name,
+      description,
       agent_type: type,
       dataset: dataSetId,
       config: configObj
@@ -221,22 +225,26 @@ export function useAgentForm(
   };
 
   const parseBasicFieldErrors = (errorData: unknown, newFieldErrors: Record<string, string>) => {
-    if (typeof errorData === 'object' && errorData && 'name' in errorData) {
-      const nameError = (errorData as { name: unknown }).name;
-      if (Array.isArray(nameError)) {
-        newFieldErrors.name = String(nameError[0]);
-      } else if (typeof nameError === 'string') {
-        newFieldErrors.name = nameError;
-      }
+    if (!(typeof errorData === 'object') || !errorData) {
+      return;
     }
-    if (typeof errorData === 'object' && errorData && 'agent_type' in errorData) {
-      const typeError = (errorData as { agent_type: unknown }).agent_type;
-      if (Array.isArray(typeError)) {
-        newFieldErrors.type = String(typeError[0]);
-      } else if (typeof typeError === 'string') {
-        newFieldErrors.type = typeError;
+
+    const fieldMappings = [
+      { source: 'name', target: 'name' },
+      { source: 'agent_type', target: 'type' },
+      { source: 'description', target: 'description' }
+    ];
+
+    fieldMappings.forEach(({ source, target }) => {
+      if (source in errorData) {
+        const error = (errorData as Record<string, unknown>)[source];
+        if (Array.isArray(error)) {
+          newFieldErrors[target] = String(error[0]);
+        } else if (typeof error === 'string') {
+          newFieldErrors[target] = error;
+        }
       }
-    }
+    });
   };
 
   const parseConfigSectionErrors = (errorData: unknown, newFieldErrors: Record<string, string>) => {
@@ -307,6 +315,7 @@ export function useAgentForm(
 
   const resetForm = () => {
     setName("");
+    setDescription("");
     setType("");
     setConfig({});
     setAgentConfigSections({});
@@ -318,6 +327,8 @@ export function useAgentForm(
   return {
     name,
     setName,
+    description,
+    setDescription,
     type,
     setType,
     config,

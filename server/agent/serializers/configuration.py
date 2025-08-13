@@ -48,7 +48,7 @@ class AgentSerializer(ParentDataContextSerializerMixin, serializers.ModelSeriali
 
     class Meta:
         model = Agent
-        fields = ["id", "name", "config", "dataset", "agent_type", "created_at", "updated_at"]
+        fields = ["id", "name", "description", "config", "dataset", "agent_type", "created_at", "updated_at"]
         read_only_fields = ["id", "created_at", "updated_at"]
 
 

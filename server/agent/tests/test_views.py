@@ -232,7 +232,13 @@ class TestAgentView:
                 },
             ],
         }
-        payload = {"name": "name", "config": config, "dataset": dataset.id, "agent_type": "agent_1"}
+        payload = {
+            "name": "name",
+            "description": "description",
+            "config": config,
+            "dataset": dataset.id,
+            "agent_type": "agent_1",
+        }
 
         with patch(
             "agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_type",
@@ -264,7 +270,13 @@ class TestAgentView:
                 {"required_test": "required_test", "optional_test": "optional_test"},
             ],
         }
-        payload = {"name": "name", "config": config, "dataset": dataset.id, "agent_type": "agent_1"}
+        payload = {
+            "name": "name",
+            "description": "description",
+            "config": config,
+            "dataset": dataset.id,
+            "agent_type": "agent_1",
+        }
 
         with patch(
             "agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_type",
@@ -295,7 +307,13 @@ class TestAgentView:
             },
             "tools": [{"required_test": "required_test"}, {"required_test": "required_test"}],
         }
-        payload = {"name": "name", "config": config, "dataset": dataset.id, "agent_type": "agent_1"}
+        payload = {
+            "name": "name",
+            "description": "description",
+            "config": config,
+            "dataset": dataset.id,
+            "agent_type": "agent_1",
+        }
 
         class NoArgsDummyTool(BaseFunctionTool):
             CONFIGURATION_ARGS = None
@@ -363,7 +381,13 @@ class TestAgentDetailsView:
                 {"required_test": "required_updated", "optional_test": "optional_updated"},
             ],
         }
-        payload = {"name": "updated", "config": updated_config, "dataset": dataset.id, "agent_type": "agent_1"}
+        payload = {
+            "name": "updated",
+            "description": "description",
+            "config": updated_config,
+            "dataset": dataset.id,
+            "agent_type": "agent_1",
+        }
         with patch(
             "agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_type",
             side_effect=[DummyAgent, DummyAgent, DummyAgent, DummyAgent],
@@ -397,7 +421,13 @@ class TestAgentDetailsView:
                 {"required_test": "required_updated", "optional_test": "optional_updated"},
             ],
         }
-        payload = {"name": "updated", "config": updated_config, "dataset": dataset.id, "agent_type": "agent_1"}
+        payload = {
+            "name": "updated",
+            "description": "description",
+            "config": updated_config,
+            "dataset": dataset.id,
+            "agent_type": "agent_1",
+        }
         with patch(
             "agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_type",
             side_effect=[DummyAgent, DummyAgent, DummyAgent, DummyAgent],

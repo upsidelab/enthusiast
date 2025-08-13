@@ -8,6 +8,7 @@ import { useRef, useEffect, useState } from "react";
 import { useAgentForm } from "./hooks/use-agent-form";
 import { AgentConfigurationForm } from "./agent-configuration-form";
 import {AgentChoice} from "@/lib/api/agents.ts";
+import {Textarea} from "@/components/ui/textarea.tsx";
 
 interface AgentFormModalProps {
   open: boolean;
@@ -31,6 +32,8 @@ export function AgentFormModal({
   const {
     name,
     setName,
+    description,
+    setDescription,
     type,
     setType,
     config,
@@ -113,6 +116,19 @@ export function AgentFormModal({
               />
               {fieldErrors.name && (
                 <p className="text-xs text-destructive">{fieldErrors.name}</p>
+              )}
+            </div>
+            
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="agent-description">Description</Label>
+              <Textarea
+                id="agent-description" 
+                placeholder="Description"
+                value={description} 
+                onChange={e => setDescription(e.target.value)}
+              />
+              {fieldErrors.description && (
+                <p className="text-xs text-destructive">{fieldErrors.description}</p>
               )}
             </div>
             

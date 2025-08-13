@@ -62,7 +62,7 @@ export type Agent = {
   created_at: string;
   updated_at: string;
   deleted_at: string;
-  corrupted?: boolean;
+  corrupted: boolean;
 };
 
 export type Conversation = {
@@ -119,6 +119,7 @@ export type AgentConfig = {
 export type AgentDetails = {
   id: number;
   name: string;
+  description: string;
   config: AgentConfig;
   dataset: number;
   agent_type: string;

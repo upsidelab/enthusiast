@@ -18,7 +18,15 @@ class LoginView(APIView):
         ),
         responses={
             200: openapi.Response(
-                description="Token retrieved successfully", examples={"application/json": {"token": "string"}}
+                description="Token retrieved successfully",schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "token": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="Authentication token"
+                        )
+                    },
+                ),
             ),
             403: "Forbidden",
         },

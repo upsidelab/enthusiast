@@ -38,6 +38,7 @@ class ResetTokenView(APIView):
         manual_parameters=[
             openapi.Parameter("id", openapi.IN_PATH, description="ID of the service account", type=openapi.TYPE_INTEGER)
         ],
+        responses={200: openapi.Response(description="Token", schema=openapi.Schema(type=openapi.TYPE_STRING))},
     )
     def post(self, request, id):
         service_account = User.objects.get(id=id, is_service_account=True)
@@ -50,6 +51,12 @@ class ServiceAccountListView(ListAPIView):
     permission_classes = [IsAdminUser]
     serializer_class = ServiceAccountSerializer
     queryset = User.objects.filter(is_service_account=True).order_by("-date_joined")
+
+    @swagger_auto_schema(
+        operation_description="Get list of service accounts",
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
     @swagger_auto_schema(
         operation_description="Create a new service account", request_body=CreateUpdateServiceAccountSerializer

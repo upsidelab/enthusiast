@@ -5,3 +5,12 @@ repos:
     - id: ruff-check
       args: [ --fix ]
     - id: ruff-format
+
+- repo: local
+  hooks:
+    - id: frontend-lint
+      name: Frontend Lint
+      entry: bash -c "cd frontend && npm run lint:fix"
+      language: system
+      files: ^frontend/.*\.(js|ts|tsx)$
+      pass_filenames: false

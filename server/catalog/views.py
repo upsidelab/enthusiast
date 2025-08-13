@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.db import transaction
 from django.db.models import Count
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -11,7 +13,7 @@ from account.models import User
 from account.serializers import UserSerializer
 from agent.core.registries.embeddings import EmbeddingProviderRegistry
 from agent.core.registries.language_models import LanguageModelRegistry
-from pecl import settings
+from agent.models import Agent
 from sync.tasks import (
     sync_all_document_sources,
     sync_all_product_sources,
@@ -55,17 +57,36 @@ class DataSetListView(ListCreateAPIView):
 
     @swagger_auto_schema(operation_description="Create a new data set", request_body=DataSetSerializer)
     def perform_create(self, serializer):
-        if not self.request.user and self.request.user.is_staff:
+        if not self.request.user.is_staff:
             self.permission_denied(self.request)
 
-        data_set = serializer.save()
-        data_set.users.add(self.request.user)
+        with transaction.atomic():
+            data_set = serializer.save()
+            data_set.users.add(self.request.user)
+            self.add_default_agent(data_set)
+
+    @staticmethod
+    def add_default_agent(data_set: DataSet):
+        default_agent = getattr(settings, "DEFAULT_AGENT", None)
+        if not default_agent:
+            return
+        if Agent.all_objects.filter(dataset=data_set).exists():
+            return
+        Agent.objects.create(
+            **{
+                "name": default_agent["name"],
+                "description": default_agent["description"],
+                "config": default_agent["config"],
+                "dataset": data_set,
+                "agent_type": default_agent["type"],
+            }
+        )
 
 
 class DataSetDetailView(RetrieveAPIView):
     serializer_class = DataSetSerializer
     permission_classes = [IsAdminUser]
-    lookup_url_kwarg = 'data_set_id'
+    lookup_url_kwarg = "data_set_id"
     queryset = DataSet.objects.all()
 
     @swagger_auto_schema(
@@ -74,7 +95,7 @@ class DataSetDetailView(RetrieveAPIView):
             openapi.Parameter(
                 "data_set_id", openapi.IN_PATH, description="ID of the data set", type=openapi.TYPE_INTEGER
             )
-        ]
+        ],
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
@@ -86,20 +107,24 @@ class DataSetDetailView(RetrieveAPIView):
             openapi.Parameter(
                 "data_set_id", openapi.IN_PATH, description="ID of the data set", type=openapi.TYPE_INTEGER
             )
-        ]
+        ],
     )
     def patch(self, request, *args, **kwargs):
         instance = self.get_object()
-        
+
         # Filter out embedding fields from the request data
-        filtered_data = {k: v for k, v in request.data.items() 
-                        if k not in ['embedding_provider', 'embedding_model', 'embedding_vector_dimensions']}
-        
+        filtered_data = {
+            k: v
+            for k, v in request.data.items()
+            if k not in ["embedding_provider", "embedding_model", "embedding_vector_dimensions"]
+        }
+
         serializer = self.get_serializer(instance, data=filtered_data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        
+
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class DataSetUserListView(ListCreateAPIView):
     serializer_class = UserSerializer

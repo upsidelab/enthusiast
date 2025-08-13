@@ -252,6 +252,13 @@ AVAILABLE_AGENTS: dict[str, dict[str, str]] = {
     },
 }
 
+DEFAULT_AGENT: dict = {
+    "type": "question_answer_agent",
+    "name": "Default Agent",
+    "description": "Default agent",
+    "config": {"tools": [{}], "agent_args": {}, "prompt_input": {}, "prompt_extension": {}},
+}
+
 SERVICE_ACCOUNT_DOMAIN = env.str("SERVICE_ACCOUNT_DOMAIN", "enthusiast.internal")
 
 from .settings_override import *  # noqa

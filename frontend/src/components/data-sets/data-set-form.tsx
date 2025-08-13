@@ -1,5 +1,4 @@
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from "@/components/ui/form.tsx";
-import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input.tsx";
@@ -13,18 +12,8 @@ import { authenticationProviderInstance } from "@/lib/authentication-provider.ts
 import { DataSet, ProvidersConfig } from "@/lib/types.ts";
 import { Alert, AlertDescription } from "@/components/ui/alert.tsx";
 import { InfoIcon } from "lucide-react";
+import { formSchema, DataSetFormSchema } from "./data-set-form-schema.ts";
 
-export const formSchema = z.object({
-  name: z.string().trim().min(1),
-  languageModelProvider: z.string().min(1),
-  languageModel: z.string().min(1),
-  embeddingProvider: z.string().min(1),
-  embeddingModel: z.string().min(1),
-  embeddingVectorSize: z.coerce.number().min(1).max(3072),
-  systemMessage: z.string().min(1)
-});
-
-export type DataSetFormSchema = z.infer<typeof formSchema>;
 const api = new ApiClient(authenticationProviderInstance);
 
 interface DataSetFormProps {

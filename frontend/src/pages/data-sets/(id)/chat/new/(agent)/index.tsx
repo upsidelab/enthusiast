@@ -33,6 +33,7 @@ function EmptyState({ title, description, pageTitle, pageDescription }: EmptySta
 
 export function NewChat() {
   const { availableAgents } = useApplicationContext()!;
+  const { agent } = useParams();
 
   if (availableAgents.length === 0) {
     return (
@@ -44,7 +45,6 @@ export function NewChat() {
       />
     );
   }
-  const { agent } = useParams();
 
   const agentId = agent ? parseInt(agent, 10) : null;
   if (!agentId) {

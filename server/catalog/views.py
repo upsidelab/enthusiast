@@ -199,11 +199,10 @@ class DataSetProductSourceListView(ListCreateAPIView):
         operation_description="Create a new product source in a data set", request_body=ProductSourceSerializer
     )
     def perform_create(self, serializer):
-        if not self.request.user and self.request.user.is_staff:
-            self.permission_denied(self.request)
         # Get data set from URL (it's not passed via request body).
         data_set_id = self.kwargs.get("data_set_id")
-        serializer.save(data_set_id=data_set_id)
+        source = serializer.save(data_set_id=data_set_id)
+        sync_product_source.apply_async(args=[source.id])
 
 
 class DataSetProductSourceView(GenericAPIView):
@@ -342,11 +341,10 @@ class DataSetDocumentSourceListView(ListCreateAPIView):
         operation_description="Create a new document source in a data set", request_body=DocumentSourceSerializer
     )
     def perform_create(self, serializer):
-        if not self.request.user and self.request.user.is_staff:
-            self.permission_denied(self.request)
         # Get data set from URL (it's not passed via request body).
         data_set_id = self.kwargs.get("data_set_id")
-        serializer.save(data_set_id=data_set_id)
+        source = serializer.save(data_set_id=data_set_id)
+        sync_document_source.apply_async(args=[source.id])
 
 
 class DataSetDocumentSourceView(GenericAPIView):

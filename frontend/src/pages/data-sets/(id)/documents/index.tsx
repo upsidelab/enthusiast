@@ -1,9 +1,12 @@
 import { DocumentsList } from "@/components/documents/documents-list.tsx";
+import { PageHeading } from "@/components/util/page-heading.tsx";
+import { PageMain } from "@/components/util/page-main.tsx";
 
 export function DocumentsIndex() {
   return (
-    <div className="p-4">
+    <PageMain>
+      <PageHeading title="Manage Documents" description="View documents synchronized from external systems." />
       <DocumentsList />
-    </div>
+    </PageMain>
   );
 }

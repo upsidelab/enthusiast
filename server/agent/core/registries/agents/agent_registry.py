@@ -50,9 +50,9 @@ class AgentRegistry(BaseAgentRegistry):
         except ModuleNotFoundError:
             raise ImportError(f"Cannot import module '{agent_module_path}' for agent '{agent_type}'.")
         agents = [
-            obj
-            for _, obj in inspect.getmembers(agent_module, inspect.isclass)
-            if issubclass(obj, BaseAgent) and obj is not BaseAgent
+            cls
+            for _, cls in inspect.getmembers(agent_module, inspect.isclass)
+            if issubclass(cls, BaseAgent) and cls.__module__ == agent_module.__name__
         ]
         return agents[0] if agents else None
 

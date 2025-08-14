@@ -45,3 +45,6 @@ class DocumentSourceSerializer(serializers.ModelSerializer):
     class Meta:
         model = DocumentSource
         fields = ["id", "plugin_name", "config", "data_set_id"]
+        
+class SyncResponseSerializer(serializers.Serializer):
+    task_id = serializers.CharField()

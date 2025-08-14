@@ -64,3 +64,11 @@ class ServiceAccountSerializer(serializers.ModelSerializer):
 
     def get_data_set_ids(self, obj):
         return list(obj.data_sets.values_list("id", flat=True))
+
+
+class TokenResponseSerializer(serializers.Serializer):
+    token = serializers.CharField()
+
+
+class AvailabilityResponseSerializer(serializers.Serializer):
+    is_available = serializers.BooleanField()

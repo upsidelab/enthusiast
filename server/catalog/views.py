@@ -8,6 +8,7 @@ from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIVi
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from account.models import User
 from account.serializers import UserSerializer
@@ -32,21 +33,21 @@ from .serializers import (
     DocumentSourceSerializer,
     ProductSerializer,
     ProductSourceSerializer,
+    SyncResponseSerializer,
 )
 
 
-class SyncAllSourcesView(GenericAPIView):
+class SyncAllSourcesView(APIView):
     permission_classes = [IsAdminUser]
 
     @swagger_auto_schema(
         operation_description="Sync all sources",
-        manual_parameters=[],
-        responses={200: openapi.Response(description="Task ID", schema=openapi.Schema(type=openapi.TYPE_STRING))},
+        responses={200: SyncResponseSerializer},
     )
     def post(self, request, *args, **kwargs):
         task = sync_all_sources.apply_async()
-
-        return Response({"task_id": task.id}, status=status.HTTP_202_ACCEPTED)
+        serializer = SyncResponseSerializer({"task_id": task.id})
+        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 
 
 class DataSetListView(ListCreateAPIView):
@@ -54,8 +55,7 @@ class DataSetListView(ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
-        operation_description="List data sets",
-        manual_parameters=[],
+        operation_description="List data sets"
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
@@ -191,18 +191,17 @@ class DataSetUserView(GenericAPIView):
         return Response({}, status=status.HTTP_204_NO_CONTENT)
 
 
-class SyncDataSetAllSourcesView(GenericAPIView):
+class SyncDataSetAllSourcesView(APIView):
     permission_classes = [IsAdminUser]
 
     @swagger_auto_schema(
         operation_description="Sync all sources in a data set",
-        manual_parameters=[],
-        responses={200: openapi.Response(description="Task ID", schema=openapi.Schema(type=openapi.TYPE_STRING))},
+        responses={200: SyncResponseSerializer},
     )
     def post(self, request, *args, **kwargs):
         task = sync_data_set_all_sources.apply_async(args=[kwargs["data_set_id"]])
-
-        return Response({"task_id": task.id}, status=status.HTTP_202_ACCEPTED)
+        serializer = SyncResponseSerializer({"task_id": task.id})
+        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 
 
 class DataSetProductSourceListView(ListCreateAPIView):
@@ -285,46 +284,43 @@ class DataSetProductSourceView(GenericAPIView):
         return Response({}, status=status.HTTP_204_NO_CONTENT)
 
 
-class SyncAllProductSourcesView(GenericAPIView):
+class SyncAllProductSourcesView(APIView):
     permission_classes = [IsAdminUser]
 
     @swagger_auto_schema(
         operation_description="Sync all product sources",
-        manual_parameters=[],
-        responses={200: openapi.Response(description="Task ID", schema=openapi.Schema(type=openapi.TYPE_STRING))},
+        responses={200: SyncResponseSerializer},
     )
     def post(self, request, *args, **kwargs):
         task = sync_all_product_sources.apply_async()
+        serializer = SyncResponseSerializer({"task_id": task.id})
+        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 
-        return Response({"task_id": task.id}, status=status.HTTP_202_ACCEPTED)
 
-
-class SyncDataSetProductSourcesView(GenericAPIView):
+class SyncDataSetProductSourcesView(APIView):
     permission_classes = [IsAdminUser]
 
     @swagger_auto_schema(
         operation_description="Sync all product sources in a data set",
-        manual_parameters=[],
-        responses={200: openapi.Response(description="Task ID", schema=openapi.Schema(type=openapi.TYPE_STRING))},
+        responses={200: SyncResponseSerializer},
     )
     def post(self, request, *args, **kwargs):
         task = sync_data_set_product_sources.apply_async(args=[kwargs["data_set_id"]])
+        serializer = SyncResponseSerializer({"task_id": task.id})
+        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 
-        return Response({"task_id": task.id}, status=status.HTTP_202_ACCEPTED)
 
-
-class SyncDataSetProductSourceView(GenericAPIView):
+class SyncDataSetProductSourceView(APIView):
     permission_classes = [IsAdminUser]
 
     @swagger_auto_schema(
         operation_description="Sync a product source",
-        manual_parameters=[],
-        responses={200: openapi.Response(description="Task ID", schema=openapi.Schema(type=openapi.TYPE_STRING))},
+        responses={200: SyncResponseSerializer},
     )
     def post(self, request, *args, **kwargs):
         task = sync_product_source.apply_async(args=[kwargs["product_source_id"]])
-
-        return Response({"task_id": task.id}, status=status.HTTP_202_ACCEPTED)
+        serializer = SyncResponseSerializer({"task_id": task.id})
+        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 
 
 class ProductListView(ListAPIView):
@@ -461,46 +457,43 @@ class DataSetDocumentSourceView(GenericAPIView):
         return Response({}, status=status.HTTP_204_NO_CONTENT)
 
 
-class SyncAllDocumentSourcesView(GenericAPIView):
+class SyncAllDocumentSourcesView(APIView):
     permission_classes = [IsAdminUser]
 
     @swagger_auto_schema(
         operation_description="Sync all document sources",
-        manual_parameters=[],
-        responses={200: openapi.Response(description="Task ID", schema=openapi.Schema(type=openapi.TYPE_STRING))},
+        responses={200: SyncResponseSerializer},
     )
     def post(self, request, *args, **kwargs):
         task = sync_all_document_sources.apply_async()
+        serializer = SyncResponseSerializer({"task_id": task.id})
+        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 
-        return Response({"task_id": task.id}, status=status.HTTP_202_ACCEPTED)
 
-
-class SyncDataSetDocumentSourcesView(GenericAPIView):
+class SyncDataSetDocumentSourcesView(APIView):
     permission_classes = [IsAdminUser]
 
     @swagger_auto_schema(
         operation_description="Sync all document sources in a data set",
-        manual_parameters=[],
-        responses={200: openapi.Response(description="Task ID", schema=openapi.Schema(type=openapi.TYPE_STRING))},
+        responses={200: SyncResponseSerializer},
     )
     def post(self, request, *args, **kwargs):
         task = sync_data_set_document_sources.apply_async(args=[kwargs["data_set_id"]])
+        serializer = SyncResponseSerializer({"task_id": task.id})
+        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 
-        return Response({"task_id": task.id}, status=status.HTTP_202_ACCEPTED)
 
-
-class SyncDataSetDocumentSourceView(GenericAPIView):
+class SyncDataSetDocumentSourceView(APIView):
     permission_classes = [IsAdminUser]
 
     @swagger_auto_schema(
         operation_description="Sync a document source",
-        manual_parameters=[],
-        responses={200: openapi.Response(description="Task ID", schema=openapi.Schema(type=openapi.TYPE_STRING))},
+        responses={200: SyncResponseSerializer},
     )
     def post(self, request, *args, **kwargs):
         task = sync_document_source.apply_async(args=[kwargs["document_source_id"]])
-
-        return Response({"task_id": task.id}, status=status.HTTP_202_ACCEPTED)
+        serializer = SyncResponseSerializer({"task_id": task.id})
+        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 
 
 class ConfigView(GenericAPIView):

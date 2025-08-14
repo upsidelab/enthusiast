@@ -5,6 +5,8 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from account.serializers import TokenResponseSerializer
+
 
 class LoginView(APIView):
     @swagger_auto_schema(
@@ -17,17 +19,7 @@ class LoginView(APIView):
             },
         ),
         responses={
-            200: openapi.Response(
-                description="Token retrieved successfully",schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        "token": openapi.Schema(
-                            type=openapi.TYPE_STRING,
-                            description="Authentication token"
-                        )
-                    },
-                ),
-            ),
+            200: TokenResponseSerializer,
             403: "Forbidden",
         },
     )
@@ -35,5 +27,6 @@ class LoginView(APIView):
         user = authenticate(username=request.data["email"], password=request.data["password"])
         if user:
             token, created = Token.objects.get_or_create(user=user)
-            return Response({"token": token.key})
+            serializer = TokenResponseSerializer({"token": token.key})
+            return Response(serializer.data)
         return Response({}, status=403)

@@ -221,7 +221,6 @@ CATALOG_EMBEDDING_PROVIDERS = {
 # Configuration of installed plugins {plugin_name: plugin_path}
 CATALOG_PRODUCT_SOURCE_PLUGINS = {
     "Sample Product Source": "enthusiast_source_sample.SampleProductSource",
-    "Furnitures": "agent.plugins.product.CustomProductSource",
 }
 CATALOG_DOCUMENT_SOURCE_PLUGINS = {
     "Sample Document Source": "enthusiast_source_sample.SampleDocumentSource",

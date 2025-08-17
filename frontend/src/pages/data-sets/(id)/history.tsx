@@ -1,9 +1,12 @@
 import { ConversationsList } from "@/components/conversations/conversations-list.tsx";
+import { PageMain } from "@/components/util/page-main.tsx";
+import { PageHeading } from "@/components/util/page-heading.tsx";
 
 export function ChatHistory() {
   return (
-    <div className="p-4">
+    <PageMain>
+      <PageHeading title="History" description="View your past conversations." />
       <ConversationsList />
-    </div>
+    </PageMain>
   );
 }

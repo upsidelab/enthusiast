@@ -1,5 +1,5 @@
-import { PageMain } from "@/components/util/page-main";
-import { PageHeading } from "@/components/util/page-heading";
+import { PageMain } from "@/components/util/page-main.tsx";
+import { PageHeading } from "@/components/util/page-heading.tsx";
 import AgentsTable from "@/components/agents-table";
 
 export default function AgentsPage() {

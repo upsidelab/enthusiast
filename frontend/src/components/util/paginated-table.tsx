@@ -82,27 +82,29 @@ export function PaginatedTable<T>({
           {items.map((item, index) => tableRow(item, index))}
         </TableBody>
       </Table>
-      <Pagination className="my-4 text-lg">
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              href="#"
-              onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
+      {totalPages > 1 &&
+        <Pagination className="my-8 text-lg">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
+              />
+            </PaginationItem>
+            <RenderPaginationItems
+              currentPage={currentPage}
+              totalPages={totalPages}
+              handlePageChange={handlePageChange}
             />
-          </PaginationItem>
-          <RenderPaginationItems
-            currentPage={currentPage}
-            totalPages={totalPages}
-            handlePageChange={handlePageChange}
-          />
-          <PaginationItem>
-            <PaginationNext
-              href="#"
-              onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))}
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+        }
     </SkeletonLoader>
   )
 }

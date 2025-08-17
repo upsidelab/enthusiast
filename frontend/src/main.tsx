@@ -22,7 +22,7 @@ import { ConfigureDataSetDocumentSource } from "@/pages/data-sets/(id)/document-
 import { UsersIndex } from "@/pages/users";
 import { OnboardingIndex } from "@/pages/onboarding";
 import { NewChat } from "@/pages/data-sets/(id)/chat/new/(agent)/index.tsx";
-import AgentsPage from "@/pages/agents.tsx";
+import AgentsPage from "@/pages/data-sets/(id)/agents";
 
 const api = new ApiClient(authenticationProviderInstance);
 

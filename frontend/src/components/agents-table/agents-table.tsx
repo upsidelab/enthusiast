@@ -24,7 +24,7 @@ export default function AgentsTable() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [agentToDelete, setAgentToDelete] = useState<Agent | null>(null);
 
-  const fetchAgents = async (): Promise<PaginatedResult<Agent>> => {
+  const fetchAgents = async (): Promise<PaginatedResult<Agent> | undefined> => {
     if (dataSetId === null) {
       return;
     }
@@ -53,7 +53,6 @@ export default function AgentsTable() {
 
   const handleFormSuccess = () => {
     setFormModalOpen(false);
-    refreshAgents();
   };
 
   const handleFormClose = (open: boolean) => {
@@ -66,7 +65,6 @@ export default function AgentsTable() {
   const handleDeleteSuccess = () => {
     setDeleteModalOpen(false);
     setAgentToDelete(null);
-    refreshAgents();
   };
 
   return (

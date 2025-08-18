@@ -8,7 +8,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from account.models import User
-from account.serializers import CreateUpdateServiceAccountSerializer, ServiceAccountSerializer
+from account.serializers import (
+    AvailabilityResponseSerializer,
+    CreateUpdateServiceAccountSerializer,
+    ServiceAccountSerializer,
+    TokenResponseSerializer,
+)
 from account.services import ServiceAccountNameService
 
 
@@ -21,13 +26,14 @@ class CheckServiceNameView(APIView):
             type=openapi.TYPE_OBJECT,
             properties={"name": openapi.Schema(type=openapi.TYPE_STRING, description="Service account name")},
         ),
+        responses={200: AvailabilityResponseSerializer},
     )
     def post(self, request):
         name = request.data.get("name")
         service = ServiceAccountNameService()
-        if service.is_service_account_name_available(name):
-            return Response({"is_available": True}, status=status.HTTP_200_OK)
-        return Response({"is_available": False}, status=status.HTTP_200_OK)
+        is_available = service.is_service_account_name_available(name)
+        serializer = AvailabilityResponseSerializer({"is_available": is_available})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ResetTokenView(APIView):
@@ -38,18 +44,26 @@ class ResetTokenView(APIView):
         manual_parameters=[
             openapi.Parameter("id", openapi.IN_PATH, description="ID of the service account", type=openapi.TYPE_INTEGER)
         ],
+        responses={200: TokenResponseSerializer},
     )
     def post(self, request, id):
         service_account = User.objects.get(id=id, is_service_account=True)
         Token.objects.filter(user=service_account).delete()
         token, created = Token.objects.get_or_create(user=service_account)
-        return Response({"token": token.key}, status=status.HTTP_200_OK)
+        serializer = TokenResponseSerializer({"token": token.key})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ServiceAccountListView(ListAPIView):
     permission_classes = [IsAdminUser]
     serializer_class = ServiceAccountSerializer
     queryset = User.objects.filter(is_service_account=True).order_by("-date_joined")
+
+    @swagger_auto_schema(
+        operation_description="Get list of service accounts",
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
     @swagger_auto_schema(
         operation_description="Create a new service account", request_body=CreateUpdateServiceAccountSerializer

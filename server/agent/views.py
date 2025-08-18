@@ -46,6 +46,7 @@ class GetTaskStatus(APIView):
         manual_parameters=[
             openapi.Parameter("task_id", openapi.IN_PATH, description="ID of the task", type=openapi.TYPE_STRING)
         ],
+        responses={200: openapi.Response(description="Task status", schema=openapi.Schema(type=openapi.TYPE_OBJECT, properties={"state": openapi.Schema(type=openapi.TYPE_STRING)}))},
     )
     def get(self, request, task_id):
         task_result = AsyncResult(task_id)
@@ -67,6 +68,7 @@ class ConversationView(APIView):
                 "conversation_id", openapi.IN_PATH, description="ID of the conversation", type=openapi.TYPE_INTEGER
             )
         ],
+        responses={200: ConversationContentSerializer()},
     )
     def get(self, request, conversation_id):
         conversation = (
@@ -130,6 +132,9 @@ class ConversationListView(ListAPIView):
             )
         ],
     )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
     def get_queryset(self):
         user = self.request.user
         data_set_id = self.request.query_params.get("data_set_id")
@@ -230,7 +235,16 @@ class AgentView(APIView):
     """View to get/create agents"""
 
     @swagger_auto_schema(
-        operation_description="Get list of all dataset's agents",
+        operation_description="List all agents for a dataset",
+        manual_parameters=[
+            openapi.Parameter(
+                "dataset",
+                openapi.IN_QUERY,
+                description="ID of the dataset",
+                type=openapi.TYPE_INTEGER,
+                required=True,
+            )
+        ],
         responses={200: AgentListSerializer(many=True)},
     )
     def get(self, request):

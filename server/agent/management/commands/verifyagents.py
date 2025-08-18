@@ -3,7 +3,7 @@ from copy import deepcopy
 from django.core.management.base import BaseCommand
 from pydantic import ValidationError
 
-from agent.core.registries.agents.agent_registry import AgentRegistry
+from agent.core.registries.agents.agent_registry import AgentRegistry, AgentRegistryError
 from agent.models import Agent
 
 
@@ -20,7 +20,13 @@ class Command(BaseCommand):
             agent_class = agent_types_cache.get(agent.agent_type)
 
             if not agent_class:
-                agent_class = AgentRegistry().get_agent_class_by_type(agent_type=agent.agent_type)
+                try:
+                    agent_class = AgentRegistry().get_agent_class_by_type(agent_type=agent.agent_type)
+                except AgentRegistryError:
+                    corrupted_count += 1
+                    agent.corrupted = True
+                    agent.save(update_fields=["corrupted"])
+                    continue
                 agent_types_cache[agent.agent_type] = agent_class
 
             config = deepcopy(agent.config)

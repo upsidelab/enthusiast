@@ -241,10 +241,6 @@ AGENT_TOOLS = {
 }
 
 AVAILABLE_AGENTS: dict[str, dict[str, str]] = {
-    "product_search_agent": {
-        "name": "Product Search Agent",
-        "agent_directory_path": "agent.core.agents.product_search_react_agent",
-    },
     "question_answer_agent": {
         "name": "Question Answer Agent",
         "agent_directory_path": "agent.core.agents.tool_calling_agent",

@@ -1,0 +1,8 @@
+{
+  "label": "Agents",
+  "position": 10,
+  "link": {
+    "type": "generated-index",
+    "description": "Learn how to build Agents."
+  }
+}

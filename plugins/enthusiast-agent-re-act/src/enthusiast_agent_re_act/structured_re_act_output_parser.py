@@ -9,7 +9,7 @@ from langchain_core.exceptions import OutputParserException
 
 
 class StructuredReActOutputParser(ReActSingleInputOutputParser):
-    ACTION_PATTERN: str = r"Action:\s*\n(\{(?:[^{}]*|\{[^{}]*\})*\})"
+    ACTION_PATTERN: str = r"Action:\s*({[\s\S]*})"
     JSON_PATTERN: str = r"```json\s*\n([\s\S]*?)\n```"
 
     def parse(self, text: str) -> Union[AgentAction, AgentFinish]:

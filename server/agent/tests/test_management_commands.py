@@ -6,6 +6,7 @@ from django.core.management import call_command
 from model_bakery import baker
 from pydantic import BaseModel
 
+from agent.core.registries.agents.agent_registry import AgentNotFoundError
 from agent.models import Agent
 
 pytestmark = pytest.mark.django_db
@@ -152,6 +153,19 @@ class TestVerifyAgentsCommand:
 
         corrupted_agent.refresh_from_db()
         assert corrupted_agent.corrupted is True
+
+    @patch("agent.management.commands.verifyagents.AgentRegistry")
+    def test_verifyagents_command_missing_agent_type(self, mock_agent_registry, config_dict):
+        baker.make(Agent, agent_type=self.AGENT_TYPE, config=config_dict, _quantity=3)
+
+        mock_registry_instance = Mock()
+        mock_registry_instance.get_agent_class_by_type.side_effect = AgentNotFoundError()
+        mock_agent_registry.return_value = mock_registry_instance
+
+        call_command("verifyagents")
+
+        corrupted_agents = Agent.objects.filter(corrupted=True)
+        assert corrupted_agents.count() == 3
 
     @patch("agent.management.commands.verifyagents.AgentRegistry")
     def test_verifyagents_command_multiple_corrupted_agents(self, mock_agent_registry, config_dict):

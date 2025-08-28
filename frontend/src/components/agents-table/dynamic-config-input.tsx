@@ -2,6 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { TypeInfo } from "@/lib/types";
+import { JSONEditor } from "./json-editor";
 
 interface DynamicConfigInputProps {
   id: string;
@@ -26,7 +27,9 @@ export function DynamicConfigInput({
 }: DynamicConfigInputProps) {
   const getInputType = () => {
     if (!typeInfo) return 'text';
-    
+    if (typeInfo.inner_type === 'Json') {
+      return 'json';
+    }
     if (typeInfo.container === 'list') {
       return 'text'; // For now, handle lists as text input
     }
@@ -63,8 +66,24 @@ export function DynamicConfigInput({
     }
   };
 
+  const handleJSONChange = (jsonString: string) => {
+    onChange(jsonString);
+  };
+
   const renderInput = () => {
     const inputType = getInputType();
+    
+    if (inputType === 'json') {
+      return (
+        <JSONEditor
+          value={typeof value === 'string' ? value : '{}'}
+          onChange={handleJSONChange}
+          label={label}
+          description={description}
+          error={error}
+        />
+      );
+    }
     
     if (inputType === 'boolean') {
       return (

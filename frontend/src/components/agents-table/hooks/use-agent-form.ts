@@ -23,21 +23,26 @@ export function useAgentForm(
   const [generalError, setGeneralError] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-          const flattenConfigForForm = (config: unknown): Record<string, string | number | boolean> => {
-      const flattenedConfig: Record<string, string | number | boolean> = {};
-      
-      if (!config || typeof config !== 'object') {
-        return flattenedConfig;
-      }
-      
-      Object.entries(config as Record<string, unknown>).forEach(([section, sectionData]) => {
+  const flattenConfigForForm = (config: unknown): Record<string, string | number | boolean> => {
+    const flattenedConfig: Record<string, string | number | boolean> = {};
+    
+    if (!config || typeof config !== 'object') {
+      return flattenedConfig;
+    }
+    
+    Object.entries(config as Record<string, unknown>).forEach(([section, sectionData]) => {
       if (Array.isArray(sectionData)) {
         sectionData.forEach(obj => {
           if (obj && typeof obj === 'object') {
             Object.entries(obj).forEach(([key, value]) => {
               if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
                 flattenedConfig[`${section}_${key}`] = value;
+              } else if (typeof value === 'object' && value !== null) {
+                try {
+                  flattenedConfig[`${section}_${key}`] = JSON.stringify(value);
+                } catch {
+                  flattenedConfig[`${section}_${key}`] = '{}';
+                }
               }
             });
           }
@@ -46,6 +51,12 @@ export function useAgentForm(
         Object.entries(sectionData).forEach(([key, value]) => {
           if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
             flattenedConfig[`${section}_${key}`] = value;
+          } else if (typeof value === 'object' && value !== null) {
+            try {
+              flattenedConfig[`${section}_${key}`] = JSON.stringify(value);
+            } catch {
+              flattenedConfig[`${section}_${key}`] = '{}';
+            }
           }
         });
       }
@@ -54,6 +65,7 @@ export function useAgentForm(
     return flattenedConfig;
   };
 
+  useEffect(() => {
     const loadAgentDetailsForEditing = async () => {
       if (!agent) return;
       

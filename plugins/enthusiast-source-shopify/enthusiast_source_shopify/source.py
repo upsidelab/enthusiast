@@ -2,23 +2,20 @@ import json
 
 import shopify
 from enthusiast_common import ProductDetails, ProductSourcePlugin
+from enthusiast_common.utils import RequiredFieldsModel
+from pydantic import Field
+
+
+class ShopifyConfig(RequiredFieldsModel):
+    shop_url: str = Field(description="Shopify shop URL")
+    access_token: str = Field(description="Shopify access token")
 
 
 class ShopifyProductSource(ProductSourcePlugin):
-    def __init__(self, data_set_id, config: dict):
-        """
-        Initialize the plugin with the parameters to access shop.
+    CONFIGURATION_ARGS = ShopifyConfig
 
-        Args:
-            data_set_id (int): identifier of a data set that products are assigned to.
-            config (dict): Parameters such as shop url or access token to configure a plugin.
-        """
-        super().__init__(data_set_id, config)
-
-        self.shop_url = config.get("shop_url")
-        self.access_token = config.get("access_token")
-        self.session = shopify.Session(self.shop_url, "2024-10", self.access_token)
-        shopify.ShopifyResource.activate_session(self.session)
+    def __init__(self, data_set_id, **kwargs):
+        super().__init__(data_set_id)
 
     def get_query_template(self):
         """Prepares template for querying shopify platform.
@@ -101,6 +98,9 @@ class ShopifyProductSource(ProductSourcePlugin):
         Returns:
             list[ProductDetails]: A list of products.
         """
+
+        session = shopify.Session(self.CONFIGURATION_ARGS.shop_url, "2024-10", self.CONFIGURATION_ARGS.access_token)
+        shopify.ShopifyResource.activate_session(session)
 
         query = self.get_query_template()
         products = []

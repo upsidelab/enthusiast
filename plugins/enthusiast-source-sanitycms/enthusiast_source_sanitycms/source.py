@@ -1,44 +1,44 @@
 import requests
 from enthusiast_common import DocumentDetails, DocumentSourcePlugin
+from enthusiast_common.utils import RequiredFieldsModel
+from pydantic import Field
+
+
+class SanityCMSConfig(RequiredFieldsModel):
+    project_id: str = Field(description="Sanity project ID")
+    dataset: str = Field(description="Sanity dataset name")
+    schema_type: str = Field(description="Sanity schema type to query")
+    title_field_name: str = Field(description="Field name for document title")
+    content_field_name: str = Field(description="Field name for document content")
+    api_key: str = Field(description="Sanity API key", default="")
 
 
 class SanityCMSDocumentSource(DocumentSourcePlugin):
-    def __init__(self, data_set_id, config: dict):
-        """
-        Initialize the plugin with the parameters to access a source system.
+    CONFIGURATION_ARGS = SanityCMSConfig
 
-        Args:
-            data_set_id (int): identifier of a data set that documents are assigned to.
-            config (dict): configuration of the plugin
-        """
-        super().__init__(data_set_id, config)
-
-        # Sanity CMS related parameters.
-        self._project_id = config.get("project_id")
-        self._dataset = config.get("dataset")
-        self._schema_type = config.get("schema_type")
-        self._title_field_name = config.get("title_field_name")
-        self._content_field_name = config.get("content_field_name")
-        self._base_url = f"https://{self._project_id}.api.sanity.io/v1/data/query/{self._dataset}"
-        self._api_key = config.get("api_key")
+    def __init__(self, data_set_id, **kwargs):
+        super().__init__(data_set_id)
 
     def fetch(self) -> list[DocumentDetails]:
         results = []
         offset = 0  # Starting point for product list pagination.
         limit = 100  # Page size.
 
-        headers = {"Authorization": f"Bearer {self._api_key}"} if self._api_key else {}
+        base_url = f"https://{self.CONFIGURATION_ARGS.project_id}.api.sanity.io/v1/data/query/{self.CONFIGURATION_ARGS.dataset}"
+        headers = (
+            {"Authorization": f"Bearer {self.CONFIGURATION_ARGS.api_key}"} if self.CONFIGURATION_ARGS.api_key else {}
+        )
 
         while True:
             query = (
-                f'*[_type == "{self._schema_type}"] | order(_createdAt asc) '
+                f'*[_type == "{self.CONFIGURATION_ARGS.schema_type}"] | order(_createdAt asc) '
                 f"[{offset}...{offset + limit}] {{"
-                f' "content": {self._content_field_name},'
-                f' "title": {self._title_field_name},'
+                f' "content": {self.CONFIGURATION_ARGS.content_field_name},'
+                f' "title": {self.CONFIGURATION_ARGS.title_field_name},'
                 f' "url": _type + "/" + _id'
                 f" }}"
             )
-            response = requests.get(self._base_url, headers=headers, params={"query": query})
+            response = requests.get(base_url, headers=headers, params={"query": query})
             response.raise_for_status()
             data = response.json()
 
@@ -57,8 +57,8 @@ class SanityCMSDocumentSource(DocumentSourcePlugin):
         return results
 
     def _get_document(self, sanity_post: dict) -> DocumentDetails:
-        title = sanity_post.get(f"{self._title_field_name}")
-        content_blocks = sanity_post.get(f"{self._content_field_name}", [])
+        title = sanity_post.get(f"{self.CONFIGURATION_ARGS.title_field_name}")
+        content_blocks = sanity_post.get(f"{self.CONFIGURATION_ARGS.content_field_name}", [])
         content = self._extract_content(content_blocks)
         url = sanity_post.get("url")
         document = DocumentDetails(url=url, title=title, content=content)

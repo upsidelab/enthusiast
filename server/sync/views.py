@@ -1,49 +1,47 @@
-from django.conf import settings
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from sync.serializers import SourcePluginSerializer
+from sync.document.registry import DocumentSourcePluginRegistry
+from sync.product.registry import ProductSourcePluginRegistry
+from sync.serializers import AvailablePluginsResponseSerializer
+from sync.utils import PluginTypesMixin
 
 
-class GetDocumentSourcePlugins(APIView):
+class GetDocumentSourcePlugins(APIView, PluginTypesMixin):
     """
     View to get list of plugins registered in ECL settings.
     """
 
     permission_classes = [IsAuthenticated]
-    serializer_class = SourcePluginSerializer
+    serializer_class = AvailablePluginsResponseSerializer
     pagination_class = None
 
     @swagger_auto_schema(
         operation_description="Get list of document source plugins",
-        responses={200: SourcePluginSerializer(many=True)},
+        responses={200: AvailablePluginsResponseSerializer(many=True)},
     )
     def get(self, request):
-        plugins = settings.CATALOG_DOCUMENT_SOURCE_PLUGINS.items()
-        data = [{"plugin_name": plugin_name} for plugin_name, plugin_class in plugins]
-        serializer = self.serializer_class(data, many=True)
-
-        return Response({"results": serializer.data})
+        serializer = self.serializer_class(data=self.get_choices(DocumentSourcePluginRegistry))
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data)
 
 
-class GetProductSourcePlugins(APIView):
+class GetProductSourcePlugins(APIView, PluginTypesMixin):
     """
     View to get list of plugins registered in ECL settings.
     """
 
     permission_classes = [IsAuthenticated]
-    serializer_class = SourcePluginSerializer
+    serializer_class = AvailablePluginsResponseSerializer
     pagination_class = None
 
     @swagger_auto_schema(
         operation_description="Get list of product source plugins",
-        responses={200: SourcePluginSerializer(many=True)},
+        responses={200: AvailablePluginsResponseSerializer(many=True)},
     )
     def get(self, request):
-        plugins = settings.CATALOG_PRODUCT_SOURCE_PLUGINS.items()
-        data = [{"plugin_name": plugin_name} for plugin_name, plugin_class in plugins]
-        serializer = self.serializer_class(data, many=True)
-
-        return Response({"results": serializer.data})
+        serializer = self.serializer_class(data=self.get_choices(ProductSourcePluginRegistry))
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data)

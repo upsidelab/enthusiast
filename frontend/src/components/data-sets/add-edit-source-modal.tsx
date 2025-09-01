@@ -1,21 +1,16 @@
-import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog.tsx";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from "@/components/ui/form.tsx";
-import { Button } from "@/components/ui/button.tsx";
-import { Textarea } from "@/components/ui/textarea.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select.tsx";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ApiClient } from "@/lib/api.ts";
-import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { CatalogSource, SourcePlugin } from "@/lib/types.ts";
-
-const api = new ApiClient(authenticationProviderInstance);
+import { useSourceForm } from "./hooks/use-source-form.ts";
+import { ConfigurationForm } from "@/components/ui/configuration-form.tsx";
+import { FormModal } from "@/components/ui/form-modal";
+import { useEffect } from "react";
 
 const formSchema = z.object({
   pluginName: z.string().min(1, "Plugin is required"),
-  config: z.string().min(1, "Configuration is required"),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -39,147 +34,108 @@ export function AddEditSourceModal({
   onSave,
   open
 }: AddEditSourceModalProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [configError, setConfigError] = useState<string | null>(null);
-  const [apiError, setApiError] = useState<string | null>(null);
+  const {
+    setPluginName,
+    config,
+    setConfig,
+    fieldErrors,
+    generalError,
+    submitting,
+    handleSubmit,
+    getSelectedPlugin,
+    resetForm
+  } = useSourceForm(source, availablePlugins, dataSetId, sourceType, onSave);
+
+  // Reset form when modal closes
+  useEffect(() => {
+    if (!open) {
+      resetForm();
+    }
+  }, [open, resetForm]);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       pluginName: source?.plugin_name || "",
-      config: source ? JSON.stringify(source.config, null, 2) : "{}",
     },
   });
 
-  const handleSubmit = async (data: FormData) => {
-    setIsLoading(true);
-    setConfigError(null);
-    setApiError(null);
-    
-    try {
-      let parsedConfig;
-      try {
-        parsedConfig = JSON.parse(data.config);
-      } catch (jsonError) {
-        console.error(jsonError);
-        setConfigError("Invalid JSON format. Please check your configuration.");
-        setIsLoading(false);
-        return;
-      }
+  const selectedPlugin = getSelectedPlugin();
 
-      if (source) {
-        const updatedSource: CatalogSource = {
-          ...source,
-          plugin_name: data.pluginName,
-          config: data.config,
-        };
-
-        if (sourceType === 'product') {
-          await api.dataSets().configureDataSetProductSource(updatedSource);
-        } else {
-          await api.dataSets().configureDataSetDocumentSource(updatedSource);
-        }
-      } else {
-        if (sourceType === 'product') {
-          await api.dataSets().addDataSetProductSource(dataSetId, data.pluginName, parsedConfig);
-        } else {
-          await api.dataSets().addDataSetDocumentSource(dataSetId, data.pluginName, parsedConfig);
-        }
-      }
-      onSave();
-    } catch (error) {
-      console.error(error);
-      setApiError("Failed to add source. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+  const onSubmit = async () => {
+    await handleSubmit();
   };
 
   const isEditing = !!source;
   const title = isEditing ? `Edit ${sourceType} source` : `Add ${sourceType} source`;
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-        </DialogHeader>
+    <FormModal
+      open={open}
+      onOpenChange={onClose}
+      title={title}
+      onSubmit={onSubmit}
+      onCancel={onClose}
+      submitLabel={isEditing ? "Update" : "Add"}
+      submitting={submitting}
+      disabled={!selectedPlugin}
+      dependencies={[selectedPlugin, config, generalError, fieldErrors]}
+    >
+      {generalError && (
+        <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+          <p className="text-sm text-destructive">{generalError}</p>
+        </div>
+      )}
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="pluginName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Plugin</FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
-                    defaultValue={field.value}
-                    disabled={isLoading || isEditing}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a plugin" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {availablePlugins.map((plugin) => (
-                        <SelectItem key={plugin.plugin_name} value={plugin.plugin_name}>
-                          {plugin.plugin_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormDescription>
-                    Choose the plugin that will provide the data for this source.
-                  </FormDescription>
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="config"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Configuration</FormLabel>
-                  {configError && (
-                    <div className="text-red-500 text-sm mb-2">
-                      {configError}
-                    </div>
-                  )}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <FormField
+            control={form.control}
+            name="pluginName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Plugin</FormLabel>
+                <Select 
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    setPluginName(value);
+                  }}
+                  defaultValue={field.value}
+                  disabled={submitting || isEditing}
+                >
                   <FormControl>
-                    <Textarea 
-                      placeholder="Enter configuration as JSON" 
-                      className="min-h-[200px] font-mono text-sm"
-                      {...field}
-                      disabled={isLoading}
-                    />
+                    <SelectTrigger className={fieldErrors.pluginName ? "border-destructive" : ""}>
+                      <SelectValue placeholder="Select a plugin" />
+                    </SelectTrigger>
                   </FormControl>
-                  <FormDescription>
-                    Configuration parameters for the selected plugin. Please refer to the plugin documentation for required parameters.
-                  </FormDescription>
-                </FormItem>
-              )}
-            />
-
-            {apiError && (
-              <div className="text-red-500 text-sm mb-4">
-                {apiError}
-              </div>
+                  <SelectContent>
+                    {availablePlugins.map((plugin) => (
+                      <SelectItem key={plugin.name} value={plugin.name}>
+                        {plugin.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Choose the plugin that will provide the data for this source.
+                </FormDescription>
+                {fieldErrors.pluginName && (
+                  <p className="text-xs text-destructive">{fieldErrors.pluginName}</p>
+                )}
+              </FormItem>
             )}
-            <div className="flex justify-end space-x-2">
-              <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Saving..." : (isEditing ? "Update" : "Add")}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+          />
+
+          {selectedPlugin && (
+            <ConfigurationForm
+              configurationArgs={selectedPlugin.configuration_args}
+              config={config}
+              setConfig={setConfig}
+              fieldErrors={fieldErrors}
+            />
+          )}
+        </form>
+      </Form>
+    </FormModal>
   );
 } 

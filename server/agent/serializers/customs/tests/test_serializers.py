@@ -1,7 +1,6 @@
 import pytest
 from rest_framework import serializers
-
-from agent.serializers.customs.serializers import ParentDataContextSerializerMixin
+from utils.serializers import ParentDataContextSerializerMixin
 
 
 class DummyChildSerializer(serializers.Serializer):
@@ -13,6 +12,8 @@ class DummyListSerializer(serializers.ListSerializer):
 
 
 class DummyTestSerializer(ParentDataContextSerializerMixin, serializers.Serializer):
+    context_keys_to_propagate = ["agent_type"]
+
     child = DummyChildSerializer()
     children = serializers.ListField(child=DummyChildSerializer())
     regular = serializers.CharField()
@@ -58,6 +59,8 @@ def test_context_propagated_to_nested_serializer_fields():
 
 def test_context_propagated_to_non_serializer_fields():
     class PlainSerializer(ParentDataContextSerializerMixin, serializers.Serializer):
+        context_keys_to_propagate = ["agent_type"]
+
         number = serializers.IntegerField()
         text = serializers.CharField()
 

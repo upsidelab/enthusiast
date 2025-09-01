@@ -112,6 +112,13 @@ export function DynamicConfigInput({
     );
   };
 
+  const inputType = getInputType();
+  
+  // For JSON inputs, the JSONEditor handles its own label and description
+  if (inputType === 'json') {
+    return renderInput();
+  }
+
   return (
     <div className="space-y-2">
       <Label htmlFor={id} className="text-sm font-medium">

@@ -6,8 +6,8 @@ from enthusiast_common import ProductDetails, ProductSourcePlugin
 
 
 class SampleProductSource(ProductSourcePlugin):
-    def __init__(self, data_set_id: Any, config: dict):
-        super().__init__(data_set_id, config)
+    def __init__(self, data_set_id: Any):
+        super().__init__(data_set_id)
         self.sample_file_path = Path(__file__).parent / "sample_products.csv"
 
     def fetch(self) -> list[ProductDetails]:

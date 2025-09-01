@@ -1,21 +1,19 @@
 import requests
 from enthusiast_common import ProductDetails, ProductSourcePlugin
+from enthusiast_common.utils import RequiredFieldsModel
+from pydantic import Field
+
+
+class SolidusConfig(RequiredFieldsModel):
+    base_url: str = Field(description="Solidus API base URL")
+    api_key: str = Field(description="Solidus API key")
 
 
 class SolidusProductSource(ProductSourcePlugin):
-    def __init__(self, data_set_id, config: dict):
-        """
-        Initialize the plugin with the parameters to access source.
+    CONFIGURATION_ARGS = SolidusConfig
 
-        Args:
-            data_set_id (int): identifier of a data set that products are assigned to.
-            config (dict): Parameters such as shop url or access token to configure a plugin.
-        """
-        super().__init__(data_set_id, config)
-
-        # Source specific parameters.
-        self._base_url = config.get("base_url")
-        self._api_key = config.get("api_key")
+    def __init__(self, data_set_id, **kwargs):
+        super().__init__(data_set_id)
 
     @staticmethod
     def get_properties(solidus_properties):
@@ -54,11 +52,11 @@ class SolidusProductSource(ProductSourcePlugin):
             list[ProductDetails]: A list of products.
         """
 
-        endpoint = f"{self._base_url}/api/products"
+        endpoint = f"{self.CONFIGURATION_ARGS.base_url}/api/products"
 
         products = []
         page = 1
-        headers = {"Authorization": f"Bearer {self._api_key}"}
+        headers = {"Authorization": f"Bearer {self.CONFIGURATION_ARGS.api_key}"}
 
         while True:
             response = requests.get(endpoint, headers=headers, params={"page": page})

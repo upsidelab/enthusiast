@@ -3,17 +3,9 @@ from pydantic import BaseModel
 from pydantic import ValidationError as PydanticValidationError
 from rest_framework import serializers
 from rest_framework.exceptions import APIException
+from utils.serializers import BasePydanticModelField
 
 from agent.core.registries.agents.agent_registry import AgentRegistry
-
-
-class BasePydanticModelField(serializers.Field):
-    def _format_pydantic_errors(self, e: PydanticValidationError):
-        error_dict = {}
-        for err in e.errors():
-            field_path = ".".join(str(x) for x in err["loc"])
-            error_dict.setdefault(field_path, []).append(err["msg"])
-        return error_dict
 
 
 class PydanticModelField(BasePydanticModelField):

@@ -52,8 +52,9 @@ export type User = {
 }
 
 export type SourcePlugin = {
-  plugin_name: string;
-}
+  name: string;
+  configuration_args: Record<string, ExtraArgDetail>;
+};
 
 export type Agent = {
   id: number;

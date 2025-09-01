@@ -5,7 +5,7 @@ from typing import Dict, List
 import pytest
 from pydantic import BaseModel, Field
 
-from agent.utils.functions import extract_type_info, get_model_descriptor_from_class_field, import_from_string
+from utils.functions import extract_type_info, get_model_descriptor_from_class_field, import_from_string
 
 
 class SimpleModel(BaseModel):

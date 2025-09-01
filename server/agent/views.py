@@ -10,6 +10,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from utils.functions import get_model_descriptor_from_class_field
 
 from agent.conversation import ConversationManager
 from agent.core.registries.agents.agent_registry import AgentRegistry
@@ -31,7 +32,6 @@ from agent.serializers.conversation import (
     MessageFeedbackSerializer,
 )
 from agent.tasks import respond_to_user_message_task
-from agent.utils.functions import get_model_descriptor_from_class_field
 from catalog.models import DataSet
 
 
@@ -46,7 +46,14 @@ class GetTaskStatus(APIView):
         manual_parameters=[
             openapi.Parameter("task_id", openapi.IN_PATH, description="ID of the task", type=openapi.TYPE_STRING)
         ],
-        responses={200: openapi.Response(description="Task status", schema=openapi.Schema(type=openapi.TYPE_OBJECT, properties={"state": openapi.Schema(type=openapi.TYPE_STRING)}))},
+        responses={
+            200: openapi.Response(
+                description="Task status",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT, properties={"state": openapi.Schema(type=openapi.TYPE_STRING)}
+                ),
+            )
+        },
     )
     def get(self, request, task_id):
         task_result = AsyncResult(task_id)

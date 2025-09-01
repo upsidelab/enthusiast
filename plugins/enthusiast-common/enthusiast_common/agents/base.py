@@ -12,12 +12,7 @@ from ..utils import RequiredFieldsModel, validate_required_vars
 
 
 class ExtraArgsClassBaseMeta(ABCMeta):
-    REQUIRED_VARS = {
-        "AGENT_ARGS": RequiredFieldsModel,
-        "PROMPT_INPUT": RequiredFieldsModel,
-        "PROMPT_EXTENSION": RequiredFieldsModel,
-        "TOOLS": list[BaseModel],
-    }
+    REQUIRED_VARS = {}
 
     def __new__(mcs, name, bases, namespace, **kwargs):
         cls = super().__new__(mcs, name, bases, namespace, **kwargs)
@@ -26,7 +21,16 @@ class ExtraArgsClassBaseMeta(ABCMeta):
         return cls
 
 
-class ExtraArgsClassBase(metaclass=ExtraArgsClassBaseMeta):
+class AgentExtraArgsClassBaseMeta(ExtraArgsClassBaseMeta):
+    REQUIRED_VARS = {
+        "AGENT_ARGS": RequiredFieldsModel,
+        "PROMPT_INPUT": RequiredFieldsModel,
+        "PROMPT_EXTENSION": RequiredFieldsModel,
+        "TOOLS": list[BaseModel],
+    }
+
+
+class ExtraArgsClassBase(metaclass=AgentExtraArgsClassBaseMeta):
     __abstract__ = True
 
 

@@ -1,16 +1,44 @@
-from abc import ABC, abstractmethod
-from typing import Optional, Type, Any
+from abc import ABC, ABCMeta, abstractmethod
+from typing import Any
 
 from enthusiast_common.structures import DocumentDetails, ProductDetails
+from enthusiast_common.utils import RequiredFieldsModel, validate_required_vars
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.tools import BaseTool
-from pydantic import BaseModel
 
 
-class ProductSourcePlugin(ABC):
-    def __init__(self, data_set_id, config: dict):
-        self.config = config
+class ExtraArgsClassBaseMeta(ABCMeta):
+    REQUIRED_VARS = {}
+
+    def __new__(mcs, name, bases, namespace, **kwargs):
+        cls = super().__new__(mcs, name, bases, namespace, **kwargs)
+        if not namespace.get("__abstract__", False):
+            return validate_required_vars(cls, name, cls.REQUIRED_VARS)
+        return cls
+
+
+class SourceExtraArgsClassBaseMeta(ExtraArgsClassBaseMeta):
+    REQUIRED_VARS = {
+        "CONFIGURATION_ARGS": RequiredFieldsModel,
+    }
+
+
+class SourceExtraArgsClassBase(metaclass=SourceExtraArgsClassBaseMeta):
+    __abstract__ = True
+
+    def set_runtime_arguments(self, runtime_arguments: Any) -> None:
+        for key, value in runtime_arguments.items():
+            class_field_key = key.upper()
+            field = getattr(self, class_field_key)
+            if field is None:
+                continue
+            setattr(self, key.upper(), field(**value))
+
+
+class ProductSourcePlugin(ABC, SourceExtraArgsClassBase):
+    CONFIGURATION_ARGS = None
+
+    def __init__(self, data_set_id):
         self.data_set_id = data_set_id
 
     @abstractmethod
@@ -23,9 +51,10 @@ class ProductSourcePlugin(ABC):
         pass
 
 
-class DocumentSourcePlugin(ABC):
-    def __init__(self, data_set_id, config: dict):
-        self.config = config
+class DocumentSourcePlugin(ABC, SourceExtraArgsClassBase):
+    CONFIGURATION_ARGS = None
+
+    def __init__(self, data_set_id):
         self.data_set_id = data_set_id
 
     @abstractmethod
@@ -97,40 +126,3 @@ class EmbeddingProvider(ABC):
         Returns:
             A list of supported model names.
         """
-
-
-class CustomTool(BaseTool):
-    name: str
-    description: str
-    args_schema: Type[BaseModel]
-    return_direct: bool
-    data_set: Any  # TODO use a proper type definition
-    chat_model: Optional[str]
-
-    def __init__(
-        self, data_set, chat_model, language_model_provider: LanguageModelProvider, streaming: bool = False, **kwargs
-    ):
-        """Initialize the ToolInterface.
-
-        Args:
-            data_set (Any): The dataset used by the tool.
-            chat_model (str, deprecated): This param is deprecated and will be removed in future versions. Use `language_model_provider.model_name()` instead.
-            language_model_provider (LanguageModelProvider): A language model provider that the tool can use.
-            streaming (bool, optional): If True, the tool will use streaming mode.
-            **kwargs: Additional keyword arguments.
-        """
-        super(CustomTool, self).__init__(**kwargs)
-        self.data_set = data_set
-        self.chat_model = chat_model
-        self._language_model_provider = language_model_provider
-        self.streaming = streaming
-
-    @abstractmethod
-    def _run(self, *args, **kwargs):
-        """Abstract method to run the tool.
-
-        Args:
-            *args: Positional arguments.
-            **kwargs: Keyword arguments.
-        """
-        pass

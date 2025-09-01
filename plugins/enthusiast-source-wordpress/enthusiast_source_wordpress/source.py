@@ -1,28 +1,26 @@
 import logging
 import re
 import urllib.parse
-from typing import Optional
 
 import requests
 from enthusiast_common import DocumentDetails, DocumentSourcePlugin
+from enthusiast_common.utils import RequiredFieldsModel
+from pydantic import Field
 from requests import Response
 
 logger = logging.getLogger(__name__)
 
 
+class WordpressConfig(RequiredFieldsModel):
+    base_url: str = Field(description="Base URL of the WordPress site")
+    user_agent: str = Field(default="", description="Custom User-Agent for requests")
+
+
 class WordpressDocumentSource(DocumentSourcePlugin):
-    def __init__(self, data_set_id, config: dict):
-        """
-        Initialize the plugin with the parameters to access shop.
+    CONFIGURATION_ARGS = WordpressConfig
 
-        Args:
-            data_set_id (int): identifier of a data set that documents are assigned to.
-            config (dict): configuration of the plugin
-        """
-        super().__init__(data_set_id, config)
-
-        self._wordpress_url = config.get("base_url")
-        self._user_agent = config.get("user_agent", None)
+    def __init__(self, data_set_id, **kwargs):
+        super().__init__(data_set_id)
 
     def fetch(self) -> list[DocumentDetails]:
         session = self._create_http_session()
@@ -44,19 +42,19 @@ class WordpressDocumentSource(DocumentSourcePlugin):
             current_url = self._next_page_link_from_headers(response)
         return results
 
-    def _next_page_link_from_headers(self, response: Response) -> Optional[str]:
+    def _next_page_link_from_headers(self, response: Response) -> str:
         link_header = response.headers["Link"]
 
         match = re.search(r'<(\S+?)>; rel="next"', link_header)
         if match:
             return match.group(1)
-        return None
+        return ""
 
     def _posts_url(self):
-        return urllib.parse.urljoin(self._wordpress_url, "wp-json/wp/v2/posts")
+        return urllib.parse.urljoin(self.CONFIGURATION_ARGS.base_url, "wp-json/wp/v2/posts")
 
     def _create_http_session(self):
         session = requests.Session()
-        if self._user_agent:
-            session.headers.update({"User-Agent": self._user_agent})
+        if self.CONFIGURATION_ARGS.user_agent:
+            session.headers.update({"User-Agent": self.CONFIGURATION_ARGS.user_agent})
         return session

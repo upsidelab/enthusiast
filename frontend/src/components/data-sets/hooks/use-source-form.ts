@@ -27,18 +27,22 @@ export function useSourceForm(
       
       try {
         setPluginName(source.plugin_name);
-        
-        const flattenedConfig = flattenConfigForForm(source.config, {
-          'configuration_args': 'configuration'
-        });
-        setConfig(flattenedConfig);
+        const currentPlugin = availablePlugins.find(p => p.name === source.plugin_name);
+        if (currentPlugin && Object.keys(currentPlugin.configuration_args).length > 0) {
+          const flattenedConfig = flattenConfigForForm(source.config, {
+            'configuration_args': 'configuration'
+          });
+          setConfig(flattenedConfig);
+        } else {
+          setConfig({});
+        }
       } catch {
         setGeneralError('Failed to load source details');
       }
     };
 
     loadSourceDetailsForEditing();
-  }, [source?.id]);
+  }, [source?.id, availablePlugins]);
 
   useEffect(() => {
     const resetFormForNewSource = () => {

@@ -54,9 +54,7 @@ class DataSetListView(ListCreateAPIView):
     serializer_class = DataSetSerializer
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_description="List data sets"
-    )
+    @swagger_auto_schema(operation_description="List data sets")
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -258,12 +256,9 @@ class DataSetProductSourceView(GenericAPIView):
     @swagger_auto_schema(operation_description="Update a product source", request_body=ProductSourceSerializer)
     def patch(self, request, *args, **kwargs):
         product_source = ProductSource.objects.get(id=kwargs.get("product_source_id"))
-        product_source.plugin_name = request.data.get("plugin_name", product_source.plugin_name)
-        product_source.config = request.data.get("config", product_source.config)
-        product_source.data_set_id = request.data.get("data_set_id", product_source.data_set_id)
-        product_source.save()
-
-        serializer = self.serializer_class(product_source)
+        serializer = self.serializer_class(product_source, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(corrupted=False)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -427,13 +422,9 @@ class DataSetDocumentSourceView(GenericAPIView):
     @swagger_auto_schema(operation_description="Update a document source", request_body=DocumentSourceSerializer)
     def patch(self, request, *args, **kwargs):
         document_source = DocumentSource.objects.get(id=kwargs.get("document_source_id"))
-        document_source.plugin_name = request.data.get("plugin_name", document_source.plugin_name)
-        document_source.config = request.data.get("config", document_source.config)
-        document_source.data_set_id = request.data.get("data_set_id", document_source.data_set_id)
-        document_source.save()
-
-        serializer = self.serializer_class(document_source)
-
+        serializer = self.serializer_class(document_source, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(corrupted=False)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
@@ -508,17 +499,17 @@ class ConfigView(GenericAPIView):
                         "language_model_providers": openapi.Schema(
                             type=openapi.TYPE_ARRAY,
                             items=openapi.Schema(type=openapi.TYPE_STRING),
-                            description="List of available language model providers"
+                            description="List of available language model providers",
                         ),
                         "embedding_providers": openapi.Schema(
                             type=openapi.TYPE_ARRAY,
                             items=openapi.Schema(type=openapi.TYPE_STRING),
-                            description="List of available embedding providers"
+                            description="List of available embedding providers",
                         ),
                     },
                 ),
             )
-        }
+        },
     )
     def get(self, request, *args, **kwargs):
         response_body = {
@@ -542,7 +533,7 @@ class ConfigLanguageModelView(GenericAPIView):
                     items=openapi.Schema(type=openapi.TYPE_STRING),
                 ),
             )
-        }
+        },
     )
     def get(self, request, *args, **kwargs):
         provider_name = kwargs.get("provider_name")
@@ -564,7 +555,7 @@ class ConfigEmbeddingModelView(GenericAPIView):
                     items=openapi.Schema(type=openapi.TYPE_STRING),
                 ),
             )
-        }
+        },
     )
     def get(self, request, *args, **kwargs):
         provider_name = kwargs.get("provider_name")

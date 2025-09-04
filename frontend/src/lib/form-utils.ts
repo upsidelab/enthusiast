@@ -85,6 +85,12 @@ export function buildConfigFromFlattened(
       configObj[sectionKey] = fields;
     }
   });
+
+  if (Object.keys(configObj).length === 0 && sectionMapping) {
+    Object.values(sectionMapping).forEach(sectionKey => {
+      configObj[sectionKey] = {};
+    });
+  }
   
   return configObj;
 }

@@ -7,6 +7,9 @@ from sync.product.manager import ProductSyncManager
 
 @shared_task
 def sync_product_source(source_id: int):
+    product_source = ProductSource.objects.get(pk=source_id)
+    if product_source.corrupted:
+        return
     manager = ProductSyncManager()
     manager.sync(source_id=source_id)
 
@@ -25,6 +28,9 @@ def sync_all_product_sources():
 
 @shared_task
 def sync_document_source(source_id: int):
+    document_source = DocumentSource.objects.get(pk=source_id)
+    if document_source.corrupted:
+        return
     manager = DocumentSyncManager()
     manager.sync(source_id=source_id)
 

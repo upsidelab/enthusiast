@@ -34,12 +34,14 @@ class ProductSource(models.Model):
     plugin_name = models.CharField()
     data_set = models.ForeignKey(DataSet, related_name="product_sources", on_delete=models.PROTECT)
     config = models.JSONField(default=dict, null=True)
+    corrupted = models.BooleanField(default=False)
 
 
 class DocumentSource(models.Model):
     plugin_name = models.CharField()
     data_set = models.ForeignKey(DataSet, related_name="document_sources", on_delete=models.PROTECT)
     config = models.JSONField(default=dict, null=True)
+    corrupted = models.BooleanField(default=False)
 
 
 class Document(models.Model):

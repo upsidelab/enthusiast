@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu.tsx";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog.tsx";
-import { Plus, RefreshCw, Settings, Trash2 } from "lucide-react";
+import { Plus, RefreshCw, Settings, Trash2, AlertTriangle } from "lucide-react";
 import { AddEditSourceModal } from "./add-edit-source-modal.tsx";
 import { ButtonWithTooltip } from "@/components/ui/button-with-tooltip.tsx";
 
@@ -176,13 +176,20 @@ export function DataSetSourceList({ dataSetId }: DataSetSourceListProps) {
             {sources.map((source) => (
               <TableRow key={`${source.type}-${source.id}`}>
                 <TableCell className="font-medium">
-                  {source.plugin_name}
+                  <div className="flex items-center space-x-2">
+                    {source.corrupted && <AlertTriangle className="h-4 w-4 text-yellow-500" />}
+                    <span className={source.corrupted ? "text-muted-foreground" : ""}>
+                      {source.plugin_name}
+                    </span>
+                  </div>
                 </TableCell>
                 <TableCell>
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    source.type === 'product'
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-green-100 text-green-800'
+                    source.corrupted 
+                      ? 'bg-gray-100 text-gray-500'
+                      : source.type === 'product'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-green-100 text-green-800'
                   }`}>
                     {source.type === 'product' ? 'Product' : 'Document'}
                   </span>
@@ -201,7 +208,8 @@ export function DataSetSourceList({ dataSetId }: DataSetSourceListProps) {
                       variant="outline"
                       size="sm"
                       onClick={() => handleSyncSource(source)}
-                      tooltip="Synchronize data from source"
+                      tooltip={source.corrupted ? "Cannot sync corrupted source" : "Synchronize data from source"}
+                      disabled={source.corrupted}
                     >
                       <RefreshCw className="h-4 w-4"/>
                     </ButtonWithTooltip>

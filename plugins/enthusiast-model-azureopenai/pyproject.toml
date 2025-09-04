@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "enthusiast-model-azureopenai"
+version = "1.0.0"
+description = "A plugin for Enthusiast that provides an OpenAI connector."
+authors = ["Damian Sowiński <damian.sowinski@upsidelab.io>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+langchain-core = "^0.3.66"
+python = "^3.10"
+enthusiast-common = ">=1,<2"
+openai = "^1.86.0"
+langchain-openai = "^0.3.27"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

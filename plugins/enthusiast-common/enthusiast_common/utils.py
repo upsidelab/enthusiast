@@ -1,7 +1,8 @@
 import inspect
+import json
 from typing import Any, Dict, List, Union, get_args, get_origin
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Json, model_validator
 from pydantic._internal._model_construction import ModelMetaclass
 
 
@@ -74,7 +75,14 @@ class RequiredFieldsMeta(ModelMetaclass):
 
 
 class RequiredFieldsModel(BaseModel, metaclass=RequiredFieldsMeta):
-    pass
+    @model_validator(mode="before")
+    def convert_json_fields(cls, values: dict) -> dict:
+        for name, field in cls.model_fields.items():
+            if field.annotation is Json and name in values:
+                v = values[name]
+                if isinstance(v, dict):
+                    values[name] = json.dumps(v)
+        return values
 
 
 class AgentAdditionalArguments(BaseModel):

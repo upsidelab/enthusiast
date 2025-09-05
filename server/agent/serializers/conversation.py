@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from agent.models import Conversation, Message
+from agent.models.conversation import ConversationFile
 from agent.serializers.configuration import AgentListSerializer
 
 
@@ -78,3 +79,34 @@ class ConversationContentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Conversation
         fields = ["id", "started_at", "summary", "history", "agent"]
+
+
+class ConversationFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConversationFile
+        fields = ["id", "file", "conversation", "content_type", "created_at", "updated_at"]
+
+    def create(self, validated_data):
+        file_obj = validated_data["file"]
+        validated_data["content_type"] = getattr(file_obj, "content_type", None)
+        return super().create(validated_data)
+
+
+class ConversationMultiFileUploadSerializer(serializers.Serializer):
+    files = serializers.ListField(child=serializers.FileField(), allow_empty=False)
+
+    def create(self, validated_data):
+        files = validated_data["files"]
+        conversation = self.context.get("conversation")
+        if not conversation:
+            raise serializers.ValidationError("Conversation is required")
+
+        objs = []
+        for f in files:
+            obj = ConversationFile.objects.create(
+                conversation=conversation,
+                file=f,
+                content_type=getattr(f, "content_type", None),
+            )
+            objs.append(obj)
+        return objs

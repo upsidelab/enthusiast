@@ -95,6 +95,14 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "pecl.urls"
 
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+FILE_STORAGE = env.str("FILE_STORAGE", default="local")
+
+if FILE_STORAGE == "local":
+    DEFAULT_FILE_STORAGE = "pecl.storage.LocalStorage"
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",

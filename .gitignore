@@ -98,6 +98,7 @@ plugins/*/dist
 .DS_Store
 
 server/.DS_Store
+server/media
 
 .env
 

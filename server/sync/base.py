@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from importlib import import_module
-from typing import Generic, TypeVar
+from typing import Generic, Self, Type, TypeVar
 
 
 @dataclass
@@ -24,11 +23,8 @@ class SourcePluginRegistry(ABC):
 
     def load_plugins(self):
         plugins = {}
-        for plugin_name, plugin_path in self.get_plugins():
-            module_name, class_name = plugin_path.rsplit(".", 1)
-            module = import_module(module_name)
-            plugin_class = getattr(module, class_name)
-            plugins[plugin_name] = plugin_class
+        for plugin_name, _ in self.get_plugins():
+            plugins[plugin_name] = self.get_plugin_class_by_name(plugin_name)
         return plugins
 
     def get_plugin_instance(self, data_set_source: DataSetSource):
@@ -41,10 +37,16 @@ class SourcePluginRegistry(ABC):
             Instance of a plugin that is configured to fetch data from external source and load to a given dataset.
         """
         plugin_class = self.plugins[data_set_source.plugin_name]
-        return plugin_class(data_set_id=data_set_source.data_set_id, config=data_set_source.config)
+        plugin_instance = plugin_class(data_set_id=data_set_source.data_set_id)
+        plugin_instance.set_runtime_arguments(data_set_source.config)
+        return plugin_instance
 
     @abstractmethod
     def get_plugins(self) -> dict:
+        pass
+
+    @abstractmethod
+    def get_plugin_class_by_name(self, path: str) -> Type[Self]:
         pass
 
 

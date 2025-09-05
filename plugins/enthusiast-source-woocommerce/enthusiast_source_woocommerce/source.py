@@ -1,39 +1,37 @@
 import logging
-import os
 from urllib.parse import urlparse
 
 from enthusiast_common import ProductDetails, ProductSourcePlugin
+from enthusiast_common.utils import RequiredFieldsModel
+from pydantic import Field
 from woocommerce import API
 
 logger = logging.getLogger(__name__)
 
 
+class WoocommerceConfig(RequiredFieldsModel):
+    base_url: str = Field(description="WooCommerce site base URL")
+    per_page: int = Field(default=20, description="Number of products per page (10-100)")
+    consumer_key: str = Field(description="WooCommerce consumer key")
+    consumer_secret: str = Field(description="WooCommerce consumer secret")
+
+
 class WoocommerceProductSource(ProductSourcePlugin):
-    def __init__(self, data_set_id, config: dict):
-        super().__init__(data_set_id, config)
-        self._woocommerce_url = config.get("base_url")
-        self._per_page = self._validate_per_page(config.get("per_page", 20))
-        self._woocommerce_consumer_key, self._woocommerce_consumer_secret = self._get_credentials(config)
-        self.wcapi = self._initialize_api()
+    CONFIGURATION_ARGS = WoocommerceConfig
+
+    def __init__(self, data_set_id, **kwargs):
+        super().__init__(data_set_id)
 
     def _validate_per_page(self, per_page):
         return max(10, min(int(per_page), 100))
 
-    def _get_credentials(self, config):
-        if "WOO_CONSUMER_KEY" in os.environ and "WOO_CONSUMER_SECRET" in os.environ:
-            return os.environ["WOO_CONSUMER_KEY"], os.environ["WOO_CONSUMER_SECRET"]
-        elif "consumer_key" in config and "consumer_secret" in config:
-            return config["consumer_key"], config["consumer_secret"]
-        else:
-            raise ValueError("WooCommerce consumer key and secret not provided")
-
     def _check_url_security(self):
-        if not self._woocommerce_url:
+        if not self.CONFIGURATION_ARGS.base_url:
             raise ValueError("WooCommerce URL is not set")
 
-        parsed_url = urlparse(self._woocommerce_url)
+        parsed_url = urlparse(self.CONFIGURATION_ARGS.base_url)
         if not parsed_url.scheme or not parsed_url.netloc:
-            raise ValueError(f"Invalid WooCommerce URL: {self._woocommerce_url}")
+            raise ValueError(f"Invalid WooCommerce URL: {self.CONFIGURATION_ARGS.base_url}")
 
         scheme = parsed_url.scheme.lower()
         match scheme:
@@ -50,20 +48,24 @@ class WoocommerceProductSource(ProductSourcePlugin):
     def _initialize_api(self):
         is_secure = self._check_url_security()
         return API(
-            url=self._woocommerce_url,
-            consumer_key=self._woocommerce_consumer_key,
-            consumer_secret=self._woocommerce_consumer_secret,
+            url=self.CONFIGURATION_ARGS.base_url,
+            consumer_key=self.CONFIGURATION_ARGS.consumer_key,
+            consumer_secret=self.CONFIGURATION_ARGS.consumer_secret,
             version="wc/v3",
             timeout=30,
             verify_ssl=is_secure,
         )
 
     def fetch(self) -> list[ProductDetails]:
+        wcapi = self._initialize_api()
         results = []
         page = 1
         while True:
             try:
-                response = self.wcapi.get("products", params={"page": page, "per_page": self._per_page})
+                response = wcapi.get(
+                    "products",
+                    params={"page": page, "per_page": self._validate_per_page(self.CONFIGURATION_ARGS.per_page)},
+                )
 
                 if response.status_code != 200:
                     logger.error(f"Failed to fetch products. Status code: {response.status_code}")

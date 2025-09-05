@@ -54,6 +54,7 @@ export const JSONEditor: React.FC<JSONEditorProps> = ({
         setJsonString(stringValue);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
   const handleOpenModal = () => {

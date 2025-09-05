@@ -1,23 +1,21 @@
 import requests
 from enthusiast_common import ProductDetails, ProductSourcePlugin
+from enthusiast_common.utils import RequiredFieldsModel
+from pydantic import Field
+
+
+class ShopwareConfig(RequiredFieldsModel):
+    base_url: str = Field(description="Shopware API base URL")
+    currency_iso_code: str = Field(description="Currency ISO code (e.g., EUR, USD)")
+    client_id: str = Field(description="Shopware client ID")
+    api_key: str = Field(description="Shopware API key")
 
 
 class ShopwareProductSource(ProductSourcePlugin):
-    def __init__(self, data_set_id, config: dict):
-        """
-        Initialize the plugin with the parameters to access source.
+    CONFIGURATION_ARGS = ShopwareConfig
 
-        Args:
-            data_set_id (int): identifier of a data set that products are assigned to.
-            config (dict): Parameters such as shop url or access token to configure a plugin.
-        """
-        super().__init__(data_set_id, config)
-
-        # Source specific parameters.
-        self._base_url = config.get("base_url", "")
-        self._currency_iso_code = config.get("currency_iso_code", "")
-        self._client_id = config.get("client_id", "")
-        self._api_key = config.get("api_key", "")
+    def __init__(self, data_set_id, **kwargs):
+        super().__init__(data_set_id)
 
         self._access_token = None
         self._categories = None
@@ -52,8 +50,12 @@ class ShopwareProductSource(ProductSourcePlugin):
     def _get_access_token(self):
         if self._access_token:
             return self._access_token
-        body = {"grant_type": "client_credentials", "client_id": self._client_id, "client_secret": self._api_key}
-        response = requests.post(f"{self._base_url}/api/oauth/token", body)
+        body = {
+            "grant_type": "client_credentials",
+            "client_id": self.CONFIGURATION_ARGS.client_id,
+            "client_secret": self.CONFIGURATION_ARGS.api_key,
+        }
+        response = requests.post(f"{self.CONFIGURATION_ARGS.base_url}/api/oauth/token", body)
         if response.status_code != 200:
             raise Exception("Failed to acquire access token. Please verify the client ID and API key.")
 
@@ -64,7 +66,7 @@ class ShopwareProductSource(ProductSourcePlugin):
         return {"Authorization": f"Bearer {self._get_access_token()}"}
 
     def _fetch_products(self):
-        response = requests.get(f"{self._base_url}/api/product", headers=self._build_headers())
+        response = requests.get(f"{self.CONFIGURATION_ARGS.base_url}/api/product", headers=self._build_headers())
         if response.status_code != 200:
             raise Exception("Failed to fetch products")
 
@@ -83,7 +85,7 @@ class ShopwareProductSource(ProductSourcePlugin):
         if self._categories:
             return self._categories
 
-        response = requests.get(f"{self._base_url}/api/category", headers=self._build_headers())
+        response = requests.get(f"{self.CONFIGURATION_ARGS.base_url}/api/category", headers=self._build_headers())
         if response.status_code != 200:
             raise Exception("Failed to fetch categories")
 
@@ -98,13 +100,18 @@ class ShopwareProductSource(ProductSourcePlugin):
         if self._currency_id:
             return self._currency_id
 
-        response = requests.get(f"{self._base_url}/api/currency", headers=self._build_headers())
+        response = requests.get(f"{self.CONFIGURATION_ARGS.base_url}/api/currency", headers=self._build_headers())
         if response.status_code != 200:
             raise Exception("Failed to fetch currency id")
 
         data = response.json().get("data", [])
         self._currency_id = next(
-            (c.get("id") for c in data if c.get("attributes", {}).get("isoCode") == self._currency_iso_code), None
+            (
+                c.get("id")
+                for c in data
+                if c.get("attributes", {}).get("isoCode") == self.CONFIGURATION_ARGS.currency_iso_code
+            ),
+            None,
         )
 
         return self._currency_id
@@ -113,7 +120,7 @@ class ShopwareProductSource(ProductSourcePlugin):
         if self._properties:
             return self._properties
 
-        response = requests.get(f"{self._base_url}/api/property-group", headers=self._build_headers())
+        response = requests.get(f"{self.CONFIGURATION_ARGS.base_url}/api/property-group", headers=self._build_headers())
         if response.status_code != 200:
             raise Exception("Failed to fetch properties")
 
@@ -128,7 +135,9 @@ class ShopwareProductSource(ProductSourcePlugin):
         if self._property_options:
             return self._property_options
 
-        response = requests.get(f"{self._base_url}/api/property-group-option", headers=self._build_headers())
+        response = requests.get(
+            f"{self.CONFIGURATION_ARGS.base_url}/api/property-group-option", headers=self._build_headers()
+        )
         if response.status_code != 200:
             raise Exception("Failed to fetch property options")
 

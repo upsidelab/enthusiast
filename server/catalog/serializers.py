@@ -1,6 +1,11 @@
 from rest_framework import serializers
+from utils.serializers import ParentDataContextSerializerMixin
+
+from sync.document.registry import DocumentSourcePluginRegistry
+from sync.product.registry import ProductSourcePluginRegistry
 
 from .models import DataSet, Document, DocumentSource, Product, ProductSource
+from .utils import PydanticModelField
 
 
 class DataSetSerializer(serializers.ModelSerializer):
@@ -35,16 +40,43 @@ class DocumentSerializer(serializers.ModelSerializer):
         return obj.chunks_count > 0
 
 
-class ProductSourceSerializer(serializers.ModelSerializer):
+class ProductSourceConfigSerializer(serializers.Serializer):
+    configuration_args = PydanticModelField(
+        config_field_name="CONFIGURATION_ARGS",
+        plugin_registry_class=ProductSourcePluginRegistry,
+        allow_null=True,
+        default=None,
+    )
+
+
+class DocumentSourceConfigSerializer(serializers.Serializer):
+    configuration_args = PydanticModelField(
+        config_field_name="CONFIGURATION_ARGS",
+        plugin_registry_class=DocumentSourcePluginRegistry,
+        allow_null=True,
+        default=None,
+    )
+
+
+class ProductSourceSerializer(ParentDataContextSerializerMixin, serializers.ModelSerializer):
+    context_keys_to_propagate = ["plugin_name"]
+
+    config = ProductSourceConfigSerializer()
+
     class Meta:
         model = ProductSource
         fields = ["id", "plugin_name", "config", "data_set_id"]
 
 
-class DocumentSourceSerializer(serializers.ModelSerializer):
+class DocumentSourceSerializer(ParentDataContextSerializerMixin, serializers.ModelSerializer):
+    context_keys_to_propagate = ["plugin_name"]
+
+    config = DocumentSourceConfigSerializer()
+
     class Meta:
         model = DocumentSource
         fields = ["id", "plugin_name", "config", "data_set_id"]
-        
+
+
 class SyncResponseSerializer(serializers.Serializer):
     task_id = serializers.CharField()

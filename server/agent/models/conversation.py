@@ -28,6 +28,7 @@ class ConversationFile(models.Model):
     conversation = models.ForeignKey(Conversation, on_delete=models.PROTECT, related_name="files")
     file = models.FileField(upload_to=conversation_file_path)
     content_type = models.CharField(max_length=255, null=True)
+    llm_content = models.TextField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

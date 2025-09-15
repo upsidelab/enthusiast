@@ -262,6 +262,16 @@ DEFAULT_AGENT: dict = {
     "config": {"tools": [{}], "agent_args": {}, "prompt_input": {}, "prompt_extension": {}},
 }
 
+FILE_PARSER_CLASSES: dict[tuple[str] : str] = {
+    (".txt",): "enthusiast_file_parsers.text.PlainTextFileParser",
+    (".pdf",): "enthusiast_file_parsers.pdf.PDFFileParser",
+    (
+        ".jpg",
+        ".jpeg",
+        ".png",
+    ): "enthusiast_file_parsers.image.ImageFileParser",
+}
+
 SERVICE_ACCOUNT_DOMAIN = env.str("SERVICE_ACCOUNT_DOMAIN", "enthusiast.internal")
 
 from .settings_override import *  # noqa

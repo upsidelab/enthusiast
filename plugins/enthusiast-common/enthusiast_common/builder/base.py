@@ -20,6 +20,7 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
     _repositories: RepositoriesInstances
 
     def __init__(self, config: ConfigT, conversation_id: Any, streaming: bool = False):
+        self._llm_registry = None
         self._llm = None
         self._embeddings_registry = None
         self._data_set_id = None
@@ -32,8 +33,9 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
         model_registry = self._build_db_models_registry()
         self._build_and_set_repositories(model_registry)
         self._data_set_id = self._repositories.conversation.get_data_set_id(self.conversation_id)
-        self._llm = self._build_llm(self._config.llm)
+        self._llm_registry = self._build_llm_registry()
         self._embeddings_registry = self._build_embeddings_registry()
+        self._llm = self._build_llm(self._config.llm)
         self._injector = self._build_injector()
         tools = self._build_tools(default_llm=self._llm, injector=self._injector)
         agent_callback_handler = self._build_agent_callback_handler()

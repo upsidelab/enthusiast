@@ -26,6 +26,7 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         return self._config.agent_class(
             tools=tools,
             llm=llm,
+            llm_registry=self._llm_registry,
             prompt=self._config.chat_prompt_template,
             conversation_id=self.conversation_id,
             callback_handler=callback_handler,
@@ -68,10 +69,9 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
 
     def _build_llm(self, llm_config: LLMConfig) -> BaseLanguageModel:
         data_set_repo = self._repositories.data_set
-        llm_registry = self._build_llm_registry()
         callbacks = self._build_llm_callback_handlers()
         llm = llm_config.llm_class(
-            llm_registry=llm_registry,
+            llm_registry=self._llm_registry,
             callbacks=callbacks,
             streaming=self.streaming,
             data_set_repo=data_set_repo,

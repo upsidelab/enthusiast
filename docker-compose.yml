@@ -37,3 +37,15 @@ services:
     environment:
       - RUN_MIGRATIONS=False
       - RUN_WORKER=True
+
+  beat:
+    build:
+      context: server/
+      dockerfile: Dockerfile
+    environment:
+      - RUN_MIGRATIONS=False
+      - RUN_WORKER=False
+      - RUN_BEAT=True
+    depends_on:
+      - redis
+      - postgres

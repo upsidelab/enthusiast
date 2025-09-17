@@ -28,6 +28,8 @@ services:
     environment:
       - PORT=10000
       - RUN_MIGRATIONS=True
+      - RUN_WORKER=False
+      - RUN_BEAT=False
   worker:
     build:
       context: server/
@@ -37,6 +39,7 @@ services:
     environment:
       - RUN_MIGRATIONS=False
       - RUN_WORKER=True
+      - RUN_BEAT=False
 
   beat:
     build:

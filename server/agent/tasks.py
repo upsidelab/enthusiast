@@ -28,7 +28,7 @@ class SaveMessageOnFailureTask(Task):
 
 @shared_task(base=SaveMessageOnFailureTask, bind=True, max_retries=3)
 def respond_to_user_message_task(
-    self, conversation_id: int, data_set_id: int, user_id: int, message: str, streaming: bool
+    self, conversation_id: int, data_set_id: int, user_id: int, message: str, streaming: bool, file_ids: list[int]
 ):
     manager = ConversationManager()
     try:
@@ -38,6 +38,7 @@ def respond_to_user_message_task(
             user_id=user_id,
             message=message,
             streaming=streaming,
+            file_ids=file_ids,
         )
         if streaming:
             channel_layer = get_channel_layer()

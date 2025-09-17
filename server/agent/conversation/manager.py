@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from enthusiast_common.structures import LLMFile
+
 from account.models import User
 from agent.core.registries.agents.agent_registry import AgentRegistry
 from agent.models import Conversation, Message
@@ -9,14 +11,16 @@ from agent.models.agent import Agent
 class ConversationManager:
     DEFAULT_ERROR_MESSAGE = "We couldn't process your request at this time"
 
-    def get_answer(self, conversation: Conversation, question_message, streaming) -> str:
+    def get_answer(
+        self, conversation: Conversation, question_message: str, streaming: bool, files_content: list[LLMFile]
+    ) -> str:
         """Formulate an answer to a given question and store the decision-making process.
 
         Engine calculates embedding for a question and using similarity search collects documents that may contain
         relevant content.
         """
         agent = AgentRegistry().get_conversation_agent(conversation, streaming)
-        response = agent.get_answer(question_message)
+        response = agent.get_answer(question_message, files_content)
 
         return response
 
@@ -35,19 +39,24 @@ class ConversationManager:
     def get_conversation(self, user_id: int, data_set_id: int, conversation_id: int) -> Conversation:
         user = User.objects.get(id=user_id)
         data_set = user.data_sets.get(id=data_set_id)
-        return Conversation.objects.select_related("agent").get(id=conversation_id, data_set=data_set, user=user)
+        return (
+            Conversation.objects.select_related("agent")
+            .prefetch_related("files")
+            .get(id=conversation_id, data_set=data_set, user=user)
+        )
 
     def respond_to_user_message(
-        self, conversation_id: int, data_set_id: int, user_id: int, message: str, streaming: bool
+        self, conversation_id: int, data_set_id: int, user_id: int, message: str, streaming: bool, file_ids: list[int]
     ) -> Message:
         conversation = self.get_conversation(user_id=user_id, data_set_id=data_set_id, conversation_id=conversation_id)
-
         # Set the conversation summary if it's the first message
         if not conversation.summary:
             conversation.summary = message
             conversation.save()
 
-        self.get_answer(conversation, message, streaming)
+        files_content = [file.get_llm_file_object() for file in conversation.files.filter(id__in=file_ids)]
+
+        self.get_answer(conversation, message, streaming, files_content)
         response = conversation.messages.order_by("created_at").last()
 
         return response

@@ -4,6 +4,9 @@ from typing import Any, Type
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
 
+from ..config.prompts import BaseFileContent, BaseImageContent
+from ..structures import FileTypes, LLMFile
+
 
 class LanguageModelProvider(ABC):
     STREAMING_AVAILABLE = True
@@ -41,6 +44,27 @@ class LanguageModelProvider(ABC):
         Returns:
             A list of available model names.
         """
+
+    @classmethod
+    def prepare_files_objects(cls, files_objects: list[LLMFile]):
+        pass
+        objects = []
+        for file in files_objects:
+            if file.file_category == FileTypes.FILE:
+                objects.append(cls.prepare_file_object(file))
+            else:
+                objects.append(cls.prepare_image_object(file))
+        return objects
+
+    @staticmethod
+    @abstractmethod
+    def prepare_image_object(file_object: LLMFile) -> BaseImageContent:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def prepare_file_object(file_object: LLMFile) -> BaseFileContent:
+        pass
 
 
 class BaseLanguageModelRegistry(ABC):

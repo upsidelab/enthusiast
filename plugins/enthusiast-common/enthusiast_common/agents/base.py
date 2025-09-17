@@ -1,10 +1,11 @@
 from abc import ABC, ABCMeta, abstractmethod
 from typing import Any
 
+from enthusiast_common.config.prompts import ChatPromptTemplateConfig
 from enthusiast_common.injectors import BaseInjector
+from enthusiast_common.structures import LLMFile
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel
 
@@ -40,7 +41,7 @@ class BaseAgent(ABC, ExtraArgsClassBase):
         self,
         tools: list[BaseTool],
         llm: BaseLanguageModel,
-        prompt: ChatPromptTemplate,
+        prompt: ChatPromptTemplateConfig,
         conversation_id: Any,
         injector: BaseInjector,
         callback_handler: BaseCallbackHandler | None = None,
@@ -53,7 +54,7 @@ class BaseAgent(ABC, ExtraArgsClassBase):
         self._injector = injector
 
     @abstractmethod
-    def get_answer(self, input_text: str) -> str:
+    def get_answer(self, input_text: str, files_content: list[LLMFile]) -> str:
         pass
 
     def set_runtime_arguments(self, runtime_arguments: Any) -> None:

@@ -4,11 +4,10 @@ from typing import Any, Generic, Optional, TypeVar
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.memory import BaseMemory
-from langchain_core.prompts import BasePromptTemplate, ChatMessagePromptTemplate, PromptTemplate
 from langchain_core.tools import BaseTool
 
 from ..agents import BaseAgent
-from ..config import AgentConfig, AgentToolConfig, FunctionToolConfig, LLMConfig, LLMToolConfig
+from ..config.base import AgentConfig, AgentToolConfig, FunctionToolConfig, LLMConfig, LLMToolConfig
 from ..injectors import BaseInjector
 from ..registry import BaseDBModelsRegistry, BaseEmbeddingProviderRegistry, BaseLanguageModelRegistry
 from ..structures import RepositoriesInstances
@@ -38,8 +37,7 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
         self._injector = self._build_injector()
         tools = self._build_tools(default_llm=self._llm, injector=self._injector)
         agent_callback_handler = self._build_agent_callback_handler()
-        prompt_template = self._build_prompt_template()
-        agent_instance = self._build_agent(tools, self._llm, prompt_template, agent_callback_handler)
+        agent_instance = self._build_agent(tools, self._llm, agent_callback_handler)
         self._inject_additional_arguments(agent_instance)
         return agent_instance
 
@@ -53,7 +51,6 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
         self,
         tools: list[BaseTool],
         llm: BaseLanguageModel,
-        prompt: PromptTemplate | ChatMessagePromptTemplate,
         callback_handler: BaseCallbackHandler,
     ) -> BaseAgent:
         pass
@@ -118,8 +115,4 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
 
     @abstractmethod
     def _build_chat_limited_memory(self) -> BaseMemory:
-        pass
-
-    @abstractmethod
-    def _build_prompt_template(self) -> BasePromptTemplate:
         pass

@@ -1,8 +1,8 @@
 from importlib import import_module
 from typing import Type
 
-from enthusiast_common.interfaces import LanguageModelProvider
 from enthusiast_common.registry import BaseLanguageModelRegistry
+from enthusiast_common.registry.llm import LanguageModelProvider
 from enthusiast_common.repositories import BaseDataSetRepository
 
 from agent.core.repositories import DjangoDataSetRepository

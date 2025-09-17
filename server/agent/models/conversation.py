@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from enthusiast_common.structures import LLMFile
 
 from agent.models.agent import Agent
 from catalog.models import DataSet
@@ -25,8 +26,13 @@ class Conversation(models.Model):
 
 
 class ConversationFile(models.Model):
+    class FileCategory(models.TextChoices):
+        IMAGE = "image", "Image"
+        FILE = "file", "File"
+
     conversation = models.ForeignKey(Conversation, on_delete=models.PROTECT, related_name="files")
     file = models.FileField(upload_to=conversation_file_path)
+    file_category = models.CharField(choices=FileCategory.choices, max_length=32)
     content_type = models.CharField(max_length=255, null=True)
     llm_content = models.TextField(blank=True)
 
@@ -35,3 +41,11 @@ class ConversationFile(models.Model):
 
     def __str__(self):
         return self.file.name
+
+    def get_llm_file_object(self):
+        return LLMFile(
+            content=self.llm_content,
+            filename=self.file.name,
+            content_type=self.content_type,
+            file_category=self.file_category,
+        )

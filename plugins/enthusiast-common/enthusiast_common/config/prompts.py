@@ -7,15 +7,11 @@ from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, field_validator, model_validator
 from typing_extensions import Self
 
-
-class ContentType(str, Enum):
-    TEXT = "input_text"
-    IMAGE = "input_image"
-    FILE = "input_file"
+TEXT_CONTENT_TYPE = "input_text"
 
 
 class BaseContent(BaseModel):
-    type: ContentType
+    type: str
 
 
 class TextContent(BaseContent):
@@ -44,7 +40,7 @@ class Message(BaseModel):
     @field_validator("content", mode="after")
     def validate_content(cls, value: Union[str, list[TextContent | BaseFileContent | BaseImageContent]]):
         if isinstance(value, str):
-            return [TextContent(text=value, type=ContentType.TEXT)]
+            return [TextContent(text=value, type=TEXT_CONTENT_TYPE)]
         return value
 
     def to_chat_prompt_template(self):

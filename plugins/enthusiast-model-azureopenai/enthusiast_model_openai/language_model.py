@@ -1,4 +1,6 @@
+from enthusiast_common.config.prompts import BaseContent
 from enthusiast_common.registry.llm import LanguageModelProvider
+from enthusiast_common.structures import LLMFile
 from enthusiast_common.utils import prioritize_items
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
@@ -6,6 +8,15 @@ from langchain_openai import AzureChatOpenAI
 from openai import AzureOpenAI
 
 PRIORITIZED_MODELS = ["gpt-4o", "gpt-4.1", "gpt-4o-mini", "gpt-4.1-mini"]
+
+
+class AzureOpenAIImageContent(BaseContent):
+    image_url: str
+
+
+class AzureOpenAIFileContent(BaseContent):
+    filename: str
+    file_data: str
 
 
 class AzureOpenAILanguageModelProvider(LanguageModelProvider):
@@ -23,3 +34,14 @@ class AzureOpenAILanguageModelProvider(LanguageModelProvider):
         all_models = AzureOpenAI().models.list().data
         gpt_models = [model.id for model in all_models if model.id.startswith("gpt-")]
         return prioritize_items(gpt_models, PRIORITIZED_MODELS)
+
+    @staticmethod
+    def prepare_image_object(file_object: LLMFile) -> AzureOpenAIImageContent:
+        return AzureOpenAIImageContent(
+            type="input_image",
+            image_url=f"data:{file_object.content_type};base64,{file_object.content}",
+        )
+
+    @staticmethod
+    def prepare_file_object(file_object: LLMFile) -> AzureOpenAIFileContent:
+        return AzureOpenAIFileContent(type="input_file", file_data=file_object.content, filename=file_object.filename)

@@ -65,7 +65,7 @@ class ProductSourceSerializer(ParentDataContextSerializerMixin, serializers.Mode
 
     class Meta:
         model = ProductSource
-        fields = ["id", "plugin_name", "config", "data_set_id"]
+        fields = ["id", "plugin_name", "config", "data_set_id", "corrupted"]
 
 
 class DocumentSourceSerializer(ParentDataContextSerializerMixin, serializers.ModelSerializer):
@@ -75,7 +75,7 @@ class DocumentSourceSerializer(ParentDataContextSerializerMixin, serializers.Mod
 
     class Meta:
         model = DocumentSource
-        fields = ["id", "plugin_name", "config", "data_set_id"]
+        fields = ["id", "plugin_name", "config", "data_set_id", "corrupted"]
 
 
 class SyncResponseSerializer(serializers.Serializer):

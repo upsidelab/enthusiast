@@ -1,12 +1,20 @@
+import logging
+
 from celery import shared_task
 
 from catalog.models import DocumentSource, ProductSource
 from sync.document.manager import DocumentSyncManager
 from sync.product.manager import ProductSyncManager
 
+logger = logging.getLogger(__name__)
+
 
 @shared_task
 def sync_product_source(source_id: int):
+    product_source = ProductSource.objects.get(pk=source_id)
+    if product_source.corrupted:
+        logger.info(f"Product source: {product_source.plugin_name} {source_id} corrupted, skipping synchronization.")
+        return
     manager = ProductSyncManager()
     manager.sync(source_id=source_id)
 
@@ -25,6 +33,10 @@ def sync_all_product_sources():
 
 @shared_task
 def sync_document_source(source_id: int):
+    document_source = DocumentSource.objects.get(pk=source_id)
+    if document_source.corrupted:
+        logger.info(f"Document source: {document_source.plugin_name} {source_id} corrupted, skipping synchronization.")
+        return
     manager = DocumentSyncManager()
     manager.sync(source_id=source_id)
 

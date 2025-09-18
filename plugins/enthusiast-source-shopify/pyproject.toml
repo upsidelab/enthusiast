@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "enthusiast-source-shopify"
-version = "1.0.1"
+version = "1.1.0"
 description = "A plugin for Enthusiast that provides a Shopify products importer."
 authors = ["Rafal Cymerys <rafal@upsidelab.io>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-enthusiast-common = ">=1,<2"
+enthusiast-common = ">=1.3,<2"
 shopifyapi = "^12.7.0"
 
 

@@ -36,12 +36,26 @@ class AzureOpenAILanguageModelProvider(LanguageModelProvider):
         return prioritize_items(gpt_models, PRIORITIZED_MODELS)
 
     @staticmethod
-    def prepare_image_object(file_object: LLMFile) -> AzureOpenAIImageContent:
+    def prepare_image_object(file_object: LLMFile, data_placeholder: bool = True) -> AzureOpenAIImageContent:
+        if data_placeholder:
+            image_url = (
+                f'data:{file_object.content_type};base64,"{{{LanguageModelProvider.FILE_KEY_PREFIX}{file_object.id}}}"'
+            )
+        else:
+            image_url = f'data:{file_object.content_type};base64,"{file_object.content}"'
         return AzureOpenAIImageContent(
             type="input_image",
-            image_url=f"data:{file_object.content_type};base64,{file_object.content}",
+            image_url=image_url,
         )
 
     @staticmethod
-    def prepare_file_object(file_object: LLMFile) -> AzureOpenAIFileContent:
-        return AzureOpenAIFileContent(type="input_file", file_data=file_object.content, filename=file_object.filename)
+    def prepare_file_object(file_object: LLMFile, data_placeholder: bool = True) -> AzureOpenAIFileContent:
+        if data_placeholder:
+            file_data = f'"{{{LanguageModelProvider.FILE_KEY_PREFIX}{file_object.id}}}"'
+        else:
+            file_data = file_object.content
+        return AzureOpenAIFileContent(
+            type="input_file",
+            file_data=file_data,
+            filename=file_object.filename,
+        )

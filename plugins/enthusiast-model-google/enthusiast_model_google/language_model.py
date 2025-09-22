@@ -35,12 +35,22 @@ class GoogleLanguageModelProvider(LanguageModelProvider):
         return prioritize_items(gemini_models, PRIORITIZED_MODELS)
 
     @staticmethod
-    def prepare_image_object(file_object: LLMFile) -> GoogleAIImageContent:
+    def prepare_image_object(file_object: LLMFile, data_placeholder: bool = True) -> GoogleAIImageContent:
+        if data_placeholder:
+            image_url = (
+                f"data:{file_object.content_type};base64,{{{LanguageModelProvider.FILE_KEY_PREFIX}{file_object.id}}}"
+            )
+        else:
+            image_url = f"data:{file_object.content_type};base64,{file_object.content}"
         return GoogleAIImageContent(
             type="image_url",
-            image_url=f"data:{file_object.content_type};base64,{file_object.content}",
+            image_url=image_url,
         )
 
     @staticmethod
-    def prepare_file_object(file_object: LLMFile) -> GoogleAIFileContent:
-        return GoogleAIFileContent(type="input_file", data=file_object.content, mime_type=file_object.content_type)
+    def prepare_file_object(file_object: LLMFile, data_placeholder: bool = True) -> GoogleAIFileContent:
+        if data_placeholder:
+            data = f"{LanguageModelProvider.FILE_KEY_PREFIX}{file_object.id}"
+        else:
+            data = file_object.content
+        return GoogleAIFileContent(type="input_file", data=data, mime_type=file_object.content_type)

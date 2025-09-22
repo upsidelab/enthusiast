@@ -12,15 +12,15 @@ class ConversationManager:
     DEFAULT_ERROR_MESSAGE = "We couldn't process your request at this time"
 
     def get_answer(
-        self, conversation: Conversation, question_message: str, streaming: bool, files_content: list[LLMFile]
+        self, conversation: Conversation, question_message: str, streaming: bool, file_objects: list[LLMFile]
     ) -> str:
         """Formulate an answer to a given question and store the decision-making process.
 
         Engine calculates embedding for a question and using similarity search collects documents that may contain
         relevant content.
         """
-        agent = AgentRegistry().get_conversation_agent(conversation, streaming)
-        response = agent.get_answer(question_message, files_content)
+        agent = AgentRegistry().get_conversation_agent(conversation, streaming, file_objects)
+        response = agent.get_answer(question_message, file_objects)
 
         return response
 
@@ -54,9 +54,9 @@ class ConversationManager:
             conversation.summary = message
             conversation.save()
 
-        files_content = [file.get_llm_file_object() for file in conversation.files.filter(id__in=file_ids)]
+        file_objects = [file.get_llm_file_object() for file in conversation.files.filter(id__in=file_ids)]
 
-        self.get_answer(conversation, message, streaming, files_content)
+        self.get_answer(conversation, message, streaming, file_objects)
         response = conversation.messages.order_by("created_at").last()
 
         return response

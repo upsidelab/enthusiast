@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any
 
 from .repositories import (
     BaseAgentRepository,
@@ -55,6 +56,7 @@ class FileTypes(Enum):
 
 @dataclass
 class LLMFile:
+    id: Any
     content: str
     file_category: FileTypes
     filename: str

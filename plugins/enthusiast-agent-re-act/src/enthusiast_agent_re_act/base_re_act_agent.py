@@ -22,9 +22,9 @@ class BaseReActAgent(BaseAgent):
 
         return {}
 
-    def _build_agent_executor(self, files_content: list[LLMFile]) -> AgentExecutor:
+    def _build_agent_executor(self, file_objects: list[LLMFile]) -> AgentExecutor:
         tools = self._build_tools()
-        prompt = self._create_prompt(files_content)
+        prompt = self._create_prompt(file_objects)
         agent = create_react_agent(
             tools=tools,
             llm=self._llm,
@@ -34,7 +34,7 @@ class BaseReActAgent(BaseAgent):
         )
         return AgentExecutor(agent=agent, tools=tools, memory=self._build_memory())
 
-    def get_answer(self, input_text: str, files_content: list[LLMFile]) -> str:
-        agent_executor = self._build_agent_executor()
+    def get_answer(self, input_text: str, file_objects: list[LLMFile]) -> str:
+        agent_executor = self._build_agent_executor(file_objects)
         response = agent_executor.invoke({"input": input_text}, config=self._build_invoke_config())
         return response["output"]

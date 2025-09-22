@@ -4,6 +4,7 @@ from enthusiast_common.agents import BaseAgent
 from enthusiast_common.builder import BaseAgentBuilder, RepositoriesInstances
 from enthusiast_common.callbacks import ConversationCallbackHandler
 from enthusiast_common.config.base import AgentConfig, AgentToolConfig, FunctionToolConfig, LLMConfig, LLMToolConfig
+from enthusiast_common.config.prompts import ChatPromptTemplateConfig
 from enthusiast_common.injectors import BaseInjector
 from enthusiast_common.registry import BaseDBModelsRegistry, BaseEmbeddingProviderRegistry, BaseLanguageModelRegistry
 from enthusiast_common.retrievers import BaseRetriever
@@ -21,13 +22,14 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         self,
         tools: list[BaseTool],
         llm: BaseLanguageModel,
+        prompt: ChatPromptTemplateConfig,
         callback_handler: BaseCallbackHandler,
     ) -> BaseAgent:
         return self._config.agent_class(
             tools=tools,
             llm=llm,
             llm_registry=self._llm_registry,
-            prompt=self._config.chat_prompt_template,
+            prompt=prompt,
             conversation_id=self.conversation_id,
             callback_handler=callback_handler,
             injector=self._injector,
@@ -199,3 +201,13 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
             output_key="output",
             chat_memory=history,
         )
+
+    def _build_prompt_template(self) -> ChatPromptTemplateConfig:
+        data_set_id = self._injector.repositories.conversation.get_data_set_id(self.conversation_id)
+        llm_provider = self._llm_registry.provider_for_dataset(data_set_id)
+
+        memory = self._injector.chat_summary_memory or self._config.chat_limited_memory
+        chat_history_files = memory.chat_memory.get_files()
+        files_objects = llm_provider.prepare_files_objects(files_objects=chat_history_files, data_placeholder=False)
+        file_injected_prompt = self._config.chat_prompt_template.add_files_content(files_objects)
+        return file_injected_prompt

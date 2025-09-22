@@ -1,4 +1,5 @@
 from django.db import models
+from enthusiast_common.registry import LanguageModelProvider
 
 from .conversation import Conversation
 
@@ -13,6 +14,12 @@ class Message(models.Model):
     feedback = models.TextField(null=True)
 
     answer_failed = models.BooleanField(default=False)
+    is_file = models.BooleanField(default=False)
+
+    def parse_file_id(self) -> int | None:
+        if not self.is_file:
+            return None
+        return int(self.text.removeprefix(LanguageModelProvider.FILE_KEY_PREFIX))
 
     class Meta:
         db_table_comment = (

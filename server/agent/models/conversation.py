@@ -44,8 +44,9 @@ class ConversationFile(models.Model):
 
     def get_llm_file_object(self):
         return LLMFile(
+            id=self.pk,
             content=self.llm_content,
-            filename=self.file.name,
+            filename=self.file.name.split("/")[-1].split(".")[0],
             content_type=self.content_type,
             file_category=self.file_category,
         )

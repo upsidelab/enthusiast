@@ -1,8 +1,10 @@
 from abc import ABC, ABCMeta, abstractmethod
 from typing import Any
 
+from enthusiast_common.registry import LanguageModelProvider
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel
 
@@ -57,7 +59,7 @@ class BaseAgent(ABC, ExtraArgsClassBase):
         self._injector = injector
 
     @abstractmethod
-    def get_answer(self, input_text: str, files_content: list[LLMFile]) -> str:
+    def get_answer(self, input_text: str, file_objects: list[LLMFile]) -> str:
         pass
 
     def set_runtime_arguments(self, runtime_arguments: Any) -> None:
@@ -71,9 +73,15 @@ class BaseAgent(ABC, ExtraArgsClassBase):
         for index, tool in enumerate(self._tools):
             tool.set_runtime_arguments(tools_runtime_arguments[index])
 
-    def _create_prompt(self, files_content: list[LLMFile]):
+    def _create_prompt(self, file_objects: list[LLMFile]) -> ChatPromptTemplate:
         data_set_id = self._injector.repositories.conversation.get_data_set_id(self._conversation_id)
         llm_provider = self._llm_registry.provider_for_dataset(data_set_id)
-        files_objects = llm_provider.prepare_files_objects(files_objects=files_content)
+        files_objects = llm_provider.prepare_files_objects(files_objects=file_objects)
         file_injected_prompt = self._prompt.add_files_content(files_objects)
         return file_injected_prompt.to_chat_prompt_template()
+
+    def _prepare_file_inputs(self, file_objects: list[LLMFile]):
+        return {
+            f"{LanguageModelProvider.FILE_KEY_PREFIX}{file_object.id}": file_object.content
+            for file_object in file_objects
+        }

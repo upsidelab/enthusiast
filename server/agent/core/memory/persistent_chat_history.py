@@ -17,18 +17,18 @@ class PersistentChatHistory(BaseChatMessageHistory):
 
     def add_message(self, message: BaseMessage) -> None:
         self._conversation.messages.create(
-            role=message.type, text=message.content, is_file=getattr(message, "is_file", False)
+            role=message.type, text=message.content, file_id=getattr(message, "file_id", None)
         )
 
     @property
     def messages(self) -> list[BaseMessage]:
-        messages = self._conversation.messages.filter(answer_failed=False, is_file=False).order_by("created_at")
+        messages = self._conversation.messages.filter(answer_failed=False, file_id__isnull=True).order_by("created_at")
         message_dicts = [{"type": message.role, "data": {"content": message.text}} for message in messages]
         return messages_from_dict(message_dicts)
 
     def get_files(self) -> list[LLMFile]:
-        messages = self._conversation.messages.filter(answer_failed=False, is_file=True).order_by("created_at")
-        files = [self._conversation.files.filter(pk=message.parse_file_id()).first() for message in messages]
+        messages = self._conversation.messages.filter(answer_failed=False, file_id__isnull=False).order_by("created_at")
+        files = [self._conversation.files.filter(pk=message.file_id).first() for message in messages]
         return [file.get_llm_file_object() for file in files]
 
     def clear(self) -> None:

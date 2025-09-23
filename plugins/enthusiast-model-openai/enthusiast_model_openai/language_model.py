@@ -6,6 +6,7 @@ from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
 from langchain_openai import ChatOpenAI
 from openai import OpenAI
+from pydantic import BaseModel
 
 PRIORITIZED_MODELS = ["gpt-4o", "gpt-4.1", "gpt-4o-mini", "gpt-4.1-mini"]
 
@@ -14,9 +15,13 @@ class OpenAIImageContent(BaseContent):
     image_url: str
 
 
-class OpenAIFileContent(BaseContent):
+class OpenAIFileObject(BaseModel):
     filename: str
     file_data: str
+
+
+class OpenAIFileContent(BaseContent):
+    file: OpenAIFileObject
 
 
 class OpenAILanguageModelProvider(LanguageModelProvider):
@@ -51,11 +56,7 @@ class OpenAILanguageModelProvider(LanguageModelProvider):
     @staticmethod
     def prepare_file_object(file_object: LLMFile, data_placeholder: bool = True) -> OpenAIFileContent:
         if data_placeholder:
-            file_data = f'"{{{LanguageModelProvider.FILE_KEY_PREFIX}{file_object.id}}}"'
+            file_data = f"data:application/pdf;base64,{{{LanguageModelProvider.FILE_KEY_PREFIX}{file_object.id}}}"
         else:
-            file_data = file_object.content
-        return OpenAIFileContent(
-            type="input_file",
-            file_data=file_data,
-            filename=file_object.filename,
-        )
+            file_data = f"data:application/pdf;base64,{file_object.content}"
+        return OpenAIFileContent(type="file", file=OpenAIFileObject(file_data=file_data, filename=file_object.filename))

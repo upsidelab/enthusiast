@@ -6,6 +6,7 @@ from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
 from langchain_openai import AzureChatOpenAI
 from openai import AzureOpenAI
+from pydantic import BaseModel
 
 PRIORITIZED_MODELS = ["gpt-4o", "gpt-4.1", "gpt-4o-mini", "gpt-4.1-mini"]
 
@@ -14,9 +15,13 @@ class AzureOpenAIImageContent(BaseContent):
     image_url: str
 
 
-class AzureOpenAIFileContent(BaseContent):
+class AzureOpenAIFileObject(BaseModel):
     filename: str
     file_data: str
+
+
+class AzureOpenAIFileContent(BaseContent):
+    file: AzureOpenAIFileObject
 
 
 class AzureOpenAILanguageModelProvider(LanguageModelProvider):
@@ -51,11 +56,9 @@ class AzureOpenAILanguageModelProvider(LanguageModelProvider):
     @staticmethod
     def prepare_file_object(file_object: LLMFile, data_placeholder: bool = True) -> AzureOpenAIFileContent:
         if data_placeholder:
-            file_data = f'"{{{LanguageModelProvider.FILE_KEY_PREFIX}{file_object.id}}}"'
+            file_data = f"data:application/pdf;base64,{{{LanguageModelProvider.FILE_KEY_PREFIX}{file_object.id}}}"
         else:
-            file_data = file_object.content
+            file_data = f"data:application/pdf;base64,{file_object.content}"
         return AzureOpenAIFileContent(
-            type="input_file",
-            file_data=file_data,
-            filename=file_object.filename,
+            type="file", file=AzureOpenAIFileObject(file_data=file_data, filename=file_object.filename)
         )

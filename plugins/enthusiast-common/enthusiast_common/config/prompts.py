@@ -75,4 +75,5 @@ class ChatPromptTemplateConfig(BaseModel):
             raise ValueError("No user message was provided.")
         for file in files_objects:
             user_message.content.append(file)
+
         return self.model_copy(update={"messages": self.messages})

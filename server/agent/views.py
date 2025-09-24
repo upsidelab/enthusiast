@@ -13,6 +13,7 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from utils.functions import get_model_descriptor_from_class_field
 
 from agent.conversation import ConversationManager
 from agent.core.registries.agents.agent_registry import AgentRegistry
@@ -37,7 +38,6 @@ from agent.serializers.conversation import (
     SupportedFileTypesSerializer,
 )
 from agent.tasks import process_file_upload_task, respond_to_user_message_task
-from agent.utils.functions import get_model_descriptor_from_class_field
 from catalog.models import DataSet
 
 

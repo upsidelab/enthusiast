@@ -1,21 +1,27 @@
+import base64
+
 import requests
 from enthusiast_common import ProductDetails, ProductSourcePlugin
+from enthusiast_common.utils import RequiredFieldsModel
+from pydantic import Field
+
+
+class MedusaProductSourceConfig(RequiredFieldsModel):
+    api_key: str = Field(title="API key", description="Medusa API key")
+    base_url: str = Field(title="Base url", description="Medusa API base url")
 
 
 class MedusaProductSource(ProductSourcePlugin):
-    def __init__(self, data_set_id, config: dict):
+    CONFIGURATION_ARGS = MedusaProductSourceConfig
+
+    def __init__(self, data_set_id):
         """
         Initialize the plugin with the parameters to access source.
 
         Args:
             data_set_id (int): identifier of a data set that products are assigned to.
-            config (dict): Parameters such as shop url or access token to configure a plugin.
         """
-        super().__init__(data_set_id, config)
-
-        # Source specific parameters.
-        self._base_url = config.get("base_url")
-        self._api_key = config.get("api_key")
+        super().__init__(data_set_id)
 
     def get_product(self, medusa_product) -> ProductDetails:
         """Translates product definition received from Medusa into Enthusiast product.
@@ -34,7 +40,7 @@ class MedusaProductSource(ProductSourcePlugin):
             price=medusa_product.get("variants", [{}])[0].get("prices", [{}])[0].get("amount")
             if medusa_product.get("variants")
             else None,
-            properties=medusa_product.get("metadata"),
+            properties=medusa_product.get("metadata", ""),
             categories=[category.get("name") for category in medusa_product.get("collection", {}).get("categories", [])]
             if medusa_product.get("collection")
             else [],
@@ -49,12 +55,14 @@ class MedusaProductSource(ProductSourcePlugin):
             list[ProductDetails]: A list of products.
         """
 
-        endpoint = f"{self._base_url}/admin/products?expand=categories"
+        endpoint = f"{self.CONFIGURATION_ARGS.base_url}/admin/products?expand=categories"
         products = []
         offset = 0  # Starting point for product list pagination.
         limit = 100  # Page size.
+        encoded_api_key_bytes = base64.b64encode(self.CONFIGURATION_ARGS.api_key.encode("utf-8"))
+        encoded_api_key = encoded_api_key_bytes.decode("utf-8")
 
-        headers = {"Authorization": f"Bearer {self._api_key}"}
+        headers = {"Authorization": f"Basic {encoded_api_key}"}
 
         while True:
             response = requests.get(endpoint, headers=headers, params={"limit": limit, "offset": offset})

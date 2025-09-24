@@ -232,14 +232,14 @@ files = [
 
 [[package]]
 name = "enthusiast-common"
-version = "1.2.0"
+version = "1.3.0"
 description = "Core interfaces for developing custom Enthusiast plugins and integrations."
 optional = false
-python-versions = "<4.0,>=3.9"
+python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "enthusiast_common-1.2.0-py3-none-any.whl", hash = "sha256:2c015650da886ff91c70b4ade6669442933c11d994878cbbf13c9b6cea168a2f"},
-    {file = "enthusiast_common-1.2.0.tar.gz", hash = "sha256:3d08091deda15387f4c6eac7b9261aa64bfb2857d165625e3339fe98f1195f65"},
+    {file = "enthusiast_common-1.3.0-py3-none-any.whl", hash = "sha256:a9dc306ccad7818ca04ac3f3cb1f76e3feeea7a93216c2d9d45930772f350023"},
+    {file = "enthusiast_common-1.3.0.tar.gz", hash = "sha256:4ec962bebea8aeb2b3ad39745bcc35727e9c3608faaf34880b9f4997dbd70829"},
 ]
 
 [package.dependencies]
@@ -252,7 +252,7 @@ description = "Backport of PEP 654 (exception groups)"
 optional = false
 python-versions = ">=3.7"
 groups = ["main"]
-markers = "python_version < \"3.11\""
+markers = "python_version == \"3.10\""
 files = [
     {file = "exceptiongroup-1.3.0-py3-none-any.whl", hash = "sha256:4d111e6e0c13d0644cad6ddaa7ed0261a0b36971f6d23e7ec9b4b9097da78a10"},
     {file = "exceptiongroup-1.3.0.tar.gz", hash = "sha256:b241f5885f560bc56a59ee63ca4c6a8bfa46ae4ad651af316d4e81817bb9fd88"},
@@ -1007,5 +1007,5 @@ cffi = ["cffi (>=1.11)"]
 
 [metadata]
 lock-version = "2.1"
-python-versions = "^3.9"
-content-hash = "8aa8686584f69c86795d105b48644c53db7a5c62c4fa314034116345fd2b8479"
+python-versions = "^3.10"
+content-hash = "09fb5da205dfd4fbfcc71b188a2b4e93f1268c0bd51144d11669b8eddb6e9a72"

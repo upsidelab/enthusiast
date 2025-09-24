@@ -746,14 +746,14 @@ validation = ["swagger-spec-validator (>=2.1.0)"]
 
 [[package]]
 name = "enthusiast-common"
-version = "1.2.3"
+version = "1.3.0"
 description = "Core interfaces for developing custom Enthusiast plugins and integrations."
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "enthusiast_common-1.2.3-py3-none-any.whl", hash = "sha256:2b3a048ced33b1432cd3aae31b4d913bf65cf91a02c803e6a9ec1f6fd25b7ab3"},
-    {file = "enthusiast_common-1.2.3.tar.gz", hash = "sha256:04f5845ecd4758ceeaca5cb47a1c750d1ac86a6ce5ee21ce2c409a2069a79f4b"},
+    {file = "enthusiast_common-1.3.0-py3-none-any.whl", hash = "sha256:a9dc306ccad7818ca04ac3f3cb1f76e3feeea7a93216c2d9d45930772f350023"},
+    {file = "enthusiast_common-1.3.0.tar.gz", hash = "sha256:4ec962bebea8aeb2b3ad39745bcc35727e9c3608faaf34880b9f4997dbd70829"},
 ]
 
 [package.dependencies]
@@ -761,14 +761,14 @@ langchain-core = ">=0.3.66,<0.4.0"
 
 [[package]]
 name = "enthusiast-model-openai"
-version = "1.1.1"
+version = "1.1.2"
 description = "A plugin for Enthusiast that provides an OpenAI connector."
 optional = false
-python-versions = "<4.0,>=3.9"
+python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "enthusiast_model_openai-1.1.1-py3-none-any.whl", hash = "sha256:bc61fc269994d2d634ac81c20ef4544b14de57bfdc1677d3e583207e5c97aff7"},
-    {file = "enthusiast_model_openai-1.1.1.tar.gz", hash = "sha256:268b849ce6c494615bd19d2931c7d59742d58cdb9511b44524ca0a577916deb7"},
+    {file = "enthusiast_model_openai-1.1.2-py3-none-any.whl", hash = "sha256:223b71897a0d67b60a4e3f2dee3a2f103a3b7e443be46349948278ea68f8f50c"},
+    {file = "enthusiast_model_openai-1.1.2.tar.gz", hash = "sha256:721fd64b19ec8ed71e698bbd11e1f801979060bba2ef63b90f2d7659a104d26d"},
 ]
 
 [package.dependencies]
@@ -779,18 +779,18 @@ openai = ">=1.86.0,<2.0.0"
 
 [[package]]
 name = "enthusiast-source-sample"
-version = "1.0.0"
+version = "1.1.0"
 description = "A plugin for Enthusiast that provides a sample data source for demo purposes."
 optional = false
-python-versions = "<4.0,>=3.9"
+python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "enthusiast_source_sample-1.0.0-py3-none-any.whl", hash = "sha256:378ca9d34abbb3c80991d39dd948a54604f264c2ed66e8e46a0a9c51b039a956"},
-    {file = "enthusiast_source_sample-1.0.0.tar.gz", hash = "sha256:9d3e662335188116ce0e2e6bce17ecdaf8babb388575ad73b1b027a56f4b8db8"},
+    {file = "enthusiast_source_sample-1.1.0-py3-none-any.whl", hash = "sha256:fe663eef19ec0e4859c5a57d68313cc90b3cef6e8fe6692e0a338061ed2231a6"},
+    {file = "enthusiast_source_sample-1.1.0.tar.gz", hash = "sha256:4ed4ae48f38fcc9a6b86ecf1b3893fd007079c99b8ceed9a3eade165441ecb23"},
 ]
 
 [package.dependencies]
-enthusiast-common = ">=1,<2"
+enthusiast-common = ">=1.3,<2"
 
 [[package]]
 name = "exceptiongroup"
@@ -2798,4 +2798,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10, <4.0"
-content-hash = "5d8d22cbe258fa6a3d25fa040870cf0f950ed62e8143b24b13148d8d6fbd01db"
+content-hash = "3dea9f8dc68936f3d6ade44f2a1c70167c1dea138c2b54cb1e432be8b73219d0"

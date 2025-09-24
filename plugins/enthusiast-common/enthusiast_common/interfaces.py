@@ -1,11 +1,42 @@
-from abc import ABC, abstractmethod
+from abc import ABC, ABCMeta, abstractmethod
+from typing import Any
 
 from enthusiast_common.structures import DocumentDetails, ProductDetails
+from enthusiast_common.utils import RequiredFieldsModel, validate_required_vars
 
 
-class ProductSourcePlugin(ABC):
-    def __init__(self, data_set_id, config: dict):
-        self.config = config
+class ExtraArgsClassBaseMeta(ABCMeta):
+    REQUIRED_VARS = {}
+
+    def __new__(mcs, name, bases, namespace, **kwargs):
+        cls = super().__new__(mcs, name, bases, namespace, **kwargs)
+        if not namespace.get("__abstract__", False):
+            return validate_required_vars(cls, name, cls.REQUIRED_VARS)
+        return cls
+
+
+class SourceExtraArgsClassBaseMeta(ExtraArgsClassBaseMeta):
+    REQUIRED_VARS = {
+        "CONFIGURATION_ARGS": RequiredFieldsModel,
+    }
+
+
+class SourceExtraArgsClassBase(metaclass=SourceExtraArgsClassBaseMeta):
+    __abstract__ = True
+
+    def set_runtime_arguments(self, runtime_arguments: Any) -> None:
+        for key, value in runtime_arguments.items():
+            class_field_key = key.upper()
+            field = getattr(self, class_field_key)
+            if field is None:
+                continue
+            setattr(self, key.upper(), field(**value))
+
+
+class ProductSourcePlugin(ABC, SourceExtraArgsClassBase):
+    CONFIGURATION_ARGS = None
+
+    def __init__(self, data_set_id):
         self.data_set_id = data_set_id
 
     @abstractmethod
@@ -18,9 +49,10 @@ class ProductSourcePlugin(ABC):
         pass
 
 
-class DocumentSourcePlugin(ABC):
-    def __init__(self, data_set_id, config: dict):
-        self.config = config
+class DocumentSourcePlugin(ABC, SourceExtraArgsClassBase):
+    CONFIGURATION_ARGS = None
+
+    def __init__(self, data_set_id):
         self.data_set_id = data_set_id
 
     @abstractmethod

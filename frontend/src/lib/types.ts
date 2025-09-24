@@ -29,6 +29,7 @@ export type CatalogSource = {
   plugin_name: string;
   config: string;
   data_set_id: number;
+  corrupted: boolean;
 }
 
 export type Document = {

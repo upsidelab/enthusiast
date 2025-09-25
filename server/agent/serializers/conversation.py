@@ -1,5 +1,7 @@
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from rest_framework import serializers
 
+from agent.file_service import FileService
 from agent.models import Conversation, Message
 from agent.models.conversation import ConversationFile
 from agent.serializers.configuration import AgentListSerializer
@@ -84,7 +86,7 @@ class ConversationContentSerializer(serializers.ModelSerializer):
 class ConversationFileSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConversationFile
-        fields = ["id", "file", "conversation", "content_type", "created_at", "updated_at"]
+        fields = ["id", "file", "conversation", "content_type", "llm_content", "created_at", "updated_at"]
 
     def create(self, validated_data):
         file_obj = validated_data["file"]
@@ -96,17 +98,21 @@ class ConversationMultiFileUploadSerializer(serializers.Serializer):
     files = serializers.ListField(child=serializers.FileField(), allow_empty=False)
 
     def create(self, validated_data):
-        files = validated_data["files"]
+        files: list[InMemoryUploadedFile] = validated_data["files"]
+
         conversation = self.context.get("conversation")
         if not conversation:
             raise serializers.ValidationError("Conversation is required")
 
         objs = []
-        for f in files:
-            obj = ConversationFile.objects.create(
+        for file in files:
+            obj = ConversationFile(
                 conversation=conversation,
-                file=f,
-                content_type=getattr(f, "content_type", None),
+                file=file,
+                content_type=getattr(file, "content_type", None),
+                llm_content=FileService(file.file, file.content_type).process() or "",
             )
+
             objs.append(obj)
-        return objs
+
+        return ConversationFile.objects.bulk_create(objs)

@@ -101,7 +101,7 @@ class ConversationView(APIView):
     )
     def post(self, request, conversation_id):
         conversation = get_object_or_404(Conversation, id=conversation_id)
-        serializer = AskQuestionSerializer(data=request.data)
+        serializer = AskQuestionSerializer(data=request.data, context={"conversation_id": conversation_id})
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -111,6 +111,7 @@ class ConversationView(APIView):
         data_set_id = serializer.validated_data.get("data_set_id")
         question_message = serializer.validated_data.get("question_message")
         streaming = serializer.validated_data.get("streaming")
+        file_ids = serializer.validated_data.get("file_ids")
         data_set = Conversation.objects.get(id=conversation_id).data_set
         data_set_repo = DjangoDataSetRepository(DataSet)
         language_model_provider_class = LanguageModelRegistry(data_set_repo).provider_for_dataset(data_set.id)
@@ -121,6 +122,7 @@ class ConversationView(APIView):
                 "user_id": request.user.id,
                 "message": question_message,
                 "streaming": streaming,
+                "file_ids": file_ids,
             }
         )
 

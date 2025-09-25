@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import Any, Generic, Optional, TypeVar
 
-from enthusiast_common.config.prompts import ChatPromptTemplateConfig
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.memory import BaseMemory
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import BaseTool
 
 from ..agents import BaseAgent
@@ -124,5 +124,5 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
         pass
 
     @abstractmethod
-    def _build_prompt_template(self) -> ChatPromptTemplateConfig:
+    def _build_prompt_template(self) -> ChatPromptTemplate:
         pass

@@ -34,6 +34,8 @@ services:
     environment:
       - PORT=10000
       - RUN_MIGRATIONS=True
+      - RUN_WORKER=False
+      - RUN_BEAT=False
   worker:
     build:
       context: .
@@ -43,3 +45,18 @@ services:
     environment:
       - RUN_MIGRATIONS=False
       - RUN_WORKER=True
+      - RUN_BEAT=False
+    depends_on:
+      - redis
+      - postgres
+  beat:
+    build:
+      context: .
+      dockerfile: server/Dockerfile.development
+    environment:
+      - RUN_MIGRATIONS=False
+      - RUN_WORKER=False
+      - RUN_BEAT=True
+    depends_on:
+      - redis
+      - postgres

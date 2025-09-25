@@ -8,6 +8,7 @@ from django.conf import settings
 from enthusiast_common.agents import BaseAgent
 from enthusiast_common.builder import BaseAgentBuilder
 from enthusiast_common.config.base import AgentConfig
+from enthusiast_common.structures import LLMFile
 
 from agent.core.agents.default_config import merge_config
 from agent.core.builder import AgentBuilder
@@ -52,12 +53,12 @@ class AgentRegistry(BaseAgentRegistry):
         agents_config = settings.AVAILABLE_AGENTS
         super().__init__(agents_config)
 
-    def get_conversation_agent(self, conversation: Conversation, streaming: bool) -> BaseAgent:
+    def get_conversation_agent(self, conversation: Conversation, streaming: bool, files: list[LLMFile]) -> BaseAgent:
         try:
             builder = self._get_builder_class_by_name(agent_type=conversation.agent.agent_type)
             config = self._get_config_by_name(agent_type=conversation.agent.agent_type)
             config = merge_config(partial=config)
-            return builder(config=config, conversation_id=conversation.id, streaming=streaming).build()
+            return builder(config=config, conversation_id=conversation.id, streaming=streaming, files=files).build()
         except Exception as e:
             raise AgentRegistryError(f"Failed to build agent for conversation {conversation.id}") from e
 

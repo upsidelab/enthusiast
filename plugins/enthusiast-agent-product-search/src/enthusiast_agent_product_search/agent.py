@@ -3,12 +3,14 @@ from enthusiast_common.config.base import LLMToolConfig
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain_core.tools import render_text_description_and_args
 
+from .tools.present_product_tool import PresentProductsTool
 from .tools.product_search_tool import ProductSearchTool
 
 
 class ProductSearchReActAgent(BaseReActAgent):
     TOOLS = [
         LLMToolConfig(tool_class=ProductSearchTool),
+        LLMToolConfig(tool_class=PresentProductsTool),
     ]
 
     def _build_agent_executor(self) -> AgentExecutor:

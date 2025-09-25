@@ -111,3 +111,42 @@ class AgentActionWebsocketCallbackHandler(BaseWebSocketHandler):
                 "output": output,
             },
         )
+
+    def on_product_widget_start(self, data, **kwargs):
+        self.send_message(
+            {
+                "type": "chat_message",
+                "event": "product_widget_start",
+                "run_id": self.run_id,
+                "data": data,
+            }
+        )
+
+    def on_product_widget_product(self, product, **kwargs):
+        self.send_message(
+            {
+                "type": "chat_message",
+                "event": "product_widget_product",
+                "run_id": self.run_id,
+                "data": product,
+            },
+        )
+
+    def on_product_widget_end(self):
+        self.send_message(
+            {
+                "type": "chat_message",
+                "event": "product_widget_end",
+                "run_id": self.run_id,
+            }
+        )
+
+    def on_test(self, token: str, **kwargs):
+        self.send_message(
+            {
+                "type": "chat_message",
+                "event": "stream",
+                "run_id": self.run_id,
+                "token": token,
+            },
+        )

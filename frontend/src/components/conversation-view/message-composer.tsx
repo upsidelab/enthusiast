@@ -68,6 +68,7 @@ export function MessageComposer({ onSubmit, isLoading, conversationLocked = fals
       document.body.removeEventListener("dragover", handleDragOver);
       document.body.removeEventListener("dragleave", handleDragLeave);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const resizeTextArea = (element: HTMLTextAreaElement) => {

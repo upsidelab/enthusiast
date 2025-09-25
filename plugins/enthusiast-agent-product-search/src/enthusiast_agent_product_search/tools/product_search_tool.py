@@ -1,7 +1,5 @@
 from django.core import serializers
-from enthusiast_common.injectors import BaseInjector
 from enthusiast_common.tools import BaseLLMTool
-from langchain_core.language_models import BaseLanguageModel
 from pydantic import BaseModel, Field
 
 
@@ -15,19 +13,8 @@ class ProductSearchTool(BaseLLMTool):
     ARGS_SCHEMA = ProductSearchInput
     RETURN_DIRECT = False
 
-    def __init__(
-        self,
-        data_set_id: int,
-        llm: BaseLanguageModel,
-        injector: BaseInjector | None,
-    ):
-        super().__init__(data_set_id=data_set_id, llm=llm, injector=injector)
-        self.data_set_id = data_set_id
-        self.llm = llm
-        self.injector = injector
-
     def run(self, full_user_request: str):
-        product_retriever = self.injector.product_retriever
+        product_retriever = self._injector.product_retriever
         relevant_products = product_retriever.find_products_matching_query(full_user_request)
         if not relevant_products:
             return "No products found, try to loosen the criteria"

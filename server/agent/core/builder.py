@@ -3,14 +3,14 @@ from typing import Optional
 from enthusiast_common.agents import BaseAgent
 from enthusiast_common.builder import BaseAgentBuilder, RepositoriesInstances
 from enthusiast_common.callbacks import ConversationCallbackHandler
-from enthusiast_common.config import AgentConfig, AgentToolConfig, FunctionToolConfig, LLMConfig, LLMToolConfig
+from enthusiast_common.config.base import AgentConfig, AgentToolConfig, FunctionToolConfig, LLMConfig, LLMToolConfig
 from enthusiast_common.injectors import BaseInjector
 from enthusiast_common.registry import BaseDBModelsRegistry, BaseEmbeddingProviderRegistry, BaseLanguageModelRegistry
 from enthusiast_common.retrievers import BaseRetriever
 from enthusiast_common.tools import BaseAgentTool, BaseFunctionTool, BaseLLMTool
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.prompts import BasePromptTemplate, ChatMessagePromptTemplate, ChatPromptTemplate, PromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import BaseTool
 
 from agent.core.memory import PersistentChatHistory, SummaryChatMemory
@@ -22,13 +22,13 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         self,
         tools: list[BaseTool],
         llm: BaseLanguageModel,
-        prompt: PromptTemplate | ChatMessagePromptTemplate,
         callback_handler: BaseCallbackHandler,
     ) -> BaseAgent:
         return self._config.agent_class(
             tools=tools,
             llm=llm,
-            prompt=prompt,
+            llm_registry=self._llm_registry,
+            prompt=self._prompt,
             conversation_id=self.conversation_id,
             callback_handler=callback_handler,
             injector=self._injector,
@@ -70,10 +70,9 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
 
     def _build_llm(self, llm_config: LLMConfig) -> BaseLanguageModel:
         data_set_repo = self._repositories.data_set
-        llm_registry = self._build_llm_registry()
         callbacks = self._build_llm_callback_handlers()
         llm = llm_config.llm_class(
-            llm_registry=llm_registry,
+            llm_registry=self._llm_registry,
             callbacks=callbacks,
             streaming=self.streaming,
             data_set_repo=data_set_repo,
@@ -202,11 +201,10 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
             chat_memory=history,
         )
 
-    def _build_prompt_template(self) -> BasePromptTemplate:
-        if self._config.prompt_template:
-            return PromptTemplate(
-                input_variables=self._config.prompt_template.input_variables,
-                template=self._config.prompt_template.template,
-            )
-        else:
-            return ChatPromptTemplate.from_messages(messages=self._config.chat_prompt_template.messages)
+    def _build_prompt_template(self) -> ChatPromptTemplate:
+        data_set_id = self._injector.repositories.conversation.get_data_set_id(self.conversation_id)
+        llm_provider = self._llm_registry.provider_for_dataset(data_set_id)
+
+        files_objects = llm_provider.prepare_files_objects(files_objects=self._files)
+        file_injected_prompt = self._config.chat_prompt_template.add_files_content(files_objects)
+        return file_injected_prompt.to_chat_prompt_template()

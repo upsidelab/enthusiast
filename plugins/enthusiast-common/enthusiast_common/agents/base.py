@@ -1,13 +1,15 @@
 from abc import ABC, ABCMeta, abstractmethod
 from typing import Any
 
-from enthusiast_common.injectors import BaseInjector
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel
 
+from ..injectors import BaseInjector
+from ..registry import BaseLanguageModelRegistry, LanguageModelProvider
+from ..structures import LLMFile
 from ..utils import RequiredFieldsModel, validate_required_vars
 
 
@@ -44,6 +46,7 @@ class BaseAgent(ABC, ExtraArgsClassBase):
         self,
         tools: list[BaseTool],
         llm: BaseLanguageModel,
+        llm_registry: BaseLanguageModelRegistry,
         prompt: ChatPromptTemplate,
         conversation_id: Any,
         injector: BaseInjector,
@@ -51,13 +54,14 @@ class BaseAgent(ABC, ExtraArgsClassBase):
     ):
         self._tools = tools
         self._llm = llm
+        self._llm_registry = llm_registry
         self._prompt = prompt
         self._conversation_id = conversation_id
         self._callback_handler = callback_handler
         self._injector = injector
 
     @abstractmethod
-    def get_answer(self, input_text: str) -> str:
+    def get_answer(self, input_text: str, files_objects: list[LLMFile]) -> str:
         pass
 
     def set_runtime_arguments(self, runtime_arguments: Any) -> None:
@@ -70,3 +74,9 @@ class BaseAgent(ABC, ExtraArgsClassBase):
             setattr(self, key.upper(), field(**value))
         for index, tool in enumerate(self._tools):
             tool.set_runtime_arguments(tools_runtime_arguments[index])
+
+    def _prepare_file_inputs(self, file_objects: list[LLMFile]):
+        return {
+            f"{LanguageModelProvider.FILE_KEY_PREFIX}{file_object.id}": file_object.content
+            for file_object in file_objects
+        }

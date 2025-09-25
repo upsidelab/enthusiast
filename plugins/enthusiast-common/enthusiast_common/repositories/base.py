@@ -66,6 +66,14 @@ class BaseConversationRepository(BaseRepository[T], ABC):
     def get_agent_id(self, conversation_id: Any) -> Any:
         pass
 
+    @abstractmethod
+    def list_files(self, conversation_id: Any) -> List[Any]:
+        pass
+
+    @abstractmethod
+    def get_file_objects(self, conversation_id: Any, file_ids: list[Any]) -> List[Any]:
+        pass
+
 
 class BaseDataSetRepository(BaseRepository[T], ABC):
     pass

@@ -2,6 +2,8 @@
 
 if [ "$RUN_WORKER" = "True" ]; then
     exec celery -A pecl.celery worker --loglevel=info -E
+elif [ "$RUN_BEAT" = "True" ]; then
+    exec celery -A pecl.celery beat --loglevel=info
 else
     if [ "$RUN_MIGRATIONS" = "True" ]; then
         python manage.py migrate

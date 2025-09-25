@@ -1,6 +1,7 @@
 import {MutableRefObject, useEffect, useRef, useState} from "react";
 import {MessageComposer} from "@/components/conversation-view/message-composer.tsx";
 import {MessageBubble} from "@/components/conversation-view/message-bubble.tsx";
+import {AttachmentBubble} from "@/components/conversation-view/attachment-bubble.tsx";
 import {authenticationProviderInstance} from "@/lib/authentication-provider.ts";
 import {ApiClient, TaskHandle} from "@/lib/api.ts";
 import {useApplicationContext} from "@/lib/use-application-context.ts";
@@ -14,10 +15,18 @@ export interface ConversationProps {
     conversationLocked?: boolean;
 }
 
+export interface MessageFile {
+    id: number;
+    filename: string;
+    content_type: string;
+    file_url: string;
+}
+
 export interface MessageProps {
     role: "human" | "ai" | "system";
     text: string;
     id: number | null;
+    files?: MessageFile[];
 }
 
 interface ConversationUIProps {
@@ -25,24 +34,33 @@ interface ConversationUIProps {
     isAgentLoading: boolean
     agentAction: string;
     lastMessageRef: MutableRefObject<HTMLDivElement | null>
-    onSubmit: (message: string) => void;
+    onSubmit: (message: string, fileIds?: number[]) => void;
     isLoading: boolean;
     conversationLocked?: boolean;
+    conversationId?: number;
+    agentId?: number;
 }
 
-function ConversationUI({messages, isAgentLoading, agentAction, lastMessageRef, onSubmit, isLoading, conversationLocked = false}: ConversationUIProps) {
+function ConversationUI({messages, isAgentLoading, agentAction, lastMessageRef, onSubmit, isLoading, conversationLocked = false, conversationId, agentId}: ConversationUIProps) {
     return (
         <div className="flex flex-col h-full px-4 pt-16">
             <div className="grow flex-1 space-y-4">
                 {messages.map((message, index) =>
                     message.role === "system" ? (
                         <MessageError key={index} text={message.text}/>
+                    ) : !message.text && message.files && message.files.length > 0 ? (
+                        <AttachmentBubble
+                            key={index}
+                            variant={message.role === "human" ? "primary" : "secondary"}
+                            files={message.files}
+                        />
                     ) : (
                         <MessageBubble
                             key={index}
                             text={message.text}
                             variant={message.role === "human" ? "primary" : "secondary"}
                             questionId={message.id}
+                            files={message.files}
                         />
                     )
                 )}
@@ -51,7 +69,7 @@ function ConversationUI({messages, isAgentLoading, agentAction, lastMessageRef, 
                 <div ref={lastMessageRef}/>
             </div>
             <div className="bottom-0 sticky flex-shrink-0 bg-white pb-4">
-                <MessageComposer onSubmit={onSubmit} isLoading={isLoading} conversationLocked={conversationLocked}/>
+                <MessageComposer onSubmit={onSubmit} isLoading={isLoading} conversationLocked={conversationLocked} conversationId={conversationId} agentId={agentId}/>
             </div>
         </div>
     );
@@ -67,6 +85,7 @@ export function Conversation({ conversationId, pendingMessage, onPendingMessageS
     const [isAgentLoading, setIsAgentLoading] = useState(false);
     const [agentAction, setAgentAction] = useState<string>("Thinking...");
     const [messages, setMessages] = useState<MessageProps[]>([]);
+    const [agentId, setAgentId] = useState<number | undefined>();
     const initialized = useRef(false);
 
     const usePolling = useRef(!streamingEnabled);
@@ -82,30 +101,6 @@ export function Conversation({ conversationId, pendingMessage, onPendingMessageS
         };
     }, []);
 
-    // Load messages when conversationId changes
-    useEffect(() => {
-        const loadMessages = async () => {
-            if (pendingMessage && !initialized.current) {
-                // React StrictMode renders this component twice, but we can't execute this callback twice.
-                initialized.current = true;
-                await onMessageComposerSubmit(pendingMessage);
-                onPendingMessageSent();
-                setMessages([{role: "human", id: null, text: pendingMessage}]);
-                return;
-            }
-
-            const conversation = await api.conversations().getConversation(conversationId);
-            const initialMessages = conversation.history as MessageProps[];
-            setMessages(initialMessages);
-
-            setTimeout(() => {
-                lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
-            }, 100);
-        };
-
-        loadMessages();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [conversationId]);
 
     const scrollToLastMessage = () => {
         setTimeout(() => {
@@ -247,12 +242,12 @@ export function Conversation({ conversationId, pendingMessage, onPendingMessageS
         scrollToLastMessage();
     };
 
-    const onMessageComposerSubmit = async (message: string) => {
+    const onMessageComposerSubmit = async (message: string, fileIds?: number[]) => {
         setIsLoading(true);
         setIsAgentLoading(true);
         addUserMessage(message);
 
-        const taskHandle = await api.conversations().sendMessage(conversationId, dataSetId!, message, streamingEnabled);
+        const taskHandle = await api.conversations().sendMessage(conversationId, dataSetId!, message, streamingEnabled, fileIds);
         usePolling.current = !taskHandle.streaming;
 
         if (taskHandle.streaming) {
@@ -269,6 +264,31 @@ export function Conversation({ conversationId, pendingMessage, onPendingMessageS
             setIsAgentLoading(false);
         }
     };
+
+    useEffect(() => {
+        const loadMessages = async () => {
+            if (pendingMessage && !initialized.current) {
+                initialized.current = true;
+                await onMessageComposerSubmit(pendingMessage);
+                onPendingMessageSent();
+                setMessages([{role: "human", id: null, text: pendingMessage}]);
+                return;
+            }
+
+            const conversation = await api.conversations().getConversation(conversationId);
+            const initialMessages = conversation.history as MessageProps[];
+            setMessages(initialMessages);
+            setAgentId(conversation.agent?.id);
+
+            setTimeout(() => {
+                lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
+            }, 100);
+        };
+
+        loadMessages();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [conversationId]);
+
         return (
             <ConversationUI
                 messages={messages}
@@ -278,6 +298,8 @@ export function Conversation({ conversationId, pendingMessage, onPendingMessageS
                 onSubmit={onMessageComposerSubmit}
                 isLoading={isLoading}
                 conversationLocked={conversationLocked}
+                conversationId={conversationId}
+                agentId={agentId}
             />
         );
 }

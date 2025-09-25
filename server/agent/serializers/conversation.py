@@ -1,10 +1,12 @@
-from django.core.files.uploadedfile import InMemoryUploadedFile
+import logging
+
 from rest_framework import serializers
 
-from agent.file_service import FileService
 from agent.models import Conversation, Message
 from agent.models.conversation import ConversationFile
 from agent.serializers.configuration import AgentListSerializer
+
+logger = logging.getLogger(__name__)
 
 
 class AskQuestionSerializer(serializers.Serializer):
@@ -88,9 +90,18 @@ class ConversationContentSerializer(serializers.ModelSerializer):
 
 
 class ConversationFileSerializer(serializers.ModelSerializer):
+    filename = serializers.SerializerMethodField()
+    file_url = serializers.SerializerMethodField()
+
     class Meta:
         model = ConversationFile
-        fields = ["id", "file", "conversation", "content_type", "llm_content", "created_at", "updated_at"]
+        fields = ["id", "filename", "file_url", "content_type"]
+
+    def get_filename(self, obj):
+        return obj.file.name.split("/")[-1] if obj.file else ""
+
+    def get_file_url(self, obj):
+        return obj.file.url if obj.file else ""
 
     def create(self, validated_data):
         file_obj = validated_data["file"]
@@ -98,31 +109,15 @@ class ConversationFileSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
-class ConversationMultiFileUploadSerializer(serializers.Serializer):
-    files = serializers.ListField(child=serializers.FileField(), allow_empty=False)
+class FileUploadTaskResponseSerializer(serializers.Serializer):
+    task_id = serializers.CharField()
 
-    def create(self, validated_data):
-        files: list[InMemoryUploadedFile] = validated_data["files"]
 
-        conversation = self.context.get("conversation")
-        if not conversation:
-            raise serializers.ValidationError("Conversation is required")
+class FileUploadStatusResponseSerializer(serializers.Serializer):
+    task_id = serializers.CharField()
+    status = serializers.CharField()
+    result = serializers.JSONField(required=False, allow_null=True)
 
-        objs = []
-        for file in files:
-            content_type = getattr(file, "content_type", None)
-            if content_type.startswith("image/"):
-                file_category = ConversationFile.FileCategory.IMAGE
-            else:
-                file_category = ConversationFile.FileCategory.FILE
-            obj = ConversationFile(
-                conversation=conversation,
-                file=file,
-                content_type=content_type,
-                file_category=file_category,
-                llm_content=FileService(file.file, file.content_type).process() or "",
-            )
 
-            objs.append(obj)
-
-        return ConversationFile.objects.bulk_create(objs)
+class SupportedFileTypesSerializer(serializers.Serializer):
+    supported_extensions = serializers.ListField(child=serializers.CharField())

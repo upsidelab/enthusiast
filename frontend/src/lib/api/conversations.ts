@@ -10,6 +10,24 @@ export type CreateMessagePayload = {
   question_message: string;
   data_set_id: number;
   streaming: boolean;
+  file_ids?: number[];
+}
+
+export type SupportedFileTypes = {
+  supported_extensions: string[];
+}
+
+export type FileUploadResponse = {
+  task_id: string;
+}
+
+export type FileUploadStatusResponse = {
+  task_id: string;
+  status: string;
+  result?: {
+    file_id?: number;
+    error?: string;
+  };
 }
 
 type TaskState = {
@@ -41,11 +59,12 @@ export class ConversationsApiClient extends BaseApiClient {
     return id;
   }
 
-  async sendMessage(conversationId: number, dataSetId: number, message: string, streaming: boolean): Promise<TaskHandle> {
+  async sendMessage(conversationId: number, dataSetId: number, message: string, streaming: boolean, fileIds?: number[]): Promise<TaskHandle> {
     const requestBody: CreateMessagePayload = {
       "question_message": message,
       "data_set_id": dataSetId,
-      streaming
+      streaming,
+      file_ids: fileIds
     }
 
     const response = await fetch(`${this.apiBase}/api/conversations/${conversationId}`, {
@@ -110,5 +129,58 @@ export class ConversationsApiClient extends BaseApiClient {
     }
 
     return await response.json() as Promise<void>;
+  }
+
+  async getSupportedFileTypes(): Promise<SupportedFileTypes> {
+    try {
+      const response = await fetch(`${this.apiBase}/api/supported-file-types/`, {
+        ...this._requestConfiguration(),
+        method: 'GET',
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json() as SupportedFileTypes;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`Failed to get supported file types: ${error.message}`);
+      } else {
+        throw new Error("Failed to get supported file types: An unknown error occurred.");
+      }
+    }
+  }
+
+  async uploadFile(conversationId: number, file: File): Promise<FileUploadResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const requestConfig = this._requestConfiguration();
+    const headers = { ...requestConfig.headers } as Record<string, string>;
+    delete headers['Content-Type'];
+
+    const response = await fetch(`${this.apiBase}/api/conversations/${conversationId}/upload/`, {
+      ...requestConfig,
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to start file upload: ${response.status} ${response.statusText}`);
+    }
+
+    return await response.json() as FileUploadResponse;
+  }
+
+  async getFileUploadStatus(taskId: string): Promise<FileUploadStatusResponse> {
+    const response = await fetch(`${this.apiBase}/api/file-upload-status/${taskId}/`, this._requestConfiguration());
+
+    if (!response.ok) {
+      throw new Error('Failed to check upload status');
+    }
+
+    return await response.json() as FileUploadStatusResponse;
   }
 }

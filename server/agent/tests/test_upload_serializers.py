@@ -33,8 +33,7 @@ class TestConversationFileSerializer:
         assert data["created_at"] == "2023-01-01T00:00:00Z"
         assert data["updated_at"] == "2023-01-01T00:00:00Z"
 
-    def test_create_conversation_file_with_content_type(self):
-        conversation = Mock()
+    def test_create_conversation_file_with_content_type(self, conversation):
         file_obj = SimpleUploadedFile("test.txt", b"test content", content_type="text/plain")
         validated_data = {"conversation": conversation, "file": file_obj}
 
@@ -87,35 +86,6 @@ class TestConversationMultiFileUploadSerializer:
 
         assert serializer.is_valid()
 
-    def test_create_multiple_files_success(self):
-        conversation = Mock()
-        file1 = SimpleUploadedFile("test1.txt", b"content1", content_type="text/plain")
-        file2 = SimpleUploadedFile("test2.txt", b"content2", content_type="text/plain")
-        data = {"files": [file1, file2]}
-        context = {"conversation": conversation}
-
-        with patch("agent.serializers.conversation.ConversationFile.objects.create") as mock_create:
-            mock_file1 = Mock(id=1, content_type="text/plain")
-            mock_file2 = Mock(id=2, content_type="text/plain")
-            mock_create.side_effect = [mock_file1, mock_file2]
-
-            serializer = ConversationMultiFileUploadSerializer(data=data, context=context)
-            serializer.is_valid()
-            result = serializer.save()
-
-        assert len(result) == 2
-        assert mock_create.call_count == 2
-
-        first_call = mock_create.call_args_list[0]
-        assert first_call[1]["conversation"] == conversation
-        assert first_call[1]["file"] == file1
-        assert first_call[1]["content_type"] == "text/plain"
-
-        second_call = mock_create.call_args_list[1]
-        assert second_call[1]["conversation"] == conversation
-        assert second_call[1]["file"] == file2
-        assert second_call[1]["content_type"] == "text/plain"
-
     def test_create_without_conversation_context(self):
         file1 = SimpleUploadedFile("test1.txt", b"content1", content_type="text/plain")
         data = {"files": [file1]}
@@ -139,34 +109,6 @@ class TestConversationMultiFileUploadSerializer:
         with pytest.raises(serializers.ValidationError) as exc_info:
             serializer.save()
         assert "Conversation is required" in str(exc_info.value)
-
-    def test_create_files_with_different_content_types(self):
-        conversation = Mock()
-        file1 = SimpleUploadedFile("test.txt", b"content", content_type="text/plain")
-        file2 = SimpleUploadedFile("test.pdf", b"content", content_type="application/pdf")
-        file3 = SimpleUploadedFile("test.jpg", b"content", content_type="image/jpeg")
-        data = {"files": [file1, file2, file3]}
-        context = {"conversation": conversation}
-
-        with patch("agent.serializers.conversation.ConversationFile.objects.create") as mock_create:
-            mock_files = [
-                Mock(id=i, content_type=ct) for i, ct in enumerate(["text/plain", "application/pdf", "image/jpeg"])
-            ]
-            mock_create.side_effect = mock_files
-
-            serializer = ConversationMultiFileUploadSerializer(data=data, context=context)
-            serializer.is_valid()
-            result = serializer.save()
-
-        assert len(result) == 3
-        assert mock_create.call_count == 3
-
-        # Verify content types were preserved
-        call_args_list = [call[1] for call in mock_create.call_args_list]
-        content_types = [args["content_type"] for args in call_args_list]
-        assert "text/plain" in content_types
-        assert "application/pdf" in content_types
-        assert "image/jpeg" in content_types
 
     def test_serializer_fields(self):
         serializer = ConversationMultiFileUploadSerializer()

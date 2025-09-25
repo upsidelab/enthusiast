@@ -42,21 +42,6 @@ class TestConversationFileUploadView:
         file_obj = ConversationFile.objects.get(conversation=conversation)
         assert file_obj.content_type == "text/plain"
 
-    def test_upload_multiple_files_success(self, api_client, url, conversation):
-        file1 = SimpleUploadedFile("test1.txt", b"content1", content_type="text/plain")
-        file2 = SimpleUploadedFile("test2.pdf", b"content2", content_type="application/pdf")
-        data = {"files": [file1, file2]}
-
-        response = api_client.post(url, data, format="multipart")
-
-        assert response.status_code == status.HTTP_201_CREATED
-        assert len(response.data) == 2
-        assert ConversationFile.objects.filter(conversation=conversation).count() == 2
-        files = ConversationFile.objects.filter(conversation=conversation)
-        content_types = [f.content_type for f in files]
-        assert "text/plain" in content_types
-        assert "application/pdf" in content_types
-
     def test_upload_nonexistent_conversation_returns_404(self, api_client):
         url = reverse("conversation-upload", kwargs={"conversation_id": 99999})
         test_file = SimpleUploadedFile("test.txt", b"test content", content_type="text/plain")

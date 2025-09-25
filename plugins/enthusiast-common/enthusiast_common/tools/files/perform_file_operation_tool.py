@@ -30,7 +30,7 @@ class FileRetrievalTool(BaseFileTool):
         llm_provider = self._llm_registry.provider_for_dataset(self._data_set_id)
         llm_file_objects = llm_provider.prepare_files_objects(file_objects)
         chat_prompt_template_config.add_files_content(llm_file_objects)
-        chat_prompt_template = chat_prompt_template_config.to_chat_prompt_template()
+        chat_prompt_template = chat_prompt_template_config.create_prompt_template_instance()
         messages = chat_prompt_template.format_messages()
 
         response = self._llm.invoke(messages)

@@ -114,7 +114,7 @@ class AgentConfig(ArbitraryTypeBaseModel, Generic[InjectorT]):
     retrievers: RetrieversConfig
     injector: Type[InjectorT]
     registry: RegistryConfig
-    prompt_template: ChatPromptTemplateConfig | PromptTemplateConfig
+    prompt_template: PromptTemplateConfig | ChatPromptTemplateConfig
     tools: Optional[list[FunctionToolConfig | LLMToolConfig | AgentToolConfig | FileToolConfig]] = None
     agent_callback_handler: Optional[AgentCallbackHandlerConfig] = None
 

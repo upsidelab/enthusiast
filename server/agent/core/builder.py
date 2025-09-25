@@ -11,7 +11,6 @@ from enthusiast_common.config import (
     LLMConfig,
     LLMToolConfig,
 )
-from enthusiast_common.config.prompts import PromptTemplateConfig
 from enthusiast_common.injectors import BaseInjector
 from enthusiast_common.registry import BaseDBModelsRegistry, BaseEmbeddingProviderRegistry, BaseLanguageModelRegistry
 from enthusiast_common.retrievers import BaseRetriever
@@ -225,10 +224,4 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         )
 
     def _build_prompt_template(self) -> ChatPromptTemplate | PromptTemplate:
-        if isinstance(self._config.prompt_template, PromptTemplateConfig):
-            return PromptTemplate(
-                input_variables=self._config.prompt_template.input_variables,
-                template=self._config.prompt_template.prompt_template,
-            )
-        else:
-            return self._config.prompt_template.to_chat_prompt_template()
+        return self._config.prompt_template.create_prompt_template_instance()

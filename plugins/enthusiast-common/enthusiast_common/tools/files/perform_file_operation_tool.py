@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 class FileRetrievalToolInput(BaseModel):
     file_ids: str = Field(description="String with comma seperated file ids")
-    action: str = Field(description="Full action description to perform on file/s.")
+    action: str = Field(description="Describe what you want to know about specific file in details.")
 
 
 class FileRetrievalTool(BaseFileTool):
@@ -33,5 +33,5 @@ class FileRetrievalTool(BaseFileTool):
         chat_prompt_template = chat_prompt_template_config.to_chat_prompt_template()
         messages = chat_prompt_template.format_messages()
 
-        response = self._llm.invoke(messages)
+        response = self._llm.invoke(messages).content
         return f"{response}"

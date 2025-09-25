@@ -9,6 +9,8 @@ from .structured_re_act_output_parser import StructuredReActOutputParser
 
 
 class BaseReActAgent(BaseAgent):
+    IS_REACT = True
+
     def get_answer(self, input_text: str) -> str:
         agent_executor = self._build_agent_executor()
         response = agent_executor.invoke({"input": input_text}, config=self._build_invoke_config())

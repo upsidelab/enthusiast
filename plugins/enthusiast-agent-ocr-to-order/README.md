@@ -1,0 +1,1 @@
+This agent processes scanned images, extracting structured order information such as products and quantities. It enables fast, reliable ingestion of orders into your backend systems, reducing manual entry and human error.

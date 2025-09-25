@@ -1,6 +1,7 @@
 from typing import Type
 
 from enthusiast_common.config import (
+    AgentCallbackHandlerConfig,
     AgentConfig,
     AgentConfigWithDefaults,
     CallbackHandlerConfig,
@@ -15,7 +16,11 @@ from enthusiast_common.config import (
 )
 from pydantic import BaseModel
 
-from agent.core.callbacks import ConversationWebSocketCallbackHandler
+from agent.core.callbacks import (
+    AgentActionWebsocketCallbackHandler,
+    ConversationWebSocketCallbackHandler,
+    ReactAgentWebsocketCallbackHandler,
+)
 from agent.core.injector import Injector
 from agent.core.registries.embeddings import EmbeddingProviderRegistry
 from agent.core.registries.language_models import LanguageModelRegistry
@@ -40,9 +45,16 @@ class DefaultAgentConfig(BaseModel):
     injector: Type[Injector]
     registry: RegistryConfig
     llm: LLMConfig
+    agent_callback_handler: AgentCallbackHandlerConfig | None = None
 
 
-def get_default_config() -> DefaultAgentConfig:
+def get_default_config(is_react: bool = False) -> DefaultAgentConfig:
+    llm_callback_handler_class = (
+        ReactAgentWebsocketCallbackHandler if is_react else ConversationWebSocketCallbackHandler
+    )
+    agent_callback_handler_config = (
+        AgentCallbackHandlerConfig(handler_class=AgentActionWebsocketCallbackHandler) if is_react else None
+    )
     return DefaultAgentConfig(
         repositories=RepositoriesConfig(
             user=DjangoUserRepository,
@@ -73,9 +85,10 @@ def get_default_config() -> DefaultAgentConfig:
         ),
         llm=LLMConfig(
             callbacks=[
-                CallbackHandlerConfig(handler_class=ConversationWebSocketCallbackHandler),
+                CallbackHandlerConfig(handler_class=llm_callback_handler_class),
             ],
         ),
+        agent_callback_handler=agent_callback_handler_config,
     )
 
 
@@ -83,7 +96,7 @@ def merge_config(
     partial: AgentConfigWithDefaults,
 ) -> AgentConfig:
     merged: dict[str, object] = {}
-    defaults = get_default_config()
+    defaults = get_default_config(is_react=partial.agent_class.IS_REACT)
     for name in AgentConfig.model_fields:
         value = getattr(partial, name, None)
 

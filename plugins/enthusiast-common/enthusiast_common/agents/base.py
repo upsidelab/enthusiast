@@ -40,6 +40,8 @@ class BaseAgent(ABC, ExtraArgsClassBase):
     PROMPT_EXTENSION = None
     TOOLS = []
 
+    IS_REACT = False
+
     def __init__(
         self,
         tools: list[BaseTool],

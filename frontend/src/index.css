@@ -80,3 +80,19 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  /* Styles for markdown links in message bubbles */
+  .primary a,
+  .secondary a {
+    @apply text-blue-600 underline underline-offset-2 hover:text-blue-800 transition-colors;
+  }
+  
+  .primary a:visited {
+    @apply text-purple-600 hover:text-purple-800;
+  }
+  
+  .secondary a:visited {
+    @apply text-purple-600 hover:text-purple-800;
+  }
+}

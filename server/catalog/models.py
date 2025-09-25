@@ -102,7 +102,7 @@ class Product(models.Model):
     slug = models.CharField(max_length=255)
     description = models.TextField()
     sku = models.CharField(max_length=255)
-    properties = models.CharField(max_length=65535)
+    properties = models.CharField(max_length=65535, blank=True)
     categories = models.CharField(max_length=65535)
     price = models.FloatField()
 

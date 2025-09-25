@@ -1,3 +1,5 @@
+import base64
+
 import requests
 from enthusiast_common import ProductDetails, ProductSourcePlugin
 from enthusiast_common.utils import RequiredFieldsModel
@@ -38,7 +40,7 @@ class MedusaProductSource(ProductSourcePlugin):
             price=medusa_product.get("variants", [{}])[0].get("prices", [{}])[0].get("amount")
             if medusa_product.get("variants")
             else None,
-            properties=medusa_product.get("metadata"),
+            properties=medusa_product.get("metadata", ""),
             categories=[category.get("name") for category in medusa_product.get("collection", {}).get("categories", [])]
             if medusa_product.get("collection")
             else [],
@@ -57,8 +59,10 @@ class MedusaProductSource(ProductSourcePlugin):
         products = []
         offset = 0  # Starting point for product list pagination.
         limit = 100  # Page size.
+        encoded_api_key_bytes = base64.b64encode(self.CONFIGURATION_ARGS.api_key.encode("utf-8"))
+        encoded_api_key = encoded_api_key_bytes.decode("utf-8")
 
-        headers = {"Authorization": f"Bearer {self.CONFIGURATION_ARGS.api_key}"}
+        headers = {"Authorization": f"Basic {encoded_api_key}"}
 
         while True:
             response = requests.get(endpoint, headers=headers, params={"limit": limit, "offset": offset})

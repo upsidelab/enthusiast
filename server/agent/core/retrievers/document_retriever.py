@@ -1,5 +1,5 @@
 from django.db.models import QuerySet
-from enthusiast_common.config import AgentConfig
+from enthusiast_common.config.base import AgentConfig
 from enthusiast_common.registry import BaseEmbeddingProviderRegistry
 from enthusiast_common.retrievers import BaseVectorStoreRetriever
 from enthusiast_common.structures import RepositoriesInstances

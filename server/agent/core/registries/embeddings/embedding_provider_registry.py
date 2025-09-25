@@ -1,8 +1,8 @@
 from importlib import import_module
 from typing import Type
 
-from enthusiast_common import EmbeddingProvider
 from enthusiast_common.registry import BaseEmbeddingProviderRegistry
+from enthusiast_common.registry.embeddings import EmbeddingProvider
 from enthusiast_common.repositories import BaseDataSetRepository
 
 from agent.core.repositories import DjangoDataSetRepository

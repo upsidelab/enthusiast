@@ -18,6 +18,7 @@ from pgvector.django import CosineDistance
 from account.models import User
 from agent.models import Conversation, Message
 from agent.models.agent import Agent
+from agent.models.conversation import ConversationFile
 from catalog.models import DataSet, DocumentChunk, Product, ProductContentChunk
 
 T = TypeVar("T", bound=models.Model)
@@ -119,6 +120,17 @@ class DjangoConversationRepository(BaseDjangoRepository[Conversation], BaseConve
 
     def get_agent_id(self, conversation_id: int) -> int:
         return self.get_by_id(pk=conversation_id).agent.id
+
+    def list_files(self, conversation_id: int) -> QuerySet[ConversationFile]:
+        return self.get_by_id(pk=conversation_id).files.all()
+
+    def get_file_objects(self, conversation_id: Any, file_ids: list[Any]) -> list[Any]:
+        return [
+            file.get_llm_file_object()
+            for file in ConversationFile.objects.filter(conversation_id=conversation_id, id__in=file_ids).order_by(
+                "created_at"
+            )
+        ]
 
 
 class DjangoDataSetRepository(BaseDjangoRepository[DataSet], BaseDataSetRepository[DataSet]):

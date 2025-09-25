@@ -1,3 +1,5 @@
+import logging
+
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from rest_framework import serializers
 
@@ -5,6 +7,8 @@ from agent.file_service import FileService
 from agent.models import Conversation, Message
 from agent.models.conversation import ConversationFile
 from agent.serializers.configuration import AgentListSerializer
+
+logger = logging.getLogger(__name__)
 
 
 class AskQuestionSerializer(serializers.Serializer):
@@ -28,13 +32,24 @@ class AskQuestionSerializer(serializers.Serializer):
         default=False,
         required=False,
     )
+    file_ids = serializers.ListField(child=serializers.IntegerField(), default=[])
 
-    def validate_conversation_id(self, value):
-        if not Conversation.objects.filter(id=value).exists():
+    def validate(self, attrs):
+        conversation_id = self.context.get("conversation_id")
+        conversation = Conversation.objects.get(pk=conversation_id)
+        if not conversation:
             raise serializers.ValidationError(
-                f"Conversation with the given ID ({value}) does not exist. Either skip this parameter (a new conversation will be created), or provide a valid ID of an existing conversation"
+                {
+                    "conversation_id": f"Conversation with the given ID ({conversation_id}) does not exist. Either skip this parameter (a new conversation will be created), or provide a valid ID of an existing conversation"
+                }
             )
-        return value
+        if file_ids := set(attrs.get("file_ids")):
+            allowed_file_ids = set(conversation.files.values_list("id", flat=True))
+            if invalid_file_ids := file_ids - allowed_file_ids:
+                raise serializers.ValidationError(
+                    {"file_ids": f"Files not associated with conversation: {invalid_file_ids}"}
+                )
+        return attrs
 
 
 class ConversationCreationSerializer(serializers.Serializer):

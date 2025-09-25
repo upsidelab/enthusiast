@@ -43,7 +43,7 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
         tools = self._build_tools(default_llm=self._llm, injector=self._injector)
         agent_callback_handler = self._build_agent_callback_handler()
         self._prompt = self._build_prompt_template()
-        agent_instance = self._build_agent(tools, self._llm, self._prompt, agent_callback_handler)
+        agent_instance = self._build_agent(tools, self._llm, agent_callback_handler)
         self._inject_additional_arguments(agent_instance)
         return agent_instance
 
@@ -57,7 +57,6 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
         self,
         tools: list[BaseTool],
         llm: BaseLanguageModel,
-        prompt: ChatPromptTemplateConfig,
         callback_handler: BaseCallbackHandler,
     ) -> BaseAgent:
         pass

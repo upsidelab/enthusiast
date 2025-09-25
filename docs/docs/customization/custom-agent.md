@@ -100,7 +100,7 @@ class ContextSearchTool(BaseLLMTool):
 
 4. Create configuration inside `config.py` file:
 ```python
-from enthusiast_common.config import AgentConfigWithDefaults, LLMToolConfig
+from enthusiast_common.config.base import AgentConfigWithDefaults, LLMToolConfig
 from langchain_core.prompts import ChatPromptTemplate
 
 from .tools.pdf_context_tool import ContextSearchTool

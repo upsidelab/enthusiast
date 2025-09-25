@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import Enum
 
 from .repositories import (
     BaseAgentRepository,
@@ -45,3 +46,16 @@ class RepositoriesInstances:
     product: BaseProductRepository
     product_chunk: BaseModelChunkRepository
     agent: BaseAgentRepository
+
+
+class FileTypes(Enum):
+    FILE = "file"
+    IMAGE = "image"
+
+
+@dataclass
+class LLMFile:
+    content: str
+    file_category: FileTypes
+    filename: str
+    content_type: str

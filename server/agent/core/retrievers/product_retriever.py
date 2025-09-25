@@ -2,7 +2,7 @@ from typing import Self
 
 from django.core import serializers
 from enthusiast_common.builder import RepositoriesInstances
-from enthusiast_common.config import AgentConfig
+from enthusiast_common.config.base import AgentConfig
 from enthusiast_common.registry import BaseEmbeddingProviderRegistry
 from enthusiast_common.repositories import BaseDataSetRepository, BaseProductRepository
 from enthusiast_common.retrievers import BaseProductRetriever

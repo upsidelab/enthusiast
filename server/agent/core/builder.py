@@ -3,7 +3,7 @@ from typing import Optional
 from enthusiast_common.agents import BaseAgent
 from enthusiast_common.builder import BaseAgentBuilder, RepositoriesInstances
 from enthusiast_common.callbacks import ConversationCallbackHandler
-from enthusiast_common.config import AgentConfig, AgentToolConfig, FunctionToolConfig, LLMConfig, LLMToolConfig
+from enthusiast_common.config.base import AgentConfig, AgentToolConfig, FunctionToolConfig, LLMConfig, LLMToolConfig
 from enthusiast_common.injectors import BaseInjector
 from enthusiast_common.registry import BaseDBModelsRegistry, BaseEmbeddingProviderRegistry, BaseLanguageModelRegistry
 from enthusiast_common.retrievers import BaseRetriever

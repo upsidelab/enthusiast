@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from typing import Any, Generic, Optional, Sequence, Type, TypeVar
+from typing import Any, Generic, Optional, Type, TypeVar
 
 from langchain_core.callbacks import BaseCallbackHandler
-from langchain_core.prompts.chat import MessageLikeRepresentation
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field
 
 from ..agents import BaseAgent
 from ..injectors.base import BaseInjector
@@ -25,6 +24,7 @@ from ..repositories.base import (
 )
 from ..retrievers import BaseRetriever
 from ..tools import BaseAgentTool, BaseFunctionTool, BaseLLMTool
+from .prompts import ChatPromptTemplateConfig
 
 InjectorT = TypeVar("InjectorT", bound=BaseInjector)
 
@@ -102,15 +102,6 @@ class AgentCallbackHandlerConfig(ArbitraryTypeBaseModel):
     handler_class: Type[BaseCallbackHandler]
 
 
-class PromptTemplateConfig(ArbitraryTypeBaseModel):
-    input_variables: list[str]
-    template: str
-
-
-class ChatPromptTemplateConfig(ArbitraryTypeBaseModel):
-    messages: Sequence[MessageLikeRepresentation]
-
-
 class AgentConfig(ArbitraryTypeBaseModel, Generic[InjectorT]):
     agent_class: Type[BaseAgent]
     llm: LLMConfig
@@ -118,18 +109,9 @@ class AgentConfig(ArbitraryTypeBaseModel, Generic[InjectorT]):
     retrievers: RetrieversConfig
     injector: Type[InjectorT]
     registry: RegistryConfig
-    prompt_template: Optional[PromptTemplateConfig] = None
-    chat_prompt_template: Optional[ChatPromptTemplateConfig] = None
+    chat_prompt_template: ChatPromptTemplateConfig
     tools: Optional[list[FunctionToolConfig | LLMToolConfig | AgentToolConfig]] = None
     agent_callback_handler: Optional[AgentCallbackHandlerConfig] = None
-
-    @model_validator(mode="after")
-    def prompt_validation(self):
-        prompt_template = self.prompt_template is not None
-        chat_prompt_template = self.chat_prompt_template is not None
-        if prompt_template == chat_prompt_template:
-            raise ValueError("Exactly one of 'prompt_template' or 'chat_prompt_template' must be provided")
-        return self
 
 
 class AgentConfigWithDefaults(AgentConfig, Generic[InjectorT]):

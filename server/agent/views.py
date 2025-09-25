@@ -7,6 +7,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import ListAPIView
+from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -28,6 +29,8 @@ from agent.serializers.conversation import (
     AskQuestionSerializer,
     ConversationContentSerializer,
     ConversationCreationSerializer,
+    ConversationFileSerializer,
+    ConversationMultiFileUploadSerializer,
     ConversationSerializer,
     MessageFeedbackSerializer,
 )
@@ -307,3 +310,26 @@ class AgentDetailsView(APIView):
         instance = get_object_or_404(Agent, pk=pk)
         instance.set_deleted_at()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ConversationFileUploadView(APIView):
+    parser_classes = (MultiPartParser,)
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Upload files to conversation.",
+        request_body=ConversationMultiFileUploadSerializer,
+        responses={200: ConversationFileSerializer(many=True)},
+    )
+    def post(self, request, conversation_id, *args, **kwargs):
+        conversation = get_object_or_404(Conversation, pk=conversation_id)
+
+        serializer = ConversationMultiFileUploadSerializer(data=request.data, context={"conversation": conversation})
+        serializer.is_valid(raise_exception=True)
+
+        objs = serializer.save()
+
+        return Response(
+            ConversationFileSerializer(objs, many=True).data,
+            status=status.HTTP_201_CREATED,
+        )

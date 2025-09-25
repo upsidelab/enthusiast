@@ -20,6 +20,7 @@ from pydantic import BaseModel
 
 from agent.core.callbacks import (
     AgentActionWebsocketCallbackHandler,
+    AgentWidgetWebsocketCallbackHandler,
     ConversationWebSocketCallbackHandler,
     ReactAgentWebsocketCallbackHandler,
 )
@@ -59,7 +60,7 @@ def get_default_config(type: AgentType) -> DefaultAgentConfig:
     agent_callback_handler_config = (
         AgentCallbackHandlerConfig(handler_class=AgentActionWebsocketCallbackHandler)
         if type == AgentType.RE_ACT
-        else None
+        else AgentCallbackHandlerConfig(handler_class=AgentWidgetWebsocketCallbackHandler)
     )
     return DefaultAgentConfig(
         repositories=RepositoriesConfig(

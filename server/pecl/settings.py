@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import json
 import os
 import sys
+from datetime import timedelta
 from pathlib import Path
 
 from environ import Env
@@ -217,6 +218,12 @@ CELERY_BROKER_URL = env.str("ECL_CELERY_BROKER_URL")
 CELERY_RESULT_BACKEND = env.str("ECL_CELERY_RESULT_BACKEND")
 CELERY_TIMEZONE = env.str("ECL_CELERY_TIMEZONE")
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_BEAT_SCHEDULE = {
+    "clean_uploaded_files": {
+        "task": "agent.tasks.clean_uploaded_files",
+        "schedule": timedelta(hours=1),
+    },
+}
 
 CATALOG_LANGUAGE_MODEL_PROVIDERS = {
     "OpenAI": "enthusiast_model_openai.OpenAILanguageModelProvider",
@@ -271,6 +278,7 @@ FILE_PARSER_CLASSES: dict[tuple[str] : str] = {
         ".png",
     ): "enthusiast_file_parsers.image.ImageFileParser",
 }
+UPLOADED_FILE_RETENTION_PERIOD_HOURS: int = 48
 
 SERVICE_ACCOUNT_DOMAIN = env.str("SERVICE_ACCOUNT_DOMAIN", "enthusiast.internal")
 

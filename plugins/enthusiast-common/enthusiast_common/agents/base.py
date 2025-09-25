@@ -1,15 +1,15 @@
 from abc import ABC, ABCMeta, abstractmethod
 from typing import Any
 
-from enthusiast_common.injectors import BaseInjector
-from enthusiast_common.registry import BaseLanguageModelRegistry, LanguageModelProvider
-from enthusiast_common.structures import LLMFile
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel
 
+from ..injectors import BaseInjector
+from ..registry import BaseLanguageModelRegistry, LanguageModelProvider
+from ..structures import LLMFile
 from ..utils import RequiredFieldsModel, validate_required_vars
 
 

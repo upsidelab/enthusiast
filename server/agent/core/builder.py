@@ -23,14 +23,13 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         self,
         tools: list[BaseTool],
         llm: BaseLanguageModel,
-        prompt: ChatPromptTemplateConfig,
         callback_handler: BaseCallbackHandler,
     ) -> BaseAgent:
         return self._config.agent_class(
             tools=tools,
             llm=llm,
             llm_registry=self._llm_registry,
-            prompt=prompt,
+            prompt=self._prompt,
             conversation_id=self.conversation_id,
             callback_handler=callback_handler,
             injector=self._injector,

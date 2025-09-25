@@ -2,6 +2,8 @@ import inspect
 from abc import ABC, ABCMeta, abstractmethod
 from typing import TYPE_CHECKING, Any, Type
 
+from enthusiast_common.registry import BaseLanguageModelRegistry
+
 if TYPE_CHECKING:
     from ..agents import BaseAgent
 
@@ -79,6 +81,22 @@ class BaseLLMTool(BaseTool, ABC):
         self._data_set_id = data_set_id
         self._llm = llm
         self._injector = injector
+
+
+class BaseFileTool(BaseTool, ABC):
+    def __init__(
+        self,
+        data_set_id: Any,
+        conversation_id: Any,
+        llm: BaseLanguageModel,
+        injector: BaseInjector,
+        llm_registry: BaseLanguageModelRegistry,
+    ):
+        self._data_set_id = data_set_id
+        self._conversation_id = conversation_id
+        self._llm = llm
+        self._injector = injector
+        self._llm_registry = llm_registry
 
 
 class BaseAgentTool(BaseTool, ABC):

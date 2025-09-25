@@ -83,7 +83,9 @@ class ConversationView(APIView):
     def get(self, request, conversation_id):
         conversation = (
             Conversation.objects.select_related("agent")
-            .prefetch_related(Prefetch("messages", queryset=Message.objects.order_by("id")))
+            .prefetch_related(
+                Prefetch("messages", queryset=Message.objects.filter(function_name__isnull=True).order_by("id"))
+            )
             .get(id=conversation_id, user=request.user)
         )
         serializer = ConversationContentSerializer(conversation)
@@ -101,7 +103,7 @@ class ConversationView(APIView):
     )
     def post(self, request, conversation_id):
         conversation = get_object_or_404(Conversation, id=conversation_id)
-        serializer = AskQuestionSerializer(data=request.data)
+        serializer = AskQuestionSerializer(data=request.data, context={"conversation_id": conversation_id})
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

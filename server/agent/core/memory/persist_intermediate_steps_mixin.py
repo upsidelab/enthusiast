@@ -1,6 +1,5 @@
-import typing
 from abc import ABC
-from typing import Any, Dict
+from typing import Any, Dict, cast
 
 from langchain.memory import ConversationBufferMemory
 from langchain_core.messages import AIMessage, FunctionMessage, HumanMessage
@@ -12,7 +11,7 @@ class PersistIntermediateStepsMixin(ABC):
     """
 
     def save_context(self, inputs: Dict[str, Any], outputs: Dict[str, str]) -> None:
-        self_as_conversation_memory = typing.cast(ConversationBufferMemory, self)
+        self_as_conversation_memory = cast(ConversationBufferMemory, self)
 
         human_message = HumanMessage(inputs["input"])
         self_as_conversation_memory.chat_memory.add_message(human_message)

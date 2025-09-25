@@ -29,12 +29,16 @@ class AskQuestionSerializer(serializers.Serializer):
         required=False,
     )
 
-    def validate_conversation_id(self, value):
-        if not Conversation.objects.filter(id=value).exists():
+    def validate(self, attrs):
+        conversation_id = self.context.get("conversation_id")
+        conversation = Conversation.objects.get(pk=conversation_id)
+        if not conversation:
             raise serializers.ValidationError(
-                f"Conversation with the given ID ({value}) does not exist. Either skip this parameter (a new conversation will be created), or provide a valid ID of an existing conversation"
+                {
+                    "conversation_id": f"Conversation with the given ID ({conversation_id}) does not exist. Either skip this parameter (a new conversation will be created), or provide a valid ID of an existing conversation"
+                }
             )
-        return value
+        return attrs
 
 
 class ConversationCreationSerializer(serializers.Serializer):
@@ -106,10 +110,16 @@ class ConversationMultiFileUploadSerializer(serializers.Serializer):
 
         objs = []
         for file in files:
+            content_type = getattr(file, "content_type", None)
+            if content_type.startswith("image/"):
+                file_category = ConversationFile.FileCategory.IMAGE
+            else:
+                file_category = ConversationFile.FileCategory.FILE
             obj = ConversationFile(
                 conversation=conversation,
                 file=file,
-                content_type=getattr(file, "content_type", None),
+                content_type=content_type,
+                file_category=file_category,
                 llm_content=FileService(file.file, file.content_type).process() or "",
             )
 

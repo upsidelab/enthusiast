@@ -12,6 +12,7 @@ export interface IntegrationProps {
   registerDocumentModule?: string;
   registerLanguageModelModule?: string;
   registerEmbeddingsModule?: string;
+  envVariables?: string[]
 }
 
 const mdxComponents = getMDXComponents({});
@@ -24,6 +25,10 @@ export default async function Integration(props: IntegrationProps) {
   const buildRegisterInstructionMd = (key: string, module: string) => {
     return `\`\`\`python\n${key} = {\n    ...\n    "${props.name}": "${module}",\n}\n\`\`\``;
   }
+  const buildEnvInstructionMd = (keys: string[]) => {
+      const lines = keys.map((key) => `${key}=<value_here>`).join("\n");
+      return `\`\`\`python\n${lines}\n\`\`\``;
+    };
 
   return (
     <>
@@ -35,6 +40,16 @@ export default async function Integration(props: IntegrationProps) {
         If you're using <Link href="/docs/getting-started/installation">Enthusiast Starter</Link>, that's inside enthusiast-starter/src/
       </P>
       <MDXRemote compiledSource={installationInstructions} />
+    {props.envVariables && (
+      <>
+        <P>
+          Set variables inside .env file.
+        </P>
+        <MDXRemote
+          compiledSource={await compileMdx(buildEnvInstructionMd(props.envVariables))}
+        />
+      </>
+    )}
       <P>
         Then, register the integration in your config/settings_override.py.
       </P>

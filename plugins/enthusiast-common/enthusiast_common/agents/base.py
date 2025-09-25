@@ -42,6 +42,7 @@ class BaseAgent(ABC, ExtraArgsClassBase):
     PROMPT_EXTENSION = None
     TOOLS = []
 
+    IS_REACT = False
     FILE_UPLOAD = False
     DEFAULT_FILE_TOOLS = [FileListTool, FileRetrievalTool]
     if FILE_UPLOAD:

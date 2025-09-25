@@ -1,6 +1,5 @@
 import {Cards} from "nextra/components"
 import { useMDXComponents as getMDXComponents } from "../../mdx-components";
-import Image from "next/image";
 import IntegrationCard from "@/components/integration-card";
 
 const mdxComponents = getMDXComponents({});

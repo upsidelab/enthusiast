@@ -1,0 +1,1 @@
+Provides automated support by answering user queries based on product manuals, FAQs, and documentation. It leverages contextual retrieval and AI reasoning to deliver precise, relevant answers, improving customer satisfaction and reducing support team workload.

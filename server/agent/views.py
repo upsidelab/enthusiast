@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 from celery.result import AsyncResult
 from django.conf import settings
@@ -22,6 +23,7 @@ from agent.core.repositories import DjangoDataSetRepository
 from agent.filters import AgentFilter
 from agent.models import Conversation, Message
 from agent.models.agent import Agent
+from agent.models.conversation import ConversationFile
 from agent.serializers.configuration import (
     AgentListSerializer,
     AgentSerializer,
@@ -115,6 +117,20 @@ class ConversationView(APIView):
 
         if conversation.agent.deleted_at is not None:
             return Response({"detail": "Conversation locked."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if file_ids := serializer.validated_data.get("file_ids"):
+            files = ConversationFile.objects.filter(conversation_id=conversation_id, pk__in=file_ids, is_hidden=True)
+            for file in files:
+                Message.objects.create(
+                    conversation_id=conversation.id,
+                    created_at=datetime.now(),
+                    type=Message.MessageType.FILE,
+                    file_name=file.file.name.split(".")[0],
+                    file_type=file.file.name.split(".")[-1],
+                    text=f"Uploaded {file.file.name} with id: {file.pk}",
+                )
+                file.is_hidden = False
+                file.save()
 
         data_set_id = serializer.validated_data.get("data_set_id")
         question_message = serializer.validated_data.get("question_message")

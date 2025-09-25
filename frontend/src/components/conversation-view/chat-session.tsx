@@ -9,20 +9,30 @@ import { PageMain } from "@/components/util/page-main.tsx";
 import { PageHeading } from "@/components/util/page-heading.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { MessageBubble } from "@/components/conversation-view/message-bubble.tsx";
+import { AttachmentBubble } from "@/components/conversation-view/attachment-bubble.tsx";
 import { MessageError } from "@/components/conversation-view/message-error.tsx";
 import { MessageBubbleTyping } from "@/components/conversation-view/message-bubble-typing.tsx";
 import { ChatWindow } from "@/components/conversation-view/chat-window.tsx";
 
-import { Conversation as ConversationSchema } from '@/lib/types.ts';
+import type { AgentDetails } from "@/lib/types";
+import type { Conversation as ConversationSchema } from '@/lib/types.ts';
+import type { Message, MessageFile } from "@/components/conversation-view/message-composer.tsx";
 
-export interface MessageProps {
+export type FileMessageProps = {
+  id: number | null;
+  type: "file";
+  file_name: string;
+  file_type: string;
+};
+
+export type MessageProps = {
   type: "human" | "ai" | "system";
   text: string;
   id: number | null;
-}
+} | FileMessageProps;
 
 interface ChatSessionProps {
-  pendingMessage: string;
+  pendingMessage?: Message;
 }
 
 const api = new ApiClient(authenticationProviderInstance);
@@ -38,6 +48,8 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
   const [isAgentLoading, setIsAgentLoading] = useState(false);
   const [agentAction, setAgentAction] = useState<string>("Thinking...");
   const [messages, setMessages] = useState<MessageProps[]>([]);
+  const [agentId, setAgentId] = useState<number | undefined>();
+  const [agentDetails, setAgentDetails] = useState<AgentDetails>();
 
   const initialized = useRef(false);
   const usePolling = useRef(!streamingEnabled);
@@ -61,7 +73,6 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
     };
   }, []);
 
-  // Load messages when conversationId changes
   useEffect(() => {
     const loadMessages = async () => {
       const initChat = pendingMessage && !initialized.current;
@@ -70,24 +81,42 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
         // React StrictMode renders this component twice, but we can't execute this callback twice.
         initialized.current = true;
         await onMessageComposerSubmit(pendingMessage);
-        setMessages([{ type: "human", id: null, text: pendingMessage }]);
-        return;
       }
 
       const conversation = await api.conversations().getConversation(conversationId);
       setConversation(conversation);
+      setAgentId(conversation.agent?.id);
 
-      if (!initChat) {
-        const initialMessages = conversation.history as MessageProps[];
-        setMessages(initialMessages);
+      if (pendingMessage) {
+        return;
       }
+
+      const initialMessages = conversation.history as MessageProps[];
+      setMessages(initialMessages);
 
       scrollToLastMessage(100);
     };
 
     loadMessages();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [conversationId]);
+  }, []);
+
+  useEffect(() => {
+    const loadAgentDetails = async () => {
+      if (!agentId || agentDetails) {
+        return;
+      }
+
+      try {
+        const agentDetails = await api.agents().getAgentById(agentId);
+        setAgentDetails(agentDetails);
+      } catch (error) {
+        console.error('Failed to load agent details:', error);
+      }
+    };
+
+    loadAgentDetails();
+  }, [agentId, agentDetails]);
 
   const handleWebSocketMessage = (event: MessageEvent) => {
     const data = JSON.parse(event.data);
@@ -215,6 +244,17 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
     }
   };
 
+  const addFileMessages = (files: MessageFile[]) => {
+    const fileMessages = files.map<FileMessageProps>(file => ({
+      id: null,
+      type: "file",
+      file_name: file.name,
+      file_type: file.type
+    }));
+
+    setMessages((prev) => [ ...prev, ...fileMessages ]);
+  }
+
   const addUserMessage = (message: string) => {
     setMessages((prev) => [
       ...prev,
@@ -223,12 +263,13 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
     scrollToLastMessage();
   };
 
-  const onMessageComposerSubmit = async (message: string) => {
+  const onMessageComposerSubmit = async (message: Message) => {
     setIsLoading(true);
     setIsAgentLoading(true);
-    addUserMessage(message);
+    addFileMessages(message.files);
+    addUserMessage(message.text);
 
-    const taskHandle = await api.conversations().sendMessage(conversationId, dataSetId!, message, streamingEnabled);
+    const taskHandle = await api.conversations().sendMessage(conversationId, dataSetId!, message.text, streamingEnabled, message.files.map(f => f.id));
     usePolling.current = !taskHandle.streaming;
 
     if (taskHandle.streaming) {
@@ -246,34 +287,63 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
     }
   };
 
+  const isUserMessage = (message: MessageProps) => {
+    return message.type === "human" || message.type === "file";
+  };
+
   return (
     <PageMain className="h-full py-0">
       {conversation &&
         <>
           <PageHeading
-              title={pendingMessage || conversation.summary!}
+              title={pendingMessage?.text || conversation.summary!}
               description={`Chat with ${conversation.agent.name}`}
-              className="sticky top-0 pt-4 bg-white"
+              className="sticky top-0 pt-4 bg-white z-10"
           >
             <Button className="ml-auto mr-0" variant="outline" onClick={() => navigate(`/data-sets/${dataSetId}/chat/new/${encodeURIComponent(conversation.agent.id)}`)}>
               <PlusIcon />
               New Chat
             </Button>
           </PageHeading>
-          <ChatWindow className="pt-16" onSubmit={onMessageComposerSubmit} isLoading={isLoading} conversationLocked={isAgentDeleted || isAgentCorrupted}>
+          <ChatWindow
+            className="pt-16"
+            onSubmit={onMessageComposerSubmit}
+            isLoading={isLoading}
+            conversationLocked={isAgentDeleted || isAgentCorrupted}
+            conversationId={conversationId}
+            agentId={agentId}
+            fileUploadEnabled={agentDetails?.file_upload}
+          >
             <div className="grow flex-1 space-y-4">
-              {messages.map((message, index) =>
-                message.type === "system" ? (
-                  <MessageError key={index} text={message.text} />
-                ) : (
+              {messages.map((message, index) => {
+                const inMessageGroup = isUserMessage(message) && index > 0 && isUserMessage(messages[index - 1]);
+
+                if (message.type === "system") {
+                  return (
+                    <MessageError key={index} text={message.text} />
+                  );
+                }
+
+                if (message.type === "file") {
+                  return (
+                    <AttachmentBubble key={index} variant="primary" message={message} inMessageGroup={inMessageGroup} />
+                  );
+                }
+
+                if (message.type === 'ai' && message.text === '') {
+                  return (<MessageBubbleTyping key={index} text={agentAction} />);
+                }
+
+                return (
                   <MessageBubble
                     key={index}
                     text={message.text}
                     variant={message.type === "human" ? "primary" : "secondary"}
                     questionId={message.id}
+                    inMessageGroup={inMessageGroup}
                   />
-                )
-              )}
+                );
+              })}
               {isAgentLoading && <MessageBubbleTyping text={agentAction} />}
               <div className="mb-4" />
               <div ref={lastMessageRef} />

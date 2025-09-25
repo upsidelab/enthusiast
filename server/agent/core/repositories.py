@@ -123,14 +123,14 @@ class DjangoConversationRepository(BaseDjangoRepository[Conversation], BaseConve
         return self.get_by_id(pk=conversation_id).agent.id
 
     def list_files(self, conversation_id: int) -> list[LLMFile]:
-        return [file.get_llm_file_object() for file in self.get_by_id(pk=conversation_id).files.all()]
+        return [file.get_llm_file_object() for file in self.get_by_id(pk=conversation_id).files.filter(is_hidden=False)]
 
     def get_file_objects(self, conversation_id: Any, file_ids: list[Any]) -> list[LLMFile]:
         return [
             file.get_llm_file_object()
-            for file in ConversationFile.objects.filter(conversation_id=conversation_id, id__in=file_ids).order_by(
-                "created_at"
-            )
+            for file in ConversationFile.objects.filter(
+                conversation_id=conversation_id, id__in=file_ids, is_hidden=False
+            ).order_by("created_at")
         ]
 
 

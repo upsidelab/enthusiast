@@ -36,6 +36,8 @@ class ConversationFile(models.Model):
     content_type = models.CharField(max_length=255, null=True)
     llm_content = models.TextField(blank=True)
 
+    is_hidden = models.BooleanField(default=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

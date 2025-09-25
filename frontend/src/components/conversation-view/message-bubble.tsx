@@ -1,18 +1,19 @@
 import { useEffect, useState } from 'react';
-import { cn } from "@/lib/utils.ts";
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import { MessageFeedbackForm } from "@/components/message-feedback/message-feedback-form.tsx";
 import { CopyToClipboardButton } from '@/components/conversation-view/copy-to-clipboard-button.tsx';
 import { FeedbackButton } from '@/components/conversation-view/feedback-button.tsx';
+import { BaseBubble } from '@/components/conversation-view/base-bubble';
 
 export interface MessageBubbleProps {
   text: string;
   variant: "primary" | "secondary";
   questionId: number | null;
+  inMessageGroup?: boolean;
 }
 
-export function MessageBubble({ text, variant, questionId }: MessageBubbleProps) {
+export function MessageBubble({ text, variant, questionId, inMessageGroup }: MessageBubbleProps) {
   const [sanitizedHtml, setSanitizedHtml] = useState<string>("");
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
@@ -26,36 +27,30 @@ export function MessageBubble({ text, variant, questionId }: MessageBubbleProps)
     processText();
   }, [text]);
 
-  const shouldShowActionButtons = variant === 'secondary' && questionId !== null;
+  const shouldShowActionButtons = variant === 'secondary' && questionId !== null && text;
 
   const handleFeedbackClick = () => {
     setIsFeedbackOpen((prev) => !prev);
   };
 
   return (
-    <div className="message-bubble-container flex">
-      <div
-        className={cn(
-          "flex flex-col max-w-[75%] items-centered gap-2 rounded-lg px-3 py-2 text-sm",
-          variant === "primary"
-            ? "ml-auto bg-primary text-primary-foreground"
-            : "bg-muted"
-        )}
-      >
+    <BaseBubble variant={variant} hasBackground={true} inMessageGroup={inMessageGroup}>
+      {text && (
         <div className={variant} dangerouslySetInnerHTML={{ __html: sanitizedHtml }}/>
-        {shouldShowActionButtons &&
-          <div className="mt-4 flex items-center">
-            <FeedbackButton isOpen={isFeedbackOpen} onClick={handleFeedbackClick} />
-            <CopyToClipboardButton message={text} variant="ghost" />
-          </div>
-        }
+      )}
+      
+      {shouldShowActionButtons && (
+        <div className="mt-4 flex items-center">
+          <FeedbackButton isOpen={isFeedbackOpen} onClick={handleFeedbackClick} />
+          <CopyToClipboardButton message={text} variant="ghost" />
+        </div>
+      )}
 
-        {isFeedbackOpen &&
-          <div className="feedback-form-modal mx-4">
-            <MessageFeedbackForm messageId={questionId} />
-          </div>
-        }
-      </div>
-    </div>
+      {isFeedbackOpen && (
+        <div className="feedback-form-modal mx-4">
+          <MessageFeedbackForm messageId={questionId} />
+        </div>
+      )}
+    </BaseBubble>
   );
 }

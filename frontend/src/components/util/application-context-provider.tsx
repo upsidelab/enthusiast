@@ -1,4 +1,4 @@
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode, useState, useEffect, useRef } from "react";
 import { ApplicationContext, ApplicationContextValue } from "@/lib/application-context.ts";
 import { Account, DataSet } from "@/lib/types.ts";
 import { ApiClient } from "@/lib/api.ts";
@@ -30,6 +30,10 @@ export function ApplicationContextProvider({ children }: ApplicationContextProvi
   const [availableAgents, setAvailableAgents] = useState<{ name: string; id: number; }[]>([]);
   const [isLoadingAgents, setIsLoadingAgents] = useState(true);
   const [account, setAccount] = useState<Account | null>(null);
+  const [supportedFileExtensions, setSupportedFileExtensions] = useState<string[]>([]);
+  const [isLoadingFileExtensions, setIsLoadingFileExtensions] = useState(true);
+  const [fileExtensionsError, setFileExtensionsError] = useState<string | null>(null);
+  const hasFetchedFileExtensions = useRef(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -76,6 +80,27 @@ export function ApplicationContextProvider({ children }: ApplicationContextProvi
   fetchAgentsForDataSet();
 }, [dataSetId]);
 
+  useEffect(() => {
+    const fetchSupportedFileExtensions = async () => {
+      if (hasFetchedFileExtensions.current) return;
+      hasFetchedFileExtensions.current = true;
+
+      try {
+        const supportedTypes = await api.conversations().getSupportedFileTypes();
+        setSupportedFileExtensions(supportedTypes.supported_extensions);
+        setFileExtensionsError(null);
+      } catch (error) {
+        console.error('Failed to fetch supported file types:', error);
+        setSupportedFileExtensions([]);
+        setFileExtensionsError('Failed to load supported file types');
+      } finally {
+        setIsLoadingFileExtensions(false);
+      }
+    };
+
+    fetchSupportedFileExtensions();
+  }, []);
+
   const value: ApplicationContextValue = {
     dataSets,
     setDataSets,
@@ -86,7 +111,13 @@ export function ApplicationContextProvider({ children }: ApplicationContextProvi
     isLoadingAgents,
     setIsLoadingAgents,
     account,
-    setAccount
+    setAccount,
+    supportedFileExtensions,
+    setSupportedFileExtensions,
+    isLoadingFileExtensions,
+    setIsLoadingFileExtensions,
+    fileExtensionsError,
+    setFileExtensionsError
   };
 
   return (

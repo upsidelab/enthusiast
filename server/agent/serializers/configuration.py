@@ -63,6 +63,19 @@ class AgentSerializer(ParentDataContextSerializerMixin, serializers.ModelSeriali
         validated_data["file_upload"] = class_obj.FILE_UPLOAD
         return super().create(validated_data)
 
+    def update(self, instance, validated_data):
+        agent_type = self.context.get("agent_type")
+        if not agent_type:
+            raise AssertionError("Missing 'agent_type' in field context")
+
+        try:
+            class_obj = AgentRegistry().get_agent_class_by_type(agent_type)
+        except Exception as e:
+            raise APIException(f"Error loading agent: {str(e)}")
+
+        validated_data["file_upload"] = class_obj.FILE_UPLOAD
+        return super().update(instance, validated_data)
+
 
 class AgentListSerializer(ParentDataContextSerializerMixin, serializers.ModelSerializer):
     context_keys_to_propagate = ["agent_type"]

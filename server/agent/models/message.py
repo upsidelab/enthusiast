@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from .conversation import Conversation
@@ -22,10 +23,12 @@ class Message(models.Model):
 
     answer_failed = models.BooleanField(default=False)
     function_name = models.CharField(max_length=50, blank=True, null=True)
+    file_name = models.CharField(max_length=256, blank=True, null=True)
+    file_type = models.CharField(max_length=50, blank=True, null=True)
 
     @classmethod
     def internal_message_types(cls):
-        return [cls.MessageType.FUNCTION, cls.MessageType.FILE, cls.MessageType.INTERMEDIATE_STEP]
+        return [cls.MessageType.FUNCTION, cls.MessageType.INTERMEDIATE_STEP]
 
     @property
     def langchain_type(self):
@@ -38,6 +41,17 @@ class Message(models.Model):
             self.MessageType.SYSTEM: "system",
         }
         return langchain_type_mapping[self.type]
+
+    def clean(self):
+        errors = {}
+
+        if self.type == self.MessageType.FILE:
+            if not self.file_name:
+                errors["file_name"] = f"This field is required for {self.MessageType.FILE}."
+            if not self.file_type:
+                errors["file_type"] = f"This field is required for {self.MessageType.FILE}."
+        if errors:
+            raise ValidationError(errors)
 
     class Meta:
         db_table_comment = (

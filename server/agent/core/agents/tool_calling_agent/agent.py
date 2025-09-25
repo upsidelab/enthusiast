@@ -1,5 +1,5 @@
 from enthusiast_common.agents import BaseAgent
-from enthusiast_common.config import LLMToolConfig
+from enthusiast_common.config.base import LLMToolConfig
 from enthusiast_common.tools.base import BaseTool
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_core.callbacks import BaseCallbackHandler

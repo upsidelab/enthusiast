@@ -1,9 +1,13 @@
-import typing
 from abc import ABC
-from typing import Any, Dict
+from typing import Any, Dict, cast
 
+from enthusiast_common.registry import LanguageModelProvider
 from langchain.memory import ConversationBufferMemory
 from langchain_core.messages import AIMessage, FunctionMessage, HumanMessage
+
+
+class UploadedFile(HumanMessage):
+    file_id: int = True
 
 
 class PersistIntermediateStepsMixin(ABC):
@@ -12,10 +16,17 @@ class PersistIntermediateStepsMixin(ABC):
     """
 
     def save_context(self, inputs: Dict[str, Any], outputs: Dict[str, str]) -> None:
-        self_as_conversation_memory = typing.cast(ConversationBufferMemory, self)
+        self_as_conversation_memory = cast(ConversationBufferMemory, self)
 
         human_message = HumanMessage(inputs["input"])
         self_as_conversation_memory.chat_memory.add_message(human_message)
+
+        for key in inputs.keys():
+            if key.startswith(LanguageModelProvider.FILE_KEY_PREFIX):
+                file_upload_system_message = UploadedFile(
+                    content="", file_id=key.removeprefix(LanguageModelProvider.FILE_KEY_PREFIX)
+                )
+                self_as_conversation_memory.chat_memory.add_message(file_upload_system_message)
 
         if "intermediate_steps" in outputs:
             for agent_action, result in outputs["intermediate_steps"]:

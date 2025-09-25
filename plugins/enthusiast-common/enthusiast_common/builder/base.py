@@ -8,7 +8,7 @@ from langchain_core.prompts import BasePromptTemplate, ChatMessagePromptTemplate
 from langchain_core.tools import BaseTool
 
 from ..agents import BaseAgent
-from ..config import AgentConfig, AgentToolConfig, FunctionToolConfig, LLMConfig, LLMToolConfig
+from ..config.base import AgentConfig, AgentToolConfig, FunctionToolConfig, LLMConfig, LLMToolConfig
 from ..injectors import BaseInjector
 from ..registry import BaseDBModelsRegistry, BaseEmbeddingProviderRegistry, BaseLanguageModelRegistry
 from ..structures import RepositoriesInstances

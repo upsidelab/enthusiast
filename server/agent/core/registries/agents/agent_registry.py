@@ -7,7 +7,7 @@ from typing import Any, Type, TypeVar
 from django.conf import settings
 from enthusiast_common.agents import BaseAgent
 from enthusiast_common.builder import BaseAgentBuilder
-from enthusiast_common.config import AgentConfig
+from enthusiast_common.config.base import AgentConfig
 
 from agent.core.agents.default_config import merge_config
 from agent.core.builder import AgentBuilder

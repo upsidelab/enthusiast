@@ -204,7 +204,9 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
     def _build_prompt_template(self) -> ChatPromptTemplate:
         data_set_id = self._injector.repositories.conversation.get_data_set_id(self.conversation_id)
         llm_provider = self._llm_registry.provider_for_dataset(data_set_id)
-
+        memory = self._injector.chat_summary_memory or self._config.chat_limited_memory
+        memory_files = memory.chat_memory.get_files()
+        memory_files_objects = llm_provider.prepare_files_objects(files_objects=memory_files, data_placeholder=False)
         files_objects = llm_provider.prepare_files_objects(files_objects=self._files)
-        file_injected_prompt = self._config.chat_prompt_template.add_files_content(files_objects)
+        file_injected_prompt = self._config.chat_prompt_template.add_files_content(files_objects + memory_files_objects)
         return file_injected_prompt.to_chat_prompt_template()

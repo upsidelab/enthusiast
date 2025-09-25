@@ -47,24 +47,24 @@ class LanguageModelProvider(ABC):
         """
 
     @classmethod
-    def prepare_files_objects(cls, files_objects: list[LLMFile]):
+    def prepare_files_objects(cls, files_objects: list[LLMFile], data_placeholder: bool = True):
         pass
         objects = []
         for file in files_objects:
             if file.file_category == FileTypes.FILE:
-                objects.append(cls.prepare_file_object(file))
+                objects.append(cls.prepare_file_object(file, data_placeholder))
             else:
-                objects.append(cls.prepare_image_object(file))
+                objects.append(cls.prepare_image_object(file, data_placeholder))
         return objects
 
     @staticmethod
     @abstractmethod
-    def prepare_image_object(file_object: LLMFile) -> BaseImageContent:
+    def prepare_image_object(file_object: LLMFile, data_placeholder: bool) -> BaseImageContent:
         pass
 
     @staticmethod
     @abstractmethod
-    def prepare_file_object(file_object: LLMFile) -> BaseFileContent:
+    def prepare_file_object(file_object: LLMFile, data_placeholder: bool) -> BaseFileContent:
         pass
 
 

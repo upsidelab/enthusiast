@@ -1,6 +1,6 @@
 from django.db import models
 
-from .conversation import Conversation
+from .conversation import Conversation, ConversationFile
 
 
 class Message(models.Model):
@@ -13,6 +13,7 @@ class Message(models.Model):
     feedback = models.TextField(null=True)
 
     answer_failed = models.BooleanField(default=False)
+    file = models.ForeignKey(ConversationFile, on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
         db_table_comment = (

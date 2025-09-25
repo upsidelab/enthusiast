@@ -251,10 +251,6 @@ CATALOG_MODELS = {
     "agent": "agent.models.Agent",
 }
 
-AGENT_TOOLS = {
-    "Create Answer Tool": "agent.tools.create_answer_tool.CreateAnswerTool",
-}
-
 AVAILABLE_AGENTS: dict[str, dict[str, str]] = {
     "question_answer_agent": {
         "name": "Question Answer Agent",

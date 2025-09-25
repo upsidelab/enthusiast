@@ -1,3 +1,5 @@
 import Integration from "@/components/integration";
 
-<Integration name="Mistral" integrationKey="mistral" pipName="enthusiast-model-mistral" registerLanguageModelModule="enthusiast_model_mistral.MistralAILanguageModelProvider" registerEmbeddingsModule="enthusiast_model_mistral.MistralAIEmbeddingProvider"/>
+export const envVariables = ["MISTRAL_API_KEY"]
+
+<Integration name="Mistral" integrationKey="mistral" pipName="enthusiast-model-mistral" registerLanguageModelModule="enthusiast_model_mistral.MistralAILanguageModelProvider" registerEmbeddingsModule="enthusiast_model_mistral.MistralAIEmbeddingProvider" envVariables={envVariables} />

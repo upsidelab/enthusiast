@@ -1,4 +1,4 @@
-from typing import Self
+from typing import Any, Self
 
 from django.core import serializers
 from enthusiast_common.builder import RepositoriesInstances
@@ -8,8 +8,6 @@ from enthusiast_common.repositories import BaseDataSetRepository, BaseProductRep
 from enthusiast_common.retrievers import BaseProductRetriever
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import PromptTemplate
-
-from catalog.models import Product
 
 QUERY_PROMPT_TEMPLATE = """
     With the following database schema delimited by three backticks ```
@@ -31,6 +29,9 @@ QUERY_PROMPT_TEMPLATE = """
     ```
     generate a where clause for an SQL query for fetching products that can be useful when answering the following 
     request delimited by three backticks.
+    try to avoid using AND in queries so you get more results instead try with OR.
+    try to place multiple like queries with different phrases.
+    try to place a single words in LIKE queries so you can find more products.
     Make sure that the queries are case insensitive 
     ``` 
     {query} 
@@ -59,12 +60,11 @@ class ProductRetriever(BaseProductRetriever):
         self.prompt_template = prompt_template
         self.llm = llm
 
-    def find_products_matching_query(self, user_query: str) -> list[Product]:
+    def find_products_matching_query(self, user_query: str) -> list[Any]:
         agent_where_clause = self._build_where_clause_for_query(user_query)
         where_conditions = [f"data_set_id = {self.data_set_id}"]
         if agent_where_clause:
             where_conditions.append(agent_where_clause)
-
         return self.product_repo.extra(where_conditions=where_conditions)[: self.number_of_products]
 
     def get_sample_products_json(self) -> str:

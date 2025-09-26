@@ -83,7 +83,7 @@ class ConversationView(APIView):
     def get(self, request, conversation_id):
         conversation = (
             Conversation.objects.select_related("agent")
-            .prefetch_related(Prefetch("messages", queryset=Message.objects.order_by("id")))
+            .prefetch_related(Prefetch("messages", queryset=Message.objects.filter(is_file=False).order_by("id")))
             .get(id=conversation_id, user=request.user)
         )
         serializer = ConversationContentSerializer(conversation)

@@ -176,6 +176,7 @@ class TestConversationManager:
         conversation_id = conversation.id
         message = "Hello, this is my first message"
         streaming = False
+        file_ids = []
 
         # Mock the get_answer method to create a response message
         mock_get_answer.return_value = None
@@ -187,12 +188,13 @@ class TestConversationManager:
             user_id=user_id,
             message=message,
             streaming=streaming,
+            file_ids=file_ids,
         )
 
         # Then
         conversation.refresh_from_db()
         assert conversation.summary == message
-        mock_get_answer.assert_called_once_with(conversation, message, streaming)
+        mock_get_answer.assert_called_once_with(conversation, message, streaming, file_ids)
 
     @patch("agent.conversation.manager.ConversationManager.get_answer")
     def test_respond_to_user_message_subsequent_message_does_not_change_summary(self, mock_get_answer):
@@ -210,6 +212,7 @@ class TestConversationManager:
         conversation_id = conversation.id
         message = "This is a subsequent message"
         streaming = True
+        file_ids = []
 
         # Mock the get_answer method to create a response message
         mock_get_answer.return_value = None
@@ -221,12 +224,13 @@ class TestConversationManager:
             user_id=user_id,
             message=message,
             streaming=streaming,
+            file_ids=file_ids,
         )
 
         # Then
         conversation.refresh_from_db()
         assert conversation.summary == "Original summary"
-        mock_get_answer.assert_called_once_with(conversation, message, streaming)
+        mock_get_answer.assert_called_once_with(conversation, message, streaming, file_ids)
 
     @patch("agent.conversation.manager.ConversationManager.get_answer")
     def test_respond_to_user_message_with_invalid_conversation(self, mock_get_answer):
@@ -246,6 +250,7 @@ class TestConversationManager:
                 user_id=user_id,
                 message=message,
                 streaming=streaming,
+                file_ids=[],
             )
 
         # Verify get_answer was not called

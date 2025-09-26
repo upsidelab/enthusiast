@@ -6,7 +6,7 @@ services:
       - POSTGRES_PASSWORD=enthusiast
       - POSTGRES_DB=enthusiast
     ports:
-      - "5433:5432"
+      - "5432:5432"
   redis:
     image: redis:latest
   frontend:

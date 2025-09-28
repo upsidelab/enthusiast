@@ -42,5 +42,5 @@ jobs:
 
         - name: Upload built artifacts to S3
           run: |
-            aws s3 sync build/ s3://${{ secrets.DOCS_UPLOAD_BUCKET }}/tools/enthusiast/ --acl public-read
+            aws s3 sync out/ s3://${{ secrets.DOCS_UPLOAD_BUCKET }}/tools/enthusiast/ --acl public-read
             

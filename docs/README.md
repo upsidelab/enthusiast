@@ -1,25 +1,9 @@
-# Website
+## Getting Started
 
-This documentation site is built using [Docusaurus](https://docusaurus.io/).
+First, run the development server:
 
-### Installation
-
-```
-$ pnpm install
+```bash
+pnpm dev
 ```
 
-### Local Development
-
-```
-$ pnpm start
-```
-
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
-
-### Build
-
-```
-$ pnpm build
-```
-
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.

@@ -18,20 +18,14 @@ const navbar = (
 )
 const footer = <Footer>MIT {new Date().getFullYear()} © Nextra.</Footer>
 
-export default async function RootLayout({ children }) {
+export default async function RootLayout({ children }: any) {
   return (
     <html
-      // Not required, but good for SEO
       lang="en"
-      // Required to be set
       dir="ltr"
-      // Suggested by `next-themes` package https://github.com/pacocoursey/next-themes#with-app
       suppressHydrationWarning
     >
-    <Head
-      // ... Your additional head options
-    >
-      {/* Your additional tags should be passed as `children` of `<Head>` element */}
+    <Head>
     </Head>
     <body>
     <Layout

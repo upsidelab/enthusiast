@@ -1,10 +1,13 @@
 import type { NextConfig } from "next";
 import nextra from "nextra";
 
-const nextConfig: NextConfig = {};
+const nextConfig: NextConfig = {
+  output: "export",
+  basePath: "/tools/enthusiast",
+};
 
 const withNextra = nextra({
-  contentDirBasePath: '/docs'
+  contentDirBasePath: "/docs",
 });
 
 export default withNextra(nextConfig);

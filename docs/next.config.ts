@@ -4,6 +4,9 @@ import nextra from "nextra";
 const nextConfig: NextConfig = {
   output: "export",
   basePath: "/tools/enthusiast",
+  images: {
+    unoptimized: true,
+  },
 };
 
 const withNextra = nextra({

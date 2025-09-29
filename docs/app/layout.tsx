@@ -3,6 +3,7 @@ import { Banner, Head } from "nextra/components";
 import { getPageMap } from "nextra/page-map";
 import "nextra-theme-docs/style.css";
 import Logo from "@/app/logo";
+import { GoogleTagManager } from "@next/third-parties/google"
 
 export const metadata = {
   // Define your metadata here
@@ -18,6 +19,8 @@ const footer = (
   </Footer>
 )
 
+const gtagId = process.env.GTAG_ID;
+
 export default async function RootLayout({ children }: any) {
   return (
     <html
@@ -27,6 +30,7 @@ export default async function RootLayout({ children }: any) {
     >
     <Head>
     </Head>
+    {gtagId && <GoogleTagManager gtmId={gtagId}/>}
     <body>
     <Layout
       banner={banner}

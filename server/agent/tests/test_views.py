@@ -3,7 +3,7 @@ from unittest.mock import patch
 import pytest
 from django.urls import reverse
 from django.utils import timezone
-from enthusiast_common.config.base import FunctionToolConfig
+from enthusiast_common.config import FunctionToolConfig
 from enthusiast_common.tools import BaseFunctionTool
 from enthusiast_common.utils import RequiredFieldsModel
 from model_bakery import baker

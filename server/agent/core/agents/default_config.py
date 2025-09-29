@@ -1,6 +1,6 @@
 from typing import Type
 
-from enthusiast_common.config.base import (
+from enthusiast_common.config import (
     AgentConfig,
     AgentConfigWithDefaults,
     CallbackHandlerConfig,

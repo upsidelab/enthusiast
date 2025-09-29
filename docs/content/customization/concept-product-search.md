@@ -324,7 +324,7 @@ class AgentActionWebsocketCallbackHandler(BaseWebSocketHandler):
 Let's create custom product vector store retriever
 ```python
 from django.db.models import QuerySet
-from enthusiast_common.config.base import AgentConfig
+from enthusiast_common.config import AgentConfig
 from enthusiast_common.registry import BaseEmbeddingProviderRegistry
 from enthusiast_common.retrievers import BaseVectorStoreRetriever
 from enthusiast_common.structures import RepositoriesInstances
@@ -498,7 +498,7 @@ from typing import Optional
 
 from enthusiast_common.agents import BaseAgent
 from enthusiast_common.builder import BaseAgentBuilder, RepositoriesInstances
-from enthusiast_common.config.base import AgentConfig, LLMConfig
+from enthusiast_common.config import AgentConfig, LLMConfig
 from enthusiast_common.injectors import BaseInjector
 from enthusiast_common.registry import BaseDBModelsRegistry, BaseEmbeddingProviderRegistry, BaseLanguageModelRegistry
 from enthusiast_common.retrievers import BaseVectorStoreRetriever
@@ -676,7 +676,7 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
 ### Configuration
 Create configuration inside `config.py` file:
 ```python
-from enthusiast_common.config.base import (
+from enthusiast_common.config import (
     AgentCallbackHandlerConfig,
     AgentConfigWithDefaults,
     LLMConfig,

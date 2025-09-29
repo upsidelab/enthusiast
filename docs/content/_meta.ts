@@ -2,13 +2,11 @@ const mapping = {
   index: "",
   "getting-started": "",
   customization: "",
-  synchronize: "",
-  chat: "",
+  agents: "",
+  management: "",
   integrate: "",
-  manage: "",
   observe: "",
   plugins: "",
-  agents: "",
 };
 
 export default mapping

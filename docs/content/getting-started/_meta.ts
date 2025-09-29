@@ -1,7 +1,7 @@
 const mapping = {
   installation: "",
   "import-test-data": "",
-  "chat-with-agent": "",
+  "try-it-out": "",
 };
 
 export default mapping

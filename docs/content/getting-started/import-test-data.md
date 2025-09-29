@@ -1,7 +1,3 @@
----
-sidebar_position: 2
----
-
 # Importing Test Data
 
 When you sign in to Enthusiast for the first time, you’ll be prompted to create your first [data set](/docs/synchronize/manage-data-sets).

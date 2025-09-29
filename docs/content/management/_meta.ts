@@ -1,5 +1,6 @@
 const mapping = {
-  "manage-users": "",
+  "data-sets": "",
+  "users": "",
 };
 
 export default mapping

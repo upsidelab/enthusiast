@@ -1,8 +1,4 @@
----
-sidebar_position: 3
----
-
-# Chat with the Agent
+# Give It a Task
 
 Once the test data set has been imported and indexed, you can start chatting with the agent.
 The enthusiast-starter package comes with a few example agents, that are pre-configured to execute different workflows. To learn more how to build custom agents, see the [customization](/docs/customization/system-architecture/) section of the documentation.
@@ -25,7 +21,7 @@ In the left sidebar, go to “Ask” → “Default Agent”. This will open the
 
 ## Next Steps
 
-- [Learn more about data sets](/docs/synchronize/manage-data-sets)
-- [See how to manage users](/docs/manage/manage-users)
-- [Add custom tools for the AI agent](/docs/chat/add-custom-tools)
+- [Learn more about data sets](/docs/management/data-sets)
+- [See how to manage users](/docs/management/users)
+- [Build your custom agent](/docs/agents/agent-architecture)
 - [Create a custom plugin](/docs/plugins/create-custom-plugin)

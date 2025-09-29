@@ -6,6 +6,6 @@ sidebar_position: 2
 
 ### Popular E-Commerce Systems
 
-- [Shopify](/tools/enthusiast/docs/plugins/shopify-integration)
-- [Shopware](/tools/enthusiast/docs/plugins/shopware-integration)
-- [Solidus](/tools/enthusiast/docs/plugins/solidus-integration)
+- [Shopify](/docs/plugins/shopify-integration)
+- [Shopware](/docs/plugins/shopware-integration)
+- [Solidus](/docs/plugins/solidus-integration)

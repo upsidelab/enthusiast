@@ -18,7 +18,7 @@ Service accounts enable you to integrate external systems with Enthusiast. Like 
 8. A pop-up will display the API token for the newly created account. Copy it and store it in a secure location.
 
 :::success
-Congratulations! You’ve successfully created a service account. Now you can [connect to Enthusiast's API](/tools/enthusiast/docs/integrate/connect-to-api).
+Congratulations! You’ve successfully created a service account. Now you can [connect to Enthusiast's API](/docs/integrate/connect-to-api).
 :::
 
 ## Modifying Data Set Access for a Service Account

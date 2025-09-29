@@ -112,4 +112,4 @@ The response includes:
 
 ## Authentication
 
-All API endpoints require authentication. Read more about [authenticating with the API](/tools/enthusiast/docs/integrate/connect-to-api)
+All API endpoints require authentication. Read more about [authenticating with the API](/docs/integrate/connect-to-api)

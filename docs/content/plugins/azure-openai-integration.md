@@ -30,4 +30,4 @@ Save the changes and restart the web server and the worker.
 
 ## Configuring a Data Set to use Azure OpenAI
 
-After installing and configuring the plugin, you can now select Azure OpenAI as a language model and embedding provider when [setting up a new data set](/tools/enthusiast/docs/synchronize/manage-data-sets/#creating-a-data-set).
+After installing and configuring the plugin, you can now select Azure OpenAI as a language model and embedding provider when [setting up a new data set](/docs/synchronize/manage-data-sets/#creating-a-data-set).

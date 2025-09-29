@@ -23,7 +23,7 @@ While a single data set is usually enough to get started, there are scenarios wh
   - **Embedding Vector Size:** The size of the embeddings vector (default: 512).
 3. Click "Create" at the bottom. 
 
-Now, you're ready to connect your [data sources](/tools/enthusiast/docs/synchronize/connect-product-source).
+Now, you're ready to connect your [data sources](/docs/synchronize/connect-product-source).
 
 ## Assigning Users to a Data Set
 

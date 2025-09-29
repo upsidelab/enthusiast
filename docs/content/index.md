@@ -31,4 +31,4 @@ Enthusiast is your open-source AI agent for e-commerce. Connect it to your produ
 
 ## Try It Out
 
-Check our [Getting Started guide](category/getting-started) to set up your local instance and see Enthusiast in action in under 5 minutes.
+Check our [Getting Started guide](/docs/getting-started/installation/) to set up your local instance and see Enthusiast in action in under 5 minutes.

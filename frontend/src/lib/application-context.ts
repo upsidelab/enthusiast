@@ -12,6 +12,12 @@ export interface ApplicationContextValue {
   setIsLoadingAgents: (value: boolean) => void;
   account: Account | null;
   setAccount: (account: Account | null) => void;
+  supportedFileExtensions: string[];
+  setSupportedFileExtensions: (extensions: string[]) => void;
+  isLoadingFileExtensions: boolean;
+  setIsLoadingFileExtensions: (value: boolean) => void;
+  fileExtensionsError: string | null;
+  setFileExtensionsError: (error: string | null) => void;
 }
 
 export const ApplicationContext = createContext<ApplicationContextValue | null>(null);

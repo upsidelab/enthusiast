@@ -51,7 +51,7 @@ class LanguageModelProvider(ABC):
         pass
         objects = []
         for file in files_objects:
-            if file.file_category == FileTypes.FILE:
+            if file.file_category == FileTypes.FILE.value:
                 objects.append(cls.prepare_file_object(file, data_placeholder))
             else:
                 objects.append(cls.prepare_image_object(file, data_placeholder))

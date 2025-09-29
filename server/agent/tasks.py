@@ -3,12 +3,15 @@ from datetime import datetime, timedelta
 from asgiref.sync import async_to_sync
 from celery import Task, shared_task
 from channels.layers import get_channel_layer
+from django.core.files.base import ContentFile
 from django.utils import timezone
 
 from agent.conversation import ConversationManager
 from agent.core.callbacks import BaseWebSocketHandler
+from agent.file_service import FileService
 from agent.models import Message
-from agent.models.conversation import ConversationFile
+from agent.models.conversation import Conversation, ConversationFile
+from agent.serializers.conversation import ConversationFileSerializer
 from pecl import settings
 
 
@@ -57,6 +60,39 @@ def respond_to_user_message_task(
         return {"conversation_id": conversation_id, "message_id": answer.id}
     except Exception:
         self.retry(countdown=1)
+
+
+@shared_task
+def process_file_upload_task(conversation_id: int, file_content: bytes, filename: str, content_type: str):
+    try:
+        conversation = Conversation.objects.get(id=conversation_id)
+        django_file = ContentFile(file_content, name=filename)
+        file_category = "image" if content_type.startswith("image/") else "file"
+
+        obj = ConversationFile(
+            conversation=conversation,
+            file=django_file,
+            content_type=content_type,
+            file_category=file_category,
+            llm_content=FileService(django_file, content_type).process() or "",
+        )
+
+        obj.save()
+
+        Message.objects.create(conversation=conversation, role="human", text="", file=obj)
+        serializer = ConversationFileSerializer(obj)
+
+        return {
+            "status": "SUCCESS",
+            "conversation_id": conversation_id,
+            "uploaded_file": serializer.data,
+            "file_id": obj.id,
+        }
+
+    except Conversation.DoesNotExist:
+        return {"status": "FAILURE", "error": f"Conversation {conversation_id} not found"}
+    except Exception as e:
+        return {"status": "FAILURE", "error": str(e)}
 
 
 @shared_task

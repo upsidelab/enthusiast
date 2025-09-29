@@ -1,3 +1,5 @@
+import os
+
 from celery.result import AsyncResult
 from django.conf import settings
 from django.db.models import Prefetch
@@ -29,12 +31,13 @@ from agent.serializers.conversation import (
     AskQuestionSerializer,
     ConversationContentSerializer,
     ConversationCreationSerializer,
-    ConversationFileSerializer,
-    ConversationMultiFileUploadSerializer,
     ConversationSerializer,
+    FileUploadStatusResponseSerializer,
+    FileUploadTaskResponseSerializer,
     MessageFeedbackSerializer,
+    SupportedFileTypesSerializer,
 )
-from agent.tasks import respond_to_user_message_task
+from agent.tasks import process_file_upload_task, respond_to_user_message_task
 from catalog.models import DataSet
 
 
@@ -321,19 +324,109 @@ class ConversationFileUploadView(APIView):
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
-        operation_description="Upload files to conversation.",
-        request_body=ConversationMultiFileUploadSerializer,
-        responses={200: ConversationFileSerializer(many=True)},
+        operation_description="Upload a single file to conversation asynchronously.",
+        manual_parameters=[
+            openapi.Parameter(
+                "file", openapi.IN_FORM, description="File to upload", type=openapi.TYPE_FILE, required=True
+            )
+        ],
+        responses={202: FileUploadTaskResponseSerializer()},
     )
     def post(self, request, conversation_id, *args, **kwargs):
-        conversation = get_object_or_404(Conversation, pk=conversation_id)
+        get_object_or_404(Conversation, pk=conversation_id, user=request.user)
+        if "file" not in request.FILES:
+            return Response({"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = ConversationMultiFileUploadSerializer(data=request.data, context={"conversation": conversation})
-        serializer.is_valid(raise_exception=True)
+        file = request.FILES["file"]
+        file_extension = os.path.splitext(file.name)[1].lower()
+        supported_extensions = []
+        for extensions_tuple in settings.FILE_PARSER_CLASSES.keys():
+            supported_extensions.extend(extensions_tuple)
 
-        objs = serializer.save()
+        if file_extension not in supported_extensions:
+            return Response(
+                {
+                    "error": f"File type {file_extension} is not supported. Supported types: {', '.join(supported_extensions)}"
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        file_content = file.read()
+        filename = file.name
+        content_type = getattr(file, "content_type", "")
+
+        task = process_file_upload_task.apply_async(
+            kwargs={
+                "conversation_id": conversation_id,
+                "file_content": file_content,
+                "filename": filename,
+                "content_type": content_type,
+            }
+        )
+
+        response_data = {"task_id": task.id}
+        response_serializer = FileUploadTaskResponseSerializer(data=response_data)
+        response_serializer.is_valid(raise_exception=True)
 
         return Response(
-            ConversationFileSerializer(objs, many=True).data,
-            status=status.HTTP_201_CREATED,
+            response_serializer.validated_data,
+            status=status.HTTP_202_ACCEPTED,
         )
+
+
+class FileUploadStatusView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Check the status of a file upload task",
+        manual_parameters=[
+            openapi.Parameter(
+                "task_id", openapi.IN_PATH, description="ID of the file upload task", type=openapi.TYPE_STRING
+            )
+        ],
+        responses={200: FileUploadStatusResponseSerializer()},
+    )
+    def get(self, request, task_id, *args, **kwargs):
+        try:
+            task_result = AsyncResult(task_id)
+
+            response_data = {
+                "task_id": task_id,
+                "status": task_result.status,
+            }
+
+            if task_result.status == "SUCCESS":
+                response_data["result"] = task_result.result
+            elif task_result.status == "FAILURE":
+                response_data["result"] = {"error": str(task_result.result)}
+
+            # Use serializer for response validation
+            serializer = FileUploadStatusResponseSerializer(data=response_data)
+            serializer.is_valid(raise_exception=True)
+
+            return Response(serializer.validated_data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to get task status: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class SupportedFileTypesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Get list of supported file types for upload",
+        responses={200: SupportedFileTypesSerializer()},
+    )
+    def get(self, request):
+        supported_extensions = []
+        for extensions_tuple in settings.FILE_PARSER_CLASSES.keys():
+            supported_extensions.extend(extensions_tuple)
+
+        response_data = {"supported_extensions": supported_extensions}
+
+        serializer = SupportedFileTypesSerializer(data=response_data)
+        serializer.is_valid(raise_exception=True)
+
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)

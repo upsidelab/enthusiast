@@ -1,9 +1,7 @@
 import logging
 
-from django.core.files.uploadedfile import InMemoryUploadedFile
 from rest_framework import serializers
 
-from agent.file_service import FileService
 from agent.models import Conversation, Message
 from agent.models.conversation import ConversationFile
 from agent.serializers.configuration import AgentListSerializer
@@ -82,9 +80,16 @@ class MessageFeedbackSerializer(serializers.ModelSerializer):
 
 class MessagesSerializer(serializers.ModelSerializer):
     # Serializer to get list of messages exchanged during a given conversation.
+    files = serializers.SerializerMethodField()
+
     class Meta:
         model = Message
-        fields = ["id", "text", "role"]
+        fields = ["id", "text", "role", "files"]
+
+    def get_files(self, obj):
+        if obj.file and obj.role == "human":
+            return [ConversationFileSerializer(obj.file, context=self.context).data]
+        return []
 
 
 class ConversationContentSerializer(serializers.ModelSerializer):
@@ -99,9 +104,18 @@ class ConversationContentSerializer(serializers.ModelSerializer):
 
 
 class ConversationFileSerializer(serializers.ModelSerializer):
+    filename = serializers.SerializerMethodField()
+    file_url = serializers.SerializerMethodField()
+
     class Meta:
         model = ConversationFile
-        fields = ["id", "file", "conversation", "content_type", "llm_content", "created_at", "updated_at"]
+        fields = ["id", "filename", "file_url", "content_type"]
+
+    def get_filename(self, obj):
+        return obj.file.name.split("/")[-1] if obj.file else ""
+
+    def get_file_url(self, obj):
+        return obj.file.url if obj.file else ""
 
     def create(self, validated_data):
         file_obj = validated_data["file"]
@@ -109,25 +123,15 @@ class ConversationFileSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
-class ConversationMultiFileUploadSerializer(serializers.Serializer):
-    files = serializers.ListField(child=serializers.FileField(), allow_empty=False)
+class FileUploadTaskResponseSerializer(serializers.Serializer):
+    task_id = serializers.CharField()
 
-    def create(self, validated_data):
-        files: list[InMemoryUploadedFile] = validated_data["files"]
 
-        conversation = self.context.get("conversation")
-        if not conversation:
-            raise serializers.ValidationError("Conversation is required")
+class FileUploadStatusResponseSerializer(serializers.Serializer):
+    task_id = serializers.CharField()
+    status = serializers.CharField()
+    result = serializers.JSONField(required=False, allow_null=True)
 
-        objs = []
-        for file in files:
-            obj = ConversationFile(
-                conversation=conversation,
-                file=file,
-                content_type=getattr(file, "content_type", None),
-                llm_content=FileService(file.file, file.content_type).process() or "",
-            )
 
-            objs.append(obj)
-
-        return ConversationFile.objects.bulk_create(objs)
+class SupportedFileTypesSerializer(serializers.Serializer):
+    supported_extensions = serializers.ListField(child=serializers.CharField())

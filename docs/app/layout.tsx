@@ -10,8 +10,13 @@ export const metadata = {
 }
 
 const banner = <Banner storageKey="banner">Enthusiast 1.3.0 is released 🎉</Banner>
-const navbar = <Navbar logo={<Logo/>}/>
-const footer = <Footer>MIT {new Date().getFullYear()} © Upside Lab sp. z o.o.</Footer>
+const navbar = <Navbar logo={<Logo/>} projectLink="https://github.com/upsidelab/enthusiast/"/>
+const footer = (
+  <Footer>
+    © {new Date().getFullYear()}&nbsp;
+    <a href="https://upsidelab.io">Upside Lab sp. z o.o.</a>
+  </Footer>
+)
 
 export default async function RootLayout({ children }: any) {
   return (

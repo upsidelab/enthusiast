@@ -236,6 +236,7 @@ CATALOG_EMBEDDING_PROVIDERS = {
 # Configuration of installed plugins {plugin_name: plugin_path}
 CATALOG_PRODUCT_SOURCE_PLUGINS = {
     "Sample Product Source": "enthusiast_source_sample.SampleProductSource",
+    "Medusa": "enthusiast_source_medusa.MedusaProductSource",
 }
 CATALOG_DOCUMENT_SOURCE_PLUGINS = {
     "Sample Document Source": "enthusiast_source_sample.SampleDocumentSource",
@@ -260,6 +261,10 @@ AVAILABLE_AGENTS: dict[str, dict[str, str]] = {
         "name": "Question Answer Agent",
         "agent_directory_path": "agent.core.agents.tool_calling_agent",
     },
+    "ocr": {
+        "name": "OCR Agent",
+        "agent_directory_path": "enthusiast_agent_ocr_to_order",
+    },
 }
 
 DEFAULT_AGENT: dict = {
@@ -281,5 +286,8 @@ FILE_PARSER_CLASSES: dict[tuple[str] : str] = {
 UPLOADED_FILE_RETENTION_PERIOD_HOURS: int = 48
 
 SERVICE_ACCOUNT_DOMAIN = env.str("SERVICE_ACCOUNT_DOMAIN", "enthusiast.internal")
+
+MEDUSA_API_KEY = env.str("MEDUSA_API_KEY")
+MEDUSA_BASE_URL = env.str("MEDUSA_BASE_URL")
 
 from .settings_override import *  # noqa

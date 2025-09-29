@@ -21,7 +21,15 @@ export function MessageBubble({ text, variant, questionId, files }: MessageBubbl
 
   useEffect(() => {
     const processText = async () => {
-      const rawHtml = await marked(text);
+      const renderer = new marked.Renderer();
+      renderer.link = ({ href, title, tokens }) => {
+        const text = tokens.map(token => token.raw).join('');
+        const target =' target="_blank" rel="noopener noreferrer"';
+        const titleAttr = title ? ` title="${title}"` : '';
+        return `<a href="${href}"${target}${titleAttr}>${text}</a>`;
+      };
+
+      const rawHtml = await marked(text, { renderer });
       const cleanHtml = DOMPurify.sanitize(rawHtml);
       setSanitizedHtml(cleanHtml);
     };

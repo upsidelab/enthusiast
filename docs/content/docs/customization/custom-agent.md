@@ -138,5 +138,6 @@ AVAILABLE_AGENTS = {
 
 ```
 Now Agent is available in UI to chat with it.
+
 ![Agent chat](./img/agent-chat.png)
 

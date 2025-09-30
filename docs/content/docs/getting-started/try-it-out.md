@@ -24,4 +24,4 @@ In the left sidebar, go to “Ask” → “Default Agent”. This will open the
 - [Learn more about data sets](/docs/management/data-sets)
 - [See how to manage users](/docs/management/users)
 - [Build your custom agent](/docs/agents/agent-architecture)
-- [Create a custom plugin](/docs/plugins/create-custom-plugin)
+- [Create a custom plugin](/docs/customization/custom-plugin)

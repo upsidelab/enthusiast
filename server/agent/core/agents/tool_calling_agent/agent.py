@@ -4,13 +4,19 @@ from enthusiast_common.structures import LLMFile
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 
 from agent.core.tools import CreateAnswerTool
+from agent.core.tools.file_list_tool import FileListTool
+from agent.core.tools.file_operation_tool import FileOperationTool
 
 
 class ToolCallingAgent(BaseAgent):
     AGENT_ARGS = None
     PROMPT_INPUT = None
     PROMPT_EXTENSION = None
-    TOOLS = [LLMToolConfig(tool_class=CreateAnswerTool)]
+    TOOLS = [
+        LLMToolConfig(tool_class=CreateAnswerTool),
+        LLMToolConfig(tool_class=FileListTool),
+        LLMToolConfig(tool_class=FileOperationTool),
+    ]
 
     def _create_agent_executor(self) -> AgentExecutor:
         tools = self._create_tools()

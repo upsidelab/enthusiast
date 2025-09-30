@@ -75,8 +75,10 @@ class BaseLLMTool(BaseTool, ABC):
         data_set_id: Any,
         llm: BaseLanguageModel,
         injector: BaseInjector,
+        conversation_id: Any = None,
     ):
         self._data_set_id = data_set_id
+        self._conversation_id = conversation_id
         self._llm = llm
         self._injector = injector
 

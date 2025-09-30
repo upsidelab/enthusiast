@@ -49,8 +49,9 @@ class CreateAnswerTool(BaseLLMTool):
         data_set_id: int,
         llm: BaseLanguageModel,
         injector: BaseInjector,
+        conversation_id: int,
     ):
-        super().__init__(data_set_id=data_set_id, llm=llm, injector=injector)
+        super().__init__(data_set_id=data_set_id, llm=llm, injector=injector, conversation_id=conversation_id)
         self.data_set_id = data_set_id
         self.llm = llm
         self.injector = injector

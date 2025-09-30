@@ -117,9 +117,7 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         if config.llm:
             llm = config.llm
         return config.tool_class(
-            data_set_id=self._data_set_id,
-            llm=llm,
-            injector=injector,
+            data_set_id=self._data_set_id, llm=llm, injector=injector, conversation_id=self.conversation_id
         )
 
     def _build_agent_tool(self, config: AgentToolConfig) -> BaseAgentTool:

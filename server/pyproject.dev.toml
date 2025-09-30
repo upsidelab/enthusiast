@@ -25,6 +25,7 @@ dependencies = [
     "model-bakery (>=1.20.5,<2.0.0)",
     "django-filter (>=25.1,<26.0)",
     "enthusiast-file-parsers (==1.0.0)",
+    "enthusiast-agent-ocr-to-order (==1.0.0)"
 ]
 
 
@@ -33,6 +34,7 @@ enthusiast-common = { path="../plugins/enthusiast-common" }
 enthusiast-source-sample = { path="../plugins/enthusiast-source-sample" }
 enthusiast-model-openai = { path="../plugins/enthusiast-model-openai" }
 enthusiast-file-parsers = { path="../plugins/enthusiast-file-parsers" }
+enthusiast-agent-ocr-to-order = { path="../plugins/enthusiast-agent-ocr-to-order" }
 
 [tool.poetry]
 package-mode = false

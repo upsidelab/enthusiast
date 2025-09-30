@@ -117,6 +117,7 @@ class ConversationView(APIView):
         question_message = serializer.validated_data.get("question_message")
         streaming = serializer.validated_data.get("streaming")
         file_ids = serializer.validated_data.get("file_ids")
+        file_ids = []
         data_set = Conversation.objects.get(id=conversation_id).data_set
         data_set_repo = DjangoDataSetRepository(DataSet)
         language_model_provider_class = LanguageModelRegistry(data_set_repo).provider_for_dataset(data_set.id)

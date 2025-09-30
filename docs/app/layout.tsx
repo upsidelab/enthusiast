@@ -11,7 +11,7 @@ export const metadata = {
 }
 
 const banner = <Banner storageKey="banner">Enthusiast 1.3.0 is released 🎉</Banner>
-const navbar = <Navbar logo={<Logo/>} projectLink="https://github.com/upsidelab/enthusiast/"/>
+const navbar = <Navbar logo={<Logo/>} align="left" projectLink="https://github.com/upsidelab/enthusiast/"/>
 const footer = (
   <Footer>
     © {new Date().getFullYear()}&nbsp;
@@ -35,7 +35,7 @@ export default async function RootLayout({ children }: any) {
     <Layout
       banner={banner}
       navbar={navbar}
-      pageMap={await getPageMap("/docs/")}
+      pageMap={await getPageMap("/")}
       docsRepositoryBase="https://github.com/upsidelab/enthusiast/tree/main/docs"
       footer={footer}
       // ... Your additional layout options

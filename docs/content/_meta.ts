@@ -1,12 +1,17 @@
-const mapping = {
-  index: "",
-  "getting-started": "",
-  customization: "",
-  agents: "",
-  management: "",
-  integrate: "",
-  observe: "",
-  plugins: "",
-};
-
-export default mapping
+export default {
+  index: {
+    display: "hidden",
+  },
+  docs: {
+    title: "Documentation",
+    type: "page",
+  },
+  integrations: {
+    title: "Integrations",
+    type: "page",
+    theme: {
+      sidebar: false,
+      pagination: false,
+    }
+  }
+}

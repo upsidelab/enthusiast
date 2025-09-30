@@ -13,7 +13,7 @@ Data sources can be synchronized on-demand, or according to a defined schedule.
 
 Let's configure a sample data source for products and documents, to feed our agents with knowledge.
 
-Enthusiast comes with a set of [plugins](/docs/category/plugins), that make it easy to pull information from popular E-Commerce, PIM and CMS systems.
+Enthusiast comes with a set of [integrations](/integrations), that make it easy to pull information from popular E-Commerce, PIM and CMS systems.
 It also provides a sample source for products and documents, that can be used to get started quickly.
 
 ![Add a product source](./img/add-product-source.png)
@@ -36,4 +36,4 @@ After triggering the synchronization, go to the “Products” tab in the left m
 
 ![Verify product synchronization](./img/verify-product-synchronization.png)
 
-Now, it's the time to start to [try out your agent](/docs/getting-started/chat-with-agent).
+Now, it's the time to start to [try out your agent](/docs/getting-started/try-it-out).

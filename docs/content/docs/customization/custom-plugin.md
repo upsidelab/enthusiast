@@ -59,6 +59,7 @@ CATALOG_DOCUMENT_SOURCE_PLUGINS = {
 ```
 Now this custom plugin will be available in Document source section.
 `config` variable used in above example could be provided while adding any source plugin:
+
 ![Source config](./img/source-config.png)
 in this example it was used to provide urls to documents.
 

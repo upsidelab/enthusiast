@@ -13,8 +13,6 @@ const nextConfig: NextConfig = {
   trailingSlash: true,
 };
 
-const withNextra = nextra({
-  contentDirBasePath: "/docs",
-});
+const withNextra = nextra({});
 
 export default withNextra(nextConfig);

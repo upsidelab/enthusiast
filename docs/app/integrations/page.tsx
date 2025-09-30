@@ -1,5 +1,7 @@
 import {Cards} from "nextra/components"
 import { useMDXComponents as getMDXComponents } from "../../mdx-components";
+import Image from "next/image";
+import IntegrationCard from "@/components/integration-card";
 
 const mdxComponents = getMDXComponents({});
 const Wrapper = mdxComponents.wrapper;
@@ -16,23 +18,24 @@ export default async function Page() {
       <H1>Integrations</H1>
       <H2>E-Commerce Systems</H2>
       <Cards>
-        <Cards.Card title="Medusa" href="/integrations/medusa/"/>
-        <Cards.Card title="Shopware" href="/integrations/shopware/"/>
-        <Cards.Card title="Shopify" href="/integrations/shopify/"/>
-        <Cards.Card title="Solidus" href="/integrations/solidus/"/>
+        <IntegrationCard name="Medusa" imageSrc="/tools/enthusiast/img/integrations/medusa.png" href="/integrations/medusa/" />
+        <IntegrationCard name="Shopware" imageSrc="/tools/enthusiast/img/integrations/shopware.png" href="/integrations/shopware/" />
+        <IntegrationCard name="Shopify" imageSrc="/tools/enthusiast/img/integrations/shopify.png" href="/integrations/shopify/" />
+        <IntegrationCard name="Solidus" imageSrc="/tools/enthusiast/img/integrations/solidus.png" href="/integrations/solidus/" />
+        <IntegrationCard name="WooCommerce" imageSrc="/tools/enthusiast/img/integrations/woocommerce.png" href="/integrations/woocommerce/" />
       </Cards>
       <H2>Content Management Systems</H2>
       <Cards>
-        <Cards.Card title="Sanity" href="/integrations/sanity/"/>
-        <Cards.Card title="wordpress" href="/integrations/wordpress/"/>
+        <IntegrationCard name="Sanity" imageSrc="/tools/enthusiast/img/integrations/sanity.png" href="/integrations/sanity/" />
+        <IntegrationCard name="WordPress" imageSrc="/tools/enthusiast/img/integrations/wordpress.png" href="/integrations/wordpress/" />
       </Cards>
       <H2>Language Models</H2>
       <Cards>
-        <Cards.Card title="OpenAI" href="/integrations/openai/"/>
-        <Cards.Card title="Ollama" href="/integrations/ollama/"/>
-        <Cards.Card title="Azure OpenAI" href="/integrations/azure-openai/"/>
-        <Cards.Card title="Google Gemini" href="/integrations/gemini/"/>
-        <Cards.Card title="Mistral" href="/integrations/mistral/"/>
+        <IntegrationCard name="OpenAI" imageSrc="/tools/enthusiast/img/integrations/openai.png" href="/integrations/openai/" />
+        <IntegrationCard name="Ollama" imageSrc="/tools/enthusiast/img/integrations/ollama.png" href="/integrations/ollama/" />
+        <IntegrationCard name="Azure OpenAI" imageSrc="/tools/enthusiast/img/integrations/azure-openai.png" href="/integrations/azure-openai/" />
+        <IntegrationCard name="Google Gemini" imageSrc="/tools/enthusiast/img/integrations/gemini.png" href="/integrations/gemini/" />
+        <IntegrationCard name="Mistral" imageSrc="/tools/enthusiast/img/integrations/mistral.png" href="/integrations/mistral/" />
       </Cards>
     </Wrapper>
   )

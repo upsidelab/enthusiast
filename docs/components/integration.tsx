@@ -2,9 +2,11 @@ import { useMDXComponents as getMDXComponents } from "@/mdx-components";
 import { MDXRemote } from "nextra/mdx-remote";
 import { compileMdx } from "nextra/compile";
 import Link from "next/link";
+import Image from "next/image";
 
 export interface IntegrationProps {
   name: string;
+  integrationKey: string;
   pipName: string;
   registerProductModule?: string;
   registerDocumentModule?: string;
@@ -25,8 +27,8 @@ export default async function Integration(props: IntegrationProps) {
 
   return (
     <>
-      <H1>{props.name}</H1>
-
+      <Image className="x:py-4" src={`/tools/enthusiast/img/integrations/${props.integrationKey}.png`} alt={props.name} width={256} height={256} />
+      <H1 className="x:hidden">{props.name}</H1>
       <H2>Installation</H2>
       <P>
         Run the following command inside your application directory.<br />

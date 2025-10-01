@@ -1,13 +1,13 @@
 from abc import ABC, ABCMeta, abstractmethod
 from typing import Any
 
-from enthusiast_common.injectors import BaseInjector
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel
 
+from ..injectors import BaseInjector
 from ..utils import RequiredFieldsModel, validate_required_vars
 
 

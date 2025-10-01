@@ -15,7 +15,11 @@ class PersistentChatHistory(BaseChatMessageHistory):
         self._conversation = conversation_repo.get_by_id(conversation_id)
 
     def add_message(self, message: BaseMessage) -> None:
-        self._conversation.messages.create(role=message.type, text=message.content)
+        self._conversation.messages.create(
+            role=message.type,
+            text=message.content,
+            name=getattr(message, "name", ""),
+        )
 
     @property
     def messages(self) -> list[BaseMessage]:

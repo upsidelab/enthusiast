@@ -9,7 +9,7 @@ from agent.models.agent import Agent
 class ConversationManager:
     DEFAULT_ERROR_MESSAGE = "We couldn't process your request at this time"
 
-    def get_answer(self, conversation: Conversation, question_message, streaming) -> str:
+    def get_answer(self, conversation: Conversation, question_message: str, streaming: bool) -> str:
         """Formulate an answer to a given question and store the decision-making process.
 
         Engine calculates embedding for a question and using similarity search collects documents that may contain

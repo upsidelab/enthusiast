@@ -78,6 +78,14 @@ def process_file_upload_task(conversation_id: int, file_content: bytes, filename
 
         obj.save()
 
+        Message.objects.create(
+            conversation_id=conversation.id,
+            created_at=datetime.now(),
+            role="human",
+            is_file=True,
+            text=f"Uploaded {filename} with id: {obj.pk}",
+        )
+
         serializer = ConversationFileSerializer(obj)
 
         return {

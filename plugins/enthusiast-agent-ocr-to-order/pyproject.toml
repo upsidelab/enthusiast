@@ -1,0 +1,22 @@
+[project]
+name = "enthusiast-agent-ocr-to-order"
+version = "1.0.0"
+description = "Enthusiast's agent which converts images to orders."
+authors = [
+    {name = "Damian Sowiński",email = "damian.sowinski@upsidelab.io"}
+]
+readme = "README.md"
+requires-python = ">=3.10,<4"
+dependencies = [
+    "enthusiast-common (>=1.2.1,<2.0.0)",
+    "enthusiast-agent-re-act (>=1.1.0,<2.0.0)",
+    "langchain (>=0.3.26,<0.4.0)"
+]
+
+[tool.poetry]
+packages = [{include = "enthusiast_agent_ocr_to_order", from = "src"}]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

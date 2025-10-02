@@ -52,4 +52,8 @@ By default, the docs are served at **`http://localhost:3000/tools/enthusiast/doc
 
 ---
 
+For common setup issues (missing `pnpm`, permission errors, 404s), see the [Troubleshooting guide](troubleshooting.md).
+
+---
+
 With these steps, you should have the Enthusiast docs running smoothly on your local machine.

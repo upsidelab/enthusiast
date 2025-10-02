@@ -6,7 +6,7 @@ Using this guide you can preview your changes and give better contribution to th
 
 ## Install pnpm
 
-This project uses [pnpm](https://pnpm.io/) as its package manager.
+This project uses [`pnpm`](https://pnpm.io/) as its package manager.
 
 To install `pnpm` run:
 

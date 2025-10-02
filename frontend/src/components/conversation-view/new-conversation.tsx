@@ -30,9 +30,13 @@ export function NewConversation({ agentId }: NewConversationProps) {
     loadAgentDetails();
   }, [agentId]);
 
-  const onSubmit = async (message: string) => {
-    const newConversationId = await api.conversations().createConversation(agentId);
-    navigate(`/data-sets/${dataSetId}/chat/${newConversationId}?pending=${message}`);
+  const onSubmit = async (message: string, _fileIds?: number[], createdConversationId?: number) => {
+    if (createdConversationId) {
+      navigate(`/data-sets/${dataSetId}/chat/${createdConversationId}?pending=${message}`);
+    } else {
+      const newConversationId = await api.conversations().createConversation(agentId);
+      navigate(`/data-sets/${dataSetId}/chat/${newConversationId}?pending=${message}`);
+    }
   }
 
   return (
@@ -49,7 +53,7 @@ export function NewConversation({ agentId }: NewConversationProps) {
         )}
       </div>
       <div className="bottom-0 sticky flex-shrink-0 bg-white pb-4">
-        <MessageComposer onSubmit={onSubmit} isLoading={false}/>
+        <MessageComposer onSubmit={onSubmit} isLoading={false} agentId={agentId}/>
       </div>
     </div>
   )

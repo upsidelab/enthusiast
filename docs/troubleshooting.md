@@ -23,7 +23,7 @@ For more details on Corepack installation, refer to the official [Pnpm.io docs](
 ## 2. `EACCES: permission denied when installing pnpm`
 
 **Cause**: You don’t have permission to write to /usr/local/lib when installing global npm packages.
-**Fix**: Re-run with sudo:
+**Fix**: Re-run it with sudo:
 
 ```bash
 sudo npm install -g pnpm
@@ -57,5 +57,7 @@ const mapping = {
 
 export default mapping;
 ```
+
+---
 
 With these fixes, most setup and onboarding issues should be resolved. If you encounter new errors, please open an [issue on GitHub](https://github.com/upsidelab/enthusiast/issues) so we can improve this guide.

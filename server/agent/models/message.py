@@ -14,6 +14,7 @@ class Message(models.Model):
 
     answer_failed = models.BooleanField(default=False)
     function_name = models.CharField(max_length=50, blank=True, null=True)
+    is_file = models.BooleanField(default=False)
 
     class Meta:
         db_table_comment = (

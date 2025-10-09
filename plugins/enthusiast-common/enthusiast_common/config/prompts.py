@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Union
 
 from enthusiast_common.structures import BaseFileContent, BaseImageContent, TextContent
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import BasePromptTemplate, ChatPromptTemplate, PromptTemplate
 from pydantic import BaseModel, field_validator, model_validator
 from typing_extensions import Self
 
@@ -35,12 +36,24 @@ class Message(BaseModel):
         return self.model_dump(mode="json")
 
 
-class PromptTemplateConfig(BaseModel):
+class BasePromptTemplateConfig(BaseModel, ABC):
+    @abstractmethod
+    def create_prompt_template_instance(self) -> BasePromptTemplate:
+        pass
+
+
+class PromptTemplateConfig(BasePromptTemplateConfig):
     prompt_template: str
     input_variables: list[str]
 
+    def create_prompt_template_instance(self) -> PromptTemplate:
+        return PromptTemplate(
+            input_variables=self.input_variables,
+            template=self.prompt_template,
+        )
 
-class ChatPromptTemplateConfig(BaseModel):
+
+class ChatPromptTemplateConfig(BasePromptTemplateConfig):
     messages: list[Message]
 
     @model_validator(mode="before")
@@ -53,7 +66,7 @@ class ChatPromptTemplateConfig(BaseModel):
 
         return values
 
-    def to_chat_prompt_template(self) -> ChatPromptTemplate:
+    def create_prompt_template_instance(self) -> ChatPromptTemplate:
         return ChatPromptTemplate.from_messages([message.to_chat_prompt_template() for message in self.messages])
 
     def add_files_content(self, files_objects: list[BaseFileContent | BaseImageContent]) -> Self:

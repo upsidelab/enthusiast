@@ -1,12 +1,9 @@
 from enthusiast_common.agents import BaseAgent
-from enthusiast_common.config import LLMToolConfig
-from enthusiast_common.tools.base import BaseTool
+from enthusiast_common.config import FileToolConfig, LLMToolConfig
+from enthusiast_common.tools.files.list_files_tool import FileListTool
+from enthusiast_common.tools.files.perform_file_operation_tool import FileRetrievalTool
 from langchain.agents import AgentExecutor, create_tool_calling_agent
-from langchain_core.callbacks import BaseCallbackHandler
-from langchain_core.language_models import BaseLanguageModel
-from langchain_core.prompts import ChatPromptTemplate
 
-from agent.core.injector import Injector
 from agent.core.tools import CreateAnswerTool
 
 
@@ -14,35 +11,13 @@ class ToolCallingAgent(BaseAgent):
     AGENT_ARGS = None
     PROMPT_INPUT = None
     PROMPT_EXTENSION = None
-    TOOLS = [LLMToolConfig(tool_class=CreateAnswerTool)]
+    TOOLS = [
+        LLMToolConfig(tool_class=CreateAnswerTool),
+        FileToolConfig(tool_class=FileListTool),
+        FileToolConfig(tool_class=FileRetrievalTool),
+    ]
 
-    def __init__(
-        self,
-        tools: list[BaseTool],
-        llm: BaseLanguageModel,
-        prompt: ChatPromptTemplate,
-        conversation_id: int,
-        injector: Injector,
-        callback_handler: BaseCallbackHandler | None = None,
-        **kwargs,
-    ):
-        self._tools = tools
-        self._llm = llm
-        self._prompt = prompt
-        self._injector = injector
-        self._conversation_id = conversation_id
-        self._callback_handler = callback_handler
-        self._agent_executor = self._create_agent_executor(**kwargs)
-        super().__init__(
-            tools=tools,
-            llm=llm,
-            prompt=prompt,
-            conversation_id=conversation_id,
-            callback_handler=callback_handler,
-            injector=injector,
-        )
-
-    def _create_agent_executor(self, **kwargs):
+    def _create_agent_executor(self, **kwargs) -> AgentExecutor:
         tools = self._create_tools()
         agent = create_tool_calling_agent(self._llm, tools, self._prompt)
         return AgentExecutor(
@@ -53,7 +28,9 @@ class ToolCallingAgent(BaseAgent):
         return [tool_class.as_tool() for tool_class in self._tools]
 
     def get_answer(self, input_text: str) -> str:
-        agent_output = self._agent_executor.invoke(
-            {"input": input_text}, config={"callbacks": [self._callback_handler] if self._callback_handler else []}
+        agent_executor = self._create_agent_executor()
+        agent_output = agent_executor.invoke(
+            {"input": input_text},
+            config={"callbacks": [self._callback_handler] if self._callback_handler else []},
         )
         return agent_output["output"]

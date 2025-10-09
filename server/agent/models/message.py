@@ -13,6 +13,7 @@ class Message(models.Model):
     feedback = models.TextField(null=True)
 
     answer_failed = models.BooleanField(default=False)
+    function_name = models.CharField(max_length=50, blank=True, null=True)
 
     class Meta:
         db_table_comment = (

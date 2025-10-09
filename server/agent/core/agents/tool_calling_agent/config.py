@@ -1,20 +1,20 @@
 from enthusiast_common.config import AgentConfigWithDefaults
-from enthusiast_common.config.base import ChatPromptTemplateConfig
+from enthusiast_common.config.prompts import ChatPromptTemplateConfig, Message, MessageRole
 
 from agent.core.agents import ToolCallingAgent
 
 
 def get_config() -> AgentConfigWithDefaults:
     return AgentConfigWithDefaults(
-        chat_prompt_template=ChatPromptTemplateConfig(
+        prompt_template=ChatPromptTemplateConfig(
             messages=[
-                (
-                    "system",
-                    "You are a sales support agent, and you know everything about a company and their products.",
+                Message(
+                    role=MessageRole.SYSTEM,
+                    content="You are a sales support agent, and you know everything about a company and their products.",
                 ),
-                ("placeholder", "{chat_history}"),
-                ("human", "{input}"),
-                ("placeholder", "{agent_scratchpad}"),
+                Message(role=MessageRole.PLACEHOLDER, content="{chat_history}"),
+                Message(role=MessageRole.USER, content="{input}"),
+                Message(role=MessageRole.PLACEHOLDER, content="{agent_scratchpad}"),
             ]
         ),
         agent_class=ToolCallingAgent,

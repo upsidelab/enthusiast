@@ -1,4 +1,8 @@
 from dataclasses import dataclass
+from enum import Enum
+from typing import Any
+
+from pydantic import BaseModel
 
 from .repositories import (
     BaseAgentRepository,
@@ -45,3 +49,33 @@ class RepositoriesInstances:
     product: BaseProductRepository
     product_chunk: BaseModelChunkRepository
     agent: BaseAgentRepository
+
+
+class FileTypes(Enum):
+    FILE = "file"
+    IMAGE = "image"
+
+
+@dataclass
+class LLMFile:
+    id: Any
+    content: str
+    file_category: FileTypes
+    filename: str
+    content_type: str
+
+
+class BaseContent(BaseModel):
+    type: str
+
+
+class TextContent(BaseContent):
+    text: str
+
+
+class BaseImageContent(BaseContent):
+    pass
+
+
+class BaseFileContent(BaseContent):
+    pass

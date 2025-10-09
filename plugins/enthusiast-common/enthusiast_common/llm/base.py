@@ -1,6 +1,6 @@
 from typing import Any, Type
 
-from enthusiast_common import LanguageModelProvider
+from enthusiast_common.registry.llm import LanguageModelProvider
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
 

@@ -80,6 +80,7 @@ class DummyAgent:
     PROMPT_INPUT = PromptInput
     PROMPT_EXTENSION = PromptExtension
     TOOLS = [FunctionToolConfig(tool_class=DummyTool), FunctionToolConfig(tool_class=DummyTool)]
+    FILE_UPLOAD = False
 
 
 @pytest.fixture(autouse=True)
@@ -240,10 +241,7 @@ class TestAgentView:
             "agent_type": "agent_1",
         }
 
-        with patch(
-            "agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_type",
-            side_effect=[DummyAgent, DummyAgent, DummyAgent, DummyAgent],
-        ):
+        with patch("agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_type", return_value=DummyAgent):
             response = api_client.post(url, payload, format="json")
 
             assert response.status_code == status.HTTP_201_CREATED
@@ -278,10 +276,7 @@ class TestAgentView:
             "agent_type": "agent_1",
         }
 
-        with patch(
-            "agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_type",
-            side_effect=[DummyAgent, DummyAgent, DummyAgent, DummyAgent],
-        ):
+        with patch("agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_type", return_value=DummyAgent):
             response = api_client.post(url, payload, format="json")
 
             assert response.status_code == status.HTTP_201_CREATED
@@ -323,10 +318,10 @@ class TestAgentView:
             PROMPT_INPUT = PromptInput
             PROMPT_EXTENSION = PromptExtension
             TOOLS = [FunctionToolConfig(tool_class=NoArgsDummyTool), FunctionToolConfig(tool_class=DummyTool)]
+            FILE_UPLOAD = False
 
         with patch(
-            "agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_type",
-            side_effect=[NoArgsDummyAgent, NoArgsDummyAgent, NoArgsDummyAgent, NoArgsDummyAgent],
+            "agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_type", return_value=NoArgsDummyAgent
         ):
             response = api_client.post(url, payload, format="json")
 

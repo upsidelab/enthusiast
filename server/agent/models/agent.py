@@ -19,6 +19,7 @@ class Agent(models.Model):
     description = models.TextField()
     agent_type = models.CharField(max_length=255, blank=False)
     config = models.JSONField()
+    file_upload = models.BooleanField(default=False)
 
     dataset = models.ForeignKey(DataSet, on_delete=models.CASCADE, related_name="agents")
 

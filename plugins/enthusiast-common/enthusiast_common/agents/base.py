@@ -8,6 +8,8 @@ from langchain_core.tools import BaseTool
 from pydantic import BaseModel
 
 from ..injectors import BaseInjector
+from ..tools.files.list_files_tool import FileListTool
+from ..tools.files.perform_file_operation_tool import FileRetrievalTool
 from ..utils import RequiredFieldsModel, validate_required_vars
 
 
@@ -41,6 +43,9 @@ class BaseAgent(ABC, ExtraArgsClassBase):
     TOOLS = []
 
     FILE_UPLOAD = False
+    DEFAULT_FILE_TOOLS = [FileListTool, FileRetrievalTool]
+    if FILE_UPLOAD:
+        TOOLS.extend(DEFAULT_FILE_TOOLS)
 
     def __init__(
         self,

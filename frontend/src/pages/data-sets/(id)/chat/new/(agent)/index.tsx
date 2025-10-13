@@ -4,11 +4,17 @@ import { PageMain } from "@/components/util/page-main.tsx";
 import { NewConversation } from "@/components/conversation-view/new-conversation.tsx";
 import {useApplicationContext} from "@/lib/use-application-context.ts";
 
+import type { OnPendingMessage } from "@/components/conversation-view/chat";
+
 interface EmptyStateProps {
   title: string;
   description: string;
   pageTitle: string;
   pageDescription: string;
+}
+
+interface NewChatProps {
+  onPendingMessage: OnPendingMessage;
 }
 
 function EmptyState({ title, description, pageTitle, pageDescription }: EmptyStateProps) {
@@ -31,7 +37,7 @@ function EmptyState({ title, description, pageTitle, pageDescription }: EmptySta
   );
 }
 
-export function NewChat() {
+export function NewChat({ onPendingMessage }: NewChatProps) {
   const { availableAgents } = useApplicationContext()!;
   const { agent } = useParams();
 
@@ -76,7 +82,7 @@ export function NewChat() {
   return (
     <PageMain className="h-full">
       <PageHeading title={selectedAgent.name} description="Start a new conversation." className="sticky top-4 bg-white" />
-      <NewConversation agentId={selectedAgent.id} />
+      <NewConversation agentId={selectedAgent.id} onPendingMessage={onPendingMessage} />
     </PageMain>
   );
 }

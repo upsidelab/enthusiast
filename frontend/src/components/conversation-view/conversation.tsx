@@ -9,7 +9,6 @@ import {MessageBubbleTyping} from "@/components/conversation-view/message-bubble
 
 export interface ConversationProps {
     conversationId: number;
-    onPendingMessageSent: () => void;
     pendingMessage: string | null;
     conversationLocked?: boolean;
 }
@@ -62,7 +61,7 @@ const api = new ApiClient(authenticationProviderInstance);
 
 const streamingEnabled = Boolean(import.meta.env.VITE_WS_BASE);
 
-export function Conversation({ conversationId, pendingMessage, onPendingMessageSent, conversationLocked = false }: ConversationProps) {
+export function Conversation({ conversationId, pendingMessage, conversationLocked = false }: ConversationProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [isAgentLoading, setIsAgentLoading] = useState(false);
     const [agentAction, setAgentAction] = useState<string>("Thinking...");
@@ -89,7 +88,6 @@ export function Conversation({ conversationId, pendingMessage, onPendingMessageS
                 // React StrictMode renders this component twice, but we can't execute this callback twice.
                 initialized.current = true;
                 await onMessageComposerSubmit(pendingMessage);
-                onPendingMessageSent();
                 setMessages([{role: "human", id: null, text: pendingMessage}]);
                 return;
             }

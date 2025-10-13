@@ -12,20 +12,19 @@ import { PlusIcon } from "lucide-react";
 
 const api = new ApiClient(authenticationProviderInstance);
 
-export function Chat() {
+interface ChatProps {
+  pendingMessage: string;
+}
+
+export function Chat({ pendingMessage }: ChatProps) {
   const { chatId } = useParams();
   const { dataSetId } = useApplicationContext()!;
-  const [searchParams, setSearchParams] = useSearchParams();
   const conversationId = Number(chatId);
-  const pendingMessage = searchParams.get("pending");
   const [conversation, setConversation] = useState<ConversationSchema | null>(null);
   const navigate = useNavigate();
 
   const isAgentDeleted = !!conversation?.agent.deleted_at;
   const isAgentCorrupted = !!conversation?.agent.corrupted;
-  const onPendingMessageSent = () => {
-    setSearchParams({});
-  }
 
   useEffect(() => {
     const fetchConversation = async () => {
@@ -49,7 +48,7 @@ export function Chat() {
               New Chat
             </Button>
           </PageHeading>
-          <Conversation conversationId={conversationId} onPendingMessageSent={onPendingMessageSent} pendingMessage={pendingMessage} conversationLocked={isAgentDeleted || isAgentCorrupted} />
+          <Conversation conversationId={conversationId} pendingMessage={pendingMessage} conversationLocked={isAgentDeleted || isAgentCorrupted} />
         </>
       }
     </PageMain>

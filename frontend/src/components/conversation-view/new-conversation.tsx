@@ -6,15 +6,16 @@ import { authenticationProviderInstance } from "@/lib/authentication-provider.ts
 import { useState, useEffect } from "react";
 import { AgentDetails } from "@/lib/types";
 
-const api = new ApiClient(authenticationProviderInstance);
+import type { OnPendingMessage } from "@/components/conversation-view/chat";
 
 export interface NewConversationProps {
   agentId: number;
+  onPendingMessage: OnPendingMessage;
 }
 
-export function NewConversation({ agentId }: NewConversationProps) {
-  const { dataSetId } = useApplicationContext()!;
-  const navigate = useNavigate();
+const api = new ApiClient(authenticationProviderInstance);
+
+export function NewConversation({ agentId, onPendingMessage }: NewConversationProps) {
   const [agent, setAgent] = useState<AgentDetails>();
 
   useEffect(() => {
@@ -32,7 +33,7 @@ export function NewConversation({ agentId }: NewConversationProps) {
 
   const onSubmit = async (message: string) => {
     const newConversationId = await api.conversations().createConversation(agentId);
-    navigate(`/data-sets/${dataSetId}/chat/${newConversationId}?pending=${message}`);
+    onPendingMessage(message, newConversationId);
   }
 
   return (

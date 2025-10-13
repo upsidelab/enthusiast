@@ -4,7 +4,7 @@ import App from './App.tsx';
 import './index.css';
 import { createBrowserRouter, redirect, RouterProvider } from "react-router-dom";
 import { ChatHistory } from "@/pages/data-sets/(id)/history.tsx";
-import { Chat } from "@/pages/data-sets/(id)/chat/(id)/index.tsx";
+import { Chat } from "@/components/conversation-view/chat.tsx";
 import { ProductsIndex } from "@/pages/data-sets/(id)/products/index.tsx";
 import { DocumentsIndex } from "@/pages/data-sets/(id)/documents/index.tsx";
 import { LoginPage } from "@/pages/login.tsx";
@@ -21,7 +21,6 @@ import { ConfigureDataSetProductSource } from "@/pages/data-sets/(id)/product-so
 import { ConfigureDataSetDocumentSource } from "@/pages/data-sets/(id)/document-sources/(id)/config.tsx";
 import { UsersIndex } from "@/pages/users";
 import { OnboardingIndex } from "@/pages/onboarding";
-import { NewChat } from "@/pages/data-sets/(id)/chat/new/(agent)/index.tsx";
 import AgentsPage from "@/pages/data-sets/(id)/agents";
 
 const api = new ApiClient(authenticationProviderInstance);
@@ -64,19 +63,16 @@ const router = createBrowserRouter([
       },
       {
         path: "/",
-        element: <NewChat />
-      },
-      {
-        path: '/data-sets/:id/chat/new/:agent',
-        element: <NewChat />
-      },
-      {
-        path: '/data-sets/:id/chat/new',
-        element: <NewChat />
-      },
-      {
-        path: '/data-sets/:id/chat/:chatId',
         element: <Chat />
+      },
+      {
+        path: '/data-sets/:id/chat',
+        element: <Chat />,
+        children: [
+          { path: 'new' },
+          { path: 'new/:agent' },
+          { path: ':chatId' }
+        ]
       },
       {
         path: '/data-sets/:id/history',

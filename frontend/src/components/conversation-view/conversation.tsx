@@ -23,7 +23,7 @@ export interface MessageFile {
 }
 
 export interface MessageProps {
-    role: "human" | "ai" | "system";
+    type: "human" | "ai" | "system";
     text: string;
     id: number | null;
     files?: MessageFile[];
@@ -46,19 +46,19 @@ function ConversationUI({messages, isAgentLoading, agentAction, lastMessageRef, 
         <div className="flex flex-col h-full px-4 pt-16">
             <div className="grow flex-1 space-y-4">
                 {messages.map((message, index) =>
-                    message.role === "system" ? (
+                    message.type === "system" ? (
                         <MessageError key={index} text={message.text}/>
                     ) : !message.text && message.files && message.files.length > 0 ? (
                         <AttachmentBubble
                             key={index}
-                            variant={message.role === "human" ? "primary" : "secondary"}
+                            variant={message.type === "human" ? "primary" : "secondary"}
                             files={message.files}
                         />
                     ) : (
                         <MessageBubble
                             key={index}
                             text={message.text}
-                            variant={message.role === "human" ? "primary" : "secondary"}
+                            variant={message.type === "human" ? "primary" : "secondary"}
                             questionId={message.id}
                             files={message.files}
                         />
@@ -123,13 +123,13 @@ export function Conversation({ conversationId, pendingMessage, onPendingMessageS
                 setMessages((prevMessages) => {
                     const lastMessage = prevMessages[prevMessages.length - 1];
 
-                    if (lastMessage && lastMessage.role === "ai" && lastMessage.id === null) {
+                    if (lastMessage && lastMessage.type === "ai" && lastMessage.id === null) {
                         return [
                             ...prevMessages.slice(0, -1),
                             { ...lastMessage, text: lastMessage.text + data.data.chunk }
                         ];
                     } else {
-                        return [...prevMessages, { role: "ai", text: data.data.chunk, id: null }];
+                        return [...prevMessages, { type: "ai", text: data.data.chunk, id: null }];
                     }
                 });
 
@@ -150,7 +150,7 @@ export function Conversation({ conversationId, pendingMessage, onPendingMessageS
                 setIsAgentLoading(false);
                 setMessages((prevMessages) => [
                     ...prevMessages,
-                    { role: "system", text: data.data.output, id: null },
+                    { type: "system", text: data.data.output, id: null },
                 ]);
             },
         };
@@ -221,7 +221,7 @@ export function Conversation({ conversationId, pendingMessage, onPendingMessageS
                 setIsAgentLoading(false);
                 setMessages((prev) => [
                     ...prev,
-                    { role: "ai", text: response.text, id: response.id }
+                    { type: "ai", text: response.text, id: response.id }
                 ]);
                 setIsLoading(false);
                 scrollToLastMessage();
@@ -237,7 +237,7 @@ export function Conversation({ conversationId, pendingMessage, onPendingMessageS
     const addUserMessage = (message: string) => {
         setMessages((prev) => [
             ...prev,
-            { role: "human", text: message, id: null }
+            { type: "human", text: message, id: null }
         ]);
         scrollToLastMessage();
     };
@@ -271,7 +271,7 @@ export function Conversation({ conversationId, pendingMessage, onPendingMessageS
                 initialized.current = true;
                 await onMessageComposerSubmit(pendingMessage);
                 onPendingMessageSent();
-                setMessages([{role: "human", id: null, text: pendingMessage}]);
+                setMessages([{type: "human", id: null, text: pendingMessage}]);
                 return;
             }
 

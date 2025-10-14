@@ -80,7 +80,7 @@ export type Conversation = {
 
 export type Message = {
   id: number;
-  role: string;
+  type: string;
   text: string;
 }
 

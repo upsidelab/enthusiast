@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 import pytest
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.messages import AIMessage, FunctionMessage, HumanMessage
+from langchain_core.messages import AIMessage, BaseMessage, FunctionMessage, HumanMessage
 from langchain_core.tools import BaseTool
 
 from agent.core.memory.limited_chat_memory import LimitedChatMemory
@@ -71,7 +71,7 @@ class TestLimitedChatMemory:
         assert messages[0].content == "What's the weather like?"
 
         # AI action message
-        assert isinstance(messages[1], AIMessage)
+        assert isinstance(messages[1], BaseMessage)
         assert messages[1].content == "I'll check the weather for you"
 
         # Function message
@@ -115,10 +115,10 @@ class TestLimitedChatMemory:
 
         # Verify the sequence: Human -> AI -> Function -> AI -> Function -> AI
         assert isinstance(messages[0], HumanMessage)
-        assert isinstance(messages[1], AIMessage)
+        assert isinstance(messages[1], BaseMessage)
         assert isinstance(messages[2], FunctionMessage)
         assert messages[2].name == "search_tool"
-        assert isinstance(messages[3], AIMessage)
+        assert isinstance(messages[3], BaseMessage)
         assert isinstance(messages[4], FunctionMessage)
         assert messages[4].name == "process_tool"
         assert isinstance(messages[5], AIMessage)

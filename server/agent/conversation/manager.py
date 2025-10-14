@@ -58,5 +58,8 @@ class ConversationManager:
         user_message.answer_failed = True
         user_message.save()
         Message.objects.create(
-            conversation=conversation, created_at=datetime.now(), role="system", text=self.DEFAULT_ERROR_MESSAGE
+            conversation=conversation,
+            created_at=datetime.now(),
+            type=Message.MessageType.SYSTEM,
+            text=self.DEFAULT_ERROR_MESSAGE,
         )

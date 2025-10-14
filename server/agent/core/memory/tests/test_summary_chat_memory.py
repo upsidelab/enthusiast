@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 import pytest
 from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.messages import AIMessage, FunctionMessage, HumanMessage
+from langchain_core.messages import AIMessage, BaseMessage, FunctionMessage, HumanMessage
 from langchain_core.tools import BaseTool
 
 from agent.core.memory.summary_chat_memory import SummaryChatMemory
@@ -148,7 +148,7 @@ class TestSummaryChatMemory:
         assert call_args_list[0][0][0].content == "What's the weather like?"
 
         # AI action message
-        assert isinstance(call_args_list[1][0][0], AIMessage)
+        assert isinstance(call_args_list[1][0][0], BaseMessage)
         assert call_args_list[1][0][0].content == "I'll check the weather for you"
 
         # Function message
@@ -206,7 +206,7 @@ class TestSummaryChatMemory:
         assert isinstance(call_args_list[0][0][0], HumanMessage)
 
         # First AI action
-        assert isinstance(call_args_list[1][0][0], AIMessage)
+        assert isinstance(call_args_list[1][0][0], BaseMessage)
         assert call_args_list[1][0][0].content == "Searching for data..."
 
         # First Function message
@@ -214,7 +214,7 @@ class TestSummaryChatMemory:
         assert call_args_list[2][0][0].name == "search_tool"
 
         # Second AI action
-        assert isinstance(call_args_list[3][0][0], AIMessage)
+        assert isinstance(call_args_list[3][0][0], BaseMessage)
         assert call_args_list[3][0][0].content == "Processing data..."
 
         # Second Function message

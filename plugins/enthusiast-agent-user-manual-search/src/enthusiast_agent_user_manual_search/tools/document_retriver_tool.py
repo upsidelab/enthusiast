@@ -12,9 +12,6 @@ logger = logging.getLogger(__name__)
 
 class RetrieveDocumentsToolInput(BaseModel):
     full_user_request: str = Field(description="user's full request")
-    product: str = Field(
-        description="product type, available values: 'air_conditioner', 'washing_machine'. Always add it"
-    )
 
 
 class RetrieveDocumentsTool(BaseLLMTool):
@@ -49,9 +46,9 @@ class RetrieveDocumentsTool(BaseLLMTool):
             document_context = " ".join(words)
         return document_context
 
-    def run(self, full_user_request: str, product: str):
+    def run(self, full_user_request: str):
         document_retriever = self._injector.document_retriever
-        relevant_documents = document_retriever.find_content_matching_query(full_user_request, product)
+        relevant_documents = document_retriever.find_content_matching_query(full_user_request)
         return self._get_document_context(relevant_documents)
 
     def as_tool(self) -> StructuredTool:

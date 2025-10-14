@@ -7,7 +7,7 @@ from .tools.document_retriver_tool import RetrieveDocumentsTool
 from .tools.solution_verification_tool import SolutionVerificationTool
 
 
-class UserManualReActAgent(BaseReActAgent):
+class UserManualSearchAgent(BaseReActAgent):
     TOOLS = [LLMToolConfig(tool_class=SolutionVerificationTool), LLMToolConfig(tool_class=RetrieveDocumentsTool)]
 
     def get_answer(self, input_text: str) -> str:

@@ -12,7 +12,7 @@ class ExtractDataPromptInput(RequiredFieldsModel):
     output_format: Json = Field(title="Output format", description="Output format of the extracted data")
 
 
-class ExtractDataReActAgent(BaseReActAgent):
+class CatalogEnrichmentAgent(BaseReActAgent):
     PROMPT_INPUT = ExtractDataPromptInput
 
     TOOLS = [

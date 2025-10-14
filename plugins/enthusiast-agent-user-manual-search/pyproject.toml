@@ -1,5 +1,5 @@
 [project]
-name = "enthusiast-agent-customer-support"
+name = "enthusiast-agent-user-manual-search"
 version = "1.0.0"
 description = "Example implementation of a Customer Support ReAct agent for Enthusiast"
 authors = [
@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [tool.poetry]
-packages = [{include = "enthusiast_agent_customer_support", from = "src"}]
+packages = [{include = "enthusiast_agent_user_manual_search", from = "src"}]
 
 
 [build-system]

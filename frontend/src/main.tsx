@@ -4,7 +4,7 @@ import App from './App.tsx';
 import './index.css';
 import { createBrowserRouter, redirect, RouterProvider } from "react-router-dom";
 import { ChatHistory } from "@/pages/data-sets/(id)/history.tsx";
-import { Chat } from "@/components/conversation-view/chat.tsx";
+import { Chat } from "@/pages/data-sets/(id)/chat/index.tsx";
 import { ProductsIndex } from "@/pages/data-sets/(id)/products/index.tsx";
 import { DocumentsIndex } from "@/pages/data-sets/(id)/documents/index.tsx";
 import { LoginPage } from "@/pages/login.tsx";

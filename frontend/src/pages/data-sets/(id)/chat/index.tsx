@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {useApplicationContext} from "@/lib/use-application-context.ts";
 
-import { NewChat } from "@/pages/data-sets/(id)/chat/new/(agent)/index.tsx";
-import { Chat as ExistingChat } from "@/pages/data-sets/(id)/chat/(id)/index.tsx";
+import { NewChat } from "@/components/conversation-view/new-chat.tsx";
+import { ChatSession } from "@/components/conversation-view/chat-session.tsx";
 
 export type OnPendingMessage = (message: string, conversationId: number) => void;
 
@@ -24,5 +24,5 @@ export function Chat() {
     return (<NewChat onPendingMessage={onPendingMessage}/>)
   }
 
-  return (<ExistingChat pendingMessage={pendingMessage} />)
+  return (<ChatSession pendingMessage={pendingMessage} />)
 }

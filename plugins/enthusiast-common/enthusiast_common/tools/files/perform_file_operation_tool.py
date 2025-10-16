@@ -1,4 +1,3 @@
-from enthusiast_common.config.prompts import ChatPromptTemplateConfig, Message, MessageRole
 from enthusiast_common.tools import BaseFileTool
 from pydantic import BaseModel, Field
 
@@ -18,6 +17,9 @@ class FileRetrievalTool(BaseFileTool):
     def run(self, file_ids: str, action: str):
         parsed_file_ids = file_ids.split(",")
         file_objects = self._injector.repositories.conversation.get_file_objects(self._conversation_id, parsed_file_ids)
+
+        from enthusiast_common.config.prompts import ChatPromptTemplateConfig, Message, MessageRole
+
         chat_prompt_template_config = ChatPromptTemplateConfig(
             messages=[
                 Message(

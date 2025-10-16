@@ -1,6 +1,8 @@
 from rest_framework import serializers
+from rest_framework.exceptions import APIException
 from utils.serializers import ExtraArgDetailSerializer, ParentDataContextSerializerMixin
 
+from agent.core.registries.agents.agent_registry import AgentRegistry
 from agent.models import Agent
 from agent.serializers.customs.fields import PydanticModelField, PydanticModelToolListField
 from catalog.models import DataSet
@@ -36,8 +38,30 @@ class AgentSerializer(ParentDataContextSerializerMixin, serializers.ModelSeriali
 
     class Meta:
         model = Agent
-        fields = ["id", "name", "description", "config", "dataset", "agent_type", "created_at", "updated_at"]
-        read_only_fields = ["id", "created_at", "updated_at"]
+        fields = [
+            "id",
+            "name",
+            "description",
+            "config",
+            "dataset",
+            "agent_type",
+            "created_at",
+            "updated_at",
+            "file_upload",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at", "file_upload"]
+
+    def create(self, validated_data):
+        agent_type = self.context.get("agent_type")
+        if not agent_type:
+            raise AssertionError("Missing 'agent_type' in field context")
+
+        try:
+            class_obj = AgentRegistry().get_agent_class_by_type(agent_type)
+        except Exception as e:
+            raise APIException(f"Error loading agent: {str(e)}")
+        validated_data["file_upload"] = class_obj.FILE_UPLOAD
+        return super().create(validated_data)
 
 
 class AgentListSerializer(ParentDataContextSerializerMixin, serializers.ModelSerializer):

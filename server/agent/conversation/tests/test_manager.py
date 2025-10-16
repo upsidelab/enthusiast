@@ -260,7 +260,9 @@ class TestConversationManager:
             started_at=datetime.now(),
             agent=self.agent,
         )
-        user_message = Message.objects.create(conversation=conversation, role="human", text="User's message")
+        user_message = Message.objects.create(
+            conversation=conversation, type=Message.MessageType.HUMAN, text="User's message"
+        )
         user_id = self.user.id
         data_set_id = self.data_set.id
         conversation_id = conversation.id
@@ -275,7 +277,7 @@ class TestConversationManager:
         user_message.refresh_from_db()
         assert conversation.messages.count() == 2
         error_message = conversation.messages.last()
-        assert error_message.role == "system"
+        assert error_message.type == Message.MessageType.SYSTEM
         assert error_message.text == "We couldn't process your request at this time"
         assert error_message.created_at is not None
         assert user_message.answer_failed is True
@@ -343,7 +345,7 @@ class TestConversationManager:
             started_at=datetime.now(),
             agent=self.agent,
         )
-        Message.objects.create(conversation=conversation, role="human", text="User's message")
+        Message.objects.create(conversation=conversation, type=Message.MessageType.HUMAN, text="User's message")
         user_id = self.user.id
         data_set_id = self.data_set.id
         conversation_id = conversation.id
@@ -364,5 +366,5 @@ class TestConversationManager:
 
             # Verify error message was created
             latest_message = conversation.messages.order_by("-created_at").first()
-            assert latest_message.role == "system"
+            assert latest_message.type == Message.MessageType.SYSTEM
             assert latest_message.text == "We couldn't process your request at this time"

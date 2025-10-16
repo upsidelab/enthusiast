@@ -5,7 +5,7 @@ from model_bakery import baker
 
 from agent.core.memory.persistent_chat_history import PersistentChatHistory
 from agent.core.repositories import DjangoConversationRepository
-from agent.models import Agent, Conversation
+from agent.models import Agent, Conversation, Message
 from catalog.models import DataSet
 
 
@@ -31,7 +31,7 @@ class TestPersistentChatHistory:
         # Then
         assert conversation.messages.count() == 1
         stored_message = conversation.messages.first()
-        assert stored_message.role == "human"
+        assert stored_message.type == Message.MessageType.HUMAN
         assert stored_message.text == "Hello"
 
     def test_messages_property_order(self, conversation):

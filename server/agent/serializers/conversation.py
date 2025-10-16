@@ -75,7 +75,7 @@ class MessagesSerializer(serializers.ModelSerializer):
     # Serializer to get list of messages exchanged during a given conversation.
     class Meta:
         model = Message
-        fields = ["id", "text", "role"]
+        fields = ["id", "text", "type"]
 
 
 class ConversationContentSerializer(serializers.ModelSerializer):

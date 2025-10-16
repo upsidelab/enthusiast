@@ -16,14 +16,14 @@ class PersistentChatHistory(BaseChatMessageHistory):
 
     def add_message(self, message: BaseMessage) -> None:
         self._conversation.messages.create(
-            role=message.type, text=message.content, function_name=getattr(message, "name", None)
+            type=message.type, text=message.content, function_name=getattr(message, "name", None)
         )
 
     @property
     def messages(self) -> list[BaseMessage]:
         messages = self._conversation.messages.filter(answer_failed=False).order_by("created_at")
         message_dicts = [
-            {"type": message.role, "data": {"content": message.text, "name": message.function_name}}
+            {"type": message.langchain_type, "data": {"content": message.text, "name": message.function_name}}
             for message in messages
         ]
         return messages_from_dict(message_dicts)

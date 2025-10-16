@@ -89,7 +89,7 @@ class ConversationView(APIView):
             .prefetch_related(
                 Prefetch(
                     "messages",
-                    queryset=Message.objects.filter(function_name__isnull=True, is_file=False).order_by("id"),
+                    queryset=Message.objects.exclude(type__in=Message.internal_message_types()).order_by("id"),
                 )
             )
             .get(id=conversation_id, user=request.user)

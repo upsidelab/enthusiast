@@ -23,7 +23,11 @@ class SaveMessageOnFailureTask(Task):
         message = kwargs.get("message")
 
         Message.objects.create(
-            conversation_id=conversation_id, created_at=datetime.now(), role="human", text=message, answer_failed=True
+            conversation_id=conversation_id,
+            created_at=datetime.now(),
+            type=Message.MessageType.HUMAN,
+            text=message,
+            answer_failed=True,
         )
 
         manager = ConversationManager()
@@ -81,8 +85,7 @@ def process_file_upload_task(conversation_id: int, file_content: bytes, filename
         Message.objects.create(
             conversation_id=conversation.id,
             created_at=datetime.now(),
-            role="human",
-            is_file=True,
+            type=Message.MessageType.FILE,
             text=f"Uploaded {filename} with id: {obj.pk}",
         )
 

@@ -16,7 +16,7 @@ import { ChatWindow } from "@/components/conversation-view/chat-window.tsx";
 import { Conversation as ConversationSchema } from '@/lib/types.ts';
 
 export interface MessageProps {
-  role: "human" | "ai" | "system";
+  type: "human" | "ai" | "system";
   text: string;
   id: number | null;
 }
@@ -70,7 +70,7 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
         // React StrictMode renders this component twice, but we can't execute this callback twice.
         initialized.current = true;
         await onMessageComposerSubmit(pendingMessage);
-        setMessages([{ role: "human", id: null, text: pendingMessage }]);
+        setMessages([{ type: "human", id: null, text: pendingMessage }]);
         return;
       }
 
@@ -104,13 +104,13 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
         setMessages((prevMessages) => {
           const lastMessage = prevMessages[prevMessages.length - 1];
 
-          if (lastMessage && lastMessage.role === "ai" && lastMessage.id === null) {
+          if (lastMessage && lastMessage.type === "ai" && lastMessage.id === null) {
             return [
               ...prevMessages.slice(0, -1),
               { ...lastMessage, text: lastMessage.text + data.data.chunk }
             ];
           } else {
-            return [...prevMessages, { role: "ai", text: data.data.chunk, id: null }];
+            return [...prevMessages, { type: "ai", text: data.data.chunk, id: null }];
           }
         });
 
@@ -131,7 +131,7 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
         setIsAgentLoading(false);
         setMessages((prevMessages) => [
           ...prevMessages,
-          { role: "system", text: data.data.output, id: null },
+          { type: "system", text: data.data.output, id: null },
         ]);
       },
     };
@@ -202,7 +202,7 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
         setIsAgentLoading(false);
         setMessages((prev) => [
           ...prev,
-          { role: "ai", text: response.text, id: response.id }
+          { type: "ai", text: response.text, id: response.id }
         ]);
         setIsLoading(false);
         scrollToLastMessage();
@@ -218,7 +218,7 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
   const addUserMessage = (message: string) => {
     setMessages((prev) => [
       ...prev,
-      { role: "human", text: message, id: null }
+      { type: "human", text: message, id: null }
     ]);
     scrollToLastMessage();
   };
@@ -263,13 +263,13 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
           <ChatWindow className="pt-16" onSubmit={onMessageComposerSubmit} isLoading={isLoading} conversationLocked={isAgentDeleted || isAgentCorrupted}>
             <div className="grow flex-1 space-y-4">
               {messages.map((message, index) =>
-                message.role === "system" ? (
+                message.type === "system" ? (
                   <MessageError key={index} text={message.text} />
                 ) : (
                   <MessageBubble
                     key={index}
                     text={message.text}
-                    variant={message.role === "human" ? "primary" : "secondary"}
+                    variant={message.type === "human" ? "primary" : "secondary"}
                     questionId={message.id}
                   />
                 )

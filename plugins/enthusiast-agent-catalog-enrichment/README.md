@@ -1,0 +1,1 @@
+Designed to transform unstructured product catalogs into clean, database-ready entries, this agent parses descriptions, specifications, and other product metadata, and optionally adds extra attributes for improved searchability and analysis. It helps maintain an accurate, up-to-date, and enriched product database.

@@ -1,3 +1,4 @@
 import Integration from "@/components/integration";
+export const envVariables = ["GOOGLE_API_KEY"]
 
-<Integration name="Google Gemini" integrationKey="gemini" pipName="enthusiast-model-google" registerLanguageModelModule="enthusiast_model_google.GoogleLanguageModelProvider" registerEmbeddingsModule="enthusiast_model_google.GoogleEmbeddingProvider"/>
+<Integration name="Google Gemini" integrationKey="gemini" pipName="enthusiast-model-google" registerLanguageModelModule="enthusiast_model_google.GoogleLanguageModelProvider" registerEmbeddingsModule="enthusiast_model_google.GoogleEmbeddingProvider" envVariables={envVariables} />

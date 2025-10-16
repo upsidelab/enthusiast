@@ -1,6 +1,6 @@
 [project]
 name = "enthusiast-agent-re-act"
-version = "1.1.0"
+version = "1.2.0"
 description = "Base implementation of a ReAct agent for Enthusiast"
 authors = [
     {name = "Rafal Cymerys",email = "rafal@upsidelab.io"}

@@ -1,0 +1,1 @@
+Enables intelligent, natural language search across enriched product data. Users can query products with complex criteria, and the agent retrieves the most relevant results, bridging the gap between raw catalog data and actionable product discovery.

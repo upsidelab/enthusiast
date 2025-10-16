@@ -1,3 +1,5 @@
 import Integration from "@/components/integration";
 
-<Integration name="Azure OpenAI" integrationKey="azure-openai" pipName="enthusiast-model-azureopenai" registerLanguageModelModule="enthusiast_model_openai.AzureOpenAILanguageModelProvider" registerEmbeddingsModule="enthusiast_model_openai.AzureOpenAIEmbeddingProvider"/>
+export const envVariables = ["AZURE_OPENAI_API_KEY", "AZURE_OPENAI_ENDPOINT"]
+
+<Integration name="Azure OpenAI" integrationKey="azure-openai" pipName="enthusiast-model-azureopenai" registerLanguageModelModule="enthusiast_model_openai.AzureOpenAILanguageModelProvider" registerEmbeddingsModule="enthusiast_model_openai.AzureOpenAIEmbeddingProvider" envVariables={envVariables} />

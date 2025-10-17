@@ -6,7 +6,7 @@ import { CopyToClipboardButton } from '@/components/conversation-view/copy-to-cl
 import { FeedbackButton } from '@/components/conversation-view/feedback-button.tsx';
 import { MessageFiles } from '@/components/conversation-view/message-files';
 import { BaseBubble } from '@/components/conversation-view/base-bubble';
-import { MessageFile } from './conversation';
+import { MessageFile } from './chat-session';
 
 export interface MessageBubbleProps {
   text: string;

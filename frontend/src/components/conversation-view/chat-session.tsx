@@ -9,16 +9,25 @@ import { PageMain } from "@/components/util/page-main.tsx";
 import { PageHeading } from "@/components/util/page-heading.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { MessageBubble } from "@/components/conversation-view/message-bubble.tsx";
+import { AttachmentBubble } from "@/components/conversation-view/attachment-bubble.tsx";
 import { MessageError } from "@/components/conversation-view/message-error.tsx";
 import { MessageBubbleTyping } from "@/components/conversation-view/message-bubble-typing.tsx";
 import { ChatWindow } from "@/components/conversation-view/chat-window.tsx";
 
 import { Conversation as ConversationSchema } from '@/lib/types.ts';
 
+export interface MessageFile {
+  id: number;
+  filename: string;
+  content_type: string;
+  file_url: string;
+}
+
 export interface MessageProps {
   type: "human" | "ai" | "system";
   text: string;
   id: number | null;
+  files?: MessageFile[];
 }
 
 interface ChatSessionProps {
@@ -38,6 +47,7 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
   const [isAgentLoading, setIsAgentLoading] = useState(false);
   const [agentAction, setAgentAction] = useState<string>("Thinking...");
   const [messages, setMessages] = useState<MessageProps[]>([]);
+  const [agentId, setAgentId] = useState<number | undefined>();
 
   const initialized = useRef(false);
   const usePolling = useRef(!streamingEnabled);
@@ -76,6 +86,7 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
 
       const conversation = await api.conversations().getConversation(conversationId);
       setConversation(conversation);
+      setAgentId(conversation.agent?.id);
 
       if (!initChat) {
         const initialMessages = conversation.history as MessageProps[];
@@ -223,12 +234,12 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
     scrollToLastMessage();
   };
 
-  const onMessageComposerSubmit = async (message: string) => {
+  const onMessageComposerSubmit = async (message: string, fileIds?: number[]) => {
     setIsLoading(true);
     setIsAgentLoading(true);
     addUserMessage(message);
 
-    const taskHandle = await api.conversations().sendMessage(conversationId, dataSetId!, message, streamingEnabled);
+    const taskHandle = await api.conversations().sendMessage(conversationId, dataSetId!, message, streamingEnabled, fileIds);
     usePolling.current = !taskHandle.streaming;
 
     if (taskHandle.streaming) {
@@ -260,17 +271,31 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
               New Chat
             </Button>
           </PageHeading>
-          <ChatWindow className="pt-16" onSubmit={onMessageComposerSubmit} isLoading={isLoading} conversationLocked={isAgentDeleted || isAgentCorrupted}>
+          <ChatWindow
+            className="pt-16"
+            onSubmit={onMessageComposerSubmit}
+            isLoading={isLoading}
+            conversationLocked={isAgentDeleted || isAgentCorrupted}
+            conversationId={conversationId}
+            agentId={agentId}
+          >
             <div className="grow flex-1 space-y-4">
               {messages.map((message, index) =>
                 message.type === "system" ? (
                   <MessageError key={index} text={message.text} />
+                ) : !message.text && message.files && message.files.length > 0 ? (
+                  <AttachmentBubble
+                    key={index}
+                    variant={message.type === "human" ? "primary" : "secondary"}
+                    files={message.files}
+                  />
                 ) : (
                   <MessageBubble
                     key={index}
                     text={message.text}
                     variant={message.type === "human" ? "primary" : "secondary"}
                     questionId={message.id}
+                    files={message.files}
                   />
                 )
               )}

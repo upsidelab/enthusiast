@@ -7,8 +7,10 @@ import { FileUpload, UploadedFile } from "./file-upload";
 import { ApiClient } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider";
 
+export type OnSubmit = ((message: string, fileIds?: number[]) => void) | ((message: string, fileIds?: number[], createdConversationId?: number) => void);
+
 export interface MessageComposerProps {
-  onSubmit: ((message: string, fileIds?: number[]) => void) | ((message: string, fileIds?: number[], createdConversationId?: number) => void);
+  onSubmit: OnSubmit;
   isLoading: boolean;
   conversationLocked?: boolean;
   conversationId?: number;

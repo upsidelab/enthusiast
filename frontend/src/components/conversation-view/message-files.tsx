@@ -1,5 +1,5 @@
 import { FileText, Image, File } from 'lucide-react';
-import { MessageFile } from './conversation';
+import { MessageFile } from './chat-session';
 
 interface MessageFilesProps {
   files: MessageFile[];

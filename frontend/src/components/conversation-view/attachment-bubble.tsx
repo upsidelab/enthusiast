@@ -1,6 +1,6 @@
 import { BaseBubble } from './base-bubble';
 import { MessageFiles } from './message-files';
-import { MessageFile } from './conversation';
+import { MessageFile } from './chat-session';
 
 interface AttachmentBubbleProps {
   variant: "primary" | "secondary";

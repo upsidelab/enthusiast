@@ -18,7 +18,7 @@ export default async function Page() {
         <IntegrationCard name="Product Search" imageSrc="/tools/enthusiast/img/integrations/placeholder.png" href="/agents/agent-product-search/" />
         <IntegrationCard name="Catalog Enrichment" imageSrc="/tools/enthusiast/img/integrations/placeholder.png" href="/agents/agent-catalog-enrichment/" />
         <IntegrationCard name="OCR Order" imageSrc="/tools/enthusiast/img/integrations/placeholder.png" href="/agents/agent-ocr-order/" />
-        <IntegrationCard name="Customer Support" imageSrc="/tools/enthusiast/img/integrations/placeholder.png" href="/agents/agent-customer-support/" />
+        <IntegrationCard name="User Manuals" imageSrc="/tools/enthusiast/img/integrations/placeholder.png" href="/agents/agent-customer-support/" />
       </Cards>
     </Wrapper>
   )

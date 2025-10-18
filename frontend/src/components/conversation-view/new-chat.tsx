@@ -72,9 +72,13 @@ export function NewChat({ onPendingMessage }: NewChatProps) {
     loadAgentDetails();
   }, [selectedAgent]);
 
-  const onSubmit = async (message: string) => {
-    const newConversationId = await api.conversations().createConversation(selectedAgent!.id);
-    onPendingMessage(message, newConversationId);
+  const onSubmit = async (message: string, _fileIds?: number[], createdConversationId?: number) => {
+    if (createdConversationId) {
+      onPendingMessage(message, createdConversationId);
+    } else {
+      const conversationId = await api.conversations().createConversation(selectedAgent!.id);
+      onPendingMessage(message, conversationId);
+    }
   }
 
   return (
@@ -99,7 +103,7 @@ export function NewChat({ onPendingMessage }: NewChatProps) {
             </div>
           </div>
         ) : (
-          <ChatWindow className="pt-4" onSubmit={onSubmit} isLoading={false}>
+          <ChatWindow className="pt-4" onSubmit={onSubmit} isLoading={false} agentId={agentId ?? undefined}>
             <div className="grow flex items-start justify-center pt-16">
               {agentDetails?.description && (
                 <div className="text-center space-y-4 max-w-2xl px-6">

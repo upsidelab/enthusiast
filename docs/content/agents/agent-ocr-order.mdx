@@ -2,10 +2,26 @@ import AgentPlugin from "@/components/agent-plugin";
 
 export const description = "OCR to order Agent can understand images and extract text from product notes or lists. It automatically interprets the information and places orders accurately, without any manual input. By converting handwritten or printed notes into actionable orders, it saves time, reduces errors, and streamlines the purchasing process.";
 
+export const useCases = [
+  {
+    title: "Order from handwritten notes",
+    description: "Transforms messy or unstructured handwritten notes into structured order data. Ideal for sales reps or field staff who capture orders manually."
+  },
+  {
+    title: "Order from product photos",
+    description: "Extracts product names, codes, and quantities directly from images. Speeds up order entry without manual typing."
+  },
+  {
+    title: "Digitization of offline orders",
+    description: "Converts paper-based orders or notes into structured, ready-to-process digital records, reducing human error."
+  },
+]
+
 <AgentPlugin
     name="OCR Order Agent"
     integrationKey="enthusiast-agent-ocr-to-order"
     pipName="enthusiast-agent-ocr-to-order"
     registerAgentModule="enthusiast_agent_ocr_to_order"
     agentDescription={description}
+    agentUseCases={useCases}
 />

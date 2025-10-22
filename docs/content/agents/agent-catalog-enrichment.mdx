@@ -2,10 +2,34 @@ import AgentPlugin from "@/components/agent-plugin";
 
 export const description = "Catalog Enrichment Agent can automatically understand product catalogs and extract structured data in a specific format. It processes files such as spreadsheets, PDFs or documents, capturing product details, specifications, and metadata accurately. By converting diverse catalog formats into a standardized structure, it ensures consistency, reduces manual work, and speeds up data integration. This makes managing and updating product information faster, reliable, and scalable for any business.";
 
+export const useCases = [
+  {
+    title: "Marketplace with multiple vendors",
+    description: "Normalizes product sheets from various vendors. Enables a consistent and standardized catalog across the marketplace."
+  },
+  {
+    title: "Large e-commerce with inconsistent data",
+    description: "Fills gaps and standardizes product information. Improves search, filtering, and overall customer experience."
+  },
+  {
+    title: "Complex B2B catalogs",
+    description: "Extracts technical specifications and maps them to standard formats. Facilitates easier product comparison and offer configuration."
+  },
+  {
+    title: "Dynamic catalogs with reviews and user content",
+    description: "Enriches products with attributes from descriptions and reviews. Enhances filtering, recommendations, and discoverability."
+  },
+  {
+    title: "Automatic tagging and classification",
+    description: "Assigns categories, tags, and keywords based on product data. Improves searchability and recommendation systems."
+  },
+];
+
 <AgentPlugin
   name="Catalog Enrichment Agent"
   integrationKey="enthusiast-agent-catalog-enrichment"
   pipName="enthusiast-agent-catalog-enrichment"
   registerAgentModule="enthusiast_agent_catalog_enrichment"
   agentDescription={description}
+  agentUseCases={useCases}
 />

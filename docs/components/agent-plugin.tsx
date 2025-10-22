@@ -2,13 +2,17 @@ import { useMDXComponents as getMDXComponents } from "@/mdx-components";
 import { MDXRemote } from "nextra/mdx-remote";
 import { compileMdx } from "nextra/compile";
 import Link from "next/link";
-import Image from "next/image";
 
+export interface UseCase {
+  title: string;
+  description: string;
+}
 export interface IntegrationProps {
   name: string;
   integrationKey: string;
   pipName: string;
   agentDescription: string;
+  agentUseCases?: UseCase[];
   registerAgentModule?: string;
 }
 
@@ -16,6 +20,8 @@ const mdxComponents = getMDXComponents({});
 const H1 = mdxComponents.h1;
 const H2 = mdxComponents.h2;
 const P = mdxComponents.p;
+const UL = mdxComponents.ul;
+const LI =  mdxComponents.li;
 
 export default async function AgentPlugin(props: IntegrationProps) {
   const installationInstructions = await compileMdx(`\`\`\`bash\npoetry add ${props.pipName}\n\`\`\``);
@@ -32,7 +38,6 @@ AVAILABLE_AGENTS = {
 
   return (
     <>
-      <Image className="x:py-4" src={`/tools/enthusiast/img/integrations/${props.integrationKey}.png`} alt={props.name} width={256} height={256} />
       <H1 className="x:hidden">{props.name}</H1>
       <H2>Description</H2>
         <P>{props.agentDescription}</P>
@@ -46,6 +51,14 @@ AVAILABLE_AGENTS = {
         Then, register the integration in your config/settings_override.py.
       </P>
       {props.registerAgentModule && <MDXRemote compiledSource={await compileMdx(buildRegisterInstructionMd("AVAILABLE_AGENTS", props.registerAgentModule))}/>}
+      <H2>Use cases</H2>
+        <UL>
+          {props.agentUseCases?.map((item, idx) => (
+            <LI key={idx}>
+              <strong>{item.title}</strong> – {item.description}
+            </LI>
+          ))}
+        </UL>
     </>
   )
 }

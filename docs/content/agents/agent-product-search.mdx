@@ -2,10 +2,34 @@ import AgentPlugin from "@/components/agent-plugin";
 
 export const description = "Product Search Agent helps users find the right products effortlessly, even without prior knowledge of the domain. By understanding user needs through natural language queries, it recommends relevant products tailored to individual preferences. The agent intelligently filters options, highlights key features, and simplifies comparisons, saving users time and effort. It’s designed to make product discovery intuitive, accurate, and personalized, turning complex searches into simple conversation.";
 
+export const useCases = [
+  {
+    title: "Marketplace search enhancement",
+    description: "Improves search experience across marketplaces by understanding natural language queries. Provides accurate product matches even with vague or partial inputs."
+  },
+  {
+    title: "Sales support for non-experts",
+    description: "Allows sales representatives without deep product knowledge to find relevant products quickly. Reduces training time and speeds up customer response."
+  },
+  {
+    title: "E-commerce catalog navigation",
+    description: "Helps users discover products in large or complex catalogs without needing to know exact product names or SKUs. Enhances usability and reduces bounce rates."
+  },
+  {
+    title: "Technical product discovery",
+    description: "Supports finding products based on specifications or features described in natural language. Useful for technical sales teams and B2B customers."
+  },
+  {
+    title: "Sales assistant for complex queries",
+    description: "Answers complex product-related questions by interpreting user intent and returning relevant items. Reduces reliance on product manuals or expert support."
+  },
+];
+
 <AgentPlugin
     name="Product Search Agent"
     integrationKey="enthusiast-agent-product-search"
     pipName="enthusiast-agent-product-search"
     registerAgentModule="enthusiast_agent_product_search"
     agentDescription={description}
+    agentUseCases={useCases}
 />

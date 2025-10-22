@@ -15,10 +15,10 @@ export default async function Page() {
     <Wrapper toc={[]} metadata={metadata} sourceCode={""} >
       <H2>Example agents</H2>
       <Cards>
-        <IntegrationCard name="Product Search" imageSrc="/tools/enthusiast/img/integrations/placeholder.png" href="/agents/agent-product-search/" />
-        <IntegrationCard name="Catalog Enrichment" imageSrc="/tools/enthusiast/img/integrations/placeholder.png" href="/agents/agent-catalog-enrichment/" />
-        <IntegrationCard name="OCR Order" imageSrc="/tools/enthusiast/img/integrations/placeholder.png" href="/agents/agent-ocr-order/" />
-        <IntegrationCard name="User Manuals" imageSrc="/tools/enthusiast/img/integrations/placeholder.png" href="/agents/agent-customer-support/" />
+        <IntegrationCard name="Product Search" href="/agents/agent-product-search/" />
+        <IntegrationCard name="Catalog Enrichment" href="/agents/agent-catalog-enrichment/" />
+        <IntegrationCard name="OCR Order" href="/agents/agent-ocr-order/" />
+        <IntegrationCard name="User Manuals" href="/agents/agent-customer-support/" />
       </Cards>
     </Wrapper>
   )

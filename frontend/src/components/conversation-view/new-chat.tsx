@@ -9,6 +9,7 @@ import { ChatWindow } from "@/components/conversation-view/chat-window.tsx";
 
 import type { AgentDetails } from "@/lib/types";
 import type { OnPendingMessage } from "@/pages/data-sets/(id)/chat/index.tsx";
+import type { OnSubmit } from "@/components/conversation-view/message-composer.tsx";
 
 interface NewChatProps {
   onPendingMessage: OnPendingMessage;
@@ -72,9 +73,9 @@ export function NewChat({ onPendingMessage }: NewChatProps) {
     loadAgentDetails();
   }, [selectedAgent]);
 
-  const onSubmit = async (message: string) => {
-    const newConversationId = await api.conversations().createConversation(selectedAgent!.id);
-    onPendingMessage(message, newConversationId);
+  const onSubmit: OnSubmit = async (message, createdConversationId) => {
+    const conversationId = createdConversationId || await api.conversations().createConversation(selectedAgent!.id);
+    onPendingMessage(message, conversationId);
   }
 
   return (
@@ -82,7 +83,7 @@ export function NewChat({ onPendingMessage }: NewChatProps) {
       <PageHeading
         title={emptyState && emptyState.title || selectedAgent!.name}
         description={emptyState && emptyState.description || 'Start a new conversation.'}
-        className="sticky top-4 bg-white"
+        className="sticky top-4 bg-white z-10"
       />
       {
         emptyState ? (
@@ -99,7 +100,7 @@ export function NewChat({ onPendingMessage }: NewChatProps) {
             </div>
           </div>
         ) : (
-          <ChatWindow className="pt-4" onSubmit={onSubmit} isLoading={false}>
+          <ChatWindow className="pt-4" onSubmit={onSubmit} isLoading={false} agentId={agentId ?? undefined} fileUploadEnabled={agentDetails?.file_upload}>
             <div className="grow flex items-start justify-center pt-16">
               {agentDetails?.description && (
                 <div className="text-center space-y-4 max-w-2xl px-6">

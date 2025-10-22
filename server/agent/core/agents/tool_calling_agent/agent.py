@@ -6,10 +6,9 @@ from agent.core.tools import CreateAnswerTool
 
 
 class ToolCallingAgent(BaseAgent):
-    AGENT_ARGS = None
-    PROMPT_INPUT = None
-    PROMPT_EXTENSION = None
-    TOOLS = [LLMToolConfig(tool_class=CreateAnswerTool)]
+    TOOLS = [
+        LLMToolConfig(tool_class=CreateAnswerTool),
+    ]
 
     def _create_agent_executor(self, **kwargs) -> AgentExecutor:
         tools = self._create_tools()

@@ -122,6 +122,7 @@ export type AgentDetails = {
   id: number;
   name: string;
   description: string;
+  file_upload: boolean;
   config: AgentConfig;
   dataset: number;
   agent_type: string;

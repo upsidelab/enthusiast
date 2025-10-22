@@ -5,7 +5,9 @@ import {useApplicationContext} from "@/lib/use-application-context.ts";
 import { NewChat } from "@/components/conversation-view/new-chat.tsx";
 import { ChatSession } from "@/components/conversation-view/chat-session.tsx";
 
-export type OnPendingMessage = (message: string, conversationId: number) => void;
+import type { Message } from "@/components/conversation-view/message-composer.tsx";
+
+export type OnPendingMessage = (message: Message, conversationId: number) => void;
 
 export function Chat() {
   const { dataSetId } = useApplicationContext()!;
@@ -13,7 +15,7 @@ export function Chat() {
   const navigate = useNavigate();
   const isNewChat = pathname === '/' || pathname.includes("/new");
 
-  const [pendingMessage, setPendingMessage] = useState<string>('');
+  const [pendingMessage, setPendingMessage] = useState<Message>();
 
   const onPendingMessage: OnPendingMessage = (message, conversationId) => {
     setPendingMessage(message);

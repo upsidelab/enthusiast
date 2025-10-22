@@ -383,10 +383,7 @@ class TestAgentDetailsView:
             "dataset": dataset.id,
             "agent_type": "agent_1",
         }
-        with patch(
-            "agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_type",
-            side_effect=[DummyAgent, DummyAgent, DummyAgent, DummyAgent],
-        ):
+        with patch("agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_type", return_value=DummyAgent):
             response = api_client.put(url, payload, format="json")
 
             assert response.status_code == status.HTTP_200_OK
@@ -423,10 +420,7 @@ class TestAgentDetailsView:
             "dataset": dataset.id,
             "agent_type": "agent_1",
         }
-        with patch(
-            "agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_type",
-            side_effect=[DummyAgent, DummyAgent, DummyAgent, DummyAgent],
-        ):
+        with patch("agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_type", return_value=DummyAgent):
             response = api_client.put(url, payload, format="json")
 
             assert response.status_code == status.HTTP_200_OK

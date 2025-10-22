@@ -245,14 +245,14 @@ files = [
 
 [[package]]
 name = "enthusiast-common"
-version = "1.2.2"
+version = "1.4.0"
 description = "Core interfaces for developing custom Enthusiast plugins and integrations."
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "enthusiast_common-1.2.2-py3-none-any.whl", hash = "sha256:82c0a2dd17c917b97da00f18cd57f42dc92d50bce092ff66f4b4a7ce7aae35f8"},
-    {file = "enthusiast_common-1.2.2.tar.gz", hash = "sha256:86bc57f70f3231f8c3772bc7f9cd316b2158f43735233b26eb5d0ec608e1c2bc"},
+    {file = "enthusiast_common-1.4.0-py3-none-any.whl", hash = "sha256:7c60402731d6abb9158a2e791874120f8cce2a0c2d908bfd534e87e0066b4855"},
+    {file = "enthusiast_common-1.4.0.tar.gz", hash = "sha256:e9282610315fdc646981dade5ca1d70451749283a8a41abd02b3b6dc6d627e0c"},
 ]
 
 [package.dependencies]
@@ -1189,4 +1189,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4"
-content-hash = "9f365f580cea8819bd191baa5f02812247cb99aa9da35ef9dc3ae5e08884f39f"
+content-hash = "6da315e272b83ef2f7d0024cacd2fd18e6df059eeb84604ccb62fe9cc670c00a"

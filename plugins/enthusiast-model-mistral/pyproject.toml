@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "enthusiast-model-mistral"
-version = "1.0.0"
+version = "1.1.0"
 description = "A plugin for Enthusiast that provides an Mistral connector."
 authors = ["Damian Sowiński <damian.sowinski@upsidelab.io>"]
 readme = "README.md"

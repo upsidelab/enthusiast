@@ -10,6 +10,7 @@ export interface ApplicationContextValue {
   setAvailableAgents: (agents: { name: string; id: number; corrupted?: boolean; }[]) => void;
   isLoadingAgents: boolean;
   setIsLoadingAgents: (value: boolean) => void;
+  refetchAgents: () => Promise<void>;
   account: Account | null;
   setAccount: (account: Account | null) => void;
   supportedFileExtensions: string[];

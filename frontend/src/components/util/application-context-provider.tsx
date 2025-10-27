@@ -61,7 +61,6 @@ export function ApplicationContextProvider({ children }: ApplicationContextProvi
     fetchDataSets();
   }, [location.pathname, navigate]);
 
-  useEffect(() => {
   const fetchAgentsForDataSet = async () => {
     if (!dataSetId) return;
 
@@ -77,8 +76,9 @@ export function ApplicationContextProvider({ children }: ApplicationContextProvi
     }
   };
 
-  fetchAgentsForDataSet();
-}, [dataSetId]);
+  useEffect(() => {
+    fetchAgentsForDataSet();
+  }, [dataSetId]);
 
   useEffect(() => {
     const fetchSupportedFileExtensions = async () => {
@@ -110,6 +110,7 @@ export function ApplicationContextProvider({ children }: ApplicationContextProvi
     setAvailableAgents,
     isLoadingAgents,
     setIsLoadingAgents,
+    refetchAgents: fetchAgentsForDataSet,
     account,
     setAccount,
     supportedFileExtensions,

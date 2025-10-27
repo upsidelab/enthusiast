@@ -70,7 +70,7 @@ def test_extract_type_info_list():
     info = extract_type_info(List[str])
 
     assert info["container"] == "list"
-    assert info["inner_type"] == {"container": None, "inner_type": "str"}
+    assert info["inner_type"] == "str"
 
 
 def test_extract_type_info_dict():
@@ -103,7 +103,7 @@ def test_get_model_descriptor_from_class_field_list():
 
     assert "tags" in desc
     assert desc["tags"]["type"]["container"] == "list"
-    assert desc["tags"]["type"]["inner_type"] == {"container": None, "inner_type": "str"}
+    assert desc["tags"]["type"]["inner_type"] == "str"
 
 
 def test_get_model_descriptor_from_class_field_dict():

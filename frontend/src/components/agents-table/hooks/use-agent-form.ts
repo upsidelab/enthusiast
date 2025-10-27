@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ApiClient } from "@/lib/api";
 import { authenticationProviderInstance } from "@/lib/authentication-provider";
 import { Agent } from "@/lib/types";
 import {AgentChoice} from "@/lib/api/agents.ts";
 import { ApiError } from "@/lib/api-error";
 import { flattenConfigForForm, parseFieldErrors as parseFieldErrorsBase } from "@/lib/form-utils";
+import { buildConfigFromFlatForm } from "@/lib/config-utils";
 
 const apiClient = new ApiClient(authenticationProviderInstance);
 
@@ -12,7 +13,8 @@ export function useAgentForm(
   agent: Agent | null,
   agentTypes: AgentChoice[],
   dataSetId: number | null,
-  onSuccess: () => void
+  onSuccess: () => void,
+  modalOpen: boolean
 ) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -26,7 +28,7 @@ export function useAgentForm(
 
   useEffect(() => {
     const loadAgentDetailsForEditing = async () => {
-      if (!agent) return;
+      if (!agent || !modalOpen) return;
       
       try {
         const agentDetails = await apiClient.agents().getAgentById(agent.id);
@@ -43,7 +45,7 @@ export function useAgentForm(
 
     loadAgentDetailsForEditing();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [agent?.id]);
+  }, [agent?.id, modalOpen]);
 
   useEffect(() => {
     const resetFormForNewAgent = () => {
@@ -60,7 +62,8 @@ export function useAgentForm(
     };
 
     resetFormForNewAgent();
-  }, [agent]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [agent?.id]);
   
   useEffect(() => {
     const clearFormWhenNoType = () => {
@@ -91,22 +94,6 @@ export function useAgentForm(
       return initialOpenSections;
     };
 
-    const createDefaultConfigValues = (configSections: Record<string, unknown>) => {
-      const defaults: Record<string, string | number | boolean> = {};
-      Object.entries(configSections).forEach(([section, sectionData]) => {
-        if (Array.isArray(sectionData)) {
-          sectionData.forEach(obj => {
-            if (obj && typeof obj === 'object') {
-              Object.keys(obj).forEach(k => { defaults[`${section}_${k}`] = ""; });
-            }
-          });
-        } else if (sectionData && typeof sectionData === 'object') {
-          Object.keys(sectionData).forEach(k => { defaults[`${section}_${k}`] = ""; });
-        }
-      });
-      return defaults;
-    };
-
     const updateFormForSelectedType = () => {
       const wasCleared = clearFormWhenNoType();
       if (wasCleared) return;
@@ -115,57 +102,33 @@ export function useAgentForm(
       if (!selected) return;
 
       const configSections = extractConfigSectionsFromType(selected);
-      setAgentConfigSections(configSections);
+      
+      setAgentConfigSections(prev => {
+        if (JSON.stringify(prev) === JSON.stringify(configSections)) {
+          return prev;
+        }
+        return configSections;
+      });
       
       const initialOpenSections = initializeCollapsedSections(configSections);
-      setOpenSections(initialOpenSections);
-      
-      if (!agent && Object.keys(config).length === 0) {
-        const defaults = createDefaultConfigValues(configSections);
-        setConfig(defaults);
-      }
+      setOpenSections(prev => {
+        if (JSON.stringify(prev) === JSON.stringify(initialOpenSections)) {
+          return prev;
+        }
+        return initialOpenSections;
+      });
     };
 
     updateFormForSelectedType();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [type, agentTypes, agent]);
+     
+  }, [type, agentTypes, agent?.id]);
 
   const handleConfigChange = (key: string, value: string) => {
     setConfig(prev => ({ ...prev, [key]: value }));
   };
 
   const buildNestedConfigFromFlattened = () => {
-    const configObj: Record<string, unknown> = {};
-    Object.entries(agentConfigSections).forEach(([section, fields]) => {
-      if (Array.isArray(fields)) {
-        configObj[section] = buildToolsArrayConfig(section, fields);
-      } else if (fields && typeof fields === 'object') {
-        configObj[section] = buildRegularSectionConfig(section, fields);
-      }
-    });
-    return configObj;
-  };
-
-  const buildToolsArrayConfig = (section: string, fields: Record<string, unknown>[]) => {
-    return fields.map(obj => {
-      const out: Record<string, string | number | boolean> = {};
-      if (obj && typeof obj === 'object') {
-        Object.keys(obj).forEach(k => {
-          const v = config[`${section}_${k}`];
-          if (v !== '' && v !== null && v !== undefined) out[k] = v;
-        });
-      }
-      return out;
-    });
-  };
-
-  const buildRegularSectionConfig = (section: string, fields: Record<string, unknown>) => {
-    const out: Record<string, string | number | boolean> = {};
-    Object.keys(fields).forEach(k => {
-      const v = config[`${section}_${k}`];
-      if (v !== '' && v !== null && v !== undefined) out[k] = v;
-    });
-    return out;
+    return buildConfigFromFlatForm(config, agentConfigSections, '');
   };
 
   const saveAgentToApi = async (configObj: Record<string, unknown>) => {
@@ -209,7 +172,10 @@ export function useAgentForm(
   const parseSingleConfigSection = (sectionName: string, sectionErrors: unknown, newFieldErrors: Record<string, string>) => {
     if (sectionErrors && typeof sectionErrors === 'object') {
       Object.entries(sectionErrors as Record<string, unknown>).forEach(([field, error]) => {
-        newFieldErrors[`${sectionName}_${field}`] = Array.isArray(error) ? String(error[0]) : String(error);
+        const fieldName = field.split('.')[0];
+        const errorMessage = Array.isArray(error) ? String(error[0]) : String(error);
+        
+        newFieldErrors[`${sectionName}_${fieldName}`] = errorMessage;
       });
     }
   };
@@ -257,7 +223,7 @@ export function useAgentForm(
     }
   };
 
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setName("");
     setDescription("");
     setType("");
@@ -266,7 +232,7 @@ export function useAgentForm(
     setOpenSections({});
     setFieldErrors({});
     setGeneralError("");
-  };
+  }, []);
 
   return {
     name,

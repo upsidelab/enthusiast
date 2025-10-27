@@ -44,7 +44,7 @@ export function AddEditSourceModal({
     handleSubmit,
     getSelectedPlugin,
     resetForm
-  } = useSourceForm(source, availablePlugins, dataSetId, sourceType, onSave);
+  } = useSourceForm(source, availablePlugins, dataSetId, sourceType, onSave, open);
 
   // Reset form when modal closes
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { ReactNode, useState, useEffect, useRef } from "react";
+import { ReactNode, useCallback, useState, useEffect, useRef } from "react";
 import { ApplicationContext, ApplicationContextValue } from "@/lib/application-context.ts";
 import { Account, DataSet } from "@/lib/types.ts";
 import { ApiClient } from "@/lib/api.ts";
@@ -61,7 +61,7 @@ export function ApplicationContextProvider({ children }: ApplicationContextProvi
     fetchDataSets();
   }, [location.pathname, navigate]);
 
-  const fetchAgentsForDataSet = async () => {
+  const fetchAgentsForDataSet = useCallback(async () => {
     if (!dataSetId) return;
 
     setIsLoadingAgents(true);
@@ -74,11 +74,11 @@ export function ApplicationContextProvider({ children }: ApplicationContextProvi
     } finally {
       setIsLoadingAgents(false);
     }
-  };
+  }, [dataSetId]);
 
   useEffect(() => {
     fetchAgentsForDataSet();
-  }, [dataSetId]);
+  }, [fetchAgentsForDataSet]);
 
   useEffect(() => {
     const fetchSupportedFileExtensions = async () => {

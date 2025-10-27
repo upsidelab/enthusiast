@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from utils.serializers import ExtraArgDetailSerializer
 
 
 class SourcePluginSerializer(serializers.Serializer):
@@ -8,7 +7,7 @@ class SourcePluginSerializer(serializers.Serializer):
 
 class PluginChoiceSerializer(serializers.Serializer):
     name = serializers.CharField()
-    configuration_args = serializers.DictField(child=ExtraArgDetailSerializer(), allow_empty=True)
+    configuration_args = serializers.DictField(allow_empty=True)
 
 
 class AvailablePluginsResponseSerializer(serializers.Serializer):

@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button.tsx";
+import { Label } from "@/components/ui/label.tsx";
+import { Textarea } from "@/components/ui/textarea.tsx";
+import { Alert, AlertDescription } from "@/components/ui/alert.tsx";
 import { 
   Dialog, 
   DialogContent, 
   DialogHeader, 
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog.tsx";
 
 interface JSONEditorProps {
   value: string | Record<string, unknown>;
@@ -125,19 +125,12 @@ export const JSONEditor: React.FC<JSONEditorProps> = ({
     <>
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label className="text-sm font-medium">
-            {label}
-          </Label>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleOpenModal}
-          >
+          <Label className="text-sm font-medium">{label}</Label>
+          <Button type="button" variant="outline" size="sm" onClick={handleOpenModal}>
             Edit JSON
           </Button>
         </div>
-        
+
         <div className="p-3 bg-muted rounded-md border">
           <pre className="text-xs overflow-auto max-h-32 font-mono">
             {getDisplayValue(value)}

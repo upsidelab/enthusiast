@@ -1,6 +1,6 @@
 [project]
 name = "enthusiast-agent-ocr-to-order"
-version = "1.1.0"
+version = "1.1.1"
 description = "Example implementation of a OCR to order ReAct agent for Enthusiast"
 authors = [
     {name = "Damian Sowiński",email = "damian.sowinski@upsidelab.io"}

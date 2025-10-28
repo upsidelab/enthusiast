@@ -1,7 +1,4 @@
 from enthusiast_agent_re_act import BaseReActAgent, StructuredReActOutputParser
-from enthusiast_common.config.base import FileToolConfig
-from enthusiast_common.tools.files.list_files_tool import FileListTool
-from enthusiast_common.tools.files.perform_file_operation_tool import FileRetrievalTool
 from enthusiast_common.utils import RequiredFieldsModel
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain_core.tools import render_text_description_and_args
@@ -14,11 +11,7 @@ class ExtractDataPromptInput(RequiredFieldsModel):
 
 class CatalogEnrichmentAgent(BaseReActAgent):
     PROMPT_INPUT = ExtractDataPromptInput
-
-    TOOLS = [
-        FileToolConfig(tool_class=FileListTool),
-        FileToolConfig(tool_class=FileRetrievalTool),
-    ]
+    FILE_UPLOAD = True
 
     def _build_agent_executor(self) -> AgentExecutor:
         tools = self._build_tools()

@@ -11,7 +11,7 @@ export const metadata = {
 }
 
 const banner = <Banner storageKey="banner">Enthusiast 1.4.0 is released 🎉</Banner>
-const navbar = <Navbar logo={<Logo/>} logoLink="https://upsidelab.io/tools/enthusiast" align="left" projectLink="https://github.com/upsidelab/enthusiast/"/>
+const navbar = <Navbar logo={<Logo/>} logoLink={false} align="left" projectLink="https://github.com/upsidelab/enthusiast/"/>
 const footer = (
   <Footer>
     © {new Date().getFullYear()}&nbsp;

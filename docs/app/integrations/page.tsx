@@ -1,11 +1,16 @@
 import {Cards} from "nextra/components"
 import { useMDXComponents as getMDXComponents } from "../../mdx-components";
 import IntegrationCard from "@/components/integration-card";
+import { Metadata } from "next";
 
 const mdxComponents = getMDXComponents({});
 const Wrapper = mdxComponents.wrapper;
 const H1 = mdxComponents.h1;
 const H2 = mdxComponents.h2;
+
+export const metadata: Metadata = {
+  title: "Integrations | Enthusiast",
+}
 
 export default async function Page() {
   const metadata = {

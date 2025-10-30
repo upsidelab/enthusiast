@@ -15,7 +15,7 @@ export default {
     }
   },
   agents: {
-    title: "Prebuilt agents",
+    title: "Pre-built Agents",
     type: "page",
     theme: {
       sidebar: false,

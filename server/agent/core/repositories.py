@@ -1,8 +1,10 @@
-from typing import Any, Optional, Type, TypeVar
+import json
+from collections import defaultdict
+from typing import Any, DefaultDict, Optional, Type, TypeVar
 
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from django.db import models
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 from enthusiast_common.repositories import (
     BaseAgentRepository,
     BaseConversationRepository,
@@ -109,6 +111,46 @@ class DjangoProductChunkRepository(
 class DjangoProductRepository(BaseDjangoRepository[Product], BaseProductRepository[Product]):
     def extra(self, where_conditions: list[str]) -> QuerySet[Product]:
         return self.model.objects.extra(where=where_conditions)
+
+    def search_for_data_set_products(
+        self, data_set_id: Any, filter_arguments: Q, exclude_arguments: Q, order_by_arguments: list[str] | None = None
+    ) -> QuerySet[T]:
+        query = self.model.objects.filter(data_set_id=data_set_id)
+        if filter_arguments:
+            query = query.filter(filter_arguments)
+        if exclude_arguments:
+            query = query.exclude(exclude_arguments)
+        if order_by_arguments:
+            query = query.order_by(*order_by_arguments)
+        return query
+
+    def describe_filtering_columns_for_llm(self) -> str:
+        results = {}
+        qs = self.model.objects.values_list("categories", "properties")
+        categories_list = [row[0] for row in qs if row[0]]
+        properties_list = [row[1] for row in qs if row[1]]
+
+        results["categories"] = self._get_distinct_categories(categories_list)
+        results["properties"] = self._get_distinct_properties(properties_list)
+
+        return json.dumps(results)
+
+    def _get_distinct_categories(self, unique_categories: list[list[str]]) -> list[str]:
+        flat = [item for sublist in unique_categories if sublist for item in sublist]
+        return list(set(flat))
+
+    def _get_distinct_properties(self, unique_records: list[dict[str, str]]) -> dict[str, list[str]]:
+        """
+        Collect unique values for each key across all JSONField entries.
+        """
+        unique_properties: DefaultDict[str, set[str]] = defaultdict(set)
+
+        for record in unique_records:
+            if isinstance(record, dict):
+                for key, value in record.items():
+                    if value is not None:
+                        unique_properties[key].add(str(value))
+        return {key: sorted(list(value)) for key, value in unique_properties.items()}
 
 
 class DjangoMessageRepository(BaseDjangoRepository[Message], BaseMessageRepository[Message]):

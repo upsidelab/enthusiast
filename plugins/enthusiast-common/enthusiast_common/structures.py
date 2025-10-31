@@ -22,8 +22,8 @@ class ProductDetails:
     slug: str
     description: str
     sku: str
-    properties: str
-    categories: str
+    properties: dict[str, Any]
+    categories: list[str]
     price: float
 
 

@@ -7,8 +7,8 @@ CUSTOM_QUERY_PROMPT_TEMPLATE = """
         \"slug\" varchar NOT NULL,
         \"description\" text NOT NULL,
         \"sku\" varchar NOT NULL,
-        \"properties\" varchar NOT NULL,
-        \"categories\" varchar NOT NULL,
+        \"properties\" jsonb NOT NULL,
+        \"categories\" varchar[] NOT NULL,
         \"price\" float8 NOT NULL,
         PRIMARY KEY (\"id\")
     );```
@@ -16,15 +16,48 @@ CUSTOM_QUERY_PROMPT_TEMPLATE = """
     ```
     {sample_products_json}
     ```
-    generate a where clause for an SQL query for fetching products that can be useful when answering the following 
-    request delimited by three backticks.
-    try to avoid using AND in queries so you get more results instead try with OR.
-    try to place multiple like queries with different phrases.
-    try to place a single words in LIKE queries so you can find more products.
-    Make sure that the queries are case insensitive 
+    generate a JSON for Django ORM with parameters to Q() function that will be passed to filter(), exclude() and order_by() with corresponding keys:
+    {{
+        filter: json with params for Q() function that will be passed to filter() function, 
+        exclude: json with params for Q() function that will be passed to exclude() function,
+        order_by: list of order_by() arguments to sort results
+    }}
+    that can be useful when answering the following request delimited by three backticks.
+    
+    Rules:
+    - Use only expressions that suits provided table definition
+    - Use numeric comparison lookups (__lt, __gt, __lte, __gte) only on pure numeric fields (int, float) with numerical values only.
+    - Respect Django rules for building lookup expression especially for JSON field and Array field.
+    - Do not generate list membership (__in, __contains) lookups on JSON subkeys use multiple direct equality instead.
+    - Possible logical operators are: AND, OR
+
+    EXAMPLE:
+
+    {{
+        'filter': {{    
+            'AND': [
+                {{'<colum-name>__<django_lookup_expression>': <value>}},
+                {{'<colum-name>__<django_lookup_expression>': <value>}}
+            ],
+            'OR': [
+                {{'<colum-name>__<django_lookup_expression>': <value>}},
+                {{'AND': [
+                    {{'<colum-name>__<django_lookup_expression>': <value>}},
+                    {{'<colum-name>__<django_lookup_expression>': <value>}}
+                ]}}
+            ]
+        }},
+        'exclude': {{    
+            'AND': [
+                {{'<colum-name>__<django_lookup_expression>': <value>}},
+                {{'<colum-name>__<django_lookup_expression>': <value>}}
+            ]
+        }},
+        'order_by': [<value>, <value>]
+    }}
+    Distinct columns values: {distinct_columns_values}
     ``` 
     {query} 
     ```
-    Respond with the where portion of the query only, don't include any other characters, 
-    skip initial where keyword, skip order by clause.
+    Return only JSON
 """

@@ -22,8 +22,16 @@ class SampleProductSource(ProductSourcePlugin):
                         slug=row["SKU"],
                         sku=row["SKU"],
                         description=row["Description"],
-                        properties=row["Merged Properties"],
-                        categories=row["Categories"],
+                        properties={
+                            "Internet Speed": row["Internet Speed"],
+                            "Internet Package": row["Internet Package"],
+                            "Landline Phone": row["Landline Phone"],
+                            "Cable TV": row["Cable TV"],
+                            "Router Included": row["Router Included"],
+                            "Contract Length": row["Contract Length"],
+                            "SLA": row["SLA"],
+                        },
+                        categories=[row["Categories"]],
                         price=row["Price"],
                     )
                 )

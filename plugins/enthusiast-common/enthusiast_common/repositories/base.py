@@ -52,6 +52,16 @@ class BaseProductRepository(BaseRepository[T], ABC):
     def extra(self, where_conditions: list[str]) -> list[T]:
         pass
 
+    @abstractmethod
+    def search_for_data_set_products(
+        self,
+        data_set_id: Any,
+        filter_arguments: Any,
+        exclude_arguments: Any,
+        order_by_arguments: list[str] | None = None,
+    ) -> list[T]:
+        pass
+
 
 class BaseMessageRepository(BaseRepository[T], ABC):
     pass

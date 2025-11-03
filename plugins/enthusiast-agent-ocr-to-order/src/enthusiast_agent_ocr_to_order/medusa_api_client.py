@@ -16,6 +16,21 @@ class MedusaAPIClient:
         "Authorization": f"Basic {encoded_api_key}",
     }
 
+    def list_regions(self) -> list[dict]:
+        """
+        Fetch all regions from Medusa admin API.
+        Each region includes id, name, currency, tax info, etc.
+        """
+        try:
+            url = f"{self.BASE_URL}/admin/regions"
+            response = requests.get(url, headers=self.HEADERS)
+            response.raise_for_status()
+            data = response.json()
+            return data.get("regions", [])
+        except Exception as e:
+            logger.error("Error fetching regions: %s", e)
+            return []
+
     def get_variants(self, product_id: str):
         """
         Fetch all variants for a given product.
@@ -33,7 +48,7 @@ class MedusaAPIClient:
         """
         url = f"{self.BASE_URL}/admin/draft-orders"
         payload = {
-            "region_id": "reg_01K5V7CVJ7WDWM9KENJ5PSB73H",
+            "region_id": self.list_regions()[0]["id"],
             "email": customer_email,
             "billing_address": {
                 "first_name": "John",

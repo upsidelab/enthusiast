@@ -1,3 +1,4 @@
+import logging
 from typing import Self
 
 from django.core import serializers
@@ -11,6 +12,8 @@ from langchain_core.prompts import PromptTemplate
 
 from catalog.models import Product
 
+logger = logging.getLogger(__name__)
+
 QUERY_PROMPT_TEMPLATE = """
     With the following database schema delimited by three backticks ```
     CREATE TABLE catalog_product (
@@ -20,8 +23,8 @@ QUERY_PROMPT_TEMPLATE = """
         \"slug\" varchar NOT NULL,
         \"description\" text NOT NULL,
         \"sku\" varchar NOT NULL,
-        \"properties\" varchar NOT NULL,
-        \"categories\" varchar NOT NULL,
+        \"properties\" jsonb NOT NULL,
+        \"categories\" varchar[] NOT NULL, # ArrayField
         \"price\" float8 NOT NULL,
         PRIMARY KEY (\"id\")
     );```
@@ -29,9 +32,10 @@ QUERY_PROMPT_TEMPLATE = """
     ```
     {sample_products_json}
     ```
+    columns unique values: {unique_values}
     generate a where clause for an SQL query for fetching products that can be useful when answering the following 
     request delimited by three backticks.
-    Make sure that the queries are case insensitive 
+    Make sure that the queries are case insensitive.
     ``` 
     {query} 
     ```
@@ -64,7 +68,6 @@ class ProductRetriever(BaseProductRetriever):
         where_conditions = [f"data_set_id = {self.data_set_id}"]
         if agent_where_clause:
             where_conditions.append(agent_where_clause)
-
         return self.product_repo.extra(where_conditions=where_conditions)[: self.number_of_products]
 
     def get_sample_products_json(self) -> str:
@@ -73,8 +76,17 @@ class ProductRetriever(BaseProductRetriever):
 
     def _build_where_clause_for_query(self, query: str) -> str:
         chain = PromptTemplate.from_template(self.prompt_template) | self.llm
-        llm_result = chain.invoke({"sample_products_json": self.get_sample_products_json(), "query": query})
+        sample = self.get_sample_products_json()
+        logger.info(f"SAMPEL: {sample}")
+        llm_result = chain.invoke(
+            {
+                "sample_products_json": sample,
+                "query": query,
+                "unique_values": self.product_repo.describe_filtering_columns_for_llm(),
+            }
+        )
         sanitized_result = llm_result.content.strip("`").removeprefix("sql").strip("\n").replace("%", "%%")
+        logger.info(f"SANITIZED: {sanitized_result}")
         return sanitized_result
 
     @classmethod

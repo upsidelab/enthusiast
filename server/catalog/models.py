@@ -1,6 +1,7 @@
 import logging
 
 from django.conf import settings
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from langchain.text_splitter import TokenTextSplitter
 from pgvector.django import VectorField
@@ -102,8 +103,12 @@ class Product(models.Model):
     slug = models.CharField(max_length=255)
     description = models.TextField()
     sku = models.CharField(max_length=255)
-    properties = models.CharField(max_length=65535, blank=True)
-    categories = models.CharField(max_length=65535)
+    properties_deprecated = models.CharField(max_length=65535, blank=True)
+    categories_deprecated = models.CharField(max_length=65535)
+    properties = models.JSONField(default=dict, null=True)
+    categories = ArrayField(
+        models.CharField(max_length=255), blank=True, default=list, help_text="List of tags for the product"
+    )
     price = models.FloatField()
 
     class Meta:

@@ -256,6 +256,10 @@ AVAILABLE_AGENTS: dict[str, dict[str, str]] = {
         "name": "Question Answer Agent",
         "agent_directory_path": "agent.core.agents.tool_calling_agent",
     },
+    "product_search": {
+        "name": "Product Search Agent",
+        "agent_directory_path": "enthusiast_agent_product_search",
+    },
 }
 
 DEFAULT_AGENT: dict = {

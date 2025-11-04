@@ -1,10 +1,22 @@
 import base64
 import logging
+from urllib.error import HTTPError
 
 import requests
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
+
+
+class MedusaAPIClientException(Exception):
+    default_message = "An unknown client error occurred."
+
+    def __init__(self, message: str | None = None):
+        super().__init__(message or self.default_message)
+
+
+class MedusaAPIClientNoRegionsException(MedusaAPIClientException):
+    default_message = "No regions found."
 
 
 class MedusaAPIClient:
@@ -26,10 +38,21 @@ class MedusaAPIClient:
             response = requests.get(url, headers=self.HEADERS)
             response.raise_for_status()
             data = response.json()
-            return data.get("regions", [])
+            regions = data.get("regions", [])
+            if not regions:
+                raise MedusaAPIClientNoRegionsException()
+            return regions
+
+        except HTTPError as e:
+            raise MedusaAPIClientException() from e
+
         except Exception as e:
-            logger.error("Error fetching regions: %s", e)
-            return []
+            if isinstance(e, MedusaAPIClientException):
+                logger.error("Error fetching regions: %s", e)
+                raise e
+            else:
+                logger.error("Unexpected Internal Error : %s", e)
+                raise MedusaAPIClientException()
 
     def get_variants(self, product_id: str):
         """
@@ -38,39 +61,65 @@ class MedusaAPIClient:
         try:
             url = f"{self.BASE_URL}/admin/products/{product_id}"
             response = requests.get(url, headers=self.HEADERS)
+            response.raise_for_status()
             return response.json()
-        except Exception as e:
-            logger.error(e)
 
-    def create_admin_order(self, customer_email: str, variant_ids: list[str], quantities: list[str]) -> dict:
+        except HTTPError as e:
+            raise MedusaAPIClientException() from e
+
+        except Exception as e:
+            if isinstance(e, MedusaAPIClientException):
+                logger.error("Error fetching variants: %s", e)
+                raise e
+            else:
+                logger.error("Unexpected Internal Error : %s", e)
+                raise MedusaAPIClientException()
+
+    def create_admin_order(
+        self, customer_email: str, variant_ids: list[str], quantities: list[str], region_id: str
+    ) -> dict:
         """
         Create an admin draft order.
         """
-        url = f"{self.BASE_URL}/admin/draft-orders"
-        payload = {
-            "region_id": self.list_regions()[0]["id"],
-            "email": customer_email,
-            "billing_address": {
-                "first_name": "John",
-                "last_name": "Doe",
-                "address_1": "123 Main St",
-                "city": "New York",
-                "country_code": "US",
-                "postal_code": "10001",
-            },
-            "shipping_address": {
-                "first_name": "John",
-                "last_name": "Doe",
-                "address_1": "123 Main St",
-                "city": "New York",
-                "country_code": "US",
-                "postal_code": "10001",
-            },
-            "items": [
-                {"variant_id": variant_id, "quantity": int(quantity)}
-                for variant_id, quantity in zip(variant_ids, quantities)
-            ],
-        }
+        try:
+            url = f"{self.BASE_URL}/admin/draft-orders"
+            payload = {
+                "region_id": region_id,
+                "email": customer_email,
+                "billing_address": {
+                    "first_name": "John",
+                    "last_name": "Doe",
+                    "address_1": "123 Main St",
+                    "city": "New York",
+                    "country_code": "US",
+                    "postal_code": "10001",
+                },
+                "shipping_address": {
+                    "first_name": "John",
+                    "last_name": "Doe",
+                    "address_1": "123 Main St",
+                    "city": "New York",
+                    "country_code": "US",
+                    "postal_code": "10001",
+                },
+                "items": [
+                    {"variant_id": variant_id, "quantity": int(quantity)}
+                    for variant_id, quantity in zip(variant_ids, quantities)
+                ],
+            }
 
-        response = requests.post(url, headers=self.HEADERS, json=payload)
-        return response.json()
+            response = requests.post(url, headers=self.HEADERS, json=payload)
+            response.raise_for_status()
+
+            return response.json()
+
+        except HTTPError as e:
+            raise MedusaAPIClientException() from e
+
+        except Exception as e:
+            if isinstance(e, MedusaAPIClientException):
+                logger.error("Error creating admin order: %s", e)
+                raise e
+            else:
+                logger.error("Unexpected Internal Error : %s", e)
+                raise MedusaAPIClientException()

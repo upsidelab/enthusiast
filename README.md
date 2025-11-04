@@ -39,8 +39,6 @@ Some key highlights include:
 
 - **[E-commerce integrations included](https://upsidelab.io/tools/enthusiast/integrations/)** - Native connectors to synchronize your catalogs from platforms like Medusa.JS, Shopify, Shopware or Solidus without extra integration work. A plugin system also lets you write your own product or document sources.
 
-- **[LangSmith tracing integration](https://upsidelab.io/tools/enthusiast/docs/observe/integrate-langsmith/)** - Integrates with LangSmith for execution tracing, ideal for observability and debugging.
-
 ## Getting Started
 
 The recommended way to get started with Enthusiast is with Docker by following these steps:
@@ -95,13 +93,11 @@ Supported integrations include: Medusa, Shopify, Shopware, WooCommerce, Solidus.
 
 It can also be integrated with CMS systems such as Sanity and WordPress.
 
-## Built by UpsideLab
+## Built by Upside
 
-Enthusiast is developed and maintained by UpsideLab, a company focused on practical, privacy-first AI solutions for e-commerce operations.
+Upside is a full-stack digital agency that builds robust, secure, and fully compliant AI-powered solutions — from data platforms and healthcare solutions to e-commerce systems — for startups and enterprise businesses.
 
-We build open, modular tools that let organizations adopt agentic AI on their own terms — secure, customizable, and production-ready.
-
-### Want to see it in action?
+### Want to see Enthusiast in action?
 
 [**Book a live demo**](https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ3NyFdPn_jqYqD24asveLkfrB1NTal0PWkLNHFTT4Fmp6sNW50-0or8WyIzBriF8IFdP1jXSPjQ) to see Enthusiast in action and discuss how we can tailor it to your e-commerce workflows.
 

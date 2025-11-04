@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timedelta
 
 from asgiref.sync import async_to_sync
@@ -13,6 +14,8 @@ from agent.models import Message
 from agent.models.conversation import Conversation, ConversationFile
 from agent.serializers.conversation import ConversationFileSerializer
 from pecl import settings
+
+logger = logging.getLogger(__name__)
 
 
 class SaveMessageOnFailureTask(Task):
@@ -86,15 +89,23 @@ def process_file_upload_task(conversation_id: int, file_content: bytes, filename
 
         return {
             "status": "SUCCESS",
-            "conversation_id": conversation_id,
-            "uploaded_file": serializer.data,
-            "file_id": obj.id,
+            "result": {
+                "conversation_id": conversation_id,
+                "uploaded_file": serializer.data,
+                "file_id": obj.id,
+            },
         }
 
     except Conversation.DoesNotExist:
-        return {"status": "FAILURE", "error": f"Conversation {conversation_id} not found"}
+        return {"status": "FAILURE", "result": {"error": f"Conversation {conversation_id} not found"}}
+    except ModuleNotFoundError:
+        return {
+            "status": "FAILURE",
+            "result": {"error": f"Could not process file: {filename}, invalid parser configuration."},
+        }
     except Exception as e:
-        return {"status": "FAILURE", "error": str(e)}
+        logger.info(f"File upload error: {e}")
+        return {"status": "FAILURE", "result": {"error": "File upload error"}}
 
 
 @shared_task

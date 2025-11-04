@@ -2,6 +2,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -23,6 +24,11 @@ class TestConversationFileUploadView:
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
+    @override_settings(
+        FILE_PARSER_CLASSES={
+            (".txt",): "FakeClass",
+        }
+    )
     @patch("agent.views.process_file_upload_task.apply_async")
     def test_upload_single_file_success(self, mock_task, api_client, url, conversation):
         mock_task.return_value = MagicMock(id="fake-task-id")
@@ -72,6 +78,11 @@ class TestConversationFileUploadView:
         assert "File type .xyz is not supported" in response.data["error"]
         mock_task.assert_not_called()
 
+    @override_settings(
+        FILE_PARSER_CLASSES={
+            (".pdf",): "agent.parsers.TextFileParser",
+        }
+    )
     @patch("agent.views.process_file_upload_task.apply_async")
     def test_upload_supported_file_type_success(self, mock_task, api_client, url):
         mock_task.return_value = MagicMock(id="fake-task-id")
@@ -108,7 +119,7 @@ class TestFileUploadStatusView:
     def test_get_status_success(self, mock_async_result, api_client, url):
         mock_result = MagicMock()
         mock_result.status = "SUCCESS"
-        mock_result.result = {"file_id": 123, "filename": "test.txt"}
+        mock_result.result = {"status": "SUCCESS", "result": {"file_id": 123, "filename": "test.txt"}}
         mock_async_result.return_value = mock_result
 
         response = api_client.get(url)

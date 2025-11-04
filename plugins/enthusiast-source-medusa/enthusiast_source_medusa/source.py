@@ -36,14 +36,12 @@ class MedusaProductSource(ProductSourcePlugin):
             name=medusa_product.get("title"),
             slug=medusa_product.get("handle"),
             description=medusa_product.get("description"),
-            sku=medusa_product.get("variants", [{}])[0].get("sku") if medusa_product.get("variants") else None,
+            sku=(medusa_product.get("variants") or [{}])[0].get("sku") or "",
             price=medusa_product.get("variants", [{}])[0].get("prices", [{}])[0].get("amount")
             if medusa_product.get("variants")
             else None,
-            properties=medusa_product.get("metadata", ""),
-            categories=[category.get("name") for category in medusa_product.get("collection", {}).get("categories", [])]
-            if medusa_product.get("collection")
-            else [],
+            properties=medusa_product.get("metadata", None) or "",
+            categories=(medusa_product.get("collection") or {}).get("title", ""),
         )
 
         return product

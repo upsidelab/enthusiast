@@ -32,6 +32,10 @@ class MockAgentClass:
     PROMPT_EXTENSION = MockConfigurationArgs
     TOOLS = [MockToolClass, MockToolClass]
 
+    @classmethod
+    def is_environment_set(cls):
+        return True
+
 
 @pytest.fixture
 def config_dict() -> dict[Any, Any]:
@@ -203,6 +207,10 @@ class TestVerifyAgentsCommand:
             PROMPT_EXTENSION = None
             TOOLS = []
 
+            @classmethod
+            def is_environment_set(cls):
+                return True
+
         mock_registry_instance = Mock()
         mock_registry_instance.get_agent_class_by_type.return_value = MockAgentClassWithNoneFields
         mock_agent_registry.return_value = mock_registry_instance
@@ -226,3 +234,30 @@ class TestVerifyAgentsCommand:
             mock_agent_registry.return_value = mock_registry_instance
 
             call_command("verifyagents")
+
+    @patch("agent.management.commands.verifyagents.AgentRegistry")
+    def test_verifyagents_command_invalid_env_configuration(self, mock_agent_registry):
+        class DummyAgentClass:
+            AGENT_ARGS = None
+            PROMPT_INPUT = None
+            PROMPT_EXTENSION = None
+            TOOLS = []
+
+            @classmethod
+            def is_environment_set(cls):
+                return False
+
+        mock_registry_instance = Mock()
+        mock_registry_instance.get_agent_class_by_type.return_value = DummyAgentClass
+        mock_agent_registry.return_value = mock_registry_instance
+
+        baker.make(
+            Agent,
+            name="Minimal Agent",
+            agent_type="minimal_agent",
+            config={"agent_args": {}, "prompt_input": {}, "prompt_extension": {}, "tools": []},
+        )
+
+        call_command("verifyagents")
+
+        assert Agent.objects.filter(corrupted=True).count() == 1

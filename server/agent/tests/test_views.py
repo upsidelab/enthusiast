@@ -82,6 +82,10 @@ class DummyAgent:
     TOOLS = [FunctionToolConfig(tool_class=DummyTool), FunctionToolConfig(tool_class=DummyTool)]
     FILE_UPLOAD = False
 
+    @classmethod
+    def is_environment_set(cls):
+        return True
+
 
 @pytest.fixture(autouse=True)
 def django_settings(settings):

@@ -22,10 +22,13 @@ class Command(BaseCommand):
             if not agent_class:
                 try:
                     agent_class = AgentRegistry().get_agent_class_by_type(agent_type=agent.agent_type)
+                    if not agent_class.is_environment_set():
+                        self._mark_as_corrupted(agent)
+                        corrupted_count += 1
+                        continue
                 except AgentRegistryError:
+                    self._mark_as_corrupted(agent)
                     corrupted_count += 1
-                    agent.corrupted = True
-                    agent.save(update_fields=["corrupted"])
                     continue
                 agent_types_cache[agent.agent_type] = agent_class
 
@@ -35,11 +38,14 @@ class Command(BaseCommand):
             try:
                 self._validate_agent_config(agent_class, config, tools_config)
             except (ValidationError, IndexError):
+                self._mark_as_corrupted(agent)
                 corrupted_count += 1
-                agent.corrupted = True
-                agent.save(update_fields=["corrupted"])
 
         print(f"Corrupted agent configurations found: {corrupted_count}")
+
+    def _mark_as_corrupted(self, agent: Agent):
+        agent.corrupted = True
+        agent.save(update_fields=["corrupted"])
 
     @staticmethod
     def _validate_agent_config(agent_class, config, tools_config):

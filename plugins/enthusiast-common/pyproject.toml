@@ -8,6 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 langchain-core = ">=0.3.66,<0.4.0"
+pydantic-settings = "^2.11.0"
 
 
 [build-system]

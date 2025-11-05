@@ -11,7 +11,7 @@
   <strong>
     <a href="https://upsidelab.io/tools/enthusiast">Website</a> |
     <a href="https://upsidelab.io/tools/enthusiast/docs/getting-started/installation">Installation Guide</a> |
-    <a href="https://upsidelab.io/tools/enthusiast/docs">View Docs</a> |
+    <a href="https://upsidelab.io/tools/enthusiast/docs">View Docs</a>
   </strong>
 </div>
 
@@ -28,15 +28,13 @@ Get started with Enthusiast by either:
 
 ## Example use cases
 
-- **Internal Knowledge Base** For companies with complex catalogs, Enthusiast supports sales teams with detailed product knowledge.
+- [**AI-Based Product Discovery**](https://upsidelab.io/tools/enthusiast/agents/agent-product-search/) Enable natural-language product search. Users describe requirements in plain terms, and the agent retrieves verifiable results from your indexed catalog.
 
-- **Customer Support:** (Semi-)automate responses to customer questions. Enthusiast can find answers from your product data.
+- [**User Manual Search:**](https://upsidelab.io/tools/enthusiast/agents/agent-customer-support/) Provide precise answers from technical documentation and manuals.
 
-- **Content Creation:** Generate newsletters, blog posts, and ads. Enthusiast acts as a marketer, creating content at scale from day one.
+- [**Purchase Order OCR:**](https://upsidelab.io/tools/enthusiast/agents/agent-ocr-order/) Convert unstructured inputs — such as scanned invoices or PDFs - into e-commerce orders.
 
-- **Product Recommendations:** Ask free-form questions about products that meet specific criteria, and Enthusiast will suggest suitable options.
-
-- **Content Moderation and Validation** Automatically validate new content or customer reviews to ensure accuracy.
+- [**Product Catalog Enrichment:**](https://upsidelab.io/tools/enthusiast/agents/agent-catalog-enrichment/) Extract product descriptions, attributes, or translations from unstructured product sheets.
 
 ## Main Features
 
@@ -56,7 +54,7 @@ Check our [Getting Started guide](https://upsidelab.io/tools/enthusiast/docs/get
 
 Connect to your e-commerce stack in minutes, with minimal configuration required.
 
-<img width="600" alt="Integrations" src="https://github.com/user-attachments/assets/84d1f4d1-51ac-4c6c-8412-a037f7ce4ecd" />
+<a href="https://upsidelab.io/tools/enthusiast/integrations/"><img width="600" alt="Integrations" src="https://github.com/user-attachments/assets/84d1f4d1-51ac-4c6c-8412-a037f7ce4ecd" /></a>
 
 ## License
 

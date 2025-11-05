@@ -22,6 +22,14 @@ class OrderPlacementToolConfiguration(RequiredFieldsModel):
         description="Medusa region id, will take first available region if not specified.",
         default="",
     )
+    medusa_api_key: str = Field(
+        title="Medusa API key",
+        description="Medusa API key, to authenticate to API.",
+    )
+    medusa_base_url: str = Field(
+        title="Medusa base url",
+        description="Medusa API base url.",
+    )
 
 
 class OrderPlacementTool(BaseLLMTool):
@@ -45,7 +53,9 @@ class OrderPlacementTool(BaseLLMTool):
     def run(self, product_ids: str, quantities: str) -> str | None:
         try:
             quantities = quantities.split(",")
-            medusa_client = MedusaAPIClient()
+            medusa_client = MedusaAPIClient(
+                api_key=self.CONFIGURATION_ARGS.medusa_api_key, base_url=self.CONFIGURATION_ARGS.medusa_base_url
+            )
             region_id = self.CONFIGURATION_ARGS.region_id or medusa_client.list_regions()[0]["id"]
             variant_ids = [
                 medusa_client.get_variants(product_id)["product"]["variants"][0]["id"]

@@ -2,7 +2,6 @@ import base64
 import logging
 
 import requests
-from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -19,13 +18,17 @@ class MedusaAPIClientNoRegionsException(MedusaAPIClientException):
 
 
 class MedusaAPIClient:
-    BASE_URL = settings.MEDUSA_BASE_URL
-    encoded_api_key_bytes = base64.b64encode(settings.MEDUSA_API_KEY.encode("utf-8"))
-    encoded_api_key = encoded_api_key_bytes.decode("utf-8")
-    HEADERS = {
-        "Content-Type": "application/json",
-        "Authorization": f"Basic {encoded_api_key}",
-    }
+    def __init__(self, base_url: str, api_key: str):
+        self.base_url = base_url
+        self.api_key = api_key
+
+    def _get_headers(self):
+        encoded_api_key_bytes = base64.b64encode(self.api_key.encode("utf-8"))
+        encoded_api_key = encoded_api_key_bytes.decode("utf-8")
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Basic {encoded_api_key}",
+        }
 
     def list_regions(self) -> list[dict]:
         """
@@ -33,8 +36,8 @@ class MedusaAPIClient:
         Each region includes id, name, currency, tax info, etc.
         """
         try:
-            url = f"{self.BASE_URL}/admin/regions"
-            response = requests.get(url, headers=self.HEADERS)
+            url = f"{self.base_url}/admin/regions"
+            response = requests.get(url, headers=self._get_headers())
             response.raise_for_status()
             data = response.json()
             regions = data.get("regions", [])
@@ -52,8 +55,8 @@ class MedusaAPIClient:
         Fetch all variants for a given product.
         """
         try:
-            url = f"{self.BASE_URL}/admin/products/{product_id}"
-            response = requests.get(url, headers=self.HEADERS)
+            url = f"{self.base_url}/admin/products/{product_id}"
+            response = requests.get(url, headers=self._get_headers())
             response.raise_for_status()
             return response.json()
 
@@ -69,7 +72,7 @@ class MedusaAPIClient:
         Create an admin draft order.
         """
         try:
-            url = f"{self.BASE_URL}/admin/draft-orders"
+            url = f"{self.base_url}/admin/draft-orders"
             payload = {
                 "region_id": region_id,
                 "email": customer_email,
@@ -95,7 +98,7 @@ class MedusaAPIClient:
                 ],
             }
 
-            response = requests.post(url, headers=self.HEADERS, json=payload)
+            response = requests.post(url, headers=self._get_headers(), json=payload)
             response.raise_for_status()
 
             return response.json()

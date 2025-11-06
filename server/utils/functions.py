@@ -12,7 +12,7 @@ def extract_type_info(annotation) -> dict:
     origin = get_origin(annotation)
     args = get_args(annotation)
     if origin is list:
-        return {"container": "list", "inner_type": extract_type_info(args[0])}
+        return {"container": "list", "inner_type": args[0].__name__ if args else "Any"}
 
     if origin is dict:
         key_type = args[0].__name__ if args else "Any"

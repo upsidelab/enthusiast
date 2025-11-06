@@ -85,7 +85,6 @@ export function AgentConfigurationForm({
         key={key}
         id={`agent-arg-${configKey}`}
         label={fieldTitle}
-        placeholder={fieldTitle}
         value={currentValue}
         onChange={(value) => handleConfigChange(configKey, value)}
         typeInfo={typeInfo}
@@ -147,7 +146,7 @@ export function AgentConfigurationForm({
             </div>
           </Button>
         </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-4 mt-2">
+        <CollapsibleContent className="space-y-4 mt-2 pb-6">
           <div className="pl-4 space-y-4">
             {Array.isArray(fields)
               ? renderToolsArrayFields(section, fields)
@@ -170,7 +169,7 @@ export function AgentConfigurationForm({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-6">
       <div className="flex items-center justify-between">
         <h4 className="text-sm font-medium text-foreground">Configuration</h4>
         <p className="text-xs text-muted-foreground">Configure agent parameters</p>

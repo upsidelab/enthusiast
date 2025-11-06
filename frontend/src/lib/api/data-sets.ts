@@ -1,5 +1,6 @@
 import { BaseApiClient } from "@/lib/api/base.ts";
 import { DataSet, CatalogSource, User } from "@/lib/types.ts";
+import { ApiError } from "@/lib/api-error";
 
 export type DataSetResponse = {
   id: number | undefined;
@@ -112,6 +113,14 @@ export class DataSetsApiClient extends BaseApiClient {
       }
     );
 
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new ApiError(`Failed to configure product source: ${response.statusText}`, {
+        data: errorData,
+        status: response.status
+      });
+    }
+
     const responseJson = (await response.json()) as ProductSourceResponse;
     return responseJson.id!;
   }
@@ -127,7 +136,7 @@ export class DataSetsApiClient extends BaseApiClient {
   }
 
   async addDataSetProductSource(dataSetId: number, pluginName: string, config: object): Promise<void> {
-    await fetch(
+    const response = await fetch(
       `${this.apiBase}/api/data_sets/${dataSetId}/product_sources`,
       {
         ...this._requestConfiguration(),
@@ -135,6 +144,14 @@ export class DataSetsApiClient extends BaseApiClient {
         body: JSON.stringify({plugin_name: pluginName, config: config})
       }
     );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new ApiError(`Failed to add product source: ${response.statusText}`, {
+        data: errorData,
+        status: response.status
+      });
+    }
   }
 
   async syncAllProductSources(): Promise<void> {
@@ -193,6 +210,14 @@ export class DataSetsApiClient extends BaseApiClient {
       }
     );
 
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new ApiError(`Failed to configure document source: ${response.statusText}`, {
+        data: errorData,
+        status: response.status
+      });
+    }
+
     const responseJson = (await response.json()) as DocumentSourceResponse;
     return responseJson.id!;
   }
@@ -208,7 +233,7 @@ export class DataSetsApiClient extends BaseApiClient {
   }
 
   async addDataSetDocumentSource(dataSetId: number, pluginName: string, config: object): Promise<void> {
-    await fetch(
+    const response = await fetch(
       `${this.apiBase}/api/data_sets/${dataSetId}/document_sources`,
       {
         ...this._requestConfiguration(),
@@ -216,6 +241,14 @@ export class DataSetsApiClient extends BaseApiClient {
         body: JSON.stringify({plugin_name: pluginName, config: config})
       }
     );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new ApiError(`Failed to add document source: ${response.statusText}`, {
+        data: errorData,
+        status: response.status
+      });
+    }
   }
 
   async syncAllDocumentSources(): Promise<void> {

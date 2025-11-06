@@ -245,6 +245,8 @@ class AgentTypesView(APIView):
         choices = []
         for key, value in settings.AVAILABLE_AGENTS.items():
             agent_class = agent_registry.get_agent_class_by_type(agent_type=key)
+            if not agent_class.is_environment_set():
+                continue
             choices.append(
                 {
                     "name": value["name"],

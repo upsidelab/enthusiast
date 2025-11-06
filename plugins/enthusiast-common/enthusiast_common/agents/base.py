@@ -1,16 +1,20 @@
+import logging
 from abc import ABC, ABCMeta, abstractmethod
-from typing import Any
+from typing import Any, Type
 
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import BaseTool
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
+from pydantic_settings import BaseSettings
 
 from ..injectors import BaseInjector
 from ..tools.files.list_files_tool import FileListTool
 from ..tools.files.perform_file_operation_tool import FileRetrievalTool
 from ..utils import RequiredFieldsModel, validate_required_vars
+
+logger = logging.getLogger(__name__)
 
 
 class ExtraArgsClassBaseMeta(ABCMeta):
@@ -45,6 +49,7 @@ class BaseAgent(ABC, ExtraArgsClassBase):
     IS_REACT = False
     FILE_UPLOAD = False
     DEFAULT_FILE_TOOLS = [FileListTool, FileRetrievalTool]
+    ENV_CONFIG: Type[BaseSettings] | None = None
 
     def __init__(
         self,
@@ -85,3 +90,15 @@ class BaseAgent(ABC, ExtraArgsClassBase):
             setattr(self, key.upper(), field(**value))
         for index, tool in enumerate(self._tools):
             tool.set_runtime_arguments(tools_runtime_arguments[index])
+
+    @classmethod
+    def is_environment_set(cls):
+        if cls.ENV_CONFIG is None:
+            return True
+        try:
+            cls.ENV_CONFIG()
+            return True
+        except ValidationError as e:
+            missing = [err["loc"][0] for err in e.errors()]
+            logger.error(f"Missing or invalid env vars: {', '.join(missing)} for agent {cls.__name__}")
+            return False

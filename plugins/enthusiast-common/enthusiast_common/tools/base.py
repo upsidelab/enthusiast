@@ -14,6 +14,7 @@ from pydantic import BaseModel
 
 from ..injectors import BaseInjector
 from ..utils import RequiredFieldsModel, validate_required_vars
+from .interfaces import BaseWidgetResponseSerializer
 
 
 class ToolMeta(ABCMeta):
@@ -97,6 +98,14 @@ class BaseFileTool(BaseTool, ABC):
         self._llm = llm
         self._injector = injector
         self._llm_registry = llm_registry
+
+
+class BaseWidgetResponseLLMTool(BaseLLMTool, ABC):
+    SERIALIZER_CLASS: Type[BaseWidgetResponseSerializer]
+
+    def __init__(self, data_set_id: Any, llm: BaseLanguageModel, injector: BaseInjector, streaming: bool = False):
+        super().__init__(data_set_id, llm, injector)
+        self._streaming = streaming
 
 
 class BaseAgentTool(BaseTool, ABC):

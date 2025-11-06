@@ -16,7 +16,10 @@ class PersistentChatHistory(BaseChatMessageHistory):
 
     def add_message(self, message: BaseMessage) -> None:
         self._conversation.messages.create(
-            type=message.type, text=message.content, function_name=getattr(message, "name", None)
+            type=message.type,
+            text=message.content,
+            function_name=getattr(message, "name", None),
+            widget_data=getattr(message, "widget_data", None),
         )
 
     @property

@@ -16,7 +16,7 @@ import { ButtonWithTooltip } from "@/components/ui/button-with-tooltip.tsx";
 const api = new ApiClient(authenticationProviderInstance);
 
 export default function AgentsTable() {
-  const { dataSetId } = useApplicationContext() ?? { dataSetId: null };
+  const { dataSetId, refetchAgents } = useApplicationContext() ?? { dataSetId: null, refetchAgents: async () => {} };
   const { agentTypes, loadingTypes } = useAgentTypes();
   
   const [formModalOpen, setFormModalOpen] = useState(false);
@@ -51,8 +51,9 @@ export default function AgentsTable() {
     setDeleteModalOpen(true);
   };
 
-  const handleFormSuccess = () => {
+  const handleFormSuccess = async () => {
     setFormModalOpen(false);
+    await refetchAgents();
   };
 
   const handleFormClose = (open: boolean) => {
@@ -62,9 +63,10 @@ export default function AgentsTable() {
     }
   };
 
-  const handleDeleteSuccess = () => {
+  const handleDeleteSuccess = async () => {
     setDeleteModalOpen(false);
     setAgentToDelete(null);
+    await refetchAgents();
   };
 
   return (

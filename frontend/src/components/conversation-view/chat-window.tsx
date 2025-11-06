@@ -28,7 +28,7 @@ export function ChatWindow({
   return (
     <div className={cn("flex flex-col h-full px-4", className)}>
       {children}
-      <div className="bottom-0 sticky flex-shrink-0 bg-white pb-4">
+      <div className="bottom-0 sticky flex-shrink-0 pb-4">
         <MessageComposer
           onSubmit={onSubmit}
           isLoading={isLoading}

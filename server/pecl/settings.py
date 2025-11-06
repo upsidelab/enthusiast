@@ -266,13 +266,13 @@ DEFAULT_AGENT: dict = {
 }
 
 FILE_PARSER_CLASSES: dict[tuple[str] : str] = {
-    (".txt",): "enthusiast_file_parsers.text.PlainTextFileParser",
-    (".pdf",): "enthusiast_file_parsers.pdf.PDFFileParser",
+    (".txt",): "agent.file_parsers.text.PlainTextFileParser",
+    (".pdf",): "agent.file_parsers.pdf.PDFFileParser",
     (
         ".jpg",
         ".jpeg",
         ".png",
-    ): "enthusiast_file_parsers.image.ImageFileParser",
+    ): "agent.file_parsers.image.ImageFileParser",
 }
 UPLOADED_FILE_RETENTION_PERIOD_HOURS: int = 48
 

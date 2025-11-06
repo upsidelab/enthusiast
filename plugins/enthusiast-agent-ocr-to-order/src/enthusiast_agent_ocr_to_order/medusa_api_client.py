@@ -1,6 +1,5 @@
 import base64
 import logging
-from urllib.error import HTTPError
 
 import requests
 from django.conf import settings
@@ -43,16 +42,10 @@ class MedusaAPIClient:
                 raise MedusaAPIClientNoRegionsException()
             return regions
 
-        except HTTPError as e:
-            raise MedusaAPIClientException() from e
-
+        except MedusaAPIClientException:
+            raise
         except Exception as e:
-            if isinstance(e, MedusaAPIClientException):
-                logger.error("Error fetching regions: %s", e)
-                raise e
-            else:
-                logger.error("Unexpected Internal Error : %s", e)
-                raise MedusaAPIClientException()
+            raise MedusaAPIClientException() from e
 
     def get_variants(self, product_id: str):
         """
@@ -64,16 +57,10 @@ class MedusaAPIClient:
             response.raise_for_status()
             return response.json()
 
-        except HTTPError as e:
-            raise MedusaAPIClientException() from e
-
+        except MedusaAPIClientException:
+            raise
         except Exception as e:
-            if isinstance(e, MedusaAPIClientException):
-                logger.error("Error fetching variants: %s", e)
-                raise e
-            else:
-                logger.error("Unexpected Internal Error : %s", e)
-                raise MedusaAPIClientException()
+            raise MedusaAPIClientException() from e
 
     def create_admin_order(
         self, customer_email: str, variant_ids: list[str], quantities: list[str], region_id: str
@@ -113,13 +100,7 @@ class MedusaAPIClient:
 
             return response.json()
 
-        except HTTPError as e:
-            raise MedusaAPIClientException() from e
-
+        except MedusaAPIClientException:
+            raise
         except Exception as e:
-            if isinstance(e, MedusaAPIClientException):
-                logger.error("Error creating admin order: %s", e)
-                raise e
-            else:
-                logger.error("Unexpected Internal Error : %s", e)
-                raise MedusaAPIClientException()
+            raise MedusaAPIClientException() from e

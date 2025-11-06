@@ -265,8 +265,15 @@ DEFAULT_AGENT: dict = {
     "config": {"tools": [{}], "agent_args": {}, "prompt_input": {}, "prompt_extension": {}},
 }
 
-FILE_PARSER_CLASSES: dict[tuple[str] : str] = {}
-
+FILE_PARSER_CLASSES: dict[tuple[str] : str] = {
+    (".txt",): "enthusiast_file_parsers.text.PlainTextFileParser",
+    (".pdf",): "enthusiast_file_parsers.pdf.PDFFileParser",
+    (
+        ".jpg",
+        ".jpeg",
+        ".png",
+    ): "enthusiast_file_parsers.image.ImageFileParser",
+}
 UPLOADED_FILE_RETENTION_PERIOD_HOURS: int = 48
 
 SERVICE_ACCOUNT_DOMAIN = env.str("SERVICE_ACCOUNT_DOMAIN", "enthusiast.internal")

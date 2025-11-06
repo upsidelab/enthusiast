@@ -1,11 +1,15 @@
-import { Button } from "@/components/ui/button.tsx";
-import { Loader, Send, Paperclip } from "lucide-react";
 import { ChangeEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
 import './message-composer.css';
-import { Textarea } from "@/components/ui/textarea.tsx";
-import { FileUpload, UploadedFile } from "./file-upload";
 import { ApiClient } from "@/lib/api.ts";
+import { cn } from '@/lib/utils';
 import { authenticationProviderInstance } from "@/lib/authentication-provider";
+import { Loader, Send } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea.tsx";
+import { Button } from "@/components/ui/button.tsx";
+import { FileUpload, UploadedFile } from "./file-upload";
+import { FileList } from "./file-list";
+
+import type { HandleFileRemove } from "./file-list";
 
 export interface MessageFile {
   id: number;
@@ -51,23 +55,32 @@ export function MessageComposer({ onSubmit, isLoading, conversationLocked = fals
       setShowUploadArea(true);
     };
 
+    const handleDragEnd = () => {
+      setShowUploadArea(false);
+    };
+
     const handleDragLeave = (e: DragEvent) => {
       e.preventDefault();
 
-      if (e.relatedTarget) {
+      if (e.relatedTarget && e.relatedTarget !== document.documentElement) {
         return;
       }
 
-      setShowUploadArea(false);
+      handleDragEnd();
     };
 
     document.body.addEventListener("dragover", handleDragOver);
     document.body.addEventListener("dragleave", handleDragLeave);
+    document.body.addEventListener("dragend", handleDragEnd);
+    window.addEventListener("blur", () => handleDragEnd);
 
     return () => {
       document.body.removeEventListener("dragover", handleDragOver);
       document.body.removeEventListener("dragleave", handleDragLeave);
+      document.body.removeEventListener("dragend", handleDragEnd);
+      window.removeEventListener("blur", handleDragEnd);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const resizeTextArea = (element: HTMLTextAreaElement) => {
@@ -206,7 +219,7 @@ const handleFilesChange = async (files: UploadedFile[]) => {
   await Promise.all(uploadPromises);
 };
 
-  const handleFileRemove = (fileId: string) => {
+  const handleFileRemove: HandleFileRemove = (fileId) => {
     setUploadedFiles(prev => {
       const newFiles = prev.filter(f => f.id !== fileId);
       if (newFiles.length === 0) {
@@ -231,21 +244,12 @@ const handleFilesChange = async (files: UploadedFile[]) => {
         </div>
       )}
 
-      {(showUploadArea || uploadedFiles.length > 0) && (
-        <div className="border rounded-lg p-4 bg-gray-50">
-          <FileUpload
-            onFilesChange={handleFilesChange}
-            onFileRemove={handleFileRemove}
-            uploadedFiles={uploadedFiles}
-            disabled={isLoading || uploadingFiles || conversationLocked}
-            onClose={() => setShowUploadArea(false)}
-            showUploadArea={showUploadArea}
-            onUploadError={setUploadError}
-          />
-        </div>
-      )}
+      <FileList
+        uploadedFiles={uploadedFiles}
+        handleFileRemove={handleFileRemove}
+        disabled={isLoading || uploadingFiles || conversationLocked}
+      />
 
-      {/* Message Input */}
       <form
         onSubmit={(event) => {
           event.preventDefault();
@@ -253,7 +257,17 @@ const handleFilesChange = async (files: UploadedFile[]) => {
         }}
         className="flex w-full items-center space-x-2 relative"
       >
-        <div className="relative flex-1 rounded-md border">
+        <div className={cn("relative flex-1 rounded-md border bg-white", showUploadArea && 'border-dashed')}>
+          {fileUploadEnabled && (
+            <FileUpload
+              onFilesChange={handleFilesChange}
+              uploadedFiles={uploadedFiles}
+              disabled={isLoading || uploadingFiles || conversationLocked}
+              onClose={() => setShowUploadArea(false)}
+              showUploadArea={showUploadArea}
+              onUploadError={setUploadError}
+            />
+          )}
           <Textarea
             id="message"
             ref={inputRef}
@@ -266,20 +280,7 @@ const handleFilesChange = async (files: UploadedFile[]) => {
             disabled={isLoading || uploadingFiles || conversationLocked}
           />
           <div className="flex">
-            {fileUploadEnabled && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowUploadArea(!showUploadArea)}
-                disabled={isLoading || conversationLocked}
-                className="shrink-0 ml-2 mb-2"
-              >
-                <Paperclip className="h-4 w-4" />
-                <span className="sr-only">Attach files</span>
-              </Button>
-            )}
-            <Button 
+            <Button
               type="submit"
               size="icon"
               className="ml-auto mr-2 mb-2"

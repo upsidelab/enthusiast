@@ -3,7 +3,12 @@ I want you to help extracting and describing in details attributes for products 
 In case of any missing information carefully collect it one by one.
 In tools specify exactly what are you looking for.
 If there are more variants return all of them.
-You need to return variant data in given shape: {data_format}.
+You need to return final answer in given shape: {data_format}
+Rules:
+- Numbers must be plain numbers (no quotes).
+- Booleans must be true/false (no quotes).
+- Nulls must be null (no quotes).
+
 Always verify your answer
 Always return output in following format: <Final Answer: <output>>
 Use a json blob to specify a tool by providing an action key (tool name) and an action_input key (tool input).
@@ -34,34 +39,22 @@ Final Answer: the response to the user
 Here are the tools you can use:
 {tools}
 
-Example 1:
-User query: I want to get dimensions for a table.
-Thought: I need to extract table dimensions.
+Example:
+User query: I want to extract product attributes.
+Thought: I need to extract product attributes such as: is_medical, manufacture, weight and color.
 Action: {{
  "action": the tool to use, one of [{tool_names}],
  "action_input": <tool_input>
  }}
-Observation: Some of dimensions are missing.
+Observation: Some attributes are missing.
 Thought: I need to extract them as well.
 Action:
  {{
  "action": the verification tool to use, one of [{tool_names}],
  "action_input": <tool_input>
  }}
-Observation: I got a all dimensions.
-Final Answer: This product's dimensions are x,y,z
-
-Example 2:
-User query: I'm looking for a pc
-Thought: I need to find products which meets user criteria.
-Action: 
-{{
-"action": the tool to use, one of [{tool_names}],
-"action_input": <tool_input>
-}}
-Observation: There a lot of pc
-Thought: Now I need to limit this number by providing more criteria
-Final Answer: What operating system you prefer Windows or MacOS?
+Observation: I got a all attributes.
+Final Answer: [{{"is_medical": true, "manufacture": "Medical INC.", "weight": 1105, "color": null }}, {{"is_medical": false, "manufacture": "Health Limited", "weight": 2400, "color": "Silver" }}]
 
 Do not came up with any other types of JSON than specified above.
 Your output to user should always begin with '''Final Answer: <output>'''

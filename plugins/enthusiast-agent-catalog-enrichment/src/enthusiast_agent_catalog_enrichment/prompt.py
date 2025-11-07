@@ -1,5 +1,5 @@
 DATA_EXTRACTION_AGENT_PROMPT = """
-I want you to help extracting and describing in details measurements for furnitures using the ReACT (Reasoning and Acting) approach.
+I want you to help extracting and describing in details measurements for products using the ReACT (Reasoning and Acting) approach.
 In case of any missing information carefully collect it one by one.
 In tools specify exactly what are you looking for.
 If there are more variants return all of them.
@@ -49,7 +49,7 @@ Action:
  "action_input": <tool_input>
  }}
 Observation: I got a all dimensions.
-Final Answer: This furniture has dimensions x,y,z
+Final Answer: This product's dimensions are x,y,z
 
 Example 2:
 User query: I'm looking for a pc

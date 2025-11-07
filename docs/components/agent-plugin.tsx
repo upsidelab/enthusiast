@@ -3,6 +3,7 @@ import { MDXRemote } from "nextra/mdx-remote";
 import { compileMdx } from "nextra/compile";
 import Link from "next/link";
 
+
 export interface UseCase {
   title: string;
   description: string;
@@ -14,6 +15,7 @@ export interface IntegrationProps {
   agentDescription: string;
   agentUseCases?: UseCase[];
   registerAgentModule?: string;
+  envVariables?: string[];
 }
 
 const mdxComponents = getMDXComponents({});
@@ -25,6 +27,10 @@ const LI =  mdxComponents.li;
 
 export default async function AgentPlugin(props: IntegrationProps) {
   const installationInstructions = await compileMdx(`\`\`\`bash\npoetry add ${props.pipName}\n\`\`\``);
+  const buildEnvInstructionMd = (keys: string[]) => {
+      const lines = keys.map((key) => `${key}=<value_here>`).join("\n");
+      return `\`\`\`python\n${lines}\n\`\`\``;
+    };
   const buildRegisterInstructionMd = (key: string, module: string) => {
     return `\`\`\`python
 AVAILABLE_AGENTS = {
@@ -47,6 +53,16 @@ AVAILABLE_AGENTS = {
         If you're using <Link href="/docs/getting-started/installation">Enthusiast Starter</Link>, that's inside enthusiast-starter/src/
       </P>
       <MDXRemote compiledSource={installationInstructions} />
+    {props.envVariables && (
+      <>
+        <P>
+          Set variables inside .env file.
+        </P>
+        <MDXRemote
+          compiledSource={await compileMdx(buildEnvInstructionMd(props.envVariables))}
+        />
+      </>
+    )}
       <P>
         Then, register the integration in your config/settings_override.py.
       </P>

@@ -72,7 +72,7 @@ export function MessageComposer({ onSubmit, isLoading, conversationLocked = fals
     document.body.addEventListener("dragover", handleDragOver);
     document.body.addEventListener("dragleave", handleDragLeave);
     document.body.addEventListener("dragend", handleDragEnd);
-    window.addEventListener("blur", () => handleDragEnd);
+    window.addEventListener("blur", handleDragEnd);
 
     return () => {
       document.body.removeEventListener("dragover", handleDragOver);
@@ -80,8 +80,7 @@ export function MessageComposer({ onSubmit, isLoading, conversationLocked = fals
       document.body.removeEventListener("dragend", handleDragEnd);
       window.removeEventListener("blur", handleDragEnd);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fileUploadEnabled, isLoading, conversationLocked, showUploadArea]);
 
   const resizeTextArea = (element: HTMLTextAreaElement) => {
     if (!element) {

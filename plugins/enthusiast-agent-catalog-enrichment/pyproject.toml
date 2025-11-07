@@ -1,6 +1,6 @@
 [project]
 name = "enthusiast-agent-catalog-enrichment"
-version = "1.1.1"
+version = "1.1.2"
 description = "Example implementation of a catalog enrichment ReAct agent for Enthusiast"
 authors = [
     {name = "Damian Sowiński",email = "damian.sowinski@upsidelab.io"}

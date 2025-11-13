@@ -39,12 +39,10 @@ class ShopwareProductSource(ProductSourcePlugin):
             sku=product_details.get("attributes", {}).get("productNumber"),
             price=self._product_price(product_details),
             properties=self._product_properties(product_details),
-            categories=str(
-                [
-                    self._product_category(category_id)
-                    for category_id in product_details.get("attributes", {}).get("categoryTree")
-                ]
-            ),
+            categories=[
+                self._product_category(category_id)
+                for category_id in product_details.get("attributes", {}).get("categoryTree")
+            ],
         )
 
     def _get_access_token(self):
@@ -179,12 +177,7 @@ class ShopwareProductSource(ProductSourcePlugin):
                 product_properties[property_name] = []
             product_properties[property_name].append(property_option.get("name"))
 
-        return " | ".join(
-            [
-                f"{property_name} -> {str(property_options)}"
-                for property_name, property_options in product_properties.items()
-            ]
-        )
+        return product_properties
 
     def fetch(self) -> list[ProductDetails]:
         """Fetch product list.

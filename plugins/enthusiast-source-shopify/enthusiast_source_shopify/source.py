@@ -72,13 +72,11 @@ class ShopifyProductSource(ProductSourcePlugin):
             sku="",
             price=0,
             # Combine several attributes to create meaningful properties.
-            properties=str(
-                {
-                    "productType": shopify_product.get("productType", ""),
-                    "tags": shopify_product.get("tags", ""),
-                }
-            ),
-            categories=shopify_product.get("category", ""),
+            properties={
+                "productType": shopify_product.get("productType", ""),
+                "tags": shopify_product.get("tags", ""),
+            },
+            categories=[shopify_product.get("category")] if shopify_product.get("category", None) is not None else [],
         )
         # Collect attributes from variants level.
         prices = []

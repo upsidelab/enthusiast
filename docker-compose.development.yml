@@ -19,6 +19,7 @@ services:
       - PORT=10001
       - VITE_API_BASE=http://localhost:10000
       - VITE_WS_BASE=ws://localhost:10000
+      - VITE_OTP_ENABLED=false
     ports:
       - "10001:10001"
   api:

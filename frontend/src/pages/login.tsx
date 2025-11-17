@@ -1,8 +1,34 @@
 import { LoginForm } from "@/components/login/login-form.tsx";
 import logoUrl from '@/assets/logo.png';
 import logoSvgUrl from '@/assets/logo.svg';
+import {authenticationProviderInstance} from "@/lib/authentication-provider.ts";
+import {ApiClient} from "@/lib/api.ts";
+import {useNavigate} from "react-router-dom";
+import {OtpLoginForm} from "@/components/login/otp-login-form.tsx";
 
 export function LoginPage() {
+  const navigate = useNavigate();
+
+  const onSuccess = async (token:string, api: ApiClient) => {
+    authenticationProviderInstance.login(token);
+
+      const dataSets = await api.dataSets().getDataSets();
+      if (dataSets.length === 0) {
+        const account = await api.getAccount();
+        if (account.isStaff) {
+          navigate('/onboarding');
+        } else {
+          navigate('/no-data-sets');
+        }
+      } else {
+        const dataSetAgents = await api.agents().getDatasetAvailableAgents(dataSets[0].id!)
+        const agentId = dataSetAgents?.[0]?.id;
+        const page = agentId
+          ? `/data-sets/${dataSets[0].id}/chat/new/${agentId}`
+          : `/data-sets/${dataSets[0].id}/chat/new`;
+        navigate(page);
+      }
+  }
   return (
     <>
       <div className="container relative hidden h-full flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
@@ -25,7 +51,22 @@ export function LoginPage() {
                 Enter your email and password to get started
               </p>
             </div>
-            <LoginForm />
+            <LoginForm onSuccess={onSuccess}/>
+             {import.meta.env.VITE_OTP_ENABLED === "true" && (
+              <>
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                      Or
+                    </span>
+                  </div>
+                </div>
+                <OtpLoginForm onSuccess={onSuccess}/>
+              </>
+            )}
           </div>
         </div>
       </div>

@@ -7,6 +7,8 @@ import account.views.users
 
 urlpatterns = [
     path("api/auth/login", account.views.login.LoginView.as_view(), name="login"),
+    path("api/auth/otp/callback", account.views.login.OTPCallbackView.as_view(), name="otp_callback"),
+    path("api/auth/otp/start", account.views.login.OTPStartView.as_view(), name="otp_start"),
     path("api/account", account.views.accounts.AccountView.as_view(), name="account"),
     path("api/users", account.views.users.UserListView.as_view(), name="user_list"),
     path("api/users/<int:id>", account.views.users.UserView.as_view(), name="user_details"),

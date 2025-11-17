@@ -1,5 +1,6 @@
 import AgentPlugin from "@/components/agent-plugin";
 
+export const envVariables = ["MEDUSA_API_KEY", "MEDUSA_BASE_URL"];
 export const description = "OCR to order Agent can understand images and extract text from product notes or lists. It automatically interprets the information and places orders accurately, without any manual input. By converting handwritten or printed notes into actionable orders, it saves time, reduces errors, and streamlines the purchasing process.";
 
 export const useCases = [
@@ -24,4 +25,5 @@ export const useCases = [
     registerAgentModule="enthusiast_agent_ocr_to_order"
     agentDescription={description}
     agentUseCases={useCases}
+    envVariables={envVariables}
 />

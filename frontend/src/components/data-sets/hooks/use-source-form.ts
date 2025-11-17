@@ -3,7 +3,8 @@ import { ApiClient } from "@/lib/api";
 import { authenticationProviderInstance } from "@/lib/authentication-provider";
 import { CatalogSource, SourcePlugin } from "@/lib/types";
 import { ApiError } from "@/lib/api-error";
-import { flattenConfigForForm, buildConfigFromFlattened, parseFieldErrors as parseFieldErrorsBase } from "@/lib/form-utils";
+import { flattenConfigForForm, parseFieldErrors as parseFieldErrorsBase } from "@/lib/form-utils";
+import { buildSinglePrefixConfig } from "@/lib/config-utils";
 
 const apiClient = new ApiClient(authenticationProviderInstance);
 
@@ -12,7 +13,8 @@ export function useSourceForm(
   availablePlugins: SourcePlugin[],
   dataSetId: number | null,
   sourceType: 'product' | 'document',
-  onSuccess: () => void
+  onSuccess: () => void,
+  modalOpen: boolean
 ) {
   const [pluginName, setPluginName] = useState("");
   const [config, setConfig] = useState<Record<string, string | number | boolean>>({});
@@ -23,7 +25,7 @@ export function useSourceForm(
 
   useEffect(() => {
     const loadSourceDetailsForEditing = async () => {
-      if (!source) return;
+      if (!source || !modalOpen) return;
       
       try {
         setPluginName(source.plugin_name);
@@ -43,7 +45,7 @@ export function useSourceForm(
 
     loadSourceDetailsForEditing();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [source?.id, availablePlugins]);
+  }, [source?.id, availablePlugins, modalOpen]);
 
   useEffect(() => {
     const resetFormForNewSource = () => {
@@ -160,7 +162,34 @@ export function useSourceForm(
       }
     }
 
+    if (typeof errorData === 'object' && errorData && 'config' in errorData) {
+      const configErrors = (errorData as { config: unknown }).config;
+      if (typeof configErrors === 'object' && configErrors) {
+        if ('configuration_args' in configErrors) {
+          const sectionErrors = (configErrors as Record<string, unknown>).configuration_args;
+          if (typeof sectionErrors === 'object' && sectionErrors) {
+            Object.entries(sectionErrors as Record<string, unknown>).forEach(([field, error]) => {
+              const fieldName = field.split('.')[0];
+              const errorMessage = Array.isArray(error) ? String(error[0]) : String(error);
+              newFieldErrors[`configuration_${fieldName}`] = errorMessage;
+            });
+          }
+        }
+      }
+    }
+
     return newFieldErrors;
+  };
+
+  const buildConfigFromFlattened = () => {
+    const selectedPlugin = availablePlugins.find((p) => p.name === pluginName);
+    if (!selectedPlugin) return {};
+    
+    const sectionFields = buildSinglePrefixConfig(config, selectedPlugin.configuration_args, 'configuration_');
+    
+    return {
+      configuration_args: sectionFields
+    };
   };
 
   const handleSubmit = async () => {
@@ -169,17 +198,22 @@ export function useSourceForm(
     setGeneralError("");
 
     try {
-      const configObj = buildConfigFromFlattened(config, {
-        'configuration': 'configuration_args'
-      });
+      const configObj = buildConfigFromFlattened();
       await saveSourceToApi(configObj);
     } catch (error) {
       if (error instanceof ApiError) {
-        const fieldErrors = parseFieldErrors(error.response.data);
+        const errorData = error.response?.data || error.response || {};
+        const fieldErrors = parseFieldErrors(errorData);
         setFieldErrors(fieldErrors);
         
         if (Object.keys(fieldErrors).length === 0) {
-          setGeneralError(error.message || "Failed to save source");
+          const errorDetail = typeof errorData === 'object' && errorData && 'detail' in errorData 
+            ? String(errorData.detail) 
+            : undefined;
+          const errorMessage = typeof errorData === 'object' && errorData && 'message' in errorData 
+            ? String(errorData.message) 
+            : undefined;
+          setGeneralError(errorDetail || errorMessage || error.message || "Failed to save source");
         }
       } else {
         setGeneralError("Failed to save source");

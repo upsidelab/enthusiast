@@ -3,11 +3,11 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { TypeInfo } from "@/lib/types";
 import { JSONEditor } from "./json-editor";
+import { ListInput } from "./list-input";
 
 interface DynamicConfigInputProps {
   id: string;
   label: string;
-  placeholder?: string;
   value: string | number | boolean;
   onChange: (value: string | number | boolean) => void;
   typeInfo?: TypeInfo;
@@ -18,7 +18,6 @@ interface DynamicConfigInputProps {
 export function DynamicConfigInput({
   id,
   label,
-  placeholder,
   value,
   onChange,
   typeInfo,
@@ -31,7 +30,7 @@ export function DynamicConfigInput({
       return 'json';
     }
     if (typeInfo.container === 'list') {
-      return 'text'; // For now, handle lists as text input
+      return 'list';
     }
     
     const baseType = typeInfo.inner_type || typeInfo.container;
@@ -50,6 +49,28 @@ export function DynamicConfigInput({
       case 'string':
       default:
         return 'text';
+    }
+  };
+
+  const getPlaceholder = () => {
+    if (!typeInfo) return undefined;
+    if (typeInfo.inner_type === 'Json') {
+      return '{}';
+    }
+    
+    const baseType = typeInfo.inner_type || typeInfo.container;
+    
+    switch (baseType) {
+      case 'int':
+      case 'integer':
+        return '0';
+      case 'float':
+      case 'double':
+        return '0.00';
+      case 'str':
+      case 'string':
+      default:
+        return undefined;
     }
   };
 
@@ -85,6 +106,20 @@ export function DynamicConfigInput({
       );
     }
     
+    if (inputType === 'list') {
+      return (
+        <ListInput
+          id={id}
+          label={label}
+          value={typeof value === 'string' ? value : '[]'}
+          onChange={onChange}
+          description={description}
+          error={error}
+          innerType={typeInfo?.inner_type}
+        />
+      );
+    }
+    
     if (inputType === 'boolean') {
       return (
         <div className="flex items-center space-x-2">
@@ -104,7 +139,7 @@ export function DynamicConfigInput({
       <Input
         id={id}
         type={inputType === 'number' ? 'number' : 'text'}
-        placeholder={placeholder}
+        placeholder={getPlaceholder()}
         value={value === '' ? '' : String(value)}
         onChange={(e) => handleInputChange(e.target.value)}
         className={`w-full ${error ? "border-destructive" : ""}`}
@@ -113,9 +148,8 @@ export function DynamicConfigInput({
   };
 
   const inputType = getInputType();
-  
-  // For JSON inputs, the JSONEditor handles its own label and description
-  if (inputType === 'json') {
+
+  if (inputType === 'json' || inputType === 'list') {
     return renderInput();
   }
 
@@ -126,10 +160,10 @@ export function DynamicConfigInput({
       </Label>
       {renderInput()}
       {description && (
-        <p className="text-xs text-muted-foreground">{description}</p>
+        <p className="text-xs text-muted-foreground mb-2">{description}</p>
       )}
       {error && (
-        <p className="text-xs text-destructive">{error}</p>
+        <p className="text-xs text-destructive mb-3">{error}</p>
       )}
     </div>
   );

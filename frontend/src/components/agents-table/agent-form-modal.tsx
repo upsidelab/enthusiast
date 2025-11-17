@@ -45,7 +45,7 @@ export function AgentFormModal({
     submitting,
     handleSubmit,
     resetForm
-  } = useAgentForm(agent, agentTypes, dataSetId, onSuccess);
+  } = useAgentForm(agent, agentTypes, dataSetId, onSuccess, open);
 
   // Reset form when modal closes
   useEffect(() => {

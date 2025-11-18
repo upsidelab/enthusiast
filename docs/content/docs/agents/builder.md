@@ -161,7 +161,7 @@ def _build_agent_callback_handler(self) -> Optional[BaseCallbackHandler]:
     pass
 
 @abstractmethod
-def _build_llm_callback_handlers(self) -> Optional[BaseCallbackHandler]:
+def _build_llm_callback_handlers(self, llm_config: LLMConfig) -> Optional[BaseCallbackHandler]:
     """Build LLM callback handlers"""
     pass
 

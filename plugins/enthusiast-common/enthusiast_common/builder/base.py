@@ -119,7 +119,7 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
         pass
 
     @abstractmethod
-    def _build_llm_callback_handlers(self) -> Optional[BaseCallbackHandler]:
+    def _build_llm_callback_handlers(self, llm_config: LLMConfig) -> Optional[BaseCallbackHandler]:
         pass
 
     @abstractmethod

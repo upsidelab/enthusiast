@@ -77,7 +77,7 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
 
     def _build_llm(self, llm_config: LLMConfig) -> BaseLanguageModel:
         data_set_repo = self._repositories.data_set
-        callbacks = self._build_llm_callback_handlers()
+        callbacks = self._build_llm_callback_handlers(llm_config)
         llm = llm_config.llm_class(
             llm_registry=self._llm_registry,
             callbacks=callbacks,
@@ -124,7 +124,12 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
     ) -> BaseLLMTool:
         llm = default_llm
         if config.llm:
-            llm = config.llm
+            llm = config.llm.llm_class(
+                llm_registry=self._llm_registry,
+                data_set_repo=self._repositories.data_set,
+                callbacks=self._build_llm_callback_handlers(llm_config=config.llm),
+                streaming=self.streaming,
+            ).create(self._data_set_id)
         return config.tool_class(
             data_set_id=self._data_set_id,
             llm=llm,
@@ -171,11 +176,11 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         else:
             return self._config.agent_callback_handler.handler_class()
 
-    def _build_llm_callback_handlers(self) -> Optional[list[BaseCallbackHandler]]:
-        if not self._config.llm.callbacks:
+    def _build_llm_callback_handlers(self, llm_config: LLMConfig) -> Optional[list[BaseCallbackHandler]]:
+        if not llm_config.callbacks:
             return None
         handlers = []
-        for config in self._config.llm.callbacks:
+        for config in llm_config.callbacks:
             if issubclass(config.handler_class, ConversationCallbackHandler):
                 handler = config.handler_class(conversation_id=self.conversation_id)
             else:

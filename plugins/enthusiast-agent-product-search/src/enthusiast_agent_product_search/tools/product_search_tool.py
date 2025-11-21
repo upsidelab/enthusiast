@@ -26,9 +26,9 @@ class ProductSearchTool(BaseLLMTool):
         self.llm = llm
         self.injector = injector
 
-    def run(self, full_user_request: str):
+    def run(self, product_description: str):
         product_retriever = self.injector.product_retriever
-        relevant_products = product_retriever.find_products_matching_query(full_user_request)
+        relevant_products = product_retriever.find_products_matching_query(product_description)
         if not relevant_products:
             return "No products found, try to loosen the criteria"
 

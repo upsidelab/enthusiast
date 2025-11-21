@@ -1,15 +1,13 @@
 from typing import Any
 
 from enthusiast_common.agents import AgentType, BaseAgent
-from langchain.agents import AgentExecutor, create_react_agent
+from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_core.memory import BaseMemory
-from langchain_core.tools import BaseTool, render_text_description_and_args
-
-from .structured_re_act_output_parser import StructuredReActOutputParser
+from langchain_core.tools import BaseTool
 
 
-class BaseReActAgent(BaseAgent):
-    AGENT_TYPE = AgentType.RE_ACT
+class BaseToolCallingAgent(BaseAgent):
+    AGENT_TYPE = AgentType.TOOL_CALLING
 
     def get_answer(self, input_text: str) -> str:
         agent_executor = self._build_agent_executor()
@@ -30,11 +28,11 @@ class BaseReActAgent(BaseAgent):
 
     def _build_agent_executor(self) -> AgentExecutor:
         tools = self._build_tools()
-        agent = create_react_agent(
+        agent = create_tool_calling_agent(
             tools=tools,
             llm=self._llm,
             prompt=self._prompt,
-            tools_renderer=render_text_description_and_args,
-            output_parser=StructuredReActOutputParser(),
         )
-        return AgentExecutor(agent=agent, tools=tools, memory=self._build_memory())
+        return AgentExecutor(
+            agent=agent, tools=tools, verbose=True, memory=self._build_memory(), return_intermediate_steps=True
+        )

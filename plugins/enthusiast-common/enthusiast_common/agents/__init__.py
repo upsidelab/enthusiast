@@ -1,3 +1,3 @@
-from .base import BaseAgent
+from .base import AgentType, BaseAgent
 
-__all__ = ["BaseAgent"]
+__all__ = ["BaseAgent", "AgentType"]

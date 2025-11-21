@@ -1,6 +1,9 @@
+from drf_yasg.utils import swagger_serializer_method
 from rest_framework import serializers
 from utils.serializers import ParentDataContextSerializerMixin
 
+from agent.core.registries.language_models import LanguageModelRegistry
+from agent.core.repositories import DjangoDataSetRepository
 from sync.document.registry import DocumentSourcePluginRegistry
 from sync.product.registry import ProductSourcePluginRegistry
 
@@ -9,6 +12,8 @@ from .utils import PydanticModelField
 
 
 class DataSetSerializer(serializers.ModelSerializer):
+    tool_calling_support = serializers.SerializerMethodField()
+
     class Meta:
         model = DataSet
         fields = [
@@ -20,7 +25,16 @@ class DataSetSerializer(serializers.ModelSerializer):
             "embedding_model",
             "embedding_vector_dimensions",
             "system_message",
+            "tool_calling_support",
         ]
+
+    @swagger_serializer_method(serializer_or_field=serializers.BooleanField)
+    def get_tool_calling_support(self, obj):
+        llm_provider = LanguageModelRegistry(data_set_repo=DjangoDataSetRepository(DataSet)).provider_for_dataset(
+            obj.pk
+        )
+        llm = llm_provider(model=obj.language_model).provide_language_model()
+        return hasattr(llm, "bind_tools")
 
 
 class ProductSerializer(serializers.ModelSerializer):

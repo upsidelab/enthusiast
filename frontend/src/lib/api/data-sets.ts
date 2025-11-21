@@ -43,7 +43,8 @@ export type ConfigureDocumentSourcePayload = DocumentSourceResponse;
 export class DataSetsApiClient extends BaseApiClient {
   async getDataSets(): Promise<DataSet[]> {
     const response = await fetch(`${this.apiBase}/api/data_sets`, this._requestConfiguration());
-    return (await response.json()).results as DataSet[];
+    const data = await response.json();
+    return data.results.map(mapDataSet)
   }
 
   async createDataSet(dataSet: DataSet): Promise<number> {
@@ -282,16 +283,7 @@ export class DataSetsApiClient extends BaseApiClient {
     const response = await fetch(`${this.apiBase}/api/data_sets/${dataSetId}`, this._requestConfiguration());
     const data = await response.json();
     
-    return {
-      id: data.id,
-      name: data.name,
-      languageModelProvider: data.language_model_provider,
-      languageModel: data.language_model,
-      embeddingProvider: data.embedding_provider,
-      embeddingModel: data.embedding_model,
-      embeddingVectorSize: data.embedding_vector_dimensions,
-      systemMessage: data.system_message
-    } as DataSet;
+    return mapDataSet(data);
   }
 
   async updateDataSet(dataSetId: number, dataSet: DataSet): Promise<void> {
@@ -311,4 +303,18 @@ export class DataSetsApiClient extends BaseApiClient {
       }
     );
   }
+}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mapDataSet = (data: any): DataSet => {
+  return {
+    id: data.id,
+    name: data.name,
+    languageModelProvider: data.language_model_provider,
+    languageModel: data.language_model,
+    embeddingProvider: data.embedding_provider,
+    embeddingModel: data.embedding_model,
+    embeddingVectorSize: data.embedding_vector_dimensions,
+    systemMessage: data.system_message,
+    toolCallingSupport: data.tool_calling_support
+  };
 }

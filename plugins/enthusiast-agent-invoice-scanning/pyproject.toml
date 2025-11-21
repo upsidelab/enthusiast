@@ -1,0 +1,23 @@
+[project]
+name = "enthusiast-agent-invoice-scanning"
+version = "1.0.0"
+description = "Example implementation of a invoice scanning agent for Enthusiast"
+authors = [
+    {name = "Damian Sowiński",email = "damian.sowinski@upsidelab.io"}
+]
+readme = "README.md"
+requires-python = ">=3.10,<4"
+dependencies = [
+    "enthusiast-common (>=1.4.0,<2.0.0)",
+    "langchain (>=0.3.26,<0.4.0)",
+    "enthusiast_agent_re_act (>=1.2.0)",
+    "enthusiast_agent_tool_calling (>=1.0.0)",
+]
+
+[tool.poetry]
+packages = [{include = "enthusiast_agent_invoice_scanning", from = "src"}]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

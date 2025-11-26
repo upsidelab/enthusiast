@@ -7,7 +7,7 @@ from rest_framework.test import APIClient
 
 from account.models import User
 from agent.models import Conversation
-from catalog.models import DataSet
+from catalog.models import DataSet, DocumentSource, ProductSource
 
 
 @pytest.fixture
@@ -35,8 +35,45 @@ def admin_api_client(admin_user):
 
 
 @pytest.fixture
+def limited_admin_user():
+    return baker.make(User, is_staff=True, is_limited_admin=True)
+
+
+@pytest.fixture
+def limited_admin_api_client(limited_admin_user):
+    client = APIClient()
+    client.force_authenticate(user=limited_admin_user)
+    return client
+
+
+@pytest.fixture
+def limited_admin_with_dataset(limited_admin_user):
+    data_set = baker.make(DataSet)
+    data_set.users.add(limited_admin_user)
+    return limited_admin_user, data_set
+
+
+@pytest.fixture
+def limited_admin_with_dataset_client(limited_admin_with_dataset):
+    user, _ = limited_admin_with_dataset
+    client = APIClient()
+    client.force_authenticate(user=user)
+    return client
+
+
+@pytest.fixture
 def data_set():
     return baker.make(DataSet)
+
+
+@pytest.fixture
+def document_source(data_set):
+    return baker.make(DocumentSource, data_set=data_set)
+
+
+@pytest.fixture
+def product_source(data_set):
+    return baker.make(ProductSource, data_set=data_set)
 
 
 @pytest.fixture

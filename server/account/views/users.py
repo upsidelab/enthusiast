@@ -1,9 +1,9 @@
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.generics import ListCreateAPIView, UpdateAPIView
-from rest_framework.permissions import IsAdminUser
+from rest_framework.generics import ListCreateAPIView, UpdateAPIView, get_object_or_404
 
 from account.models import User
+from account.permissions import IsAdminUser
 from account.serializers import UserSerializer, UserUpdatePasswordSerializer, UserUpdateSerializer
 
 
@@ -37,7 +37,7 @@ class UserView(UpdateAPIView):
         ],
     )
     def get_object(self):
-        return User.objects.get(id=self.kwargs["id"], is_service_account=False)
+        return get_object_or_404(User, id=self.kwargs["id"], is_service_account=False)
 
     def perform_update(self, serializer):
         user = self.get_object()
@@ -59,7 +59,7 @@ class UserPasswordView(UpdateAPIView):
         ],
     )
     def get_object(self):
-        return User.objects.get(id=self.kwargs["id"], is_service_account=False)
+        return get_object_or_404(User, id=self.kwargs["id"], is_service_account=False)
 
     def perform_update(self, serializer):
         user = self.get_object()

@@ -39,6 +39,7 @@ class User(AbstractUser):
     email = models.EmailField(max_length=255, unique=True)
     username = None
     is_service_account = models.BooleanField(default=False)
+    is_limited_admin = models.BooleanField(default=False)
 
     objects = UserManager()
 

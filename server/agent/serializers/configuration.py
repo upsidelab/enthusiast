@@ -51,6 +51,14 @@ class AgentSerializer(ParentDataContextSerializerMixin, serializers.ModelSeriali
         ]
         read_only_fields = ["id", "created_at", "updated_at", "file_upload"]
 
+    def validate_name(self, name):
+        data_set = self.initial_data["dataset"]
+
+        if Agent.objects.filter(dataset=data_set, name=name).exclude(pk=getattr(self.instance, "pk", None)).exists():
+            raise serializers.ValidationError("An agent with this name already exists in this dataset.")
+
+        return name
+
     def create(self, validated_data):
         agent_type = self.context.get("agent_type")
         if not agent_type:

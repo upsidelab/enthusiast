@@ -23,7 +23,7 @@ export default async function Page() {
         <IntegrationCard name="Product Search" href="/agents/agent-product-search/" />
         <IntegrationCard name="Catalog Enrichment" href="/agents/agent-catalog-enrichment/" />
         <IntegrationCard name="OCR Order" href="/agents/agent-ocr-order/" />
-        <IntegrationCard name="User Manuals" href="/agents/agent-customer-support/" />
+        <IntegrationCard name="User Manuals" href="/agents/agent-user-manual-search/" />
       </Cards>
     </Wrapper>
   )

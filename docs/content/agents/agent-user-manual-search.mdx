@@ -1,0 +1,32 @@
+import AgentPlugin from "@/components/agent-plugin";
+
+export const description = "User Manuals Agent, with access to product manuals data, enables precise and reliable answers about product features, usage, and troubleshooting. By leveraging detailed documentation, it helps customers and support teams quickly resolve issues, understand product functionality, and receive guided step-by-step assistance.";
+
+export const useCases = [
+  {
+    title: "Customer support assistance",
+    description: "Provides instant, accurate answers related to product's features and troubleshooting. Reduces response time and improves customer satisfaction."
+  },
+  {
+    title: "Internal tool for sales and support teams",
+    description: "Equips staff with relevant product information without needing deep domain knowledge."
+  },
+  {
+    title: "Proactive issue resolution",
+    description: "Suggests solutions or next steps automatically based on customer queries, reducing the need for manual intervention."
+  },
+  {
+    title: "Training and onboarding support",
+    description: "Helps new staff learn about products by answering questions in real-time."
+  },
+];
+
+
+<AgentPlugin
+    name="User Manuals Agent"
+    integrationKey="enthusiast-agent-user-manual-search"
+    pipName="enthusiast-agent-user-manual-search"
+    registerAgentModule="enthusiast_agent_user_manual_search"
+    agentDescription={description}
+    agentUseCases={useCases}
+/>

@@ -30,7 +30,7 @@ Get started with Enthusiast by either:
 
 - [**AI-Based Product Discovery**](https://upsidelab.io/tools/enthusiast/agents/agent-product-search/) Enable natural-language product search. Users describe requirements in plain terms, and the agent retrieves verifiable results from your indexed catalog.
 
-- [**User Manual Search:**](https://upsidelab.io/tools/enthusiast/agents/agent-customer-support/) Provide precise answers from technical documentation and manuals.
+- [**User Manual Search:**](https://upsidelab.io/tools/enthusiast/agents/agent-user-manual-search/) Provide precise answers from technical documentation and manuals.
 
 - [**Purchase Order OCR:**](https://upsidelab.io/tools/enthusiast/agents/agent-ocr-order/) Convert unstructured inputs — such as scanned invoices or PDFs - into e-commerce orders.
 

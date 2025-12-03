@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "enthusiast-common"
-version = "1.4.1"
+version = "1.4.0"
 description = "Core interfaces for developing custom Enthusiast plugins and integrations."
 authors = ["Rafal Cymerys <rafal@upsidelab.io>"]
 readme = "README.md"

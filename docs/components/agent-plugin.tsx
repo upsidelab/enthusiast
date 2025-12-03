@@ -12,6 +12,7 @@ export interface IntegrationProps {
   integrationKey: string;
   pipName: string;
   agentDescription: string;
+  videoUrl?: string;
   agentUseCases?: UseCase[];
   registerAgentModule?: string;
 }
@@ -38,7 +39,12 @@ AVAILABLE_AGENTS = {
 
   return (
     <>
-      <H1 className="x:hidden">{props.name}</H1>
+      <H1>{props.name} Agent</H1>
+      {props.videoUrl &&
+        <div className="x:my-4">
+          <video autoPlay={true} controls={true} src={props.videoUrl} />
+        </div>
+      }
       <H2>Description</H2>
         <P>{props.agentDescription}</P>
       <H2>Installation</H2>

@@ -1,6 +1,7 @@
+import logging
 from typing import Type
 
-from enthusiast_common.agents import AgentType
+from enthusiast_common.agents import AgentType, BaseAgent
 from enthusiast_common.config import (
     AgentCallbackHandlerConfig,
     AgentConfig,
@@ -38,6 +39,8 @@ from agent.core.repositories import (
 )
 from agent.core.retrievers import DocumentRetriever, ProductRetriever
 from agent.core.retrievers.product_retriever import QUERY_PROMPT_TEMPLATE
+
+logger = logging.getLogger(__name__)
 
 
 class DefaultAgentConfig(BaseModel):
@@ -99,7 +102,8 @@ def merge_config(
     partial: AgentConfigWithDefaults,
 ) -> AgentConfig:
     merged: dict[str, object] = {}
-    defaults = get_default_config(type=partial.agent_class.AGENT_TYPE)
+    agent_type = get_agent_type(partial.agent_class)
+    defaults = get_default_config(type=agent_type)
     for name in AgentConfig.model_fields:
         value = getattr(partial, name, None)
 
@@ -109,3 +113,13 @@ def merge_config(
             merged[name] = getattr(defaults, name, None)
 
     return AgentConfig(**merged)
+
+
+def get_agent_type(agent_class: Type[BaseAgent]) -> AgentType:
+    is_react = getattr(agent_class, "IS_REACT", None)
+    if is_react is None:
+        return agent_class.AGENT_TYPE
+    logger.warning("IS_REACT flag is deprecated, and will be removed in the future. Use AGENT_TYPE instead.")
+    if is_react is True:
+        return AgentType.RE_ACT
+    return AgentType.BASE

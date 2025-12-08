@@ -1,0 +1,1 @@
+An agent that accepts a URL, retrieves the webpage, and extracts specified data as structured json.

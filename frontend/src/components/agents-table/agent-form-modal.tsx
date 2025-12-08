@@ -1,13 +1,14 @@
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Agent } from "@/lib/types";
+import {Agent, DataSet} from "@/lib/types";
 import { useAgentForm } from "./hooks/use-agent-form";
 import { AgentConfigurationForm } from "./agent-configuration-form";
 import {AgentChoice} from "@/lib/api/agents.ts";
 import {Textarea} from "@/components/ui/textarea.tsx";
 import { FormModal } from "@/components/ui/form-modal";
-import { useEffect } from "react";
+import {useEffect, useState} from "react";
+import {useApplicationContext} from "@/lib/use-application-context.ts";
 
 interface AgentFormModalProps {
   open: boolean;
@@ -46,13 +47,15 @@ export function AgentFormModal({
     handleSubmit,
     resetForm
   } = useAgentForm(agent, agentTypes, dataSetId, onSuccess);
-
+  const { dataSets, dataSetId: activeDataSetId} = useApplicationContext()!;
+  const [activeDataSet, setActiveDataset] = useState<DataSet | undefined>(undefined);
   // Reset form when modal closes
   useEffect(() => {
+    setActiveDataset(dataSets.find(ds => ds.id === activeDataSetId))
     if (!open) {
       resetForm();
     }
-  }, [open, resetForm]);
+  }, [activeDataSetId, dataSets, open]);
 
   const onSubmit = async () => {
     await handleSubmit();
@@ -116,7 +119,7 @@ export function AgentFormModal({
           </SelectTrigger>
           <SelectContent>
             {agentTypes.map(t => (
-              <SelectItem key={t.key} value={t.key}>{t.name}</SelectItem>
+              <SelectItem key={t.key} value={t.key} disabled={t.type === "tool_calling" && !activeDataSet?.toolCallingSupport}>{t.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>

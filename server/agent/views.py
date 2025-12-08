@@ -256,6 +256,7 @@ class AgentTypesView(APIView):
                         get_model_descriptor_from_class_field(tool_config.tool_class, "CONFIGURATION_ARGS")
                         for tool_config in agent_class.TOOLS
                     ],
+                    "type": agent_class.AGENT_TYPE,
                 }
             )
         response_serializer = AvailableAgentsResponseSerializer(data={"choices": choices})

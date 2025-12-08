@@ -1,3 +1,4 @@
+from enthusiast_common.agents import AgentType
 from rest_framework import serializers
 from rest_framework.exceptions import APIException
 from utils.serializers import ExtraArgDetailSerializer, ParentDataContextSerializerMixin
@@ -15,6 +16,7 @@ class AgentChoiceSerializer(serializers.Serializer):
     prompt_input = serializers.DictField(child=ExtraArgDetailSerializer(), allow_empty=True)
     prompt_extension = serializers.DictField(child=ExtraArgDetailSerializer(), allow_empty=True)
     tools = serializers.ListField(child=serializers.DictField(child=ExtraArgDetailSerializer()), allow_empty=True)
+    type = serializers.ChoiceField(choices=[type.value for type in AgentType])
 
 
 class AvailableAgentsResponseSerializer(serializers.Serializer):

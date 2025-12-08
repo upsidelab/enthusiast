@@ -1,7 +1,7 @@
 [project]
 name = "enthusiast-agent-ocr-to-order"
 version = "1.1.2"
-description = "Example implementation of a OCR to order ReAct agent for Enthusiast"
+description = "Purchase Order OCR Agent for Enthusiast"
 authors = [
     {name = "Damian Sowiński",email = "damian.sowinski@upsidelab.io"}
 ]
@@ -10,8 +10,15 @@ requires-python = ">=3.10,<4"
 dependencies = [
     "enthusiast-common (>=1.4.0,<2.0.0)",
     "langchain (>=0.3.26,<0.4.0)",
-    "enthusiast_agent_re_act (>=1.2.0)"
+    "enthusiast_agent_re_act (>=1.2.0)",
+    "enthusiast_agent_tool_calling (>=1.0.0)"
 ]
+
+[project.urls]
+Homepage = "https://upsidelab.io/tools/enthusiast"
+Documentation = "https://upsidelab.io/tools/enthusiast/agents/purchase-order-ocr"
+Repository = "https://github.com/upsidelab/enthusiast.git"
+Issues = "https://github.com/upsidelab/enthusiast/issues"
 
 [tool.poetry]
 packages = [{include = "enthusiast_agent_ocr_to_order", from = "src"}]

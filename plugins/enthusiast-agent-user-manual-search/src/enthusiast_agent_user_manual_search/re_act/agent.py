@@ -3,13 +3,17 @@ from enthusiast_common.config.base import LLMToolConfig
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain_core.tools import render_text_description_and_args
 
-from .tools.product_search_tool import ProductSearchTool
+from ..tools.document_retriver_tool import RetrieveDocumentsTool
+from ..tools.solution_verification_tool import SolutionVerificationTool
 
 
-class ProductSearchReActAgent(BaseReActAgent):
-    TOOLS = [
-        LLMToolConfig(tool_class=ProductSearchTool),
-    ]
+class UserManualSearchAgent(BaseReActAgent):
+    TOOLS = [LLMToolConfig(tool_class=SolutionVerificationTool), LLMToolConfig(tool_class=RetrieveDocumentsTool)]
+
+    def get_answer(self, input_text: str) -> str:
+        agent_executor = self._build_agent_executor()
+        response = agent_executor.invoke({"input": input_text}, config=self._build_invoke_config())
+        return response["output"]
 
     def _build_agent_executor(self) -> AgentExecutor:
         tools = self._build_tools()
@@ -28,8 +32,3 @@ class ProductSearchReActAgent(BaseReActAgent):
             return_intermediate_steps=True,
             handle_parsing_errors=True,
         )
-
-    def get_answer(self, input_text: str) -> str:
-        agent_executor = self._build_agent_executor()
-        response = agent_executor.invoke({"input": input_text}, config=self._build_invoke_config())
-        return response["output"]

@@ -5,10 +5,10 @@ from enthusiast_common.config import (
 )
 from enthusiast_common.config.prompts import PromptTemplateConfig
 
+from ..document_retriever import DocumentRetriever
+from ..product_retriever import ProductRetriever
+from ..product_retriever_prompt import CUSTOM_QUERY_PROMPT_TEMPLATE
 from .agent import ProductSearchReActAgent
-from .document_retriever import DocumentRetriever
-from .product_retriever import ProductRetriever
-from .product_retriever_prompt import CUSTOM_QUERY_PROMPT_TEMPLATE
 from .prompt import PRODUCT_SEARCH_AGENT_PROMPT
 
 

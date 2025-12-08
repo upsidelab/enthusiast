@@ -3,8 +3,8 @@ from enthusiast_common.config.base import LLMToolConfig
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain_core.tools import render_text_description_and_args
 
-from .tools.place_order_tool import OrderPlacementTool
-from .tools.product_search_tool import ProductSearchTool
+from ..tools.place_order_tool import OrderPlacementTool
+from ..tools.product_search_tool import ProductSearchTool
 
 
 class OCROrderReActAgent(BaseReActAgent):

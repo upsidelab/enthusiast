@@ -1,0 +1,21 @@
+[project]
+name = "enthusiast-agent-tool-calling"
+version = "1.0.0"
+description = "Base implementation of a Tool Calling agent for Enthusiast"
+authors = [
+    {name = "Damian Sowiński",email = "damian.sowinski@upsidelab.io"}
+]
+readme = "README.md"
+requires-python = ">=3.10,<4"
+dependencies = [
+    "enthusiast-common (>=1.4.0,<2.0.0)",
+    "langchain (>=0.3.26,<0.4.0)"
+]
+
+[tool.poetry]
+packages = [{include = "enthusiast_agent_tool_calling", from = "src"}]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

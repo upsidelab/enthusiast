@@ -1,5 +1,7 @@
+import logging
 from typing import Type
 
+from enthusiast_common.agents import AgentType, BaseAgent
 from enthusiast_common.config import (
     AgentCallbackHandlerConfig,
     AgentConfig,
@@ -38,6 +40,8 @@ from agent.core.repositories import (
 from agent.core.retrievers import DocumentRetriever, ProductRetriever
 from agent.core.retrievers.product_retriever import QUERY_PROMPT_TEMPLATE
 
+logger = logging.getLogger(__name__)
+
 
 class DefaultAgentConfig(BaseModel):
     repositories: RepositoriesConfig
@@ -48,12 +52,14 @@ class DefaultAgentConfig(BaseModel):
     agent_callback_handler: AgentCallbackHandlerConfig | None = None
 
 
-def get_default_config(is_react: bool = False) -> DefaultAgentConfig:
+def get_default_config(type: AgentType) -> DefaultAgentConfig:
     llm_callback_handler_class = (
-        ReactAgentWebsocketCallbackHandler if is_react else ConversationWebSocketCallbackHandler
+        ReactAgentWebsocketCallbackHandler if type == AgentType.RE_ACT else ConversationWebSocketCallbackHandler
     )
     agent_callback_handler_config = (
-        AgentCallbackHandlerConfig(handler_class=AgentActionWebsocketCallbackHandler) if is_react else None
+        AgentCallbackHandlerConfig(handler_class=AgentActionWebsocketCallbackHandler)
+        if type == AgentType.RE_ACT
+        else None
     )
     return DefaultAgentConfig(
         repositories=RepositoriesConfig(
@@ -96,7 +102,8 @@ def merge_config(
     partial: AgentConfigWithDefaults,
 ) -> AgentConfig:
     merged: dict[str, object] = {}
-    defaults = get_default_config(is_react=partial.agent_class.IS_REACT)
+    agent_type = get_agent_type(partial.agent_class)
+    defaults = get_default_config(type=agent_type)
     for name in AgentConfig.model_fields:
         value = getattr(partial, name, None)
 
@@ -106,3 +113,16 @@ def merge_config(
             merged[name] = getattr(defaults, name, None)
 
     return AgentConfig(**merged)
+
+
+def get_agent_type(agent_class: Type[BaseAgent]) -> AgentType:
+    agent_type = getattr(agent_class, "AGENT_TYPE", None)
+    if agent_type is not None:
+        return agent_type
+
+    is_react = getattr(agent_class, "IS_REACT", None)
+    if is_react is True:
+        logger.warning("IS_REACT flag is deprecated, and will be removed in the future. Use AGENT_TYPE instead.")
+        return AgentType.RE_ACT
+
+    return AgentType.BASE

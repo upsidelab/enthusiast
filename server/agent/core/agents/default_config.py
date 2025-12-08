@@ -116,10 +116,13 @@ def merge_config(
 
 
 def get_agent_type(agent_class: Type[BaseAgent]) -> AgentType:
+    agent_type = getattr(agent_class, "AGENT_TYPE", None)
+    if agent_type is not None:
+        return agent_type
+
     is_react = getattr(agent_class, "IS_REACT", None)
-    if is_react is None:
-        return agent_class.AGENT_TYPE
-    logger.warning("IS_REACT flag is deprecated, and will be removed in the future. Use AGENT_TYPE instead.")
     if is_react is True:
+        logger.warning("IS_REACT flag is deprecated, and will be removed in the future. Use AGENT_TYPE instead.")
         return AgentType.RE_ACT
+
     return AgentType.BASE

@@ -1,7 +1,7 @@
 [project]
 name = "enthusiast-agent-product-search"
-version = "1.2.0"
-description = "Example implementation of a Product Search ReAct agent for Enthusiast"
+version = "1.1.0"
+description = "Product Search Agent for Enthusiast"
 authors = [
     {name = "Damian Sowiński",email = "damian.sowinski@upsidelab.io"}
 ]
@@ -13,6 +13,12 @@ dependencies = [
     "enthusiast_agent_re_act (>=1.2.0)",
     "enthusiast_agent_tool_calling (>=1.0.0)"
 ]
+
+[project.urls]
+Homepage = "https://upsidelab.io/tools/enthusiast"
+Documentation = "https://upsidelab.io/tools/enthusiast/agents/product-search"
+Repository = "https://github.com/upsidelab/enthusiast.git"
+Issues = "https://github.com/upsidelab/enthusiast/issues"
 
 [tool.poetry]
 packages = [{include = "enthusiast_agent_product_search", from = "src"}]

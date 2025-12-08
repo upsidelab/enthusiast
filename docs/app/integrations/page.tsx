@@ -5,6 +5,7 @@ import { Metadata } from "next";
 
 const mdxComponents = getMDXComponents({});
 const Wrapper = mdxComponents.wrapper;
+const P = mdxComponents.p;
 const H1 = mdxComponents.h1;
 const H2 = mdxComponents.h2;
 
@@ -20,6 +21,8 @@ export default async function Page() {
   return (
     <Wrapper toc={[]} metadata={metadata} sourceCode={""} >
       <H1>Integrations</H1>
+      <P>Enthusiast comes with a set of ready-to-use integrations that connect your agents to services like major e-commerce platforms, CMS, and LLMs (e.g. Gemini and Azure OpenAI).</P>
+      <P>They allow you to immediately enable your agents to connect to product catalogs, and leverage enterprise-grade AI models for enhanced security and performance. Furthermore, each of these integrations can be customized and extended by a developer to reflect the structure of the data in your systems.</P>
       <H2>E-Commerce Systems</H2>
       <Cards>
         <IntegrationCard name="Medusa" imageSrc="/tools/enthusiast/img/integrations/medusa.png" href="/integrations/medusa/" />

@@ -9,6 +9,9 @@ from .structured_re_act_output_parser import StructuredReActOutputParser
 
 
 class BaseReActAgent(BaseAgent):
+    # This flag is deprecated, and is left here for backwards compatibility, use the AGENT_TYPE instead.
+    IS_REACT = True
+
     AGENT_TYPE = AgentType.RE_ACT
 
     def get_answer(self, input_text: str) -> str:

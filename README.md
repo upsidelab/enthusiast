@@ -23,19 +23,19 @@ Enthusiast helps you cut down time, cost and complexity when building AI-powered
 
 ## Getting Started
 Get started with Enthusiast by either:
-- Installing Enthusiast with or without Docker (See the [installation guide](https://upsidelab.io/tools/enthusiast/docs/getting-started/installation/))
+- Installing Enthusiast with or without Docker (See the [installation guide](https://upsidelab.io/tools/enthusiast/docs/getting-started/installation))
 - Booking a [live demo](https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ3NyFdPn_jqYqD24asveLkfrB1NTal0PWkLNHFTT4Fmp6sNW50-0or8WyIzBriF8IFdP1jXSPjQ) to see it in action
 
 ## Example use cases
 
-- [**AI-Based Product Discovery**](https://upsidelab.io/tools/enthusiast/agents/agent-product-search/) Enable natural-language product search. Users describe requirements in plain terms, and the agent retrieves verifiable results from your indexed catalog.
+- [**AI-Based Product Discovery**](https://upsidelab.io/tools/enthusiast/agents/product-search) Enable natural-language product search. Users describe requirements in plain terms, and the agent retrieves results from your indexed catalog.
 
-- [**User Manual Search:**](https://upsidelab.io/tools/enthusiast/agents/agent-customer-support/) Provide precise answers from technical documentation and manuals.
+- [**User Manual Search**](https://upsidelab.io/tools/enthusiast/agents/user-manual-search) Provide precise answers from technical documentation and manuals.
 
-- [**Purchase Order OCR:**](https://upsidelab.io/tools/enthusiast/agents/agent-ocr-order/) Convert unstructured inputs — such as scanned invoices or PDFs - into e-commerce orders.
+- [**Purchase Order OCR**](https://upsidelab.io/tools/enthusiast/agents/purchase-order-ocr) Convert unstructured inputs — such as scanned purchase order documents or notes - into e-commerce orders.
 
-- [**Product Catalog Enrichment:**](https://upsidelab.io/tools/enthusiast/agents/agent-catalog-enrichment/) Extract product descriptions, attributes, or translations from unstructured product sheets.
-
+- [**Product Catalog Enrichment**](https://upsidelab.io/tools/enthusiast/agents/catalog-enrichment) Extract product descriptions, attributes, or translations from unstructured product sheets.
+- 
 ## Main Features
 
 - Pre-built integrations with popular e-commerce platforms
@@ -54,7 +54,7 @@ Check our [Getting Started guide](https://upsidelab.io/tools/enthusiast/docs/get
 
 Connect to your e-commerce stack in minutes, with minimal configuration required.
 
-<a href="https://upsidelab.io/tools/enthusiast/integrations/"><img width="600" alt="Integrations" src="https://github.com/user-attachments/assets/84d1f4d1-51ac-4c6c-8412-a037f7ce4ecd" /></a>
+<a href="https://upsidelab.io/tools/enthusiast/integrations"><img width="600" alt="Integrations" src="https://github.com/user-attachments/assets/84d1f4d1-51ac-4c6c-8412-a037f7ce4ecd" /></a>
 
 ## License
 

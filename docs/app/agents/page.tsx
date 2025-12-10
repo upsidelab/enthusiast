@@ -6,6 +6,7 @@ import AgentCard from "@/components/agent-card";
 const mdxComponents = getMDXComponents({});
 const Wrapper = mdxComponents.wrapper;
 const H1 = mdxComponents.h1;
+const H2 = mdxComponents.h2;
 const P = mdxComponents.p;
 
 export const metadata: Metadata = {
@@ -23,11 +24,14 @@ export default async function Page() {
       <P>Enthusiast comes with a bunch of pre-built agents that cover many common use cases for back-office operations, such as enhancing product data, searching internal documentation, and processing business documents.</P>
       <P>This curated library allows you to quickly deploy specialized AI solutions for automation and productivity without needing to build custom agents from scratch. Furthermore, these agents can be customized and extended by a developer to precisely adjust their behavior and integrate with your business workflows.</P>
       <Cards className="x:py-4" num={2}>
-        <AgentCard name="Product Search" imageSrc="/tools/enthusiast/img/agents/product-search.png" href="/agents/product-search/" />
-        <AgentCard name="Catalog Enrichment" imageSrc="/tools/enthusiast/img/agents/catalog-enrichment.png" href="/agents/catalog-enrichment/" />
-        <AgentCard name="Purchase Order OCR" imageSrc="/tools/enthusiast/img/agents/purchase-order-ocr.png" href="/agents/purchase-order-ocr/" />
-        <AgentCard name="User Manual Search" imageSrc="/tools/enthusiast/img/agents/user-manual-search.png" href="/agents/user-manual-search/" />
+        <AgentCard name="Product Search" imageSrc="/tools/enthusiast/img/agents/product-search.png" href="/agents/product-search" />
+        <AgentCard name="Catalog Enrichment" imageSrc="/tools/enthusiast/img/agents/catalog-enrichment.png" href="/agents/catalog-enrichment" />
+        <AgentCard name="Purchase Order OCR" imageSrc="/tools/enthusiast/img/agents/purchase-order-ocr.png" href="/agents/purchase-order-ocr" />
+        <AgentCard name="User Manual Search" imageSrc="/tools/enthusiast/img/agents/user-manual-search.png" href="/agents/user-manual-search" />
       </Cards>
+      <H2>Build a Custom Agent</H2>
+      <P>These integrations are just the beginning, and we know that you may need more specialized functionality beyond what we've included here. Enthusiast gives you the flexibility to build entirely custom agents from the ground up, tailored to your needs.</P>
+      <Cards.Card className="x:my-4" title="Learn How to Build a Custom Agent" href="/docs/agents/agent-architecture" arrow />
     </Wrapper>
   )
 }

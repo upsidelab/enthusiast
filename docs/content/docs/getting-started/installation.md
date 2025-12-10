@@ -8,6 +8,7 @@ First, clone the starter repository:
 
 ```shell
 $ git clone https://github.com/upsidelab/enthusiast-starter
+$ cd enthusiast-starter
 $ cp config/env.sample config/env
 ```
 

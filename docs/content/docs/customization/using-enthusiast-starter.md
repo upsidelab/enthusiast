@@ -11,6 +11,7 @@ Simply clone it and fill the config/env file to get started:
 
 ```shell
 $ git clone https://github.com/upsidelab/enthusiast-starter
+$ cd enthusiast-starter
 $ cp config/env.sample config/env
 ```
 

@@ -93,14 +93,12 @@ class WoocommerceProductSource(ProductSourcePlugin):
             slug=woo_product["slug"],
             description=woo_product["description"],
             sku=woo_product["sku"],
-            properties=str(
-                {
-                    "status": woo_product["status"],
-                    "featured": woo_product["featured"],
-                    "catalog_visibility": woo_product["catalog_visibility"],
-                    "type": woo_product["type"],
-                }
-            ),
-            categories=", ".join(category["name"] for category in woo_product["categories"]),
+            properties={
+                "status": woo_product["status"],
+                "featured": woo_product["featured"],
+                "catalog_visibility": woo_product["catalog_visibility"],
+                "type": woo_product["type"],
+            },
+            categories=[category["name"] for category in woo_product["categories"]],
             price=float(woo_product["price"]) if woo_product["price"] else 0.0,
         )

@@ -51,7 +51,8 @@ export function AddEditSourceModal({
     if (!open) {
       resetForm();
     }
-  }, [open, resetForm]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),

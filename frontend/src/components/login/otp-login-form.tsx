@@ -44,7 +44,7 @@ export function OtpLoginForm({ onSuccess }: OtpLoginFormProps) {
               variant="outline"
               onClick={onClick}
             >
-              Log in with SSO
+              OTP Login
             </Button>
           </div>
   );

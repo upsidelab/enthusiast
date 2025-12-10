@@ -1,28 +1,24 @@
-import AgentPlugin from "@/components/agent-plugin";
+import Agent from "@/components/agent";
 
-export const description = "User Manuals Agent with access to contextual data and tools, knows products, manuals, customer order history, and general company information such as FAQs, return policies, and other documentation. It can instantly combine this knowledge to provide accurate answers, suggest solutions, or even resolve issues directly. This makes support faster, smoother, and more reliable. The agent streamlines the support process, delivering personalized and efficient assistance.";
+export const description = "The User Manual agent operates over a collection of product manuals and provides precise, context-aware answers to user or support-team questions. Responses include direct citations with links back to the relevant section of the manual, and the agent performs a sanity check to ensure the answer aligns with the documented information before returning it.";
 
 export const useCases = [
   {
-    title: "Customer support assistance",
-    description: "Provides instant, accurate answers using product manuals, FAQs, and order history. Reduces response time and improves customer satisfaction."
+    title: "Customer Support Assistance",
+    description: "Support teams can ask natural-language questions - installation steps, troubleshooting guidance, safety notes - and receive accurate answers with links to the exact manual section."
   },
   {
-    title: "Internal tool for sales and support teams",
-    description: "Equips staff with relevant product and company information without needing deep domain knowledge."
+    title: "Internal Knowledge Retrieval",
+    description: "Technical teams can quickly look up product specs or operational details without manually searching through multiple PDF manuals."
   },
   {
-    title: "Proactive issue resolution",
-    description: "Suggests solutions or next steps automatically based on customer queries, reducing the need for manual intervention."
-  },
-  {
-    title: "Training and onboarding support",
-    description: "Helps new staff learn about products and company processes by answering questions in real-time."
+    title: "Answer Validation for Support Workflows",
+    description: "The agent performs a sanity check against the manual before returning an answer, helping support reps avoid giving guidance that isn’t documented or may be outdated."
   },
 ];
 
 
-<AgentPlugin
+<Agent
   name="User Manual Search"
   integrationKey="enthusiast-agent-user-manual-search"
   pipName="enthusiast-agent-user-manual-search"

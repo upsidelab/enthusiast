@@ -1,31 +1,23 @@
-import AgentPlugin from "@/components/agent-plugin";
+import Agent from "@/components/agent";
 
-export const description = "Product Search Agent helps users find the right products effortlessly, even without prior knowledge of the domain. By understanding user needs through natural language queries, it recommends relevant products tailored to individual preferences. The agent intelligently filters options, highlights key features, and simplifies comparisons, saving users time and effort. It’s designed to make product discovery intuitive, accurate, and personalized, turning complex searches into simple conversation.";
+export const description = "The Product Search agent takes unstructured user requests - anything from a rough idea to a precise query - and filters your product catalog to find relevant matches. When the request is ambiguous or too broad, it asks targeted follow-up questions until it narrows the results to the desired number of products.";
 
 export const useCases = [
   {
-    title: "Marketplace search enhancement",
-    description: "Improves search experience across marketplaces by understanding natural language queries. Provides accurate product matches even with vague or partial inputs."
+    title: "Sales Team Product Recommendations",
+    description: "Sales reps can describe a client’s needs in plain language, and the agent identifies suitable products from large catalogs without requiring detailed filters."
   },
   {
-    title: "Sales support for non-experts",
-    description: "Allows sales representatives without deep product knowledge to find relevant products quickly. Reduces training time and speeds up customer response."
+    title: "Proposal and Quote Building",
+    description: "When assembling a proposal, the agent helps refine broad requirements - such as budget, size, or specifications - and returns a small set of matching products to include in the offer."
   },
   {
-    title: "E-commerce catalog navigation",
-    description: "Helps users discover products in large or complex catalogs without needing to know exact product names or SKUs. Enhances usability and reduces bounce rates."
-  },
-  {
-    title: "Technical product discovery",
-    description: "Supports finding products based on specifications or features described in natural language. Useful for technical sales teams and B2B customers."
-  },
-  {
-    title: "Sales assistant for complex queries",
-    description: "Answers complex product-related questions by interpreting user intent and returning relevant items. Reduces reliance on product manuals or expert support."
+    title: "Guided Navigation of Large Catalogs",
+    description: "For teams dealing with thousands of SKUs, the agent asks clarifying questions and progressively narrows options until it reaches a targeted set of one or a few recommended items."
   },
 ];
 
-<AgentPlugin
+<Agent
   name="Product Search"
   integrationKey="enthusiast-agent-product-search"
   pipName="enthusiast-agent-product-search"

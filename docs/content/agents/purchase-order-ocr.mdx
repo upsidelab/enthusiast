@@ -1,23 +1,23 @@
-import AgentPlugin from "@/components/agent-plugin";
+import Agent from "@/components/agent";
 
-export const description = "OCR to order Agent can understand images and extract text from product notes or lists. It automatically interprets the information and places orders accurately, without any manual input. By converting handwritten or printed notes into actionable orders, it saves time, reduces errors, and streamlines the purchasing process.";
+export const description = "The Purchase Order OCR agent converts handwritten notes, scans, and filled purchase-order PDFs into structured orders created directly in your e-commerce system. It can also detect when the provided input is incomplete or unclear; in those cases, it initiates a human-in-the-loop clarification step to confirm missing details before creating the order.";
 
 export const useCases = [
   {
-    title: "Order from handwritten notes",
-    description: "Transforms messy or unstructured handwritten notes into structured order data. Ideal for sales reps or field staff who capture orders manually."
+    title: "Field-Submitted Orders",
+    description: "Sales reps or technicians can snap a photo of a handwritten PO, and the agent creates the corresponding order without manual data entry."
   },
   {
-    title: "Order from product photos",
-    description: "Extracts product names, codes, and quantities directly from images. Speeds up order entry without manual typing."
+    title: "Email Attachment Processing",
+    description: "Automatically parse emailed PDFs or scans, request clarification when needed, and create the order once all details are confirmed."
   },
   {
-    title: "Digitization of offline orders",
-    description: "Converts paper-based orders or notes into structured, ready-to-process digital records, reducing human error."
+    title: "Bulk Import of Legacy Purchase Orders",
+    description: "Scanned archives of old POs can be processed into actual orders, simplifying data migrations and cleanup efforts."
   },
 ]
 
-<AgentPlugin
+<Agent
     name="Purchase Order OCR"
     integrationKey="enthusiast-agent-ocr-to-order"
     pipName="enthusiast-agent-ocr-to-order"

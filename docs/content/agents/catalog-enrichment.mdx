@@ -1,31 +1,23 @@
-import AgentPlugin from "@/components/agent-plugin";
+import Agent from "@/components/agent";
 
-export const description = "Catalog Enrichment Agent can automatically understand product catalogs and extract structured data in a specific format. It processes files such as spreadsheets, PDFs or documents, capturing product details, specifications, and metadata accurately. By converting diverse catalog formats into a standardized structure, it ensures consistency, reduces manual work, and speeds up data integration. This makes managing and updating product information faster, reliable, and scalable for any business.";
+export const description = "The Catalog Enrichment agent processes unstructured vendor product sheets - PDFs, scans, or raw text - and extracts product attributes and details for use in your catalog. It can be customized per category to pull different attribute sets and can flag unclear or missing information, triggering a human-in-the-loop step when clarification is required.";
 
 export const useCases = [
   {
-    title: "Marketplace with multiple vendors",
-    description: "Normalizes product sheets from various vendors. Enables a consistent and standardized catalog across the marketplace."
+    title: "Vendor Sheet Onboarding",
+    description: "Automatically extract product specs from vendor-provided documents and populate category-specific attributes in your catalog."
   },
   {
-    title: "Large e-commerce with inconsistent data",
-    description: "Fills gaps and standardizes product information. Improves search, filtering, and overall customer experience."
+    title: "Category Update",
+    description: "When your e-commerce store updates the attribute set for a category, the agent can reprocess vendor sheets or stored documentation to enrich and update existing products accordingly."
   },
   {
-    title: "Complex B2B catalogs",
-    description: "Extracts technical specifications and maps them to standard formats. Facilitates easier product comparison and offer configuration."
-  },
-  {
-    title: "Dynamic catalogs with reviews and user content",
-    description: "Enriches products with attributes from descriptions and reviews. Enhances filtering, recommendations, and discoverability."
-  },
-  {
-    title: "Automatic tagging and classification",
-    description: "Assigns categories, tags, and keywords based on product data. Improves searchability and recommendation systems."
+    title: "Data Quality Review",
+    description: "The agent can flag anomalies - such as a couch listed at an unrealistic weight - and prompt a human-in-the-loop review to confirm or correct the data before it reaches your catalog."
   },
 ];
 
-<AgentPlugin
+<Agent
   name="Catalog Enrichment"
   integrationKey="enthusiast-agent-catalog-enrichment"
   pipName="enthusiast-agent-catalog-enrichment"

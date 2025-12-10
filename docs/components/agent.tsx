@@ -24,7 +24,7 @@ const P = mdxComponents.p;
 const UL = mdxComponents.ul;
 const LI =  mdxComponents.li;
 
-export default async function AgentPlugin(props: IntegrationProps) {
+export default async function Agent(props: IntegrationProps) {
   const installationInstructions = await compileMdx(`\`\`\`bash\npoetry add ${props.pipName}\n\`\`\``);
   const buildRegisterInstructionMd = (key: string, module: string) => {
     return `\`\`\`python
@@ -45,9 +45,17 @@ AVAILABLE_AGENTS = {
           <video autoPlay={true} controls={true} src={props.videoUrl} />
         </div>
       }
-      <H2>Description</H2>
-        <P>{props.agentDescription}</P>
-      <H2>Installation</H2>
+      <MDXRemote compiledSource={installationInstructions} />
+      <P>{props.agentDescription}</P>
+      <H2>Use Cases</H2>
+      <UL>
+        {props.agentUseCases?.map((item, idx) => (
+          <LI key={idx}>
+            <strong>{item.title}</strong> – {item.description}
+          </LI>
+        ))}
+      </UL>
+      <H2>Installing {props.name} Agent</H2>
       <P>
         Run the following command inside your application directory.<br />
         If you're using <Link href="/docs/getting-started/installation">Enthusiast Starter</Link>, that's inside enthusiast-starter/src/
@@ -57,14 +65,6 @@ AVAILABLE_AGENTS = {
         Then, register the integration in your config/settings_override.py.
       </P>
       {props.registerAgentModule && <MDXRemote compiledSource={await compileMdx(buildRegisterInstructionMd("AVAILABLE_AGENTS", props.registerAgentModule))}/>}
-      <H2>Use cases</H2>
-        <UL>
-          {props.agentUseCases?.map((item, idx) => (
-            <LI key={idx}>
-              <strong>{item.title}</strong> – {item.description}
-            </LI>
-          ))}
-        </UL>
     </>
   )
 }

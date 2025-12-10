@@ -10,7 +10,12 @@ export const metadata = {
   // For more information on metadata API, see: https://nextjs.org/docs/app/building-your-application/optimizing/metadata
 }
 
-const banner = <Banner storageKey="banner">Enthusiast 1.4.0 is released 🎉</Banner>
+const banner = (
+  <Banner storageKey="banner">
+    <a href="https://upsidelab.io/blog/enthusiast-1-4">Enthusiast 1.4.0 is released 🎉</a>
+  </Banner>
+)
+
 const navbar = <Navbar logo={<Logo/>} logoLink={false} align="left" projectLink="https://github.com/upsidelab/enthusiast/"/>
 const footer = (
   <Footer>

@@ -278,4 +278,9 @@ UPLOADED_FILE_RETENTION_PERIOD_HOURS: int = 48
 
 SERVICE_ACCOUNT_DOMAIN = env.str("SERVICE_ACCOUNT_DOMAIN", "enthusiast.internal")
 
+OTP_AUTH_SERVICE = ""
+
+BASE_URL = env.str("BASE_URL", default="http://localhost:10000")
+FRONTEND_BASE_URL = env.str("FRONTEND_BASE_URL", default="http://localhost:10001")
+
 from .settings_override import *  # noqa

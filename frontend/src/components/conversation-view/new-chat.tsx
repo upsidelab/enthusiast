@@ -18,7 +18,7 @@ interface NewChatProps {
 const api = new ApiClient(authenticationProviderInstance);
 
 export function NewChat({ onPendingMessage }: NewChatProps) {
-  const { availableAgents } = useApplicationContext()!;
+  const { availableAgents, supportedFileExtensions } = useApplicationContext()!;
   const { agent } = useParams();
   const [agentDetails, setAgentDetails] = useState<AgentDetails>();
 
@@ -100,7 +100,7 @@ export function NewChat({ onPendingMessage }: NewChatProps) {
             </div>
           </div>
         ) : (
-          <ChatWindow className="pt-4" onSubmit={onSubmit} isLoading={false} agentId={agentId ?? undefined} fileUploadEnabled={agentDetails?.file_upload}>
+          <ChatWindow className="pt-4" onSubmit={onSubmit} isLoading={false} agentId={agentId ?? undefined} fileUploadEnabled={agentDetails?.file_upload && supportedFileExtensions.length > 0}>
             <div className="grow flex items-start justify-center pt-16">
               {agentDetails?.description && (
                 <div className="text-center space-y-4 max-w-2xl px-6">

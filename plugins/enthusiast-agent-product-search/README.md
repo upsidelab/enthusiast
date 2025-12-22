@@ -1,1 +1,21 @@
-Enables intelligent, natural language search across enriched product data. Users can query products with complex criteria, and the agent retrieves the most relevant results, bridging the gap between raw catalog data and actionable product discovery.
+# Enthusiast Product Search Agent
+
+The Product Search agent takes unstructured user requests - anything from a rough idea to a precise query - and filters your product catalog to find relevant matches. When the request is ambiguous or too broad, it asks targeted follow-up questions until it narrows the results to the desired number of products.
+
+## Installing the Product Search Agent
+
+Run the following command inside your application directory:
+```commandline
+poetry add enthusiast-agent-product-search
+```
+
+Then, register the agent in your config/settings_override.py.
+
+```python
+AVAILABLE_AGENTS = {
+    "enthusiast-agent-product-search": {
+        "name": "Product Search",
+        "agent_directory_path": "enthusiast_agent_product_search"
+    },
+}
+```

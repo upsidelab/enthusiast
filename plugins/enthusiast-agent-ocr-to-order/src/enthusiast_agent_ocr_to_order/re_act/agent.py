@@ -2,15 +2,15 @@ from enthusiast_agent_re_act import BaseReActAgent, StructuredReActOutputParser
 from enthusiast_common.config.base import LLMToolConfig
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain_core.tools import render_text_description_and_args
+from enthusiast_agent_product_search.tools import ProductSearchTool
 
-from ..tools.place_order_tool import OrderPlacementTool
-from ..tools.product_search_tool import ProductSearchTool
+from ..tools.place_order_tool import PlaceOrderTool
 
 
-class OCROrderReActAgent(BaseReActAgent):
+class OCRToOrderReActAgent(BaseReActAgent):
     TOOLS = [
         LLMToolConfig(tool_class=ProductSearchTool),
-        LLMToolConfig(tool_class=OrderPlacementTool),
+        LLMToolConfig(tool_class=PlaceOrderTool),
     ]
     FILE_UPLOAD = True
 

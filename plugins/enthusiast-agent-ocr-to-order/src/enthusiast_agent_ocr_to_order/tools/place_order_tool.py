@@ -11,12 +11,12 @@ from ..medusa_api_client import MedusaAPIClient
 logger = logging.getLogger(__name__)
 
 
-class OrderPlacementToolInput(BaseModel):
+class PlaceOrderToolInput(BaseModel):
     product_ids: str = Field(description="comma separated string with products entry_ids")
     quantities: str = Field(description="comma separated string with products quantities")
 
 
-class OrderPlacementToolConfiguration(RequiredFieldsModel):
+class PlaceOrderToolConfirmation(RequiredFieldsModel):
     region_id: str = Field(
         title="Region ID",
         description="Medusa region id, will take first available region if not specified.",
@@ -32,11 +32,11 @@ class OrderPlacementToolConfiguration(RequiredFieldsModel):
     )
 
 
-class OrderPlacementTool(BaseLLMTool):
-    NAME = "place_order_tool"
+class PlaceOrderTool(BaseLLMTool):
+    NAME = "place_order"
     DESCRIPTION = "It's tool for placing order and returning order URL based on products entry_ids"
-    ARGS_SCHEMA = OrderPlacementToolInput
-    CONFIGURATION_ARGS = OrderPlacementToolConfiguration
+    ARGS_SCHEMA = PlaceOrderToolInput
+    CONFIGURATION_ARGS = PlaceOrderToolConfirmation
     RETURN_DIRECT = False
 
     def __init__(

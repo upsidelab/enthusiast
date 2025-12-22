@@ -1,4 +1,4 @@
-DATA_EXTRACTION_TOOL_CALLING_AGENT_PROMPT = """
+CATALOG_ENRICHMENT_TOOL_CALLING_AGENT_PROMPT = """
 I want you to help extracting and describing in details attributes for products.
 In case of any missing information carefully collect it one by one.
 In tools specify exactly what are you looking for.

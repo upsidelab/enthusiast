@@ -13,7 +13,7 @@ dependencies = [
     "drf-yasg (==1.21.10)",
     "enthusiast-common (==1.5.0)",
     "enthusiast-source-sample (==1.2.0)",
-    "enthusiast-model-openai (==1.2.0)",
+    "enthusiast-model-openai (==1.3.0)",
     "langchain (==0.3.27)",
     "pgvector (==0.4.1)",
     "psycopg2 (==2.9.10)",

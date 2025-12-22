@@ -17,9 +17,6 @@ class DataSet(models.Model):
     embedding_vector_dimensions = models.IntegerField(default=512)
     embedding_chunk_size = models.IntegerField(default=3000)
     embedding_chunk_overlap = models.IntegerField(default=150)
-    system_message = models.TextField(
-        default="You are a sales support agent, and you know everything about a company and their products."
-    )
 
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="data_sets")
 

@@ -1,11 +1,6 @@
-import logging
-
 from enthusiast_common.tools import BaseLLMTool
 from langchain_core.prompts import PromptTemplate
-from langchain_core.tools import StructuredTool
 from pydantic import BaseModel, Field
-
-logger = logging.getLogger(__name__)
 
 VERIFY_DATA_PROMPT_TEMPLATE = """
 You are verifying solution for user_query based on user manual.
@@ -22,21 +17,21 @@ Brief explanation of any step that looks wrong.
 """
 
 
-class SolutionVerificationToolInput(BaseModel):
+class VerifySolutionToolInput(BaseModel):
     user_query: str = Field(description="User question or problem.")
     solution: str = Field(description="Your prepared solution.")
     manuals: str = Field(description="Relevant pieces of information from manuals.")
 
 
-class SolutionVerificationTool(BaseLLMTool):
-    NAME = "data_verification_tool"
+class VerifySolutionTool(BaseLLMTool):
+    NAME = "verify_solution"
     DESCRIPTION = (
         "Always use this tool. Use this tool to verify if a data has expected shape and it's relevant to product type."
     )
-    ARGS_SCHEMA = SolutionVerificationToolInput
+    ARGS_SCHEMA = VerifySolutionToolInput
     RETURN_DIRECT = False
 
-    def run(self, user_query: str, solution: str, manuals: str) -> StructuredTool:
+    def run(self, user_query: str, solution: str, manuals: str) -> str:
         prompt = PromptTemplate.from_template(VERIFY_DATA_PROMPT_TEMPLATE)
         chain = prompt | self._llm
 
@@ -48,12 +43,3 @@ class SolutionVerificationTool(BaseLLMTool):
             }
         )
         return llm_result.content
-
-    def as_tool(self) -> StructuredTool:
-        return StructuredTool.from_function(
-            func=self.run,
-            name=self.NAME,
-            description=self.DESCRIPTION,
-            args_schema=self.ARGS_SCHEMA,
-            return_direct=self.RETURN_DIRECT,
-        )

@@ -1,4 +1,5 @@
-from django.core import serializers
+import json
+
 from enthusiast_common.injectors import BaseInjector
 from enthusiast_common.tools import BaseLLMTool
 from langchain_core.language_models import BaseLanguageModel
@@ -32,4 +33,5 @@ class ProductSearchTool(BaseLLMTool):
         if not relevant_products:
             return "No products found, try to loosen the criteria"
 
-        return serializers.serialize("json", relevant_products)
+        serialized_products = product_retriever.product_details_as_json(relevant_products)
+        return json.dumps(serialized_products)

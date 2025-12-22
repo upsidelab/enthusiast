@@ -12,7 +12,7 @@ export const metadata = {
 
 const banner = (
   <Banner storageKey="banner">
-    <a href="https://upsidelab.io/blog/enthusiast-1-4">Enthusiast 1.4.0 is released 🎉</a>
+    <a href="https://github.com/upsidelab/enthusiast/releases/tag/v1.5.0">Enthusiast 1.5.0 is released 🎉</a>
   </Banner>
 )
 

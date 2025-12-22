@@ -3,7 +3,7 @@ from enthusiast_common.config import (
 )
 from enthusiast_common.config.prompts import ChatPromptTemplateConfig, Message, MessageRole
 
-from .agent import OCROrderToolCallingAgent
+from .agent import OCRToOrderAgent
 from .prompt import OCR_TOOL_CALLING_AGENT_PROMPT
 
 
@@ -20,6 +20,6 @@ def get_config() -> AgentConfigWithDefaults:
                 Message(role=MessageRole.PLACEHOLDER, content="{agent_scratchpad}"),
             ]
         ),
-        agent_class=OCROrderToolCallingAgent,
-        tools=OCROrderToolCallingAgent.TOOLS,
+        agent_class=OCRToOrderAgent,
+        tools=OCRToOrderAgent.TOOLS,
     )

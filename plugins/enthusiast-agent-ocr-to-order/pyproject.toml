@@ -11,7 +11,8 @@ dependencies = [
     "enthusiast-common (>=1.4.0,<2.0.0)",
     "langchain (>=0.3.26,<0.4.0)",
     "enthusiast_agent_re_act (>=1.2.0)",
-    "enthusiast_agent_tool_calling (>=1.0.0)"
+    "enthusiast_agent_tool_calling (>=1.0.0)",
+    "enthusiast-agent-product-search (>=1.1.0,<2.0.0)"
 ]
 
 [project.urls]

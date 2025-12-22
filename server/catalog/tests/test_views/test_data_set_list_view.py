@@ -30,13 +30,6 @@ class TestDataSetListViewPost:
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert not DataSet.objects.filter(name="New DataSet").exists()
 
-    def test_staff_dataset_creation_adds_default_agent(self, admin_api_client, url, payload):
-        response = admin_api_client.post(url, payload, format="json")
-
-        dataset = DataSet.objects.get(name="New DataSet")
-        assert response.status_code == status.HTTP_201_CREATED
-        assert Agent.objects.filter(dataset=dataset).exists()
-
     def test_staff_dataset_creation_no_default_agent_settings(self, admin_api_client, url, payload, settings):
         settings.DEFAULT_AGENT = None
 

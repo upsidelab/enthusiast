@@ -251,19 +251,7 @@ CATALOG_MODELS = {
     "agent": "agent.models.Agent",
 }
 
-AVAILABLE_AGENTS: dict[str, dict[str, str]] = {
-    "question_answer_agent": {
-        "name": "Question Answer Agent",
-        "agent_directory_path": "agent.core.agents.tool_calling_agent",
-    },
-}
-
-DEFAULT_AGENT: dict = {
-    "type": "question_answer_agent",
-    "name": "Default Agent",
-    "description": "Default agent",
-    "config": {"tools": [{}], "agent_args": {}, "prompt_input": {}, "prompt_extension": {}},
-}
+AVAILABLE_AGENTS: dict[str, dict[str, str]] = {}
 
 FILE_PARSER_CLASSES: dict[tuple[str] : str] = {
     (".txt",): "agent.file_parsers.text.PlainTextFileParser",

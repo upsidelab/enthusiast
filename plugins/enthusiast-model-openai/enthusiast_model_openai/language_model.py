@@ -7,7 +7,7 @@ from langchain_openai import ChatOpenAI
 from openai import OpenAI
 from pydantic import BaseModel
 
-PRIORITIZED_MODELS = ["gpt-4o", "gpt-4.1", "gpt-4o-mini", "gpt-4.1-mini"]
+PRIORITIZED_MODELS = ["gpt-4.1", "gpt-4.1-mini", "gpt-5", "gpt-5.2"]
 
 
 class OpenAIImageContent(BaseContent):

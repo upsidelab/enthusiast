@@ -7,7 +7,7 @@ from langchain_openai import AzureChatOpenAI
 from openai import AzureOpenAI
 from pydantic import BaseModel
 
-PRIORITIZED_MODELS = ["gpt-4o", "gpt-4.1", "gpt-4o-mini", "gpt-4.1-mini"]
+PRIORITIZED_MODELS = ["gpt-4.1", "gpt-4.1-mini", "gpt-5", "gpt-5.2"]
 
 
 class AzureOpenAIImageContent(BaseContent):
@@ -27,7 +27,7 @@ class AzureOpenAILanguageModelProvider(LanguageModelProvider):
     def provide_language_model(self, callbacks: list[BaseCallbackHandler] | None = None) -> BaseLanguageModel:
         return AzureChatOpenAI(model=self._model, callbacks=callbacks)
 
-    def provide_streaming_language_model(self, callbacks: list[BaseCallbackHandler] | None) -> BaseLanguageModel:
+    def provide_streaming_language_model(self, callbacks: list[BaseCallbackHandler] | None = None, **kwargs) -> BaseLanguageModel:
         return AzureChatOpenAI(model=self._model, callbacks=callbacks, streaming=True)
 
     def model_name(self) -> str:

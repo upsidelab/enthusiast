@@ -1,13 +1,21 @@
 from enthusiast_common.agents import BaseAgent
-from enthusiast_common.config import LLMToolConfig
+from enthusiast_common.config import CallbackHandlerConfig, LLMConfig, LLMToolConfig
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 
+from agent.core.callbacks import ConversationWebSocketCallbackHandler
 from agent.core.tools import CreateAnswerTool
 
 
 class ToolCallingAgent(BaseAgent):
     TOOLS = [
-        LLMToolConfig(tool_class=CreateAnswerTool),
+        LLMToolConfig(
+            tool_class=CreateAnswerTool,
+            llm=LLMConfig(
+                callbacks=[
+                    CallbackHandlerConfig(handler_class=ConversationWebSocketCallbackHandler),
+                ],
+            ),
+        ),
     ]
 
     def _create_agent_executor(self, **kwargs) -> AgentExecutor:

@@ -51,7 +51,6 @@ export function DataSetForm({ initialData, onSubmit, submitButtonText, disabledF
       embeddingProvider: initialData?.embeddingProvider || undefined,
       embeddingModel: initialData?.embeddingModel || undefined,
       embeddingVectorSize: initialData?.embeddingVectorSize || 512,
-      systemMessage: initialData?.systemMessage || "You are a sales support agent, and you know everything about a company and their products."
     }
   });
 
@@ -266,21 +265,6 @@ export function DataSetForm({ initialData, onSubmit, submitButtonText, disabledF
                       <Input {...field} />
                     </FormControl>
                     <FormDescription>The size of the embedding vector to use</FormDescription>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="systemMessage"
-                render={({field}) => (
-                  <FormItem>
-                    <FormLabel>System Message</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      This message will be used by the agent as the system prompt.
-                    </FormDescription>
                   </FormItem>
                 )}
               />

@@ -9,7 +9,6 @@ export type DataSetResponse = {
   embedding_provider: string;
   embedding_model: string;
   embedding_vector_dimensions: number;
-  system_message: string;
 }
 
 export type CreateDataSetPayload = DataSetResponse;
@@ -19,7 +18,6 @@ export type UpdateDataSetPayload = {
   name: string;
   language_model_provider: string;
   language_model: string;
-  system_message: string;
 }
 
 export type ProductSourceResponse = {
@@ -55,7 +53,6 @@ export class DataSetsApiClient extends BaseApiClient {
       embedding_provider: dataSet.embeddingProvider,
       embedding_model: dataSet.embeddingModel,
       embedding_vector_dimensions: dataSet.embeddingVectorSize,
-      system_message: dataSet.systemMessage
     }
 
     const response = await fetch(`${this.apiBase}/api/data_sets`,
@@ -290,7 +287,6 @@ export class DataSetsApiClient extends BaseApiClient {
       embeddingProvider: data.embedding_provider,
       embeddingModel: data.embedding_model,
       embeddingVectorSize: data.embedding_vector_dimensions,
-      systemMessage: data.system_message
     } as DataSet;
   }
 
@@ -300,7 +296,6 @@ export class DataSetsApiClient extends BaseApiClient {
       name: dataSet.name,
       language_model_provider: dataSet.languageModelProvider,
       language_model: dataSet.languageModel,
-      system_message: dataSet.systemMessage
     }
 
     await fetch(`${this.apiBase}/api/data_sets/${dataSetId}`,

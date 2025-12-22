@@ -19,7 +19,6 @@ class DataSetSerializer(serializers.ModelSerializer):
             "embedding_provider",
             "embedding_model",
             "embedding_vector_dimensions",
-            "system_message",
         ]
 
 

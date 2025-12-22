@@ -1,6 +1,6 @@
 [project]
 name = "enthusiast-agent-ocr-to-order"
-version = "1.1.2"
+version = "1.2.0"
 description = "Purchase Order OCR Agent for Enthusiast"
 authors = [
     {name = "Damian Sowiński",email = "damian.sowinski@upsidelab.io"}

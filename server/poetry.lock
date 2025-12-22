@@ -761,14 +761,14 @@ langchain-core = ">=0.3.66,<0.4.0"
 
 [[package]]
 name = "enthusiast-model-openai"
-version = "1.2.0"
+version = "1.3.0"
 description = "A plugin for Enthusiast that provides an OpenAI connector."
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "enthusiast_model_openai-1.2.0-py3-none-any.whl", hash = "sha256:ac038deb014cb5e2a6e69bd361cf44273355c3ba55c28b8bcdf3fa674e45129c"},
-    {file = "enthusiast_model_openai-1.2.0.tar.gz", hash = "sha256:4bf43c668f336da99f0d85c926028e6b2726391538ba2bd7850e33d9d6c7a02f"},
+    {file = "enthusiast_model_openai-1.3.0-py3-none-any.whl", hash = "sha256:8910bd7e81ac93c51528316dfd2ee3ca241abeb4edea1b6abd7ffb9e0cb035e6"},
+    {file = "enthusiast_model_openai-1.3.0.tar.gz", hash = "sha256:6bc464e876b598e25a10d09bf2795ab23a9715b22b9dbda69f1c239bc3694974"},
 ]
 
 [package.dependencies]
@@ -2962,4 +2962,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10, <4.0"
-content-hash = "b6c2be24c80b92bb31e50174284293721a41acdca2f2df27eaad516d57bb1cfc"
+content-hash = "76e1c62c6d61136c46ef548416976fb8a02ae93c0f9d0b1ada8d4143d153da99"

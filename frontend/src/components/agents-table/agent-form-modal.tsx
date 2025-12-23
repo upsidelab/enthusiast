@@ -80,39 +80,12 @@ export function AgentFormModal({
           <p className="text-sm text-destructive">{generalError}</p>
         </div>
       )}
-      
-      <div className="flex flex-col gap-1">
-        <Label htmlFor="agent-name">Name</Label>
-        <Input 
-          id="agent-name" 
-          placeholder="Name" 
-          value={name} 
-          onChange={e => setName(e.target.value)}
-          className={fieldErrors.name ? "border-destructive" : ""}
-        />
-        {fieldErrors.name && (
-          <p className="text-xs text-destructive">{fieldErrors.name}</p>
-        )}
-      </div>
-      
-      <div className="flex flex-col gap-1">
-        <Label htmlFor="agent-description">Description</Label>
-        <Textarea
-          id="agent-description" 
-          placeholder="Description"
-          value={description} 
-          onChange={e => setDescription(e.target.value)}
-        />
-        {fieldErrors.description && (
-          <p className="text-xs text-destructive">{fieldErrors.description}</p>
-        )}
-      </div>
-      
+
       <div className="flex flex-col gap-1">
         <Label htmlFor="agent-type">Type</Label>
-        <Select value={type} onValueChange={setType}>
+        <Select value={type} onValueChange={setType} disabled={agentTypes.length == 0}>
           <SelectTrigger id="agent-type" className={fieldErrors.type ? "border-destructive" : ""}>
-            <SelectValue placeholder="Select type" />
+            <SelectValue placeholder="Select type"/>
           </SelectTrigger>
           <SelectContent>
             {agentTypes.map(t => (
@@ -120,11 +93,41 @@ export function AgentFormModal({
             ))}
           </SelectContent>
         </Select>
+        {agentTypes.length == 0 &&
+          <p className="text-[0.8rem] text-muted-foreground">First, you'll need to install an agent.<br /> To get started quickly, you can choose on of our <a href="https://upsidelab.io/tools/enthusiast/agents" className="underline">pre-built ones</a> to get started quick.</p>
+        }
         {fieldErrors.type && (
           <p className="text-xs text-destructive">{fieldErrors.type}</p>
         )}
       </div>
-      
+
+      <div className="flex flex-col gap-1">
+        <Label htmlFor="agent-name">Name</Label>
+        <Input
+          id="agent-name"
+          placeholder="Name"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          className={fieldErrors.name ? "border-destructive" : ""}
+        />
+        {fieldErrors.name && (
+          <p className="text-xs text-destructive">{fieldErrors.name}</p>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <Label htmlFor="agent-description">Description</Label>
+        <Textarea
+          id="agent-description"
+          placeholder="Description"
+          value={description}
+          onChange={e => setDescription(e.target.value)}
+        />
+        {fieldErrors.description && (
+          <p className="text-xs text-destructive">{fieldErrors.description}</p>
+        )}
+      </div>
+
       {type && (
         <AgentConfigurationForm
           agentConfigSections={agentConfigSections}

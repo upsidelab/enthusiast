@@ -86,7 +86,7 @@ export function MainSidebar() {
       children: [
         {
           title: "Getting Started",
-          link: "https://upsidelab.io/tools/enthusiast/docs/category/getting-started/",
+          link: "https://upsidelab.io/tools/enthusiast/docs/getting-started/import-test-data",
           key: "documentation-getting-started",
           icon: <SparklesIcon />
         },

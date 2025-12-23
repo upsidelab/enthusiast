@@ -40,7 +40,7 @@ const streamingEnabled = Boolean(import.meta.env.VITE_WS_BASE);
 
 export function ChatSession({ pendingMessage }: ChatSessionProps) {
   const { chatId } = useParams();
-  const { dataSetId } = useApplicationContext()!;
+  const { dataSetId, supportedFileExtensions } = useApplicationContext()!;
   const navigate = useNavigate();
 
   const [conversation, setConversation] = useState<ConversationSchema | null>(null);
@@ -312,7 +312,7 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
             conversationLocked={isAgentDeleted || isAgentCorrupted}
             conversationId={conversationId}
             agentId={agentId}
-            fileUploadEnabled={agentDetails?.file_upload}
+            fileUploadEnabled={agentDetails?.file_upload && supportedFileExtensions.length > 0}
           >
             <div className="grow flex-1 space-y-4">
               {messages.map((message, index) => {

@@ -35,7 +35,7 @@ Get started with Enthusiast by either:
 - [**Purchase Order OCR**](https://upsidelab.io/tools/enthusiast/agents/purchase-order-ocr) Convert unstructured inputs — such as scanned purchase order documents or notes - into e-commerce orders.
 
 - [**Product Catalog Enrichment**](https://upsidelab.io/tools/enthusiast/agents/catalog-enrichment) Extract product descriptions, attributes, or translations from unstructured product sheets.
-- 
+
 ## Main Features
 
 - Pre-built integrations with popular e-commerce platforms

@@ -8,7 +8,11 @@ import { DataSetFormSchema } from "./data-set-form-schema.ts";
 
 const api = new ApiClient(authenticationProviderInstance);
 
-export function CreateDataSetForm() {
+export interface CreateDataSetFormProps {
+  isOnboarding?: boolean;
+}
+
+export function CreateDataSetForm({ isOnboarding = false }: CreateDataSetFormProps) {
   const {setDataSets, setDataSetId} = useApplicationContext()!;
   const navigate = useNavigate();
 
@@ -23,6 +27,7 @@ export function CreateDataSetForm() {
   return (
     <DataSetForm
       onSubmit={handleSubmit}
+      isOnboarding={isOnboarding}
       submitButtonText="Create"
     />
   );

@@ -13,6 +13,7 @@ import { DataSet, ProvidersConfig } from "@/lib/types.ts";
 import { Alert, AlertDescription } from "@/components/ui/alert.tsx";
 import { InfoIcon } from "lucide-react";
 import { formSchema, DataSetFormSchema } from "./data-set-form-schema.ts";
+import { Label } from "@/components/ui/label.tsx";
 
 const api = new ApiClient(authenticationProviderInstance);
 
@@ -20,6 +21,7 @@ interface DataSetFormProps {
   initialData?: DataSet;
   onSubmit: (values: DataSetFormSchema) => Promise<void>;
   submitButtonText: string;
+  isOnboarding?: boolean;
   disabledFields?: string[];
 }
 
@@ -37,7 +39,7 @@ function DisabledFieldMessage() {
   );
 }
 
-export function DataSetForm({ initialData, onSubmit, submitButtonText, disabledFields = [] }: DataSetFormProps) {
+export function DataSetForm({ initialData, onSubmit, submitButtonText, isOnboarding = false, disabledFields = [] }: DataSetFormProps) {
   const [providersConfig, setProvidersConfig] = useState<ProvidersConfig | undefined>(undefined);
   const [languageModelNames, setLanguageModelNames] = useState<string[] | undefined>(undefined);
   const [embeddingModels, setEmbeddingModels] = useState<string[] | undefined>(undefined);
@@ -45,7 +47,7 @@ export function DataSetForm({ initialData, onSubmit, submitButtonText, disabledF
   const form = useForm<DataSetFormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: initialData?.name || "",
+      name: initialData?.name || (isOnboarding ? "Default" : ""),
       languageModelProvider: initialData?.languageModelProvider || undefined,
       languageModel: initialData?.languageModel || undefined,
       embeddingProvider: initialData?.embeddingProvider || undefined,
@@ -120,41 +122,35 @@ export function DataSetForm({ initialData, onSubmit, submitButtonText, disabledF
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)}>
         {disabledFields.length > 0 && <DisabledFieldMessage />}
-        <FormField
-          control={form.control}
-          name="name"
-          render={({field}) => (
-            <FormItem>
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Name of the data set" {...field}/>
-              </FormControl>
-              <FormDescription>
-                This is the name of the data set visible to your users
-              </FormDescription>
-            </FormItem>
-          )}
-        />
-        <Collapsible className="py-4" open={advancedOpen} onOpenChange={setAdvancedOpen}>
-          <CollapsibleTrigger asChild>
-            <Button variant="link" className="pl-0">
-              {advancedOpen ? <ChevronUpIcon/> : <ChevronDownIcon/>}
-              Advanced settings
-            </Button>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <div className="space-y-6">
+        <div className="space-y-6">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({field}) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Name of the data set" {...field}/>
+                </FormControl>
+                <FormDescription>
+                  This is the name of the data set visible to your users
+                </FormDescription>
+              </FormItem>
+            )}
+          />
+
+          <div>
+            <Label>Language Model</Label>
+            <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="languageModelProvider"
                 render={({field}) => (
                   <FormItem>
-                    <FormLabel>Language Model Provider</FormLabel>
+                    <FormLabel className="hidden">Language Model Provider</FormLabel>
                     <Select value={field.value} onValueChange={field.onChange} defaultValue={field.value}>
                       <SelectTrigger disabled={!providersConfig}>
-                        <FormControl>
-                          <SelectValue placeholder="Select a language model provider"/>
-                        </FormControl>
+                        <SelectValue placeholder="Loading..."/>
                       </SelectTrigger>
                       <SelectContent>
                         {
@@ -167,7 +163,7 @@ export function DataSetForm({ initialData, onSubmit, submitButtonText, disabledF
                         }
                       </SelectContent>
                     </Select>
-                    <FormDescription>The plugin used to provide a language model</FormDescription>
+                    <FormDescription>The language model to be used by the agent</FormDescription>
                   </FormItem>
                 )}
               />
@@ -177,12 +173,10 @@ export function DataSetForm({ initialData, onSubmit, submitButtonText, disabledF
                 name="languageModel"
                 render={({field}) => (
                   <FormItem>
-                    <FormLabel>Language Model</FormLabel>
+                    <FormLabel className="hidden">Language Model</FormLabel>
                     <Select value={field.value} onValueChange={field.onChange} defaultValue={field.value}>
                       <SelectTrigger disabled={!languageModelNames}>
-                        <FormControl>
-                          <SelectValue placeholder="Select a language model to use"/>
-                        </FormControl>
+                          <SelectValue placeholder="Loading..."/>
                       </SelectTrigger>
                       <SelectContent>
                         {
@@ -195,11 +189,22 @@ export function DataSetForm({ initialData, onSubmit, submitButtonText, disabledF
                         }
                       </SelectContent>
                     </Select>
-                    <FormDescription>The language model to be used by the agent</FormDescription>
                   </FormItem>
                 )}
               />
+            </div>
+          </div>
+        </div>
 
+        <Collapsible className="py-4" open={advancedOpen} onOpenChange={setAdvancedOpen}>
+          <CollapsibleTrigger asChild>
+            <Button variant="link" className="pl-0">
+              {advancedOpen ? <ChevronUpIcon/> : <ChevronDownIcon/>}
+              Advanced settings
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="space-y-6">
               <FormField
                 control={form.control}
                 name="embeddingProvider"

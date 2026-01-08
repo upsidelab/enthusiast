@@ -1,6 +1,7 @@
+import { useEffect } from "react";
 import { Form } from "@/components/ui/form.tsx";
 import { z } from "zod";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button.tsx";
 import { checkServiceNameAvailability } from "@/components/util/check-service-name-availability.tsx";
@@ -18,6 +19,7 @@ const formSchema = z.object({
   name: z.string().trim().min(1),
   dataSetIds: z.array(z.number()),
   isActive: z.boolean(),
+  isStaff: z.boolean(),
 }).refine(async (data) => data.name === data.oldName || await checkServiceNameAvailability(data.name), {
   message: "The name has already been taken",
   path: ["name"],
@@ -37,10 +39,18 @@ export function EditServiceAccountForm({ serviceAccount, onServiceAccountUpdated
     defaultValues: {
       name: oldName,
       oldName: oldName,
-      dataSetIds: serviceAccount.dataSetIds,
+      dataSetIds: serviceAccount.dataSetIds || [],
       isActive: serviceAccount.isActive,
+      isStaff: serviceAccount.isStaff || false,
     }
   });
+  const isStaff = useWatch({ control: form.control, name: "isStaff" });
+
+  useEffect(() => {
+    if (isStaff) {
+      form.setValue("dataSetIds", []);
+    }
+  }, [isStaff, form]);
 
   const handleSubmit = async (values: CreateServiceAccountFormSchema) => {
     await api.serviceAccounts().updateServiceAccount(serviceAccount.id, values);
@@ -52,8 +62,8 @@ export function EditServiceAccountForm({ serviceAccount, onServiceAccountUpdated
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           <DetailsFields form={form}/>
-          <DataSetsFields form={form}/>
           <PermissionFields form={form}/>
+          {!isStaff && <DataSetsFields form={form}/>}
           <Button type="submit">Update</Button>
         </form>
       </Form>

@@ -27,13 +27,14 @@ export function ServiceAccountsList() {
         loadItems={loadServiceAccounts}
         itemsReloadDependencies={version}
         noItemsMessage="No service accounts"
-        tableHeaders={["Name", "Date Created", "Active", "Actions"]}
+        tableHeaders={["Name", "Date Created", "Active", "Admin", "Actions"]}
         tableRow={(item, index) => {
           return (
             <TableRow key={index}>
-              <TableCell width="65%">{item.email}</TableCell>
+              <TableCell width="60%">{item.email}</TableCell>
               <TableCell width="10%">{new Date(item.dateCreated).toLocaleDateString()}</TableCell>
               <TableCell width="5%">{item.isActive && <Check size={16} />}</TableCell>
+              <TableCell width="5%">{item.isStaff && <Check size={16} />}</TableCell>
               <TableCell className="flex space-x-4" width="20%">
                 <EditServiceAccountModal serviceAccount={item} onServiceAccountUpdated={() => setVersion(version + 1)} />
                 <TokenResetModal serviceAccount={item} />

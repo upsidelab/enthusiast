@@ -87,6 +87,7 @@ export type ServiceAccount = {
   id: number;
   email: string;
   isActive: boolean;
+  isStaff: boolean;
   dateCreated: string;
   dataSetIds: number[];
 };

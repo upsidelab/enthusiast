@@ -61,10 +61,11 @@ class ProductSourceSerializer(ParentDataContextSerializerMixin, serializers.Mode
     context_keys_to_propagate = ["plugin_name"]
 
     config = ProductSourceConfigSerializer()
+    task_id = serializers.CharField(read_only=True, required=False, allow_null=True)
 
     class Meta:
         model = ProductSource
-        fields = ["id", "plugin_name", "config", "data_set_id", "corrupted"]
+        fields = ["id", "plugin_name", "config", "data_set_id", "corrupted", "task_id"]
 
 
 class DocumentSourceSerializer(ParentDataContextSerializerMixin, serializers.ModelSerializer):

@@ -28,12 +28,12 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         admin = options["admin"]
         datasets = options["datasets"]
-        if admin is False:
-            if datasets is None:
-                datasets = DataSet.objects.all().values_list("id", flat=True)
-            serializer = CreateUpdateServiceAccountSerializer(data={"name": options["name"], "data_set_ids": datasets})
-        else:
-            serializer = CreateUpdateServiceAccountSerializer(data={"name": options["name"], "is_staff": True})
+        if datasets is None:
+            datasets = DataSet.objects.all().values_list("id", flat=True)
+
+        serializer = CreateUpdateServiceAccountSerializer(
+            data={"name": options["name"], "is_staff": admin, "data_set_ids": datasets}
+        )
         serializer.is_valid(raise_exception=True)
         service_account = serializer.save()
         token, _ = Token.objects.get_or_create(user=service_account)

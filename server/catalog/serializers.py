@@ -72,10 +72,11 @@ class DocumentSourceSerializer(ParentDataContextSerializerMixin, serializers.Mod
     context_keys_to_propagate = ["plugin_name"]
 
     config = DocumentSourceConfigSerializer()
+    task_id = serializers.CharField(read_only=True, required=False, allow_null=True)
 
     class Meta:
         model = DocumentSource
-        fields = ["id", "plugin_name", "config", "data_set_id", "corrupted"]
+        fields = ["id", "plugin_name", "config", "data_set_id", "corrupted", "task_id"]
 
 
 class SyncResponseSerializer(serializers.Serializer):

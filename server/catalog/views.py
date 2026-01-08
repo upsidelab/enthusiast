@@ -403,7 +403,17 @@ class DataSetDocumentSourceListView(ListCreateAPIView):
         # Get data set from URL (it's not passed via request body).
         data_set_id = self.kwargs.get("data_set_id")
         source = serializer.save(data_set_id=data_set_id)
-        sync_document_source.apply_async(args=[source.id])
+        task = sync_document_source.apply_async(args=[source.id])
+        return task.id
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        task_id = self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        response_data = dict(serializer.data)
+        response_data["task_id"] = task_id
+        return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class DataSetDocumentSourceView(GenericAPIView):

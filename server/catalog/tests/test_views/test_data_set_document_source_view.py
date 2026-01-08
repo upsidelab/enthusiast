@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 from django.urls import reverse
@@ -22,6 +22,10 @@ class TestDataSetDocumentSourceViewPost:
 
     @patch("catalog.views.sync_document_source.apply_async")
     def test_creates_document_source_and_triggers_task(self, mock_task, admin_api_client, url, payload, data_set):
+        fake_task = Mock()
+        fake_task.id = "fake_id"
+        mock_task.return_value = fake_task
+
         response = admin_api_client.post(url, payload, format="json")
 
         assert response.status_code == status.HTTP_201_CREATED

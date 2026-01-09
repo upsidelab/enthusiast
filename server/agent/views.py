@@ -406,18 +406,19 @@ class FileUploadStatusView(APIView):
     def get(self, request, task_id, *args, **kwargs):
         try:
             task_result = AsyncResult(task_id)
-
             response_data = {
                 "task_id": task_id,
                 "status": task_result.status,
             }
-
             if task_result.status == "SUCCESS":
-                response_data["result"] = task_result.result
+                response_data = {
+                    "task_id": task_id,
+                    "status": task_result.result["status"],
+                    "result": task_result.result["result"],
+                }
             elif task_result.status == "FAILURE":
-                response_data["result"] = {"error": str(task_result.result)}
+                response_data = {"task_id": task_id, "status": "FAILURE", "result": {"error": str(task_result.result)}}
 
-            # Use serializer for response validation
             serializer = FileUploadStatusResponseSerializer(data=response_data)
             serializer.is_valid(raise_exception=True)
 

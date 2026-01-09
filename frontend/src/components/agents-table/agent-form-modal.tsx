@@ -52,7 +52,8 @@ export function AgentFormModal({
     if (!open) {
       resetForm();
     }
-  }, [open, resetForm]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const onSubmit = async () => {
     await handleSubmit();

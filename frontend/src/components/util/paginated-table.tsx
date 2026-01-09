@@ -75,7 +75,7 @@ export function PaginatedTable<T>({
         {tableFooter && <TableCaption>{tableFooter}</TableCaption>}
         <TableHeader>
           <TableRow>
-            {tableHeaders.map((header) => <TableHead>{header}</TableHead>)}
+            {tableHeaders.map((header, idx) => <TableHead key={idx}>{header}</TableHead>)}
           </TableRow>
         </TableHeader>
         <TableBody>

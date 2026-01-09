@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+from enthusiast_common.connectors import BaseECommercePlatformConnector
 from enthusiast_common.retrievers import BaseProductRetriever, BaseVectorStoreRetriever
 from enthusiast_common.structures import RepositoriesInstances, DocumentChunkDetails
 from langchain_core.memory import BaseMemory
@@ -17,6 +18,11 @@ class BaseInjector(ABC):
     @property
     @abstractmethod
     def product_retriever(self) -> BaseProductRetriever:
+        pass
+
+    @property
+    @abstractmethod
+    def ecommerce_platform_connector(self) -> BaseECommercePlatformConnector:
         pass
 
     @property

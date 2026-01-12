@@ -15,7 +15,7 @@ class Command(BaseCommand):
             "-d",
             "--datasets",
             nargs="+",
-            default=None,
+            default=[],
             type=int,
             help="optional list of dataset ids, if none is passed, all datasets will be added.",
         )
@@ -28,7 +28,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         admin = options["admin"]
         datasets = options["datasets"]
-        if datasets is None:
+        if not datasets and not admin:
             datasets = DataSet.objects.all().values_list("id", flat=True)
 
         serializer = CreateUpdateServiceAccountSerializer(

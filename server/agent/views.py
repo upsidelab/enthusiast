@@ -114,7 +114,8 @@ class ConversationView(APIView):
         serializer = AskQuestionSerializer(data=request.data, context={"conversation_id": conversation_id})
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+        if not request.user.has_dataset_access(conversation.data_set):
+            return Response({"detail": "No dataset access."}, status=status.HTTP_403_FORBIDDEN)
         if conversation.agent.deleted_at is not None:
             return Response({"detail": "Conversation locked."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -198,6 +199,8 @@ class ConversationListView(ListAPIView):
             raise NotFound("Agent not found.")
 
         conversation = Conversation.objects.select_related("agent").prefetch_related("messages").get(pk=conversation.pk)
+        if not request.user.has_dataset_access(conversation.data_set):
+            return Response({"detail": "No dataset access."}, status=status.HTTP_403_FORBIDDEN)
         serializer = ConversationContentSerializer(conversation)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

@@ -22,7 +22,7 @@ class ConversationManager:
 
     def create_conversation(self, user_id: int, agent_id: int) -> Conversation:
         user = User.objects.get(id=user_id)
-        agent = Agent.objects.get(id=agent_id, dataset__in=user.data_sets.all())
+        agent = Agent.objects.get(id=agent_id)
 
         conversation = Conversation.objects.create(
             started_at=datetime.now(),

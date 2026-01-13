@@ -25,9 +25,9 @@ export function MainSidebar() {
 
   const synchronizeItems: SidebarSectionItemProps[] = [
     {
-      title: "Sources",
-      link: `/data-sets/${dataSetId}/sources`,
-      key: "sources",
+      title: "Integrations",
+      link: `/data-sets/${dataSetId}/integrations`,
+      key: "integrations",
       icon: <LinkIcon />
     },
     {

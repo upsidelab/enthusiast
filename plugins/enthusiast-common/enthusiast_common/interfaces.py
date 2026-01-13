@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod, ABCMeta
 from typing import Any
 
+from enthusiast_common.connectors import BaseECommercePlatformConnector
 from enthusiast_common.structures import DocumentDetails, ProductDetails
 from enthusiast_common.utils import validate_required_vars, RequiredFieldsModel
 
@@ -61,5 +62,22 @@ class DocumentSourcePlugin(ABC, SourceExtraArgsClassBase):
 
         Returns:
             list[DocumentDetails]: A list of documents to be imported to the database
+        """
+        pass
+
+
+class ECommerceIntegrationPlugin(ABC, SourceExtraArgsClassBase):
+    NAME: str = None
+    CONFIGURATION_ARGS = None
+
+    def __init__(self, data_set_id):
+        self.data_set_id = data_set_id
+
+    @abstractmethod
+    def build_connector(self) -> BaseECommercePlatformConnector:
+        """Provides a connector for the e-commerce platform.
+
+        Returns:
+            BaseECommercePlatformConnector: A connector for interacting with the e-commerce platform
         """
         pass

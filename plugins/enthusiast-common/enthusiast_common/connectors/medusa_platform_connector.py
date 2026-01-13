@@ -49,7 +49,7 @@ DEFAULT_ADDRESS = Address(
 )
 
 class MedusaPlatformConnector(BaseECommercePlatformConnector):
-    def __init__(self, base_url: str, api_key: str, region_id: Optional[str]):
+    def __init__(self, base_url: str, api_key: str, region_id: Optional[str] = None):
         self._client = MedusaAPIClient(base_url, api_key)
         self._region_id = region_id
 

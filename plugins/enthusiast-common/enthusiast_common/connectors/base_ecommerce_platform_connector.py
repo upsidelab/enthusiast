@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from enthusiast_common import ProductDetails
-from enthusiast_common.structures import Address
+from enthusiast_common.structures import Address, ProductDetails
 
 
 class BaseECommercePlatformConnector(ABC):

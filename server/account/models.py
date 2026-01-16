@@ -44,3 +44,6 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
+
+    def has_dataset_access(self, dataset):
+        return self.is_staff or getattr(self, "data_sets").filter(pk=dataset.pk).exists()

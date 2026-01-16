@@ -55,17 +55,6 @@ class TestConversationManager:
         with pytest.raises(Agent.DoesNotExist):
             self.manager.create_conversation(user_id=user_id, agent_id=invalid_agent_id)
 
-    def test_create_conversation_with_data_set_not_owned_by_user(self):
-        """Test conversation creation with data set not owned by user."""
-        # Given
-        other_user = baker.make(get_user_model())
-        other_data_set = baker.make(DataSet, users=[other_user])
-        other_agent = baker.make(Agent, dataset=other_data_set)
-
-        # When & Then
-        with pytest.raises(Agent.DoesNotExist):
-            self.manager.create_conversation(user_id=self.user.id, agent_id=other_agent.id)
-
     def test_get_conversation_success(self):
         """Test successful conversation retrieval."""
         # Given

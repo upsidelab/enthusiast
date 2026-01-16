@@ -21,7 +21,7 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def user():
-    return baker.make(User)
+    return baker.make(User, is_staff=False)
 
 
 @pytest.fixture
@@ -511,10 +511,44 @@ class TestConversationView:
         response = api_client.post(url, payload, format="json")
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
+    def test_admin_can_post_to_any_conversation(self, admin_api_client, url):
+        dataset = baker.make(DataSet, users=[])
+        agent = baker.make(Agent, deleted_at=None, dataset=dataset)
+        conversation = baker.make(Conversation, agent=agent)
+        url = reverse("conversation-details", kwargs={"conversation_id": conversation.id})
+        payload = {"data_set_id": dataset.id, "question_message": "How are you?", "streaming": False}
+
+        with (
+            patch(
+                "agent.views.respond_to_user_message_task.apply_async",
+                return_value=type("obj", (), {"id": "fake-task-id"}),
+            ) as mock_task,
+            patch("agent.views.LanguageModelRegistry.provider_for_dataset") as mock_provider,
+        ):
+            mock_provider.return_value = type("obj", (), {"STREAMING_AVAILABLE": True})
+            response = admin_api_client.post(url, payload, format="json")
+
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        mock_task.assert_called_once()
+
+    def test_user_can_not_post_to_conversation_with_no_dataset_access(self, api_client, url):
+        dataset = baker.make(DataSet, users=[])
+        agent = baker.make(Agent, deleted_at=None, dataset=dataset)
+        conversation = baker.make(Conversation, agent=agent)
+        url = reverse("conversation-details", kwargs={"conversation_id": conversation.id})
+        payload = {"data_set_id": dataset.id, "question_message": "How are you?", "streaming": False}
+
+        response = api_client.post(url, payload, format="json")
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
 
 class TestConversationListView:
-    def test_create_conversation_success(self, api_client, agent):
-        url = reverse("conversation-list")
+    @pytest.fixture
+    def url(self):
+        return reverse("conversation-list")
+
+    def test_create_conversation_success(self, api_client, agent, url):
         payload = {"agent_id": agent.id}
 
         response = api_client.post(url, payload, format="json")
@@ -522,8 +556,7 @@ class TestConversationListView:
         assert response.status_code == status.HTTP_201_CREATED
         assert response.data["agent"]["id"] == agent.id
 
-    def test_create_conversation_invalid_payload(self, api_client):
-        url = reverse("conversation-list")
+    def test_create_conversation_invalid_payload(self, api_client, url):
         payload = {"wrong_field": 123}
 
         response = api_client.post(url, payload, format="json")
@@ -531,10 +564,28 @@ class TestConversationListView:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "agent_id" in response.data
 
-    def test_create_conversation_with_deleted_agent(self, api_client, deleted_agent):
-        url = reverse("conversation-list")
+    def test_create_conversation_with_deleted_agent(self, api_client, deleted_agent, url):
         payload = {"agent_id": deleted_agent.id}
 
         response = api_client.post(url, payload, format="json")
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_create_conversation_throws_on_no_access_to_dataset(self, api_client, url):
+        dataset = baker.make(DataSet, users=[])
+        agent = baker.make(Agent, deleted_at=None, dataset=dataset)
+        payload = {"agent_id": agent.id}
+
+        response = api_client.post(url, payload, format="json")
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_admin_can_create_conversation_with_any_dataset(self, admin_api_client, url):
+        dataset = baker.make(DataSet, users=[])
+        agent = baker.make(Agent, deleted_at=None, dataset=dataset)
+        payload = {"agent_id": agent.id}
+
+        response = admin_api_client.post(url, payload, format="json")
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data["agent"]["id"] == agent.id

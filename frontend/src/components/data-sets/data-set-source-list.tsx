@@ -100,6 +100,8 @@ export function DataSetSourceList({ dataSetId }: DataSetSourceListProps) {
       await api.dataSets().syncDataSetProductSource(dataSetId, source.id);
     } else if (source.type === 'document') {
       await api.dataSets().syncDataSetDocumentSource(dataSetId, source.id);
+    } else if (source.type === 'ecommerce') {
+      await api.dataSets().syncDataSetEcommerceIntegration(dataSetId);
     }
   };
 

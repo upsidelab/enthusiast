@@ -352,6 +352,16 @@ export class DataSetsApiClient extends BaseApiClient {
     );
   }
 
+  async syncDataSetEcommerceIntegration(dataSetId: number): Promise<void> {
+    await fetch(
+      `${this.apiBase}/api/data_sets/${dataSetId}/ecommerce_integration/sync`,
+      {
+        ...this._requestConfiguration(),
+        method: "POST"
+      }
+    );
+  }
+
   async removeDataSetECommerceIntegration(dataSetId: number): Promise<void> {
     await fetch(
       `${this.apiBase}/api/data_sets/${dataSetId}/ecommerce_integration`,

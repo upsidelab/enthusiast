@@ -5,6 +5,8 @@ from enthusiast_common import ProductDetails, ProductSourcePlugin
 from enthusiast_common.utils import RequiredFieldsModel
 from pydantic import Field
 
+from .medusa_api_client import MedusaAPIClient
+
 
 class MedusaProductSourceConfig(RequiredFieldsModel):
     api_key: str = Field(title="API key", description="Medusa API key")
@@ -53,24 +55,14 @@ class MedusaProductSource(ProductSourcePlugin):
             list[ProductDetails]: A list of products.
         """
 
-        endpoint = f"{self.CONFIGURATION_ARGS.base_url}/admin/products?expand=categories"
         products = []
         offset = 0  # Starting point for product list pagination.
         limit = 100  # Page size.
-        encoded_api_key_bytes = base64.b64encode(self.CONFIGURATION_ARGS.api_key.encode("utf-8"))
-        encoded_api_key = encoded_api_key_bytes.decode("utf-8")
 
-        headers = {"Authorization": f"Basic {encoded_api_key}"}
-
+        client = self._build_api_client()
         while True:
-            response = requests.get(endpoint, headers=headers, params={"limit": limit, "offset": offset})
+            data = client.get("/admin/products?expand=categories", params={"limit": limit, "offset": offset})
 
-            if response.status_code == 404:
-                raise Exception("The endpoint was not found. Please verify the URL.")
-            elif response.status_code != 200:
-                raise Exception(f"Failed to fetch products: {response.status_code} - {response.text}")
-
-            data = response.json()
             medusa_products = data.get("products", [])
             for medusa_product in medusa_products:
                 products.append(self.get_product(medusa_product))
@@ -80,3 +72,6 @@ class MedusaProductSource(ProductSourcePlugin):
             offset += limit
 
         return products
+
+    def _build_api_client(self) -> MedusaAPIClient:
+        return MedusaAPIClient(self.CONFIGURATION_ARGS.base_url, self.CONFIGURATION_ARGS.api_key)

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod, ABCMeta
 from typing import Any
 
-from enthusiast_common.connectors import BaseECommercePlatformConnector
+from enthusiast_common.connectors import ECommercePlatformConnector
 from enthusiast_common.structures import DocumentDetails, ProductDetails
 from enthusiast_common.utils import validate_required_vars, RequiredFieldsModel
 
@@ -74,10 +74,18 @@ class ECommerceIntegrationPlugin(ABC, SourceExtraArgsClassBase):
         self.data_set_id = data_set_id
 
     @abstractmethod
-    def build_connector(self) -> BaseECommercePlatformConnector:
+    def build_connector(self) -> ECommercePlatformConnector:
         """Provides a connector for the e-commerce platform.
 
         Returns:
-            BaseECommercePlatformConnector: A connector for interacting with the e-commerce platform
+            ECommercePlatformConnector: A connector for interacting with the e-commerce platform
         """
         pass
+
+    @abstractmethod
+    def build_product_source(self) -> ProductSourcePlugin:
+        """Provides a product source for syncing and indexing products from the e-commerce platform.
+
+        Returns:
+            ProductSourcePlugin: A product source for fetching product data from the e-commerce platform.
+        """

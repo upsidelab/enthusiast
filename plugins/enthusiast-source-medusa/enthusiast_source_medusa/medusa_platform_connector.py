@@ -1,54 +1,24 @@
-import base64
 import logging
-from typing import Any, Optional
+from typing import Optional
 
-import requests
+from enthusiast_common.connectors import ECommercePlatformConnector
+from enthusiast_common.structures import Address, ProductDetails
 
-from .base_ecommerce_platform_connector import BaseECommercePlatformConnector
-from .. import ProductDetails
-from ..structures import Address
-
-
-# TODO move to Medusa's package
-
-class MedusaAPIClient:
-    def __init__(self, base_url: str, api_key: str):
-        self._base_url = base_url
-        self._headers = self._build_headers(api_key)
-
-    def get(self, path: str, body: dict[str, Any] = None) -> dict[str, Any]:
-        url = f"{self._base_url}{path}"
-        response = requests.get(url, data=body, headers=self._headers)
-        response.raise_for_status()
-        return response.json()
-
-    def post(self, path: str, body: dict[str, Any] = None) -> dict[str, Any]:
-        url = f"{self._base_url}{path}"
-        response = requests.post(url, data=body, headers=self._headers)
-        response.raise_for_status()
-        return response.json()
-
-    def _build_headers(self, api_key: str) -> dict[str, str]:
-        encoded_api_key_bytes = base64.b64encode(api_key.encode("utf-8"))
-        encoded_api_key = encoded_api_key_bytes.decode("utf-8")
-        return {
-            "Content-Type": "application/json",
-            "Authorization": f"Basic {encoded_api_key}",
-        }
+from .medusa_api_client import MedusaAPIClient
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_EMAIL = "test@example.com"
 DEFAULT_ADDRESS = Address(
-    first_name="John",
-    last_name="Doe",
+    first_name="Dummy",
+    last_name="Customer",
     address_line1="200 5th Avenue",
     city="New York",
     postal_code="10001",
     country_code="US",
 )
 
-class MedusaPlatformConnector(BaseECommercePlatformConnector):
+class MedusaPlatformConnector(ECommercePlatformConnector):
     def __init__(self, base_url: str, api_key: str, region_id: Optional[str] = None):
         self._client = MedusaAPIClient(base_url, api_key)
         self._region_id = region_id

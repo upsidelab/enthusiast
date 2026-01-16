@@ -6,6 +6,9 @@ from django.conf import settings
 
 from enthusiast_common.interfaces import ECommerceIntegrationPlugin
 
+from catalog.models import ECommerceIntegration
+
+
 class ECommerceIntegrationPluginRegistry:
     """Registry of ecommerce integration plugins."""
 
@@ -27,3 +30,13 @@ class ECommerceIntegrationPluginRegistry:
             raise ValueError(f"No valid plugin classes found in module '{module_path}'.")
         return getattr(plugin_module, plugins[0])
 
+    def get_plugin_classes_by_names(self) -> dict[str, Type[ECommerceIntegrationPlugin]]:
+        plugin_classes = [self.get_plugin_class_by_path(path) for path in self.get_plugin_paths()]
+        return { plugin_class.NAME: plugin_class for plugin_class in plugin_classes }
+
+    def get_plugin_instance(self, ecommerce_integration: ECommerceIntegration) -> ECommerceIntegrationPlugin:
+        plugin_classes_by_names = self.get_plugin_classes_by_names()
+        plugin_class = plugin_classes_by_names[ecommerce_integration.plugin_name]
+        plugin_instance = plugin_class(data_set_id=ecommerce_integration.data_set_id)
+        plugin_instance.set_runtime_arguments(ecommerce_integration.config)
+        return plugin_instance

@@ -1,3 +1,3 @@
-from .base_ecommerce_platform_connector import BaseECommercePlatformConnector
+from .ecommerce_platform_connector import ECommercePlatformConnector
 
-__all__ = ["BaseECommercePlatformConnector"]
+__all__ = ["ECommercePlatformConnector"]

@@ -4,7 +4,7 @@ from typing import Optional
 from enthusiast_common.structures import Address, ProductDetails
 
 
-class BaseECommercePlatformConnector(ABC):
+class ECommercePlatformConnector(ABC):
     """This is a basic interface for a platform connector, that allows agents to interact with e-commerce systems
     though a unified interface."""
 

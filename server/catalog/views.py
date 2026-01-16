@@ -23,9 +23,8 @@ from sync.tasks import (
     sync_data_set_document_sources,
     sync_data_set_product_sources,
     sync_document_source,
-    sync_product_source,
+    sync_product_source, sync_ecommerce_integrations,
 )
-
 from .models import DataSet, DocumentSource, ECommerceIntegration, ProductSource
 from .serializers import (
     DataSetSerializer,
@@ -561,6 +560,25 @@ class DataSetECommerceIntegrationView(GenericAPIView):
         data_set_id = kwargs["data_set_id"]
         ECommerceIntegration.objects.filter(data_set_id=data_set_id).delete()
         return Response({}, status=status.HTTP_204_NO_CONTENT)
+
+
+class DataSetECommerceIntegrationSyncView(GenericAPIView):
+    permission_classes = [IsAdminUser]
+
+    @swagger_auto_schema(
+        operation_description="Sync a document source",
+        responses={200: SyncResponseSerializer},
+    )
+    def post(self, request, *args, **kwargs):
+        data_set_id = kwargs["data_set_id"]
+        try:
+            _ecommerce_integration = ECommerceIntegration.objects.get(data_set_id=data_set_id)
+        except ECommerceIntegration.DoesNotExist:
+            return Response({}, status=status.HTTP_404_NOT_FOUND)
+
+        task = sync_ecommerce_integrations.apply_async(args=(data_set_id,))
+        serializer = SyncResponseSerializer({"task_id": task.id})
+        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 
 
 class ConfigView(GenericAPIView):

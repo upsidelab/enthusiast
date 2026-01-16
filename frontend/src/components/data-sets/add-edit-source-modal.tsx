@@ -17,7 +17,7 @@ type FormData = z.infer<typeof formSchema>;
 
 export interface AddEditSourceModalProps {
   dataSetId: number;
-  sourceType: 'product' | 'document';
+  sourceType: 'ecommerce' | 'product' | 'document';
   source: CatalogSource | null;
   availablePlugins: SourcePlugin[];
   open: boolean;

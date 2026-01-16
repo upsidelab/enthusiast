@@ -23,23 +23,25 @@ export interface DataSetSourceListProps {
 }
 
 export interface SourceWithType extends CatalogSource {
-  type: 'product' | 'document';
+  type: 'product' | 'document' | 'ecommerce';
 }
 
 export function DataSetSourceList({ dataSetId }: DataSetSourceListProps) {
   const [sources, setSources] = useState<SourceWithType[]>([]);
   const [productSourcePlugins, setProductSourcePlugins] = useState<SourcePlugin[]>([]);
   const [documentSourcePlugins, setDocumentSourcePlugins] = useState<SourcePlugin[]>([]);
+  const [ecommerceIntegrationPlugins, setEcommerceIntegrationPlugins] = useState<SourcePlugin[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSource, setEditingSource] = useState<SourceWithType | null>(null);
-  const [selectedSourceType, setSelectedSourceType] = useState<'product' | 'document'>('product');
+  const [selectedSourceType, setSelectedSourceType] = useState<'product' | 'document' | 'ecommerce'>('product');
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [sourceToDelete, setSourceToDelete] = useState<SourceWithType | null>(null);
 
   const loadSources = useCallback(async () => {
-    const [productSources, documentSources] = await Promise.all([
+    const [integration, productSources, documentSources] = await Promise.all([
+      api.dataSets().getDataSetECommerceIntegration(dataSetId),
       api.dataSets().getDataSetProductSources(dataSetId),
-      api.dataSets().getDataSetDocumentSources(dataSetId)
+      api.dataSets().getDataSetDocumentSources(dataSetId),
     ]);
 
     const sourcesWithType: SourceWithType[] = [
@@ -47,17 +49,23 @@ export function DataSetSourceList({ dataSetId }: DataSetSourceListProps) {
       ...documentSources.map(source => ({ ...source, type: 'document' as const }))
     ];
 
+    if (integration) {
+      sourcesWithType.unshift({ ...integration, type: 'ecommerce' as const, corrupted: false });
+    }
+
     setSources(sourcesWithType);
   }, [dataSetId]);
 
   const loadPlugins = useCallback(async () => {
-    const [productPlugins, documentPlugins] = await Promise.all([
+    const [productPlugins, documentPlugins, ecommercePlugins] = await Promise.all([
       api.getAllProductSourcePlugins(),
-      api.getAllDocumentSourcePlugins()
+      api.getAllDocumentSourcePlugins(),
+      api.getAllEcommerceIntegrationPlugins()
     ]);
 
     setProductSourcePlugins(productPlugins);
     setDocumentSourcePlugins(documentPlugins);
+    setEcommerceIntegrationPlugins(ecommercePlugins);
   }, []);
 
   useEffect(() => {
@@ -65,7 +73,7 @@ export function DataSetSourceList({ dataSetId }: DataSetSourceListProps) {
     loadPlugins();
   }, [loadSources, loadPlugins]);
 
-  const handleAddSource = (sourceType: 'product' | 'document') => {
+  const handleAddSource = (sourceType: 'product' | 'document' | 'ecommerce') => {
     setSelectedSourceType(sourceType);
     setEditingSource(null);
     setIsModalOpen(true);
@@ -90,8 +98,10 @@ export function DataSetSourceList({ dataSetId }: DataSetSourceListProps) {
   const handleSyncSource = async (source: SourceWithType) => {
     if (source.type === 'product') {
       await api.dataSets().syncDataSetProductSource(dataSetId, source.id);
-    } else {
+    } else if (source.type === 'document') {
       await api.dataSets().syncDataSetDocumentSource(dataSetId, source.id);
+    } else if (source.type === 'ecommerce') {
+      await api.dataSets().syncDataSetEcommerceIntegration(dataSetId);
     }
   };
 
@@ -105,8 +115,10 @@ export function DataSetSourceList({ dataSetId }: DataSetSourceListProps) {
 
     if (sourceToDelete.type === 'product') {
       await api.dataSets().removeDataSetProductSource(dataSetId, sourceToDelete.id);
-    } else {
+    } else if (sourceToDelete.type === 'document') {
       await api.dataSets().removeDataSetDocumentSource(dataSetId, sourceToDelete.id);
+    } else if (sourceToDelete.type === 'ecommerce') {
+      await api.dataSets().removeDataSetECommerceIntegration(dataSetId);
     }
     await loadSources();
     setIsDeleteDialogOpen(false);
@@ -123,24 +135,36 @@ export function DataSetSourceList({ dataSetId }: DataSetSourceListProps) {
       return productSourcePlugins;
     } else if (selectedSourceType === 'document') {
       return documentSourcePlugins;
+    } else if (selectedSourceType === 'ecommerce') {
+      return ecommerceIntegrationPlugins;
     }
     return [];
   };
 
   const hasProductPlugins = productSourcePlugins.length > 0;
   const hasDocumentPlugins = documentSourcePlugins.length > 0;
+  const hasEcommercePlugins = ecommerceIntegrationPlugins.length > 0;
 
   return (
     <div className="space-y-6">
       <div className="flex justify-end items-center">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button disabled={!hasProductPlugins && !hasDocumentPlugins}>
+            <Button disabled={!hasProductPlugins && !hasDocumentPlugins && !hasEcommercePlugins}>
               <Plus className="h-4 w-4"/>
-              Add source
+              Add integration
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={() => setTimeout(() => handleAddSource('ecommerce'), 1)}
+              disabled={!hasEcommercePlugins}
+            >
+              E-Commerce system
+              {!hasEcommercePlugins && (
+                <span className="text-xs text-gray-500 ml-2">(No plugins available)</span>
+              )}
+            </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => setTimeout(() => handleAddSource('product'), 1)}
               disabled={!hasProductPlugins}
@@ -189,9 +213,11 @@ export function DataSetSourceList({ dataSetId }: DataSetSourceListProps) {
                       ? 'bg-gray-100 text-gray-500'
                       : source.type === 'product'
                         ? 'bg-blue-100 text-blue-800'
-                        : 'bg-green-100 text-green-800'
+                        : source.type === 'document'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-purple-100 text-purple-800'
                   }`}>
-                    {source.type === 'product' ? 'Product' : 'Document'}
+                    {source.type === 'product' ? 'Product' : source.type === 'document' ? 'Document' : 'E-Commerce'}
                   </span>
                 </TableCell>
                 <TableCell className="text-right">

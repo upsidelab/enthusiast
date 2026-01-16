@@ -38,7 +38,7 @@ export function DocumentsList() {
   return (
     <>
       <div className="flex my-6 justify-end items-center">
-        <Button onClick={() => navigate(`/data-sets/${dataSetId}/sources`)}>Configure Sources</Button>
+        <Button onClick={() => navigate(`/data-sets/${dataSetId}/integrations`)}>Configure Sources</Button>
       </div>
       <PaginatedTable<Document>
         loadItems={loadDocuments}

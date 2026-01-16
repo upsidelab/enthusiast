@@ -3,13 +3,13 @@ import { useParams } from "react-router-dom";
 import { PageHeading } from "@/components/util/page-heading.tsx";
 import { PageMain } from "@/components/util/page-main.tsx";
 
-export function IndexDataSetSources() {
+export function IndexDataSetIntegrations() {
   const { id } = useParams();
   const dataSetId = Number(id);
 
   return (
     <PageMain>
-      <PageHeading title="Manage Sources" description="Add and configure product and document sources." />
+      <PageHeading title="Manage Integrations" description="Add and configure E-Commerce and CMS integrations." />
       <DataSetSourceList dataSetId={dataSetId} />
     </PageMain>
   )

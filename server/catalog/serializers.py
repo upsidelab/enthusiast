@@ -4,7 +4,7 @@ from utils.serializers import ParentDataContextSerializerMixin
 from sync.document.registry import DocumentSourcePluginRegistry
 from sync.product.registry import ProductSourcePluginRegistry
 
-from .models import DataSet, Document, DocumentSource, Product, ProductSource
+from .models import DataSet, Document, DocumentSource, ECommerceIntegration, Product, ProductSource
 from .utils import PydanticModelField
 
 
@@ -75,6 +75,14 @@ class DocumentSourceSerializer(ParentDataContextSerializerMixin, serializers.Mod
     class Meta:
         model = DocumentSource
         fields = ["id", "plugin_name", "config", "data_set_id", "corrupted"]
+
+
+class ECommerceIntegrationSerializer(ParentDataContextSerializerMixin, serializers.ModelSerializer):
+    context_keys_to_propagate = ["plugin_name"]
+
+    class Meta:
+        model = ECommerceIntegration
+        fields = ["id", "plugin_name", "config", "data_set_id"]
 
 
 class SyncResponseSerializer(serializers.Serializer):

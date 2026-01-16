@@ -16,7 +16,7 @@ import { NewDataSet } from "@/pages/data-sets/new.tsx";
 import { DataSetsIndex } from "@/pages/data-sets";
 import { EditDataSet } from "@/pages/data-sets/(id)/edit.tsx";
 import { IndexDataSetUsers } from "@/pages/data-sets/(id)/users.tsx";
-import { IndexDataSetSources } from "@/pages/data-sets/(id)/sources.tsx";
+import { IndexDataSetIntegrations } from "@/pages/data-sets/(id)/integrations.tsx";
 import { ConfigureDataSetProductSource } from "@/pages/data-sets/(id)/product-sources/(id)/config.tsx";
 import { ConfigureDataSetDocumentSource } from "@/pages/data-sets/(id)/document-sources/(id)/config.tsx";
 import { UsersIndex } from "@/pages/users";
@@ -95,8 +95,8 @@ const router = createBrowserRouter([
         element: <IndexDataSetUsers />
       },
       {
-        path: '/data-sets/:id/sources',
-        element: <IndexDataSetSources />
+        path: '/data-sets/:id/integrations',
+        element: <IndexDataSetIntegrations />
       },      
       {
         path: '/data-sets/:dataSetId/product-sources/:productSourceId',

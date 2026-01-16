@@ -56,14 +56,6 @@ class SyncManager(ABC, Generic[T]):
     def __init__(self):
         self.registry = self._build_registry()
 
-    def sync_all(self):
-        for source in self._get_all_sources():
-            self.sync_plugin(source)
-
-    def sync_data_set(self, data_set_id: int):
-        for source in self._get_data_set_sources(data_set_id=data_set_id):
-            self.sync_plugin(source)
-
     def sync(self, source_id: int):
         source = self._get_data_set_source(source_id)
         self.sync_plugin(source)
@@ -75,14 +67,6 @@ class SyncManager(ABC, Generic[T]):
 
     @abstractmethod
     def _build_registry(self):
-        pass
-
-    @abstractmethod
-    def _get_all_sources(self) -> list[DataSetSource]:
-        pass
-
-    @abstractmethod
-    def _get_data_set_sources(self, data_set_id: int) -> list[DataSetSource]:
         pass
 
     @abstractmethod

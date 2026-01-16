@@ -38,6 +38,13 @@ export type DocumentSourceResponse = {
 
 export type ConfigureDocumentSourcePayload = DocumentSourceResponse;
 
+export type ECommerceIntegrationResponse = {
+  id: number;
+  plugin_name: string;
+  config: string;
+  data_set_id: number;
+}
+
 export class DataSetsApiClient extends BaseApiClient {
   async getDataSets(): Promise<DataSet[]> {
     const response = await fetch(`${this.apiBase}/api/data_sets`, this._requestConfiguration());
@@ -303,6 +310,64 @@ export class DataSetsApiClient extends BaseApiClient {
         ...this._requestConfiguration(),
         method: 'PATCH',
         body: JSON.stringify(body)
+      }
+    );
+  }
+
+  async getDataSetECommerceIntegration(dataSetId: number): Promise<ECommerceIntegrationResponse | null> {
+    const response = await fetch(`${this.apiBase}/api/data_sets/${dataSetId}/ecommerce_integration`, this._requestConfiguration());
+    
+    if (response.status === 404) {
+      return null;
+    }
+    
+    return await response.json() as ECommerceIntegrationResponse;
+  }
+
+  async addDataSetECommerceIntegration(dataSetId: number, pluginName: string, config: object): Promise<void> {
+    await fetch(
+      `${this.apiBase}/api/data_sets/${dataSetId}/ecommerce_integration`,
+      {
+        ...this._requestConfiguration(),
+        method: "POST",
+        body: JSON.stringify({ plugin_name: pluginName, config: config })
+      }
+    );
+  }
+
+  async configureDataSetECommerceIntegration(updated_source: CatalogSource): Promise<void> {
+    const body = {
+      id: updated_source.id,
+      plugin_name: updated_source.plugin_name,
+      config: JSON.parse(updated_source.config),
+      data_set_id: updated_source.data_set_id
+    };
+
+    await fetch(`${this.apiBase}/api/data_sets/${updated_source.data_set_id}/ecommerce_integration`,
+      {
+        ...this._requestConfiguration(),
+        body: JSON.stringify(body),
+        method: 'PATCH'
+      }
+    );
+  }
+
+  async syncDataSetEcommerceIntegration(dataSetId: number): Promise<void> {
+    await fetch(
+      `${this.apiBase}/api/data_sets/${dataSetId}/ecommerce_integration/sync`,
+      {
+        ...this._requestConfiguration(),
+        method: "POST"
+      }
+    );
+  }
+
+  async removeDataSetECommerceIntegration(dataSetId: number): Promise<void> {
+    await fetch(
+      `${this.apiBase}/api/data_sets/${dataSetId}/ecommerce_integration`,
+      {
+        ...this._requestConfiguration(),
+        method: "DELETE"
       }
     );
   }

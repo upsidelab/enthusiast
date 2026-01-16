@@ -11,13 +11,13 @@ class MedusaAPIClient:
 
     def get(self, path: str, body: dict[str, Any] = None, params: dict[str, Any] = None) -> dict[str, Any]:
         url = f"{self._base_url}{path}"
-        response = requests.get(url, data=body, headers=self._headers, params=params)
+        response = requests.get(url, json=body, headers=self._headers, params=params)
         response.raise_for_status()
         return response.json()
 
     def post(self, path: str, body: dict[str, Any] = None) -> dict[str, Any]:
         url = f"{self._base_url}{path}"
-        response = requests.post(url, data=body, headers=self._headers)
+        response = requests.post(url, json=body, headers=self._headers)
         response.raise_for_status()
         return response.json()
 

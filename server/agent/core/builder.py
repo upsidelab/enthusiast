@@ -12,6 +12,7 @@ from enthusiast_common.config import (
     LLMToolConfig,
 )
 from enthusiast_common.config.prompts import PromptTemplateConfig
+from enthusiast_common.connectors import ECommercePlatformConnector
 from enthusiast_common.injectors import BaseInjector
 from enthusiast_common.registry import BaseDBModelsRegistry, BaseEmbeddingProviderRegistry, BaseLanguageModelRegistry
 from enthusiast_common.retrievers import BaseRetriever
@@ -23,6 +24,7 @@ from langchain_core.tools import BaseTool
 
 from agent.core.memory import PersistentChatHistory, SummaryChatMemory
 from agent.core.memory.limited_chat_memory import LimitedChatMemory
+from catalog.models import ECommerceIntegration
 
 
 class AgentBuilder(BaseAgentBuilder[AgentConfig]):
@@ -155,9 +157,11 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         product_retriever = self._build_product_retriever()
         chat_summary_memory = self._build_chat_summary_memory()
         chat_limited_memory = self._build_chat_limited_memory()
+        ecommerce_platform_connector = self._build_ecommerce_platform_connector()
         return self._config.injector(
             product_retriever=product_retriever,
             document_retriever=document_retriever,
+            ecommerce_platform_connector=ecommerce_platform_connector,
             repositories=self._repositories,
             chat_summary_memory=chat_summary_memory,
             chat_limited_memory=chat_limited_memory,
@@ -201,6 +205,18 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
             embeddings_registry=self._embeddings_registry,
             llm=self._llm,
         )
+
+    def _build_ecommerce_platform_connector(self) -> Optional[ECommercePlatformConnector]:
+        try:
+            ecommerce_integration = ECommerceIntegration.objects.get(data_set_id=self._data_set_id)
+        except ECommerceIntegration.DoesNotExist:
+            return None
+
+        from sync.ecommerce.registry import ECommerceIntegrationPluginRegistry
+        ecommerce_integration_registry = ECommerceIntegrationPluginRegistry()
+        ecommerce_integration_plugin = ecommerce_integration_registry.get_plugin_instance(ecommerce_integration)
+
+        return ecommerce_integration_plugin.build_connector()
 
     def _build_chat_summary_memory(self) -> SummaryChatMemory:
         history = PersistentChatHistory(self._repositories.conversation, self.conversation_id)

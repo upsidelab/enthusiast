@@ -23,13 +23,13 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
         self._client = MedusaAPIClient(base_url, api_key)
         self._region_id = region_id
 
-    def create_empty_order(self) -> str:
+    def create_empty_order(self, email: Optional[str] = None, address: Optional[Address] = None) -> str:
         raise NotImplementedError
 
     def add_to_order(self, order_id: str, sku: str, quantity: int) -> bool:
         raise NotImplementedError
 
-    def create_order_with_items(self, items: list[tuple[str, int]], email: Optional[str], address: Optional[Address]) -> str:
+    def create_order_with_items(self, items: list[tuple[str, int]], email: Optional[str] = None, address: Optional[Address] = None) -> str:
         email_or_default = email or DEFAULT_EMAIL
         address_or_default = address or DEFAULT_ADDRESS
 
@@ -39,12 +39,12 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
             "billing_address": self._address_to_payload_dict(address_or_default),
             "shipping_address": self._address_to_payload_dict(address_or_default),
             "items": [
-                {"variant_id": variant_id, "quantity": int(quantity)}
-                for variant_id, quantity in items
+                {"variant_id": self._get_default_variant_id_for_product_id(product_id), "quantity": int(quantity)}
+                for product_id, quantity in items
             ]
         }
         response = self._client.post("/admin/draft-orders", payload)
-        return response["id"]
+        return response["draft_order"]["id"]
 
     def get_product_by_sku(self, sku: str) -> ProductDetails:
         raise NotImplementedError
@@ -83,4 +83,7 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
             "company": address.company,
         }
 
-        return { key: value for key, value in payload if value is not None }
+        return { key: value for key, value in payload.items() if value is not None }
+
+    def _get_default_variant_id_for_product_id(self, product_id: str) -> str:
+        return self._client.get(f"/admin/products/{product_id}")["product"]["variants"][0]["id"]

@@ -9,7 +9,7 @@ class ECommercePlatformConnector(ABC):
     though a unified interface."""
 
     @abstractmethod
-    def create_empty_order(self) -> str:
+    def create_empty_order(self, email: Optional[str] = None, address: Optional[Address] = None) -> str:
         pass
 
     @abstractmethod
@@ -17,7 +17,7 @@ class ECommercePlatformConnector(ABC):
         pass
 
     @abstractmethod
-    def create_order_with_items(self, items: list[tuple[str, int]], email: Optional[str], address: Optional[Address]) -> str:
+    def create_order_with_items(self, items: list[tuple[str, int]], email: Optional[str] = None, address: Optional[Address] = None) -> str:
         pass
 
     @abstractmethod

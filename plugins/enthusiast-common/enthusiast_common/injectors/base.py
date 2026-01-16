@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Optional
 
 from enthusiast_common.connectors import ECommercePlatformConnector
 from enthusiast_common.retrievers import BaseProductRetriever, BaseVectorStoreRetriever
@@ -22,7 +23,7 @@ class BaseInjector(ABC):
 
     @property
     @abstractmethod
-    def ecommerce_platform_connector(self) -> ECommercePlatformConnector:
+    def ecommerce_platform_connector(self) -> Optional[ECommercePlatformConnector]:
         pass
 
     @property

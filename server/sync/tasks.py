@@ -2,7 +2,7 @@ import logging
 
 from celery import shared_task
 
-from catalog.models import DocumentSource, ProductSource, ECommerceIntegration
+from catalog.models import DocumentSource, ECommerceIntegration, ProductSource
 from sync.document.manager import DocumentSyncManager
 from sync.ecommerce.manager import ECommerceSyncManager
 from sync.product.manager import ProductSyncManager

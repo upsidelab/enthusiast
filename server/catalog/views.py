@@ -23,8 +23,10 @@ from sync.tasks import (
     sync_data_set_document_sources,
     sync_data_set_product_sources,
     sync_document_source,
-    sync_product_source, sync_ecommerce_integrations,
+    sync_ecommerce_integrations,
+    sync_product_source,
 )
+
 from .models import DataSet, DocumentSource, ECommerceIntegration, ProductSource
 from .serializers import (
     DataSetSerializer,

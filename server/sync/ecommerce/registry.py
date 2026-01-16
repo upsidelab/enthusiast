@@ -3,7 +3,6 @@ from importlib import import_module
 from typing import Type
 
 from django.conf import settings
-
 from enthusiast_common.interfaces import ECommerceIntegrationPlugin
 
 from catalog.models import ECommerceIntegration

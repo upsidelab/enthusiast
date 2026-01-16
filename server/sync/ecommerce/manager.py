@@ -1,10 +1,8 @@
 from enthusiast_common import ProductDetails
 
-from catalog.models import Product, ProductSource, ECommerceIntegration
+from catalog.models import ECommerceIntegration, Product
 from catalog.tasks import index_product_task
-from sync.base import DataSetSource, SyncManager
 from sync.ecommerce.registry import ECommerceIntegrationPluginRegistry
-from sync.product.registry import ProductSourcePluginRegistry
 
 
 class ECommerceSyncManager:

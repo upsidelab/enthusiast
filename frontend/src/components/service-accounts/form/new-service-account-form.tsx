@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Form } from "@/components/ui/form.tsx";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useWatch } from "react-hook-form";
 import { Button } from "@/components/ui/button.tsx";
 import { checkServiceNameAvailability } from "@/components/util/check-service-name-availability.tsx";
 import { TokenGeneratedModal } from "@/components/service-accounts/token-generated-modal.tsx";
@@ -22,6 +23,7 @@ const formSchema = z.object({
   }),
   dataSetIds: z.array(z.number()),
   isActive: z.boolean(),
+  isStaff: z.boolean(),
 });
 type CreateServiceAccountFormSchema = z.infer<typeof formSchema>;
 
@@ -36,10 +38,18 @@ export function NewServiceAccountForm({onServiceAccountCreated}: NewServiceAccou
       name: "",
       dataSetIds: [],
       isActive: true,
+      isStaff: false,
     }
   });
   const [isTokenDialogOpen, setIsTokenDialogOpen] = useState(false);
   const [generatedToken, setGeneratedToken] = useState("");
+  const isStaff = useWatch({ control: form.control, name: "isStaff" });
+
+  useEffect(() => {
+    if (isStaff) {
+      form.setValue("dataSetIds", []);
+    }
+  }, [isStaff, form]);
 
   const handleSubmit = async (values: CreateServiceAccountFormSchema) => {
     const {  token } = await api.serviceAccounts().createServiceAccount(values);
@@ -59,8 +69,8 @@ export function NewServiceAccountForm({onServiceAccountCreated}: NewServiceAccou
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           <DetailsFields form={form}/>
-          <DataSetsFields form={form}/>
           <PermissionFields form={form}/>
+          {!isStaff && <DataSetsFields form={form}/>}
           <Button type="submit">Create</Button>
         </form>
       </Form>

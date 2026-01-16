@@ -21,7 +21,7 @@ export function CreateDataSetForm({ isOnboarding = false }: CreateDataSetFormPro
     const dataSets = await api.dataSets().getDataSets();
     setDataSets(dataSets);
     setDataSetId(createdDataSetId);
-    navigate(`/data-sets/${createdDataSetId}/sources`);
+    navigate(`/data-sets/${createdDataSetId}/integrations`);
   };
 
   return (

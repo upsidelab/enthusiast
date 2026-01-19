@@ -21,6 +21,7 @@ DEFAULT_ADDRESS = Address(
 class MedusaPlatformConnector(ECommercePlatformConnector):
     def __init__(self, base_url: str, api_key: str, region_id: Optional[str] = None):
         self._client = MedusaAPIClient(base_url, api_key)
+        self._base_url = base_url
         self._region_id = region_id
 
     def create_empty_order(self, email: Optional[str] = None, address: Optional[Address] = None) -> str:
@@ -49,11 +50,14 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
     def get_product_by_sku(self, sku: str) -> ProductDetails:
         raise NotImplementedError
 
-    def create_product(self, product_details: ProductDetails) -> bool:
+    def create_product(self, product_details: ProductDetails) -> str:
         raise NotImplementedError
 
     def update_product(self, sku: str, product_details: ProductDetails) -> bool:
         raise NotImplementedError
+
+    def get_admin_url_for_order_id(self, order_id: str) -> str:
+        return f"{self._base_url}/app/draft-orders/{order_id}"
 
     def _get_region_id_or_default(self) -> str:
         if self._region_id:

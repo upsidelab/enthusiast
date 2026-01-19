@@ -25,9 +25,13 @@ class ECommercePlatformConnector(ABC):
         pass
 
     @abstractmethod
-    def create_product(self, product_details: ProductDetails) -> bool:
+    def create_product(self, product_details: ProductDetails) -> str:
         pass
 
     @abstractmethod
     def update_product(self, sku: str, product_details: ProductDetails) -> bool:
+        pass
+
+    @abstractmethod
+    def get_admin_url_for_order_id(self, order_id: str) -> str:
         pass

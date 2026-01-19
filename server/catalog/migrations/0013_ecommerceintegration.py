@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('plugin_name', models.CharField()),
                 ('config', models.JSONField(default=dict)),
-                ('data_set', models.OneToOneField(on_delete=django.db.models.deletion.PROTECT, related_name='ecommerce_integration', to='catalog.dataset')),
+                ('data_set', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='ecommerce_integration', to='catalog.dataset')),
             ],
         ),
     ]

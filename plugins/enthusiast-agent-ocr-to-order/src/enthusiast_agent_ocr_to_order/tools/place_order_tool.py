@@ -39,7 +39,8 @@ class PlaceOrderTool(BaseLLMTool):
             product_ids_list = product_ids.split(",")
             quantities_list = quantities.split(",")
             order_id = ecommerce_platform_connector.create_order_with_items(list(zip(product_ids_list, quantities_list)))
-            return f"Order placed successfully, url: http://localhost:9000/app/draft-orders/{order_id}"
+            admin_url = ecommerce_platform_connector.get_admin_url_for_order_id(order_id)
+            return f"Order placed successfully, url: {admin_url}"
         except Exception as e:
             logger.error(e)
             return f"Error: {str(e)}"

@@ -43,6 +43,11 @@ def sync_ecommerce_integrations(data_set_id: int):
         sync_ecommerce_integration.apply_async((integration.id,))
 
 @shared_task
+def sync_all_ecommerce_integrations():
+    for integration in ECommerceIntegration.objects.all():
+        sync_ecommerce_integration.apply_async((integration.id,))
+
+@shared_task
 def sync_document_source(source_id: int):
     document_source = DocumentSource.objects.get(pk=source_id)
     if document_source.corrupted:
@@ -73,4 +78,5 @@ def sync_data_set_all_sources(data_set_id: int):
 @shared_task
 def sync_all_sources():
     sync_all_product_sources()
+    sync_all_ecommerce_integrations()
     sync_all_document_sources()

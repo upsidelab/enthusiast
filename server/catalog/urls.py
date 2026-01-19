@@ -69,7 +69,7 @@ urlpatterns = [
     path(
         "api/data_sets/<int:data_set_id>/ecommerce_integration/sync",
         views.DataSetECommerceIntegrationSyncView.as_view(),
-        name="data_set_ecommerce_integration",
+        name="data_set_ecommerce_integration_sync",
     ),
     path("api/config", views.ConfigView.as_view(), name="config"),
     path(

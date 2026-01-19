@@ -527,8 +527,8 @@ class DataSetECommerceIntegrationView(GenericAPIView):
             )
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        ecommerce_integration = serializer.save(data_set_id=data_set_id)
-        return Response(self.get_serializer(ecommerce_integration).data, status=status.HTTP_201_CREATED)
+        serializer.save(data_set_id=data_set_id)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @swagger_auto_schema(
         operation_description="Update the ecommerce integration for a data set",

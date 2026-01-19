@@ -4,6 +4,7 @@ from account.models import User
 from agent.core.registries.agents.agent_registry import AgentRegistry
 from agent.models import Conversation, Message
 from agent.models.agent import Agent
+from catalog.models import DataSet
 
 
 class ConversationManager:
@@ -22,7 +23,7 @@ class ConversationManager:
 
     def create_conversation(self, user_id: int, agent_id: int) -> Conversation:
         user = User.objects.get(id=user_id)
-        agent = Agent.objects.get(id=agent_id, dataset__in=user.data_sets.all())
+        agent = Agent.objects.get(id=agent_id)
 
         conversation = Conversation.objects.create(
             started_at=datetime.now(),
@@ -34,7 +35,7 @@ class ConversationManager:
 
     def get_conversation(self, user_id: int, data_set_id: int, conversation_id: int) -> Conversation:
         user = User.objects.get(id=user_id)
-        data_set = user.data_sets.get(id=data_set_id)
+        data_set = DataSet.objects.get(id=data_set_id)
         return Conversation.objects.select_related("agent").get(id=conversation_id, data_set=data_set, user=user)
 
     def respond_to_user_message(

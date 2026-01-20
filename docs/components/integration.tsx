@@ -3,13 +3,16 @@ import { MDXRemote } from "nextra/mdx-remote";
 import { compileMdx } from "nextra/compile";
 import Link from "next/link";
 import Image from "next/image";
+import { ReactNode } from "react";
 
 export interface IntegrationProps {
   name: string;
+  description?: string | ReactNode;
   integrationKey: string;
   pipName: string;
   registerProductModule?: string;
   registerDocumentModule?: string;
+  registerECommerceIntegrationModule?: string;
   registerLanguageModelModule?: string;
   registerEmbeddingsModule?: string;
   envVariables?: string[]
@@ -25,6 +28,9 @@ export default async function Integration(props: IntegrationProps) {
   const buildRegisterInstructionMd = (key: string, module: string) => {
     return `\`\`\`python\n${key} = {\n    ...\n    "${props.name}": "${module}",\n}\n\`\`\``;
   }
+  const buildRegisterECommerceIntegrationInstructions = (key: string, module: string) => {
+    return `\`\`\`python\n${key} = [\n    ...\n    "${module}",\n]\n\`\`\``;
+  }
   const buildEnvInstructionMd = (keys: string[]) => {
       const lines = keys.map((key) => `${key}=<value_here>`).join("\n");
       return `\`\`\`python\n${lines}\n\`\`\``;
@@ -32,8 +38,13 @@ export default async function Integration(props: IntegrationProps) {
 
   return (
     <>
+      <H1>{props.name} Integration</H1>
       <Image className="x:py-4" src={`/tools/enthusiast/img/integrations/${props.integrationKey}.png`} alt={props.name} width={256} height={256} />
-      <H1 className="x:hidden">{props.name}</H1>
+      {props.description &&
+        <>
+          <MDXRemote compiledSource={installationInstructions} />
+          <P>{props.description}</P>
+        </>}
       <H2>Installation</H2>
       <P>
         Run the following command inside your application directory.<br />
@@ -55,8 +66,11 @@ export default async function Integration(props: IntegrationProps) {
       </P>
       {props.registerProductModule && <MDXRemote compiledSource={await compileMdx(buildRegisterInstructionMd("CATALOG_PRODUCT_SOURCE_PLUGINS", props.registerProductModule))}/>}
       {props.registerDocumentModule && <MDXRemote compiledSource={await compileMdx(buildRegisterInstructionMd("CATALOG_DOCUMENT_SOURCE_PLUGINS", props.registerDocumentModule))}/>}
+      {props.registerECommerceIntegrationModule && <MDXRemote compiledSource={await compileMdx(buildRegisterECommerceIntegrationInstructions("CATALOG_ECOMMERCE_INTEGRATION_PLUGINS", props.registerECommerceIntegrationModule))}/>}
       {props.registerLanguageModelModule && <MDXRemote compiledSource={await compileMdx(buildRegisterInstructionMd("CATALOG_LANGUAGE_MODEL_PROVIDERS", props.registerLanguageModelModule))}/>}
       {props.registerEmbeddingsModule && <MDXRemote compiledSource={await compileMdx(buildRegisterInstructionMd("CATALOG_EMBEDDING_PROVIDERS", props.registerEmbeddingsModule))}/>}
+      <P>Then, restart your server for the newly installed plugin to become available.</P>
+      <P>Finally, sign in to Enthusiast's Admin UI, go to the Integrations tab and configure the required credentials.</P>
     </>
   )
 }

@@ -164,7 +164,8 @@ class ConversationListView(ListAPIView):
         manual_parameters=[
             openapi.Parameter(
                 "data_set_id", openapi.IN_QUERY, description="ID of the data set", type=openapi.TYPE_INTEGER
-            )
+            ),
+            openapi.Parameter("agent_id", openapi.IN_QUERY, description="ID of the agent", type=openapi.TYPE_INTEGER),
         ],
     )
     def get(self, request, *args, **kwargs):
@@ -173,10 +174,16 @@ class ConversationListView(ListAPIView):
     def get_queryset(self):
         user = self.request.user
         data_set_id = self.request.query_params.get("data_set_id")
+        agent_id = self.request.query_params.get("agent_id")
+
+        qs = Conversation.objects.filter(user=user)
+
         if data_set_id:
-            return Conversation.objects.filter(data_set_id=data_set_id, user=user).order_by("-started_at")
-        else:
-            return Conversation.objects.filter(user=user).order_by("-started_at")
+            qs = qs.filter(data_set_id=data_set_id)
+        if agent_id:
+            qs = qs.filter(agent_id=agent_id)
+
+        return qs.order_by("-started_at")
 
     @swagger_auto_schema(
         operation_description="Create a new conversation",

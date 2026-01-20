@@ -589,3 +589,106 @@ class TestConversationListView:
 
         assert response.status_code == status.HTTP_201_CREATED
         assert response.data["agent"]["id"] == agent.id
+
+    def test_list_conversations_returns_all_user_conversations(self, api_client, user, dataset, url):
+        agent1 = baker.make(Agent, deleted_at=None, dataset=dataset)
+        agent2 = baker.make(Agent, deleted_at=None, dataset=dataset)
+        conversation1 = baker.make(Conversation, user=user, agent=agent1, data_set=dataset)
+        conversation2 = baker.make(Conversation, user=user, agent=agent2, data_set=dataset)
+
+        response = api_client.get(url)
+
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 2
+        conversation_ids = [conv["id"] for conv in response.data["results"]]
+        assert conversation1.id in conversation_ids
+        assert conversation2.id in conversation_ids
+
+    def test_list_conversations_filters_by_agent_id(self, api_client, user, dataset, url):
+        agent1 = baker.make(Agent, deleted_at=None, dataset=dataset)
+        agent2 = baker.make(Agent, deleted_at=None, dataset=dataset)
+        conversation1 = baker.make(Conversation, user=user, agent=agent1, data_set=dataset)
+        baker.make(Conversation, user=user, agent=agent2, data_set=dataset)
+
+        response = api_client.get(url, {"agent_id": agent1.id})
+
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == conversation1.id
+        assert response.data["results"][0]["agent"]["id"] == agent1.id
+
+    def test_list_conversations_with_agent_id_returns_empty_when_no_matches(self, api_client, user, dataset, url):
+        agent1 = baker.make(Agent, deleted_at=None, dataset=dataset)
+        agent2 = baker.make(Agent, deleted_at=None, dataset=dataset)
+        baker.make(Conversation, user=user, agent=agent1, data_set=dataset)
+
+        response = api_client.get(url, {"agent_id": agent2.id})
+
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 0
+
+    def test_list_conversations_with_agent_id_only_returns_user_conversations(self, api_client, user, dataset, url):
+        other_user = baker.make(User)
+        agent = baker.make(Agent, deleted_at=None, dataset=dataset)
+        user_conversation = baker.make(Conversation, user=user, agent=agent, data_set=dataset)
+        baker.make(Conversation, user=other_user, agent=agent, data_set=dataset)
+
+        response = api_client.get(url, {"agent_id": agent.id})
+
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == user_conversation.id
+
+    def test_list_conversations_filters_by_data_set_id(self, api_client, user, url):
+        dataset1 = baker.make(DataSet, users=[user])
+        dataset2 = baker.make(DataSet, users=[user])
+        agent = baker.make(Agent, deleted_at=None, dataset=dataset1)
+        conversation1 = baker.make(Conversation, user=user, agent=agent, data_set=dataset1)
+        baker.make(Conversation, user=user, agent=agent, data_set=dataset2)
+
+        response = api_client.get(url, {"data_set_id": dataset1.id})
+
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == conversation1.id
+
+    def test_list_conversations_filters_by_data_set_id_and_agent_id(self, api_client, user, url):
+        dataset1 = baker.make(DataSet, users=[user])
+        dataset2 = baker.make(DataSet, users=[user])
+        agent1 = baker.make(Agent, deleted_at=None, dataset=dataset1)
+        agent2 = baker.make(Agent, deleted_at=None, dataset=dataset1)
+        conversation1 = baker.make(Conversation, user=user, agent=agent1, data_set=dataset1)
+        baker.make(Conversation, user=user, agent=agent2, data_set=dataset1)
+        baker.make(Conversation, user=user, agent=agent1, data_set=dataset2)
+
+        response = api_client.get(url, {"data_set_id": dataset1.id, "agent_id": agent1.id})
+
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == conversation1.id
+        assert response.data["results"][0]["agent"]["id"] == agent1.id
+
+    def test_list_conversations_with_data_set_id_returns_empty_when_no_matches(self, api_client, user, url):
+        dataset1 = baker.make(DataSet, users=[user])
+        dataset2 = baker.make(DataSet, users=[user])
+        agent = baker.make(Agent, deleted_at=None, dataset=dataset1)
+        baker.make(Conversation, user=user, agent=agent, data_set=dataset1)
+
+        response = api_client.get(url, {"data_set_id": dataset2.id})
+
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 0
+
+    def test_list_conversations_with_data_set_id_only_returns_user_conversations(self, api_client, user, url):
+        other_user = baker.make(User)
+        dataset = baker.make(DataSet, users=[user])
+        other_dataset = baker.make(DataSet, users=[other_user])
+        agent = baker.make(Agent, deleted_at=None, dataset=dataset)
+        user_conversation = baker.make(Conversation, user=user, agent=agent, data_set=dataset)
+        baker.make(Conversation, user=other_user, agent=agent, data_set=other_dataset)
+
+        response = api_client.get(url, {"data_set_id": dataset.id})
+
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["id"] == user_conversation.id

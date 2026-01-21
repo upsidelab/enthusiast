@@ -23,6 +23,7 @@ from sync.tasks import (
     sync_data_set_document_sources,
     sync_data_set_product_sources,
     sync_document_source,
+    sync_ecommerce_integration,
     sync_ecommerce_integrations,
     sync_product_source,
 )
@@ -519,7 +520,7 @@ class DataSetECommerceIntegrationView(GenericAPIView):
     )
     def post(self, request, *args, **kwargs):
         data_set_id = kwargs["data_set_id"]
-        
+
         if ECommerceIntegration.objects.filter(data_set_id=data_set_id).exists():
             return Response(
                 {"error": "Ecommerce integration already exists for this data set"},
@@ -527,8 +528,11 @@ class DataSetECommerceIntegrationView(GenericAPIView):
             )
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(data_set_id=data_set_id)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        ecommerce_integration = serializer.save(data_set_id=data_set_id)
+        task = sync_ecommerce_integration.apply_async(args=[ecommerce_integration.id])
+        response_data = dict(serializer.data)
+        response_data["task_id"] = task.task_id
+        return Response(response_data, status=status.HTTP_201_CREATED)
 
     @swagger_auto_schema(
         operation_description="Update the ecommerce integration for a data set",

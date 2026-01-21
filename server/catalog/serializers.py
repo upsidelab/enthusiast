@@ -80,9 +80,11 @@ class DocumentSourceSerializer(ParentDataContextSerializerMixin, serializers.Mod
 class ECommerceIntegrationSerializer(ParentDataContextSerializerMixin, serializers.ModelSerializer):
     context_keys_to_propagate = ["plugin_name"]
 
+    task_id = serializers.CharField(read_only=True, required=False, allow_null=True)
+
     class Meta:
         model = ECommerceIntegration
-        fields = ["id", "plugin_name", "config", "data_set_id"]
+        fields = ["id", "plugin_name", "config", "data_set_id", "task_id"]
 
 
 class SyncResponseSerializer(serializers.Serializer):

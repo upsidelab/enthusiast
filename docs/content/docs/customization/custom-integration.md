@@ -68,3 +68,43 @@ class UpCommerceProductSource(ProductSourcePlugin):
     def fetch(self) -> list[ProductDetails]:
         return [ProductDetails( ... )]
 ```
+
+## Building a Product Source Integration
+
+A Product Source enables one-way fetching of product data from an e-commerce or PIM system. 
+
+To build a product source, implement the [enthusiast_common.interfaces.ProductSourcePlugin](https://github.com/upsidelab/enthusiast/blob/main/plugins/enthusiast-common/enthusiast_common/interfaces.py#L36) interface.
+
+Your integration class must define the following static field:
+- `CONFIGURATION_ARGS` - A subclass of [enthusiast_common.utils.RequiredFieldsModel](https://github.com/upsidelab/enthusiast/blob/main/plugins/enthusiast-common/enthusiast_common/utils.py#L77) defining the integration's configuration schema.
+
+It should also implement the following method:
+- `fetch(self)` - Returns a list of [enthusiast_common.structures.ProductDetails](https://github.com/upsidelab/enthusiast/blob/main/plugins/enthusiast-common/enthusiast_common/structures.py#L19). These products will be indexed in Enthusiast.
+
+### Example Implementation
+
+```python
+class UpCommerceProductSource(ProductSourcePlugin):
+    def fetch(self) -> list[ProductDetails]:
+        return [ProductDetails( ... )]
+```
+
+## Building a Document Source Integration
+
+A Document Source enables one-way fetching of documents such as manuals, FAQs, or internal content.
+
+To build a document source, implement the [enthusiast_common.interfaces.DocumentSourcePlugin](https://github.com/upsidelab/enthusiast/blob/main/plugins/enthusiast-common/enthusiast_common/interfaces.py#L52) interface.
+
+Your integration class must define the following static field:
+- `CONFIGURATION_ARGS` - A subclass of [enthusiast_common.utils.RequiredFieldsModel](https://github.com/upsidelab/enthusiast/blob/main/plugins/enthusiast-common/enthusiast_common/utils.py#L77) defining the integration's configuration schema.
+
+It should also implement the following method:
+- `fetch(self)` - Returns a list of [enthusiast_common.structures.DocumentDetails](https://github.com/upsidelab/enthusiast/blob/main/plugins/enthusiast-common/enthusiast_common/structures.py#L31). These documents will be indexed in Enthusiast.
+
+### Example Implementation
+
+```python
+class UpCommerceDocumentSource(DocumentSourcePlugin):
+    def fetch(self) -> list[DocumentDetails]:
+        return [DocumentDetails( ... )]
+```

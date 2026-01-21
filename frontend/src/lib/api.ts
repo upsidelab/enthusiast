@@ -76,6 +76,11 @@ export class ApiClient {
   async getAllDocumentSourcePlugins(): Promise<SourcePlugin[]> {
     const response = await fetch(`${this.apiBase}/api/plugins/document_source_plugins?page_size=1000`, this._requestConfiguration());
     return (await response.json()).choices as SourcePlugin[];
+  }
+
+  async getAllEcommerceIntegrationPlugins(): Promise<SourcePlugin[]> {
+    const response = await fetch(`${this.apiBase}/api/plugins/ecommerce_integration_plugins?page_size=1000`, this._requestConfiguration());
+    return (await response.json()).choices as SourcePlugin[];
   }  
 
   catalog(): CatalogApiClient {

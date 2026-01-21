@@ -11,7 +11,7 @@ export function useSourceForm(
   source: CatalogSource | null,
   availablePlugins: SourcePlugin[],
   dataSetId: number | null,
-  sourceType: 'product' | 'document',
+  sourceType: 'ecommerce' | 'product' | 'document',
   onSuccess: () => void
 ) {
   const [pluginName, setPluginName] = useState("");
@@ -136,14 +136,18 @@ export function useSourceForm(
       
       if (sourceType === 'product') {
         await apiClient.dataSets().configureDataSetProductSource(updatedSource);
-      } else {
+      } else if (sourceType === 'document') {
         await apiClient.dataSets().configureDataSetDocumentSource(updatedSource);
+      } else if (sourceType === 'ecommerce') {
+        await apiClient.dataSets().configureDataSetECommerceIntegration(updatedSource);
       }
     } else {
       if (sourceType === 'product') {
         await apiClient.dataSets().addDataSetProductSource(dataSetId!, pluginName, configObj);
-      } else {
+      } else if (sourceType === 'document') {
         await apiClient.dataSets().addDataSetDocumentSource(dataSetId!, pluginName, configObj);
+      } else if (sourceType === 'ecommerce') {
+        await apiClient.dataSets().addDataSetECommerceIntegration(dataSetId!, pluginName, configObj);
       }
     }
     onSuccess();

@@ -61,6 +61,16 @@ urlpatterns = [
         views.SyncDataSetDocumentSourceView.as_view(),
         name="data_set_document_source_sync",
     ),
+    path(
+        "api/data_sets/<int:data_set_id>/ecommerce_integration",
+        views.DataSetECommerceIntegrationView.as_view(),
+        name="data_set_ecommerce_integration",
+    ),
+    path(
+        "api/data_sets/<int:data_set_id>/ecommerce_integration/sync",
+        views.DataSetECommerceIntegrationSyncView.as_view(),
+        name="data_set_ecommerce_integration_sync",
+    ),
     path("api/config", views.ConfigView.as_view(), name="config"),
     path(
         "api/config/language_model_providers/<str:provider_name>",

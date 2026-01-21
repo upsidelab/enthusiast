@@ -240,6 +240,8 @@ CATALOG_PRODUCT_SOURCE_PLUGINS = {
 CATALOG_DOCUMENT_SOURCE_PLUGINS = {
     "Sample Document Source": "enthusiast_source_sample.SampleDocumentSource",
 }
+CATALOG_ECOMMERCE_INTEGRATION_PLUGINS = []
+
 CATALOG_MODELS = {
     "user": "account.models.User",
     "message": "agent.models.Message",

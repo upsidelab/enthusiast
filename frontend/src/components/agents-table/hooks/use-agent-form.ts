@@ -124,6 +124,8 @@ export function useAgentForm(
         const defaults = createDefaultConfigValues(configSections);
         setConfig(defaults);
       }
+
+      setName(selected.name);
     };
 
     updateFormForSelectedType();

@@ -74,4 +74,4 @@ class MedusaProductSource(ProductSourcePlugin):
         return products
 
     def _build_api_client(self) -> MedusaAPIClient:
-        return MedusaAPIClient(self.CONFIGURATION_ARGS.base_url, self.CONFIGURATION_ARGS.api_key)
+        return MedusaAPIClient(self.CONFIGURATION_ARGS.base_url.rstrip("/"), self.CONFIGURATION_ARGS.api_key)

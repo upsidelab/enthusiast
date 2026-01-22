@@ -14,7 +14,6 @@ from account.models import User
 from account.serializers import UserSerializer
 from agent.core.registries.embeddings import EmbeddingProviderRegistry
 from agent.core.registries.language_models import LanguageModelRegistry
-from agent.models import Agent
 from sync.tasks import (
     sync_all_document_sources,
     sync_all_product_sources,
@@ -78,24 +77,6 @@ class DataSetListView(ListCreateAPIView):
         with transaction.atomic():
             data_set = serializer.save()
             data_set.users.add(self.request.user)
-            self.add_default_agent(data_set)
-
-    @staticmethod
-    def add_default_agent(data_set: DataSet):
-        default_agent = getattr(settings, "DEFAULT_AGENT", None)
-        if not default_agent:
-            return
-        if Agent.all_objects.filter(dataset=data_set).exists():
-            return
-        Agent.objects.create(
-            **{
-                "name": default_agent["name"],
-                "description": default_agent["description"],
-                "config": default_agent["config"],
-                "dataset": data_set,
-                "agent_type": default_agent["type"],
-            }
-        )
 
 
 class DataSetDetailView(RetrieveAPIView):

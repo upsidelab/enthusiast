@@ -3,16 +3,17 @@ import { DataSetSelector } from "@/components/navigation/data-set-selector.tsx";
 import { MainSidebarSection, SidebarSectionItemProps } from "@/components/navigation/main-sidebar-section.tsx";
 import {
   BookOpenIcon,
+  BookTextIcon,
   BotMessageSquareIcon,
   DatabaseIcon,
   FileTextIcon,
-  BookTextIcon,
+  HelpCircleIcon,
   HistoryIcon,
-  PlugZapIcon,
-  UserIcon, 
-  HelpCircleIcon, 
-  SparklesIcon,
   LinkIcon,
+  PlugZapIcon,
+  Settings2Icon,
+  SparklesIcon,
+  UserIcon,
 } from "lucide-react";
 import { UserMenu } from "@/components/navigation/user-menu.tsx";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
@@ -45,6 +46,21 @@ export function MainSidebar() {
       key: agent.id.toString(),
       icon: <BotMessageSquareIcon />
     }))),
+    ...(isLoadingAgents || availableAgents.length > 0 ? [] : [
+      {
+        title: "No Agents configured",
+        link: `/data-sets/${dataSetId}/agents?action=add`,
+        key: "no-agents-configured",
+        icon: <BotMessageSquareIcon />,
+        disabled: true
+      },
+      {
+        title: "Add Agent",
+        link: `/data-sets/${dataSetId}/agents?action=add`,
+        key: "configure-agent",
+        icon: <Settings2Icon />
+      }
+    ]),
     {
       title: "History",
       link: `/data-sets/${dataSetId}/history`,

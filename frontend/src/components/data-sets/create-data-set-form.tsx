@@ -16,6 +16,8 @@ export function CreateDataSetForm({ isOnboarding = false }: CreateDataSetFormPro
   const {setDataSets, setDataSetId} = useApplicationContext()!;
   const navigate = useNavigate();
 
+  const submitLabel = isOnboarding ? "Continue" : "Create"
+
   const handleSubmit = async (values: DataSetFormSchema) => {
     const createdDataSetId = await api.dataSets().createDataSet({ ...values, id: undefined } as DataSet);
     const dataSets = await api.dataSets().getDataSets();
@@ -28,7 +30,7 @@ export function CreateDataSetForm({ isOnboarding = false }: CreateDataSetFormPro
     <DataSetForm
       onSubmit={handleSubmit}
       isOnboarding={isOnboarding}
-      submitButtonText="Create"
+      submitButtonText={submitLabel}
     />
   );
 }

@@ -123,21 +123,23 @@ export function DataSetForm({ initialData, onSubmit, submitButtonText, isOnboard
       <form onSubmit={form.handleSubmit(handleSubmit)}>
         {disabledFields.length > 0 && <DisabledFieldMessage />}
         <div className="space-y-6">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({field}) => (
-              <FormItem>
-                <FormLabel>Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Name of the data set" {...field}/>
-                </FormControl>
-                <FormDescription>
-                  This is the name of the data set visible to your users
-                </FormDescription>
-              </FormItem>
-            )}
-          />
+          {!isOnboarding &&
+            <FormField
+              control={form.control}
+              name="name"
+              render={({field}) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Name of the data set" {...field}/>
+                  </FormControl>
+                  <FormDescription>
+                    This is the name of the data set visible to your users
+                  </FormDescription>
+                </FormItem>
+              )}
+            />
+          }
 
           <div>
             <Label>Language Model</Label>

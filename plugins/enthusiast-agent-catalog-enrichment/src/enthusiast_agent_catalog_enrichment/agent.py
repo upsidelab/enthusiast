@@ -4,7 +4,9 @@ from pydantic import Field, Json
 
 
 class ExtractDataPromptInput(RequiredFieldsModel):
-    output_format: Json = Field(title="Output format", description="Output format of the extracted data")
+    output_format: Json = Field(title="Output format",
+                                description="Output format of the extracted data",
+                                default='{"sku": "string", "name": "string"}')
 
 
 class CatalogEnrichmentToolCallingAgent(BaseToolCallingAgent):

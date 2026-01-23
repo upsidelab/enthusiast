@@ -9,11 +9,14 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from utils.functions import get_model_descriptor_default_value_from_class
 
 from account.models import User
 from account.serializers import UserSerializer
+from agent.core.registries.agents.agent_registry import AgentRegistry
 from agent.core.registries.embeddings import EmbeddingProviderRegistry
 from agent.core.registries.language_models import LanguageModelRegistry
+from agent.models import Agent
 from sync.tasks import (
     sync_all_document_sources,
     sync_all_product_sources,
@@ -77,6 +80,37 @@ class DataSetListView(ListCreateAPIView):
         with transaction.atomic():
             data_set = serializer.save()
             data_set.users.add(self.request.user)
+            if True:
+                self.create_available_agents(data_set)
+
+    @staticmethod
+    def create_available_agents(data_set: DataSet):
+        registry = AgentRegistry()
+
+        for agent_type, agent_details in settings.AVAILABLE_AGENTS.items():
+            if Agent.all_objects.filter(dataset=data_set, agent_type=agent_type).exists():
+                continue
+
+            agent_class = registry.get_agent_class_by_type(agent_type=agent_type)
+
+            agent_configuration = {
+                "agent_args": get_model_descriptor_default_value_from_class(agent_class, "AGENT_ARGS"),
+                "prompt_input": get_model_descriptor_default_value_from_class(agent_class, "PROMPT_INPUT"),
+                "prompt_extension": get_model_descriptor_default_value_from_class(agent_class, "PROMPT_EXTENSION"),
+                "tools": [
+                    get_model_descriptor_default_value_from_class(tool_config.tool_class, "CONFIGURATION_ARGS")
+                    for tool_config in agent_class.TOOLS
+                ],
+            }
+
+            Agent.objects.create(
+                **{
+                    "name": agent_details["name"],
+                    "description": agent_details.get("description", ''),
+                    "config": agent_configuration,
+                    "dataset": data_set,
+                    "agent_type": agent_type,
+                })
 
 
 class DataSetDetailView(RetrieveAPIView):

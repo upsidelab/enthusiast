@@ -26,7 +26,7 @@ export interface SourceWithType extends CatalogSource {
   type: 'product' | 'document' | 'ecommerce';
 }
 
-export function DataSetSourceList({ dataSetId }: DataSetSourceListProps) {
+export function DataSetIntegrationList({ dataSetId }: DataSetSourceListProps) {
   const [sources, setSources] = useState<SourceWithType[]>([]);
   const [productSourcePlugins, setProductSourcePlugins] = useState<SourcePlugin[]>([]);
   const [documentSourcePlugins, setDocumentSourcePlugins] = useState<SourcePlugin[]>([]);
@@ -143,14 +143,14 @@ export function DataSetSourceList({ dataSetId }: DataSetSourceListProps) {
 
   const hasProductPlugins = productSourcePlugins.length > 0;
   const hasDocumentPlugins = documentSourcePlugins.length > 0;
-  const hasEcommercePlugins = ecommerceIntegrationPlugins.length > 0;
+  const hasECommerceIntegrationPlugins = ecommerceIntegrationPlugins.length > 0;
 
   return (
     <div className="space-y-6">
       <div className="flex justify-end items-center">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button disabled={!hasProductPlugins && !hasDocumentPlugins && !hasEcommercePlugins}>
+            <Button disabled={!hasProductPlugins && !hasDocumentPlugins && !hasECommerceIntegrationPlugins}>
               <Plus className="h-4 w-4"/>
               Add integration
             </Button>
@@ -158,10 +158,10 @@ export function DataSetSourceList({ dataSetId }: DataSetSourceListProps) {
           <DropdownMenuContent align="end">
             <DropdownMenuItem
               onClick={() => setTimeout(() => handleAddSource('ecommerce'), 1)}
-              disabled={!hasEcommercePlugins}
+              disabled={!hasECommerceIntegrationPlugins}
             >
               E-Commerce system
-              {!hasEcommercePlugins && (
+              {!hasECommerceIntegrationPlugins && (
                 <span className="text-xs text-gray-500 ml-2">(No plugins available)</span>
               )}
             </DropdownMenuItem>
@@ -256,15 +256,15 @@ export function DataSetSourceList({ dataSetId }: DataSetSourceListProps) {
       ) : (
         <div className="text-center py-12">
           <div className="text-gray-500 mb-6">
-            <p className="text-lg font-medium">No sources configured</p>
-            <p className="text-sm">Add your first source to get started</p>
+            <p className="text-lg font-medium">No integrations configured</p>
+            <p className="text-sm">Connect an E-Commerce system to get started</p>
           </div>
           <Button
-            onClick={() => handleAddSource('product')}
-            disabled={!hasProductPlugins}
+            onClick={() => handleAddSource('ecommerce')}
+            disabled={!hasECommerceIntegrationPlugins}
           >
             <Plus className="h-4 w-4"/>
-            Add a product source
+            Connect E-Commerce system
           </Button>
         </div>
       )}

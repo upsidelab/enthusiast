@@ -15,14 +15,22 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
+export type IntegrationType = 'ecommerce' | 'product' | 'document';
+
 export interface AddEditSourceModalProps {
   dataSetId: number;
-  sourceType: 'ecommerce' | 'product' | 'document';
+  sourceType: IntegrationType;
   source: CatalogSource | null;
   availablePlugins: SourcePlugin[];
   open: boolean;
   onClose: () => void;
   onSave: () => void;
+}
+
+const titleByIntegrationType = {
+  "ecommerce": "E-Commerce system",
+  "product": "Product source",
+  "document": "Document source",
 }
 
 export function AddEditSourceModal({
@@ -67,7 +75,7 @@ export function AddEditSourceModal({
   };
 
   const isEditing = !!source;
-  const title = isEditing ? `Edit ${sourceType} source` : `Add ${sourceType} source`;
+  const title = isEditing ? `Edit ${titleByIntegrationType[sourceType]} connection` : `Connect ${titleByIntegrationType[sourceType]}`;
 
   return (
     <FormModal
@@ -94,7 +102,7 @@ export function AddEditSourceModal({
             name="pluginName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Plugin</FormLabel>
+                <FormLabel>Integration</FormLabel>
                 <Select 
                   onValueChange={(value) => {
                     field.onChange(value);
@@ -117,7 +125,7 @@ export function AddEditSourceModal({
                   </SelectContent>
                 </Select>
                 <FormDescription>
-                  Choose the plugin that will provide the data for this source.
+                  The connector to use.
                 </FormDescription>
                 {fieldErrors.pluginName && (
                   <p className="text-xs text-destructive">{fieldErrors.pluginName}</p>

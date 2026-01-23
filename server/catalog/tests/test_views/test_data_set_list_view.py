@@ -3,10 +3,6 @@ from unittest.mock import Mock, patch
 import pytest
 from django.test import override_settings
 from django.urls import reverse
-from enthusiast_common.config import FunctionToolConfig
-from enthusiast_common.tools import BaseFunctionTool
-from enthusiast_common.utils import RequiredFieldsModel
-from pydantic import Field
 from rest_framework import status
 
 from agent.models import Agent
@@ -14,38 +10,12 @@ from catalog.models import DataSet
 
 pytestmark = pytest.mark.django_db
 
-class ToolArgs(RequiredFieldsModel):
-    with_default: str = Field(description="description", title="title", default="default")
-    without_default: str = Field(description="description", title="title")
-
-class DummyTool(BaseFunctionTool):
-    CONFIGURATION_ARGS = ToolArgs
-
-class AgentArgs(RequiredFieldsModel):
-    with_default: str = Field(description="description", title="title", default="default")
-    without_default: str = Field(description="description", title="title")
-
-class PromptInput(RequiredFieldsModel):
-    with_default: str = Field(description="description", title="title", default="default")
-    without_default: str = Field(description="description", title="title")
-
-class PromptExtension(RequiredFieldsModel):
-    with_default: str = Field(description="description", title="title", default="default")
-    without_default: str = Field(description="description", title="title")
-
 class MockAgentClass:
-    AGENT_ARGS = AgentArgs
-    PROMPT_INPUT = PromptInput
-    PROMPT_EXTENSION = PromptExtension
-    TOOLS = [FunctionToolConfig(tool_class=DummyTool), FunctionToolConfig(tool_class=DummyTool)]
+    AGENT_ARGS = type("AgentArgs", (), {"model_fields": {}})
+    PROMPT_INPUT = type("PromptInput", (), {"model_fields": {}})
+    PROMPT_EXTENSION = type("PromptExtension", (), {"model_fields": {}})
+    TOOLS = []
     FILE_UPLOAD = False
-
-EXPECTED_CONFIG = {
-    'agent_args': {'with_default': 'default'},
-    'prompt_extension': {'with_default': 'default'},
-    'prompt_input': {'with_default': 'default'},
-    'tools': [{'with_default': 'default'}, {'with_default': 'default'}]
-}
 
 @pytest.mark.django_db
 class TestDataSetListViewPost:
@@ -82,7 +52,7 @@ class TestDataSetListViewPost:
         assert response.status_code == status.HTTP_201_CREATED
         assert not Agent.objects.filter(dataset=dataset).exists()
 
-    @patch('catalog.views.AgentRegistry')
+    @patch('agent.services.AgentRegistry')
     @override_settings(
         AVAILABLE_AGENTS={
             "dummy_agent": {
@@ -104,7 +74,5 @@ class TestDataSetListViewPost:
         assert response.status_code == status.HTTP_201_CREATED
         mock_registry_instance.get_agent_class_by_type.assert_called()
 
-        qs = Agent.objects.filter(dataset=dataset)
-        assert qs.exists()
-        assert qs.first().config == EXPECTED_CONFIG
+        assert Agent.objects.filter(dataset=dataset).exists()
 

@@ -25,12 +25,6 @@ export function MainSidebar() {
 
   const synchronizeItems: SidebarSectionItemProps[] = [
     {
-      title: "Integrations",
-      link: `/data-sets/${dataSetId}/integrations`,
-      key: "integrations",
-      icon: <LinkIcon />
-    },
-    {
       title: "Products",
       link: `/data-sets/${dataSetId}/products`,
       key: "products",
@@ -105,6 +99,12 @@ export function MainSidebar() {
         link: `/data-sets/${dataSetId}/agents`,
         key: "agents",
         icon: <BotMessageSquareIcon />
+      },
+      {
+        title: "Integrations",
+        link: `/data-sets/${dataSetId}/integrations`,
+        key: "integrations",
+        icon: <LinkIcon />
       },
   ]
 

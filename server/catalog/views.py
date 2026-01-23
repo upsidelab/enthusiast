@@ -14,7 +14,7 @@ from account.models import User
 from account.serializers import UserSerializer
 from agent.core.registries.embeddings import EmbeddingProviderRegistry
 from agent.core.registries.language_models import LanguageModelRegistry
-from agent.models import Agent
+from agent.services import AgentService
 from sync.tasks import (
     sync_all_document_sources,
     sync_all_product_sources,
@@ -30,6 +30,7 @@ from sync.tasks import (
 
 from .models import DataSet, DocumentSource, ECommerceIntegration, ProductSource
 from .serializers import (
+    DataSetCreateSerializer,
     DataSetSerializer,
     DocumentSerializer,
     DocumentSourceSerializer,
@@ -54,8 +55,12 @@ class SyncAllSourcesView(APIView):
 
 
 class DataSetListView(ListCreateAPIView):
-    serializer_class = DataSetSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return DataSetCreateSerializer
+        return DataSetSerializer
 
     @swagger_auto_schema(operation_description="List data sets")
     def get(self, request, *args, **kwargs):
@@ -67,7 +72,7 @@ class DataSetListView(ListCreateAPIView):
 
         return DataSet.objects.filter(users=self.request.user)
 
-    @swagger_auto_schema(operation_description="Create a new data set", request_body=DataSetSerializer)
+    @swagger_auto_schema(operation_description="Create a new data set", request_body=DataSetCreateSerializer)
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
@@ -76,26 +81,11 @@ class DataSetListView(ListCreateAPIView):
             self.permission_denied(self.request)
 
         with transaction.atomic():
+            preconfigure_agents = serializer.validated_data.pop("preconfigure_agents")
             data_set = serializer.save()
             data_set.users.add(self.request.user)
-            self.add_default_agent(data_set)
-
-    @staticmethod
-    def add_default_agent(data_set: DataSet):
-        default_agent = getattr(settings, "DEFAULT_AGENT", None)
-        if not default_agent:
-            return
-        if Agent.all_objects.filter(dataset=data_set).exists():
-            return
-        Agent.objects.create(
-            **{
-                "name": default_agent["name"],
-                "description": default_agent["description"],
-                "config": default_agent["config"],
-                "dataset": data_set,
-                "agent_type": default_agent["type"],
-            }
-        )
+            if preconfigure_agents:
+                AgentService.preconfigure_available_agents(data_set)
 
 
 class DataSetDetailView(RetrieveAPIView):

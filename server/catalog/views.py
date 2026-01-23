@@ -64,7 +64,6 @@ class DataSetListView(ListCreateAPIView):
             return DataSetCreateSerializer
         return DataSetSerializer
 
-
     @swagger_auto_schema(operation_description="List data sets")
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)

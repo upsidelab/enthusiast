@@ -21,23 +21,17 @@ class ToolArgs(RequiredFieldsModel):
 class DummyTool(BaseFunctionTool):
     CONFIGURATION_ARGS = ToolArgs
 
-
 class AgentArgs(RequiredFieldsModel):
     with_default: str = Field(description="description", title="title", default="default")
     without_default: str = Field(description="description", title="title")
-
-
 
 class PromptInput(RequiredFieldsModel):
     with_default: str = Field(description="description", title="title", default="default")
     without_default: str = Field(description="description", title="title")
 
-
-
 class PromptExtension(RequiredFieldsModel):
     with_default: str = Field(description="description", title="title", default="default")
     without_default: str = Field(description="description", title="title")
-
 
 class MockAgentClass:
     AGENT_ARGS = AgentArgs
@@ -101,7 +95,6 @@ class TestDataSetListViewPost:
                                                                 admin_api_client,
                                                                 url,
                                                                 payload_preconfigure_agents):
-
         mock_registry_instance = Mock()
         mock_registry_instance.get_agent_class_by_type.return_value = self.MOCK_AGENT_CLASS
         mock_agent_registry.return_value = mock_registry_instance

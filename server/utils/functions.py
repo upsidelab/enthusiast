@@ -1,6 +1,8 @@
 import importlib
 from typing import Any, get_args, get_origin
 
+from pydantic_core import PydanticUndefined
+
 
 def import_from_string(path: str):
     module_path, class_name = path.rsplit(".", 1)
@@ -46,5 +48,7 @@ def get_model_descriptor_default_value_from_class(class_obj: Any, field_name: st
         return {}
     args = {}
     for field_name, field in model.model_fields.items():
+        if field.default is None or field.default is PydanticUndefined:
+            continue
         args[field_name] = field.default
     return args

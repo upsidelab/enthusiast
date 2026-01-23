@@ -19,7 +19,7 @@ export function CreateDataSetForm({ isOnboarding = false }: CreateDataSetFormPro
   const submitLabel = isOnboarding ? "Continue" : "Create"
 
   const handleSubmit = async (values: DataSetFormSchema) => {
-    const createdDataSetId = await api.dataSets().createDataSet({ ...values, id: undefined } as DataSet);
+    const createdDataSetId = await api.dataSets().createDataSet({ ...values, id: undefined } as DataSet, values.preconfigureAgents);
     const dataSets = await api.dataSets().getDataSets();
     setDataSets(dataSets);
     setDataSetId(createdDataSetId);

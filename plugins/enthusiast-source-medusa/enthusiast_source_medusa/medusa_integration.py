@@ -1,3 +1,5 @@
+from typing import Optional
+
 from enthusiast_common.connectors import ECommercePlatformConnector
 from enthusiast_common.interfaces import ECommerceIntegrationPlugin, ProductSourcePlugin
 from enthusiast_common.utils import RequiredFieldsModel
@@ -10,6 +12,7 @@ from .medusa_product_source import MedusaProductSource
 class MedusaIntegrationConfig(RequiredFieldsModel):
     base_url: str = Field(description="Medusa API URL")
     api_key: str = Field(description="Medusa API Key")
+    admin_base_url: Optional[str] = Field(description="(Optional) Medusa Admin URL, if different than the API URL", default=None)
 
 
 class MedusaIntegration(ECommerceIntegrationPlugin):
@@ -18,7 +21,8 @@ class MedusaIntegration(ECommerceIntegrationPlugin):
 
     def build_connector(self) -> ECommercePlatformConnector:
         return MedusaPlatformConnector(base_url=self.CONFIGURATION_ARGS.base_url,
-                                       api_key=self.CONFIGURATION_ARGS.api_key)
+                                       api_key=self.CONFIGURATION_ARGS.api_key,
+                                       admin_base_url=self.CONFIGURATION_ARGS.admin_base_url or self.CONFIGURATION_ARGS.base_url)
 
     def build_product_source(self) -> ProductSourcePlugin:
         source = MedusaProductSource(self.data_set_id)

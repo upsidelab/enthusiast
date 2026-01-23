@@ -50,10 +50,6 @@ class RequiredFieldsMeta(ModelMetaclass):
 
     def __new__(cls, name, bases, namespace):
         new_cls = super().__new__(cls, name, bases, namespace)
-        for field_name, field in getattr(new_cls, "model_fields", {}).items():
-            origin = get_origin(field.annotation)
-            if origin is Union:
-                raise TypeError(f"Union/Optional type not allowed for field '{field_name}' in {name}")
 
         def check_type_depth(annotation: Any, current_depth=1):
             if current_depth > cls.MAX_DEPTH:

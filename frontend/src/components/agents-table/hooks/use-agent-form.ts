@@ -125,7 +125,9 @@ export function useAgentForm(
         setConfig(defaults);
       }
 
-      setName(selected.name);
+      if (!agent) {
+        setName(selected.name);
+      }
     };
 
     updateFormForSelectedType();

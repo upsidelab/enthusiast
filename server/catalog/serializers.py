@@ -21,6 +21,12 @@ class DataSetSerializer(serializers.ModelSerializer):
             "embedding_vector_dimensions",
         ]
 
+class DataSetCreateSerializer(DataSetSerializer):
+    preconfigure_agents = serializers.BooleanField(write_only=True, required=False, default=False)
+
+    class Meta(DataSetSerializer.Meta):
+        fields = DataSetSerializer.Meta.fields + ["preconfigure_agents"]
+
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:

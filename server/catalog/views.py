@@ -32,6 +32,7 @@ from sync.tasks import (
 
 from .models import DataSet, DocumentSource, ECommerceIntegration, ProductSource
 from .serializers import (
+    DataSetCreateSerializer,
     DataSetSerializer,
     DocumentSerializer,
     DocumentSourceSerializer,
@@ -56,8 +57,13 @@ class SyncAllSourcesView(APIView):
 
 
 class DataSetListView(ListCreateAPIView):
-    serializer_class = DataSetSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return DataSetCreateSerializer
+        return DataSetSerializer
+
 
     @swagger_auto_schema(operation_description="List data sets")
     def get(self, request, *args, **kwargs):
@@ -69,7 +75,7 @@ class DataSetListView(ListCreateAPIView):
 
         return DataSet.objects.filter(users=self.request.user)
 
-    @swagger_auto_schema(operation_description="Create a new data set", request_body=DataSetSerializer)
+    @swagger_auto_schema(operation_description="Create a new data set", request_body=DataSetCreateSerializer)
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
@@ -78,9 +84,10 @@ class DataSetListView(ListCreateAPIView):
             self.permission_denied(self.request)
 
         with transaction.atomic():
+            preconfigure_agents = serializer.validated_data.pop("preconfigure_agents", False)
             data_set = serializer.save()
             data_set.users.add(self.request.user)
-            if True:
+            if preconfigure_agents:
                 self.create_available_agents(data_set)
 
     @staticmethod

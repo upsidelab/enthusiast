@@ -1,12 +1,8 @@
-import {
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-} from "@/components/ui/sidebar.tsx";
+import { SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, } from "@/components/ui/sidebar.tsx";
 import { ReactNode } from "react";
 import { MainSidebarMenuItem } from "@/components/navigation/main-sidebar-menu-item.tsx";
 import { MainSidebarMenuDropdownItem } from "@/components/navigation/main-sidebar-menu-dropdown-item.tsx";
+import { MainSidebarMenuSimpleItem } from "@/components/navigation/main-sidebar-menu-simple-item.tsx";
 
 export interface SidebarSectionItemProps {
   title: string;
@@ -14,6 +10,7 @@ export interface SidebarSectionItemProps {
   key: string;
   icon: ReactNode,
   children?: SidebarSectionItemProps[];
+  disabled?: boolean;
 }
 
 export interface SidebarSectionProps {
@@ -31,8 +28,10 @@ export function MainSidebarSection({ title, items, className }: SidebarSectionPr
           {items.map((item) => {
             if (item.children) {
               return <MainSidebarMenuDropdownItem key={item.key} item={item}/>
-            } else {
+            } else if (!item.disabled) {
               return <MainSidebarMenuItem key={item.key} item={item}/>
+            } else {
+              return <MainSidebarMenuSimpleItem key={item.key} item={item} />
             }
           })}
         </SidebarMenu>

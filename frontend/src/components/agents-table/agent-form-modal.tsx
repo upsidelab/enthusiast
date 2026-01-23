@@ -83,7 +83,7 @@ export function AgentFormModal({
 
       <div className="flex flex-col gap-1">
         <Label htmlFor="agent-type">Type</Label>
-        <Select value={type} onValueChange={setType} disabled={agentTypes.length == 0}>
+        <Select value={type} onValueChange={setType} disabled={agentTypes.length == 0 || !!agent}>
           <SelectTrigger id="agent-type" className={fieldErrors.type ? "border-destructive" : ""}>
             <SelectValue placeholder="Select type"/>
           </SelectTrigger>

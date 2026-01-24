@@ -11,7 +11,9 @@ export type DataSetResponse = {
   embedding_vector_dimensions: number;
 }
 
-export type CreateDataSetPayload = DataSetResponse;
+export type CreateDataSetPayload = DataSetResponse & {
+  preconfigure_agents: boolean;
+};
 
 export type UpdateDataSetPayload = {
   id: number | undefined;
@@ -51,7 +53,7 @@ export class DataSetsApiClient extends BaseApiClient {
     return (await response.json()).results as DataSet[];
   }
 
-  async createDataSet(dataSet: DataSet): Promise<number> {
+  async createDataSet(dataSet: DataSet, preconfigureAgents: boolean): Promise<number> {
     const body: CreateDataSetPayload = {
       id: undefined,
       name: dataSet.name,
@@ -60,6 +62,7 @@ export class DataSetsApiClient extends BaseApiClient {
       embedding_provider: dataSet.embeddingProvider,
       embedding_model: dataSet.embeddingModel,
       embedding_vector_dimensions: dataSet.embeddingVectorSize,
+      preconfigure_agents: preconfigureAgents,
     }
 
     const response = await fetch(`${this.apiBase}/api/data_sets`,

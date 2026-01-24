@@ -53,6 +53,7 @@ export function DataSetForm({ initialData, onSubmit, submitButtonText, isOnboard
       embeddingProvider: initialData?.embeddingProvider || undefined,
       embeddingModel: initialData?.embeddingModel || undefined,
       embeddingVectorSize: initialData?.embeddingVectorSize || 512,
+      preconfigureAgents: isOnboarding,
     }
   });
 

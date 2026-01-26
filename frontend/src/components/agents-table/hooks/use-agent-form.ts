@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ApiClient } from "@/lib/api";
 import { authenticationProviderInstance } from "@/lib/authentication-provider";
 import { Agent } from "@/lib/types";
@@ -261,7 +261,7 @@ export function useAgentForm(
     }
   };
 
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setName("");
     setDescription("");
     setType("");
@@ -270,7 +270,8 @@ export function useAgentForm(
     setOpenSections({});
     setFieldErrors({});
     setGeneralError("");
-  };
+  }, []);
+
 
   return {
     name,

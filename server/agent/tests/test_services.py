@@ -47,6 +47,10 @@ class MockAgentClass:
     FILE_UPLOAD = False
 
 
+class MockAgentClassFileUpload(MockAgentClass):
+    FILE_UPLOAD = True
+
+
 class MockAgentClassWithoutDefaults:
     AGENT_ARGS = AgentArgsWithoutDefaults
     PROMPT_INPUT = None
@@ -78,15 +82,25 @@ class TestAgentService:
     def dataset(self):
         return DataSet.objects.create(name="Test Dataset")
 
+    @pytest.mark.parametrize(
+        "agent_class, expected_file_upload_flag",
+        [
+            (MockAgentClass, False),
+            (MockAgentClassFileUpload, True),
+        ],
+    )
     @patch.object(AgentRegistry, "get_agent_class_by_type")
-    def test_preconfigure_available_agents_creates_agents(self, mock_agent_registry, dataset):
-        mock_agent_registry.return_value = MockAgentClass
+    def test_preconfigure_available_agents_creates_agents(
+        self, mock_agent_registry, agent_class, expected_file_upload_flag, dataset
+    ):
+        mock_agent_registry.return_value = agent_class
 
         AgentService.preconfigure_available_agents(dataset)
 
-        qs = Agent.objects.filter(dataset=dataset)
-        assert Agent.objects.filter(dataset=dataset).exists()
-        assert qs.first().config == EXPECTED_AGENT_CONFIG
+        agent = Agent.objects.filter(dataset=dataset).first()
+        assert agent
+        assert agent.config == EXPECTED_AGENT_CONFIG
+        assert agent.file_upload is expected_file_upload_flag
 
     @patch.object(AgentRegistry, "get_agent_class_by_type")
     def test_preconfigure_available_agents_skip_agents_without_defaults(self, mock_agent_registry, dataset):

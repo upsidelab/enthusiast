@@ -1,21 +1,30 @@
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 from django.test import override_settings
 from django.urls import reverse
+from enthusiast_common.utils import RequiredFieldsModel
+from pydantic import Field
 from rest_framework import status
 
+from agent.core.registries.agents.agent_registry import AgentRegistry
 from agent.models import Agent
 from catalog.models import DataSet
 
 pytestmark = pytest.mark.django_db
 
+
+class TestArgs(RequiredFieldsModel):
+    test: str = Field(default="")
+
+
 class MockAgentClass:
-    AGENT_ARGS = type("AgentArgs", (), {"model_fields": {}})
-    PROMPT_INPUT = type("PromptInput", (), {"model_fields": {}})
-    PROMPT_EXTENSION = type("PromptExtension", (), {"model_fields": {}})
+    AGENT_ARGS = TestArgs
+    PROMPT_INPUT = TestArgs
+    PROMPT_EXTENSION = TestArgs
     TOOLS = []
     FILE_UPLOAD = False
+
 
 @pytest.mark.django_db
 class TestDataSetListViewPost:
@@ -52,27 +61,23 @@ class TestDataSetListViewPost:
         assert response.status_code == status.HTTP_201_CREATED
         assert not Agent.objects.filter(dataset=dataset).exists()
 
-    @patch('agent.services.AgentRegistry')
+    @patch.object(AgentRegistry, "get_agent_class_by_type")
     @override_settings(
         AVAILABLE_AGENTS={
             "dummy_agent": {
                 "name": "Dummy Agent",
                 "agent_directory_path": "dummy_agent_directory_path",
             }
-        })
-    def test_staff_dataset_creation_with_agent_preconfiguration(self,
-                                                                mock_agent_registry,
-                                                                admin_api_client,
-                                                                url,
-                                                                payload_preconfigure_agents):
-        mock_registry_instance = Mock()
-        mock_registry_instance.get_agent_class_by_type.return_value = self.MOCK_AGENT_CLASS
-        mock_agent_registry.return_value = mock_registry_instance
+        }
+    )
+    def test_staff_dataset_creation_with_agent_preconfiguration(
+        self, mock_agent_registry, admin_api_client, url, payload_preconfigure_agents
+    ):
+        mock_agent_registry.return_value = self.MOCK_AGENT_CLASS
         response = admin_api_client.post(url, payload_preconfigure_agents, format="json")
 
         dataset = DataSet.objects.get(name="New DataSet")
         assert response.status_code == status.HTTP_201_CREATED
-        mock_registry_instance.get_agent_class_by_type.assert_called()
+        mock_agent_registry.assert_called()
 
         assert Agent.objects.filter(dataset=dataset).exists()
-

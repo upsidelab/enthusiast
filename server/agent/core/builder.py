@@ -16,7 +16,13 @@ from enthusiast_common.connectors import ECommercePlatformConnector
 from enthusiast_common.injectors import BaseInjector
 from enthusiast_common.registry import BaseDBModelsRegistry, BaseEmbeddingProviderRegistry, BaseLanguageModelRegistry
 from enthusiast_common.retrievers import BaseRetriever
-from enthusiast_common.tools import BaseAgentTool, BaseFileTool, BaseFunctionTool, BaseLLMTool
+from enthusiast_common.tools import (
+    BaseAgentTool,
+    BaseFileTool,
+    BaseFunctionTool,
+    BaseLLMTool,
+    BaseWidgetResponseLLMTool,
+)
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
@@ -109,6 +115,11 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
             if isinstance(tool_config, FunctionToolConfig):
                 tools.append(self._build_function_tool(config=tool_config))
             elif isinstance(tool_config, LLMToolConfig):
+                if issubclass(tool_config.tool_class, BaseWidgetResponseLLMTool):
+                    tools.append(
+                        self._build_widget_llm_tool(config=tool_config, default_llm=default_llm, injector=injector)
+                    )
+                    continue
                 tools.append(self._build_llm_tool(config=tool_config, injector=injector, default_llm=default_llm))
             elif isinstance(tool_config, AgentToolConfig):
                 tools.append(self._build_agent_tool(config=tool_config))
@@ -127,11 +138,15 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         llm = default_llm
         if config.llm:
             llm = config.llm
-        return config.tool_class(
-            data_set_id=self._data_set_id,
-            llm=llm,
-            injector=injector,
-        )
+        return config.tool_class(data_set_id=self._data_set_id, llm=llm, injector=injector)
+
+    def _build_widget_llm_tool(
+        self, config: LLMToolConfig, default_llm: BaseLanguageModel, injector: BaseInjector
+    ) -> BaseLLMTool:
+        llm = default_llm
+        if config.llm:
+            llm = config.llm
+        return config.tool_class(data_set_id=self._data_set_id, llm=llm, injector=injector, streaming=self.streaming)
 
     def _build_file_tool(
         self, config: FileToolConfig, default_llm: BaseLanguageModel, injector: BaseInjector
@@ -165,6 +180,7 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
             repositories=self._repositories,
             chat_summary_memory=chat_summary_memory,
             chat_limited_memory=chat_limited_memory,
+            callbacks_handler=self._agent_callback_handler,
         )
 
     def _build_agent_callback_handler(self) -> Optional[BaseCallbackHandler]:

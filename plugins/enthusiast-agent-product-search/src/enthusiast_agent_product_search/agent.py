@@ -3,10 +3,12 @@ from enthusiast_common.config.base import LLMToolConfig
 
 from .tools import ProductExamplesTool
 from .tools import ProductSQLSearchTool
+from .tools import PresentProductsTool
 
 
 class ProductSearchToolCallingAgent(BaseToolCallingAgent):
     TOOLS = [
         LLMToolConfig(tool_class=ProductSQLSearchTool),
         LLMToolConfig(tool_class=ProductExamplesTool),
+        LLMToolConfig(tool_class=PresentProductsTool),
     ]

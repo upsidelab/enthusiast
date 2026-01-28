@@ -49,6 +49,9 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
         return response["draft_order"]["id"]
 
     def get_product_by_sku(self, sku: str) -> ProductDetails | None:
+        # On Medusa side, variants do have "sku" field, but it is not possible to filter products by that field.
+        # The reason for this is that Medusa treats the SKU as an internal-purpose identifier, whereas the EAN is
+        # treated as an external one. That is why EAN is treated as a counterpart of the of SKU on the Medusa side.
         params = { "variants[ean][]": sku }
         response = self._client.get("/admin/products", params=params)
         products_data = response.get("products", [])
@@ -71,6 +74,7 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
             "variants": [
                 {
                     "title": product_details.name,
+                    # SKU persisted as EAN on Medusa side. See the comment in get_product_by_sku for details.
                     "ean": product_details.sku,
                     "prices": [
                         {
@@ -101,6 +105,7 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
                 {
                     "id": variant_id,
                     "title": product_details.name,
+                    # SKU persisted as EAN on Medusa side. See the comment in get_product_by_sku for details.
                     "ean": product_details.sku,
                     "prices": [
                         {

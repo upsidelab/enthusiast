@@ -4,6 +4,7 @@ from typing import Optional
 from enthusiast_common.connectors import ECommercePlatformConnector
 from enthusiast_common.structures import Address, ProductDetails
 
+from .medusa_product_source import MedusaProductSource
 from .medusa_api_client import MedusaAPIClient
 
 logger = logging.getLogger(__name__)
@@ -59,7 +60,7 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
         if len(products_data) == 0:
             return None
 
-        return self._parse_response_to_product_details(products_data[0])
+        return MedusaProductSource.get_product(products_data[0])
 
 
     def create_product(self, product_details: ProductDetails) -> str:
@@ -167,16 +168,3 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
 
     def _get_default_store_data(self):
         return self._client.get("/admin/stores")["stores"][0]
-
-    @staticmethod
-    def _parse_response_to_product_details(response: dict) -> ProductDetails:
-        return ProductDetails(
-            entry_id=response['id'],
-            name=response['title'],
-            slug=response['handle'],
-            description=response['description'],
-            sku=response['variants'][0]['ean'],
-            properties='',
-            categories='',
-            price=response['variants'][0]['prices'][0]['amount'],
-        )

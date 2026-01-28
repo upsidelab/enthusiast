@@ -2,7 +2,7 @@ import logging
 from typing import Optional
 
 from enthusiast_common.connectors import ECommercePlatformConnector
-from enthusiast_common.structures import Address, ProductDetails
+from enthusiast_common.structures import Address, ProductDetails, ProductUpdateDetails
 
 from .medusa_product_source import MedusaProductSource
 from .medusa_api_client import MedusaAPIClient
@@ -90,33 +90,43 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
         response = self._client.post("/admin/products", payload)
         return response["product"]["id"]
 
-    def update_product(self, sku: str, product_details: ProductDetails) -> bool:
+    def update_product(self, sku: str, product_details: ProductUpdateDetails) -> bool:
         product_details_before_update = self.get_product_by_sku(sku)
 
         if not product_details_before_update:
             return False
 
+        def remove_none_values(d: dict) -> dict:
+            return {k: v for k, v in d.items() if v is not None}
+
         variant_id = self._get_default_variant_id_for_product_id(product_details_before_update.entry_id)
 
-        payload = {
+        payload = remove_none_values({
             "title": product_details.name,
             "description": product_details.description,
             "handle": product_details.slug,
-            "variants": [
-                {
-                    "id": variant_id,
-                    "title": product_details.name,
-                    # SKU persisted as EAN on Medusa side. See the comment in get_product_by_sku for details.
-                    "ean": product_details.sku,
-                    "prices": [
-                        {
-                            "currency_code": self._get_default_store_currency_code(),
-                            "amount": product_details.price,
-                        }
-                    ]
-                }
-            ],
-        }
+        })
+
+        variant = remove_none_values({
+            "id": variant_id,
+            "title": product_details.name,
+            # SKU persisted as EAN on Medusa side. See the comment in get_product_by_sku for details.
+            "ean": product_details.sku,
+            "prices": (
+                [{
+                    "currency_code": self._get_default_store_currency_code(),
+                    "amount": product_details.price,
+                }]
+                if product_details.price is not None
+                else None
+            ),
+        })
+
+        if len(variant) > 1:
+            payload["variants"] = [variant]
+
+        if len(payload) == 0:
+            return False
 
         self._client.post(f"/admin/products/{product_details_before_update.entry_id}", payload)
         return True

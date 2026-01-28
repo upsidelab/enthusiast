@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from enthusiast_common.structures import Address, ProductDetails
+from enthusiast_common.structures import Address, ProductDetails, ProductUpdateDetails
 
 
 class ECommercePlatformConnector(ABC):
@@ -29,7 +29,7 @@ class ECommercePlatformConnector(ABC):
         pass
 
     @abstractmethod
-    def update_product(self, sku: str, product_details: ProductDetails) -> bool:
+    def update_product(self, sku: str, product_details: ProductUpdateDetails) -> bool:
         pass
 
     @abstractmethod

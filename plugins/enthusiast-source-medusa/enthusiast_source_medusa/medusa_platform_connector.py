@@ -52,7 +52,31 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
         raise NotImplementedError
 
     def create_product(self, product_details: ProductDetails) -> str:
-        raise NotImplementedError
+        payload = {
+            "title": product_details.name,
+            "description": product_details.description,
+            "handle": product_details.slug,
+            "options": [{
+                "title": "Default",
+                "values": ["Default"],
+            }],
+            "variants": [
+                {
+                    "title": product_details.name,
+                    "sku": product_details.sku,
+                    "prices": [
+                        {
+                            "currency_code": self._get_default_store_currency_code(),
+                            "amount": product_details.price,
+                        }
+                    ]
+                }
+            ],
+            "external_id": product_details.entry_id,
+        }
+
+        response = self._client.post("/admin/products", payload)
+        return response["product"]["id"]
 
     def update_product(self, sku: str, product_details: ProductDetails) -> bool:
         raise NotImplementedError
@@ -92,3 +116,14 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
 
     def _get_default_variant_id_for_product_id(self, product_id: str) -> str:
         return self._client.get(f"/admin/products/{product_id}")["product"]["variants"][0]["id"]
+
+    def _get_default_store_currency_code(self) -> str:
+        store_data = self._get_default_store_data()
+        default_currency = next(
+            (currency for currency in store_data['supported_currencies'] if currency.get("is_default") is True),
+            None
+        )
+        return default_currency["currency_code"]
+
+    def _get_default_store_data(self):
+        return self._client.get("/admin/stores")["stores"][0]

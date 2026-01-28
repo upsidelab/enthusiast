@@ -25,7 +25,8 @@ class MedusaProductSource(ProductSourcePlugin):
         """
         super().__init__(data_set_id)
 
-    def get_product(self, medusa_product) -> ProductDetails:
+    @staticmethod
+    def get_product(medusa_product) -> ProductDetails:
         """Translates product definition received from Medusa into Enthusiast product.
 
         Args:
@@ -38,7 +39,7 @@ class MedusaProductSource(ProductSourcePlugin):
             name=medusa_product.get("title"),
             slug=medusa_product.get("handle"),
             description=medusa_product.get("description"),
-            sku=(medusa_product.get("variants") or [{}])[0].get("sku") or "",
+            sku=(medusa_product.get("variants") or [{}])[0].get("ean") or "",
             price=medusa_product.get("variants", [{}])[0].get("prices", [{}])[0].get("amount")
             if medusa_product.get("variants")
             else None,

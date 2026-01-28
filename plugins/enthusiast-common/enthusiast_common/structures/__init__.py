@@ -7,7 +7,8 @@ from .document_details import DocumentDetails
 from .file_types import FileTypes
 from .llm_file import LLMFile
 from .product_details import ProductDetails
+from .product_update_details import ProductUpdateDetails
 from .repositories_instances import RepositoriesInstances
 from .text_content import TextContent
 
-__all__ = ["Address", "BaseContent", "BaseFileContent", "BaseImageContent", "DocumentChunkDetails", "DocumentDetails", "FileTypes", "LLMFile", "ProductDetails", "RepositoriesInstances", "TextContent"]
+__all__ = ["Address", "BaseContent", "BaseFileContent", "BaseImageContent", "DocumentChunkDetails", "DocumentDetails", "FileTypes", "LLMFile", "ProductDetails", "ProductUpdateDetails", "RepositoriesInstances", "TextContent"]

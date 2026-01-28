@@ -2,8 +2,9 @@ import logging
 from typing import Optional
 
 from enthusiast_common.connectors import ECommercePlatformConnector
-from enthusiast_common.structures import Address, ProductDetails
+from enthusiast_common.structures import Address, ProductDetails, ProductUpdateDetails
 
+from .medusa_product_source import MedusaProductSource
 from .medusa_api_client import MedusaAPIClient
 
 logger = logging.getLogger(__name__)
@@ -48,14 +49,88 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
         response = self._client.post("/admin/draft-orders", payload)
         return response["draft_order"]["id"]
 
-    def get_product_by_sku(self, sku: str) -> ProductDetails:
-        raise NotImplementedError
+    def get_product_by_sku(self, sku: str) -> ProductDetails | None:
+        # On Medusa side, variants do have "sku" field, but it is not possible to filter products by that field.
+        # The reason for this is that Medusa treats the SKU as an internal-purpose identifier, whereas the EAN is
+        # treated as an external one. That is why EAN is treated as a counterpart of the of SKU on the Medusa side.
+        params = { "variants[ean][]": sku }
+        response = self._client.get("/admin/products", params=params)
+        products_data = response.get("products", [])
+
+        if len(products_data) == 0:
+            return None
+
+        return MedusaProductSource.get_product(products_data[0])
+
 
     def create_product(self, product_details: ProductDetails) -> str:
-        raise NotImplementedError
+        payload = {
+            "title": product_details.name,
+            "description": product_details.description,
+            "handle": product_details.slug,
+            "options": [{
+                "title": "Default",
+                "values": ["Default"],
+            }],
+            "variants": [
+                {
+                    "title": product_details.name,
+                    # SKU persisted as EAN on Medusa side. See the comment in get_product_by_sku for details.
+                    "ean": product_details.sku,
+                    "prices": [
+                        {
+                            "currency_code": self._get_default_store_currency_code(),
+                            "amount": product_details.price,
+                        }
+                    ]
+                }
+            ],
+        }
 
-    def update_product(self, sku: str, product_details: ProductDetails) -> bool:
-        raise NotImplementedError
+        response = self._client.post("/admin/products", payload)
+        return response["product"]["id"]
+
+    def update_product(self, sku: str, product_details: ProductUpdateDetails) -> bool:
+        product_details_before_update = self.get_product_by_sku(sku)
+
+        if not product_details_before_update:
+            return False
+
+        def remove_none_values(d: dict) -> dict:
+            return {k: v for k, v in d.items() if v is not None}
+
+        variant_id = self._get_default_variant_id_for_product_id(product_details_before_update.entry_id)
+
+        payload = remove_none_values({
+            "title": product_details.name,
+            "description": product_details.description,
+            "handle": product_details.slug,
+        })
+
+        variant = remove_none_values({
+            "id": variant_id,
+            "title": product_details.name,
+            # SKU persisted as EAN on Medusa side. See the comment in get_product_by_sku for details.
+            "ean": product_details.sku,
+            "prices": (
+                [{
+                    "currency_code": self._get_default_store_currency_code(),
+                    "amount": product_details.price,
+                }]
+                if product_details.price is not None
+                else None
+            ),
+        })
+
+        if len(variant) > 1:
+            payload["variants"] = [variant]
+
+        if len(payload) == 0:
+            return False
+
+        self._client.post(f"/admin/products/{product_details_before_update.entry_id}", payload)
+        return True
+
 
     def get_admin_url_for_order_id(self, order_id: str) -> str:
         return f"{self._admin_base_url}/app/draft-orders/{order_id}"
@@ -92,3 +167,14 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
 
     def _get_default_variant_id_for_product_id(self, product_id: str) -> str:
         return self._client.get(f"/admin/products/{product_id}")["product"]["variants"][0]["id"]
+
+    def _get_default_store_currency_code(self) -> str:
+        store_data = self._get_default_store_data()
+        default_currency = next(
+            (currency for currency in store_data['supported_currencies'] if currency.get("is_default") is True),
+            None
+        )
+        return default_currency["currency_code"]
+
+    def _get_default_store_data(self):
+        return self._client.get("/admin/stores")["stores"][0]

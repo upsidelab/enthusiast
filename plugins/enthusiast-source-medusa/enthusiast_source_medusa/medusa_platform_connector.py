@@ -48,8 +48,16 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
         response = self._client.post("/admin/draft-orders", payload)
         return response["draft_order"]["id"]
 
-    def get_product_by_sku(self, sku: str) -> ProductDetails:
-        raise NotImplementedError
+    def get_product_by_sku(self, sku: str) -> ProductDetails | None:
+        params = { "variants[ean][]": sku }
+        response = self._client.get("/admin/products", params=params)
+        products_data = response.get("products", [])
+
+        if len(products_data) == 0:
+            return None
+
+        return self._parse_response_to_product(products_data[0])
+
 
     def create_product(self, product_details: ProductDetails) -> str:
         payload = {
@@ -63,7 +71,7 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
             "variants": [
                 {
                     "title": product_details.name,
-                    "sku": product_details.sku,
+                    "ean": product_details.sku,
                     "prices": [
                         {
                             "currency_code": self._get_default_store_currency_code(),
@@ -72,14 +80,41 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
                     ]
                 }
             ],
-            "external_id": product_details.entry_id,
         }
 
         response = self._client.post("/admin/products", payload)
         return response["product"]["id"]
 
     def update_product(self, sku: str, product_details: ProductDetails) -> bool:
-        raise NotImplementedError
+        product_details_before_update = self.get_product_by_sku(sku)
+
+        if not product_details_before_update:
+            return False
+
+        variant_id = self._get_default_variant_id_for_product_id(product_details_before_update.entry_id)
+
+        payload = {
+            "title": product_details.name,
+            "description": product_details.description,
+            "handle": product_details.slug,
+            "variants": [
+                {
+                    "id": variant_id,
+                    "title": product_details.name,
+                    "ean": product_details.sku,
+                    "prices": [
+                        {
+                            "currency_code": self._get_default_store_currency_code(),
+                            "amount": product_details.price,
+                        }
+                    ]
+                }
+            ],
+        }
+
+        self._client.post(f"/admin/products/{product_details_before_update.entry_id}", payload)
+        return True
+
 
     def get_admin_url_for_order_id(self, order_id: str) -> str:
         return f"{self._admin_base_url}/app/draft-orders/{order_id}"
@@ -127,3 +162,16 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
 
     def _get_default_store_data(self):
         return self._client.get("/admin/stores")["stores"][0]
+
+    @staticmethod
+    def _parse_response_to_product(response: dict) -> ProductDetails:
+        return ProductDetails(
+            entry_id=response['id'],
+            name=response['title'],
+            slug=response['handle'],
+            description=response['description'],
+            sku=response['variants'][0]['ean'],
+            properties='',
+            categories='',
+            price=response['variants'][0]['prices'][0]['amount'],
+        )

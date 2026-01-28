@@ -21,7 +21,7 @@ class ECommercePlatformConnector(ABC):
         pass
 
     @abstractmethod
-    def get_product_by_sku(self, sku: str) -> ProductDetails:
+    def get_product_by_sku(self, sku: str) -> ProductDetails | None:
         pass
 
     @abstractmethod

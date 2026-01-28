@@ -56,7 +56,7 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
         if len(products_data) == 0:
             return None
 
-        return self._parse_response_to_product(products_data[0])
+        return self._parse_response_to_product_details(products_data[0])
 
 
     def create_product(self, product_details: ProductDetails) -> str:
@@ -164,7 +164,7 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
         return self._client.get("/admin/stores")["stores"][0]
 
     @staticmethod
-    def _parse_response_to_product(response: dict) -> ProductDetails:
+    def _parse_response_to_product_details(response: dict) -> ProductDetails:
         return ProductDetails(
             entry_id=response['id'],
             name=response['title'],

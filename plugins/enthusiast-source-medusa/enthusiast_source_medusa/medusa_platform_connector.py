@@ -1,4 +1,5 @@
 import logging
+import json
 from typing import Optional
 
 from enthusiast_common.connectors import ECommercePlatformConnector
@@ -64,14 +65,16 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
 
 
     def create_product(self, product_details: ProductDetails) -> str:
+        variant_options = self._parse_properties_to_variant_options(product_details.properties)
+
         payload = {
             "title": product_details.name,
             "description": product_details.description,
             "handle": product_details.slug,
-            "options": [{
-                "title": "Default",
-                "values": ["Default"],
-            }],
+            "options":
+                self._parse_variant_options_to_product_options(variant_options)
+                if variant_options else
+                self._default_product_options(),
             "variants": [
                 {
                     "title": product_details.name,
@@ -87,6 +90,9 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
             ],
         }
 
+        if variant_options:
+            payload["variants"][0]["options"] = variant_options
+
         response = self._client.post("/admin/products", payload)
         return response["product"]["id"]
 
@@ -100,16 +106,19 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
             return {k: v for k, v in d.items() if v is not None}
 
         variant_id = self._get_default_variant_id_for_product_id(product_details_before_update.entry_id)
+        variant_options = self._parse_properties_to_variant_options(product_details.properties)
 
         payload = remove_none_values({
             "title": product_details.name,
             "description": product_details.description,
             "handle": product_details.slug,
+            "options": self._parse_variant_options_to_product_options(variant_options) if variant_options else None
         })
 
         variant = remove_none_values({
             "id": variant_id,
             "title": product_details.name,
+            "options": variant_options,
             # SKU persisted as EAN on Medusa side. See the comment in get_product_by_sku for details.
             "ean": product_details.sku,
             "prices": (
@@ -178,3 +187,20 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
 
     def _get_default_store_data(self):
         return self._client.get("/admin/stores")["stores"][0]
+
+    @staticmethod
+    def _parse_properties_to_variant_options(properties: str):
+        # ProductDetails.properties is expected to be a JSON string (e.g. '{"property": "value"}').
+        # If parsing fails, the connector assumes there are no properties to create or update.
+        try:
+            return json.loads(properties) if properties else None
+        except (TypeError, json.JSONDecodeError):
+            return None
+
+    @staticmethod
+    def _parse_variant_options_to_product_options(variant_options: dict[str, str]) -> list[dict[str, str | list[str]]]:
+        return [ {"title": property_name, "values": [value] } for property_name, value in variant_options.items() ]
+
+    @staticmethod
+    def _default_product_options() -> list[dict[str, str | list[str]]]:
+        return [{ "title": "Default", "values": ["Default"] }]

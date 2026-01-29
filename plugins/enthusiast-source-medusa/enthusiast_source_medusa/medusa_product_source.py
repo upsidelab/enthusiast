@@ -1,9 +1,11 @@
 import base64
+from typing import Any
 
 import requests
 from enthusiast_common import ProductDetails, ProductSourcePlugin
 from enthusiast_common.utils import RequiredFieldsModel
 from pydantic import Field
+import json
 
 from .medusa_api_client import MedusaAPIClient
 
@@ -25,7 +27,8 @@ class MedusaProductSource(ProductSourcePlugin):
         """
         super().__init__(data_set_id)
 
-    def get_product(self, medusa_product) -> ProductDetails:
+    @staticmethod
+    def get_product(medusa_product: dict[str, Any]) -> ProductDetails:
         """Translates product definition received from Medusa into Enthusiast product.
 
         Args:
@@ -38,15 +41,20 @@ class MedusaProductSource(ProductSourcePlugin):
             name=medusa_product.get("title"),
             slug=medusa_product.get("handle"),
             description=medusa_product.get("description"),
-            sku=(medusa_product.get("variants") or [{}])[0].get("sku") or "",
+            sku=(medusa_product.get("variants") or [{}])[0].get("ean") or "",
             price=medusa_product.get("variants", [{}])[0].get("prices", [{}])[0].get("amount")
             if medusa_product.get("variants")
             else None,
-            properties=medusa_product.get("metadata", None) or "",
+            properties=MedusaProductSource._parse_properties(medusa_product.get("variants", [{}])[0].get('options', {})),
             categories=(medusa_product.get("collection") or {}).get("title", ""),
         )
 
         return product
+
+    @staticmethod
+    def _parse_properties(raw_properties: list[dict[str, str|dict]]) -> str:
+        properties = { raw_property["option"]["title"]: raw_property["value"]  for raw_property in raw_properties}
+        return json.dumps(properties)
 
     def fetch(self) -> list[ProductDetails]:
         """Fetch product list.

@@ -6,7 +6,11 @@ from pydantic import Field, Json
 
 
 class InvoiceScanningReActAgentPromptInput(RequiredFieldsModel):
-    output_format: Json = Field(title="Output format", description="Output format of the extracted data")
+    output_format: Json = Field(
+        title="Output format",
+        description="Output format of the extracted data",
+        default='{"invoice_number": "string", "issued_at": "string", "supplier_name": "string", "gross_amount": "number"}',
+    )
 
 
 class InvoiceScanningReActAgent(BaseReActAgent):

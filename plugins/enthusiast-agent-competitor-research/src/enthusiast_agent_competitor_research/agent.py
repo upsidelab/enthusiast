@@ -3,11 +3,15 @@ from enthusiast_common.config import LLMToolConfig
 from enthusiast_common.utils import RequiredFieldsModel
 from pydantic import Field, Json
 
-from ..tools.extract_website_data import ExtractWebsiteDataTool
+from .tools.extract_website_data import ExtractWebsiteDataTool
 
 
 class CompetitorResearchToolCallingAgentPromptInput(RequiredFieldsModel):
-    output_format: Json = Field(title="Output format", description="Output format of the extracted data")
+    output_format: Json = Field(
+        title="Output format",
+        description="Output format of the extracted data",
+        default='{"sku": "string", "name": "string"}',
+    )
 
 
 class CompetitorResearchToolCallingAgent(BaseToolCallingAgent):

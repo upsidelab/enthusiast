@@ -8,9 +8,9 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.10,<4"
 dependencies = [
-    "enthusiast-common (>=1.4.0,<2.0.0)",
+    "enthusiast-common (>=1.5.0,<2.0.0)",
     "langchain (>=0.3.26,<0.4.0)",
-    "enthusiast_agent_re_act (>=1.3.1)",
+    "enthusiast_agent_re_act (>=1.3.0)",
     "enthusiast_agent_tool_calling (>=1.0.0)",
 ]
 

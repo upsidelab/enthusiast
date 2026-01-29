@@ -1,4 +1,5 @@
 import base64
+from typing import Any
 
 import requests
 from enthusiast_common import ProductDetails, ProductSourcePlugin
@@ -27,7 +28,7 @@ class MedusaProductSource(ProductSourcePlugin):
         super().__init__(data_set_id)
 
     @staticmethod
-    def get_product(medusa_product) -> ProductDetails:
+    def get_product(medusa_product: dict[str, Any]) -> ProductDetails:
         """Translates product definition received from Medusa into Enthusiast product.
 
         Args:

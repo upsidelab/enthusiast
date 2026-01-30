@@ -1,7 +1,7 @@
 from enthusiast_agent_tool_calling import BaseToolCallingAgent
 from enthusiast_common.utils import RequiredFieldsModel
 from enthusiast_common.config.base import LLMToolConfig
-from .tools.update_product_properties_tool import UpdateProductPropertiesTool
+from .tools.update_product_properties_tool import UpsertProductDetailsTool
 from pydantic import Field, Json
 
 
@@ -15,7 +15,7 @@ class CatalogEnrichmentToolCallingAgent(BaseToolCallingAgent):
     PROMPT_INPUT = ExtractDataPromptInput
     FILE_UPLOAD = True
     TOOLS = [
-        LLMToolConfig(tool_class=UpdateProductPropertiesTool),
+        LLMToolConfig(tool_class=UpsertProductDetailsTool),
     ]
 
     def get_answer(self, input_text: str) -> str:

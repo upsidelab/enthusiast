@@ -44,6 +44,8 @@ class ExtraArgsClassBase(metaclass=AgentExtraArgsClassBaseMeta):
 
 
 class BaseAgent(ABC, ExtraArgsClassBase):
+    NAME = None
+    TYPE = None
     AGENT_ARGS = None
     PROMPT_INPUT = None
     PROMPT_EXTENSION = None

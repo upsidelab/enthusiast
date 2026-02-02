@@ -253,12 +253,11 @@ class AgentTypesView(APIView):
     def get(self, request):
         agent_registry = AgentRegistry()
         choices = []
-        for key, value in settings.AVAILABLE_AGENTS.items():
-            agent_class = agent_registry.get_agent_class_by_type(agent_type=key)
+        for agent_class in agent_registry.get_plugin_classes():
             choices.append(
                 {
-                    "name": value["name"],
-                    "key": key,
+                    "name": agent_class.NAME,
+                    "key": agent_class.TYPE,
                     "agent_args": get_model_descriptor_from_class_field(agent_class, "AGENT_ARGS"),
                     "prompt_input": get_model_descriptor_from_class_field(agent_class, "PROMPT_INPUT"),
                     "prompt_extension": get_model_descriptor_from_class_field(agent_class, "PROMPT_EXTENSION"),

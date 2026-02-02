@@ -1,10 +1,10 @@
-import inspect
 import logging
 from abc import ABC, abstractmethod
 from importlib import import_module
-from typing import Any, Type, TypeVar
+from typing import Any, Type
 
 from django.conf import settings
+
 from enthusiast_common.agents import BaseAgent
 from enthusiast_common.builder import BaseAgentBuilder
 from enthusiast_common.config import AgentConfig
@@ -12,8 +12,7 @@ from enthusiast_common.config import AgentConfig
 from agent.core.agents.default_config import merge_config
 from agent.core.builder import AgentBuilder
 from agent.models import Conversation
-
-T = TypeVar("T", bound=BaseAgentBuilder)
+from utils.base_registry import BaseRegistry
 
 logger = logging.getLogger(__name__)
 
@@ -46,8 +45,14 @@ class BaseAgentRegistry(ABC):
     def get_agent_class_by_type(self, *args, **kwargs) -> Type[BaseAgent]:
         pass
 
+    @abstractmethod
+    def get_agent_class_by_path(self, *args, **kwargs) -> Type[BaseAgent]:
+        pass
 
-class AgentRegistry(BaseAgentRegistry):
+
+class AgentRegistry(BaseAgentRegistry, BaseRegistry[BaseAgent]):
+    plugin_base = BaseAgent
+
     def __init__(self):
         agents_config = settings.AVAILABLE_AGENTS
         super().__init__(agents_config)
@@ -61,22 +66,19 @@ class AgentRegistry(BaseAgentRegistry):
         except Exception as e:
             raise AgentRegistryError(f"Failed to build agent for conversation {conversation.id}") from e
 
-    def get_agent_class_by_type(self, agent_type: str) -> Type[BaseAgent]:
-        agent_directory_path = self._get_agent_directory_path(agent_type)
-        agent_module_path = f"{agent_directory_path}.agent"
-        try:
-            agent_module = import_module(agent_module_path)
-        except ModuleNotFoundError as e:
-            raise AgentImportError(f"Cannot import module '{agent_module_path}' for agent '{agent_type}'.") from e
+    def get_plugin_paths(self) -> list[str]:
+        return settings.AVAILABLE_AGENTS
 
-        agents = [
-            cls
-            for _, cls in inspect.getmembers(agent_module, inspect.isclass)
-            if issubclass(cls, BaseAgent) and cls.__module__ == agent_module.__name__
-        ]
+    def get_agent_class_by_type(self, agent_type: str) -> Type[BaseAgent]:
+        agents = [agent for agent in self.get_plugin_classes() if agent.TYPE == agent_type]
+
         if not agents:
-            raise AgentNotFoundError(f"No valid agent classes found in module '{agent_module_path}'.")
+            raise AgentNotFoundError(f"Could not find agent type '{agent_type}'.")
+
         return agents[0]
+
+    def get_agent_class_by_path(self, path: str) -> Type[BaseAgent]:
+        return self.get_plugin_class_by_path(path=path)
 
     def _get_agent_directory_path(self, agent_type: str) -> str:
         try:

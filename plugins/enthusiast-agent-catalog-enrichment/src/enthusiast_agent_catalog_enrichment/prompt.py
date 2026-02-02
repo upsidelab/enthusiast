@@ -25,8 +25,19 @@ EXTRACTION RULES:
 
 UPSERT TOOL RULES:
 - Use the upsert tool whenever sufficient verified data exists.
+- ALWAYS upsert products in a SINGLE BATCH call when multiple products or variants are available.
+- Do NOT call the upsert tool separately for individual products unless the tool explicitly
+  requires single-product input.
 - Pass ONLY fields defined in {data_format}.
 - Do NOT return JSON, text, or simulated responses when calling the tool.
+- The upsert tool will explicitly report success or failure for each product in the batch.
+- If the tool reports failures, it will include the reason for each failed product.
+- If the upsert fails for one or more products due to missing or insufficient information,
+  you may ask the user for the specific additional details required to proceed.
+- When asking the user for more information:
+  - Be precise and request only the attributes needed.
+  - Ask for missing information one attribute at a time.
+  - Request ONLY attributes defined in {data_format}.
 
 In all tool calls, specify exactly what you are requesting or upserting.
 """

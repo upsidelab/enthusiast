@@ -1,5 +1,6 @@
 import logging
-from typing import Optional
+import json
+from typing import Optional, List
 
 from enthusiast_common import ProductDetails
 from enthusiast_common.connectors import ECommercePlatformConnector
@@ -25,10 +26,15 @@ class UpsertProductDetailsInput(BaseModel):
     to the remaining defined properties""")
 
 
+class UpsertProductBatchInput(BaseModel):
+    products: List[UpsertProductDetailsInput] = Field(
+        description="List of products to upsert"
+    )
+
 class UpsertProductDetailsTool(BaseLLMTool):
     NAME = "upsert_product_properties"
-    DESCRIPTION = "It's tool for creating/updating product properties based on product sku and passed property names and values"
-    ARGS_SCHEMA = UpsertProductDetailsInput
+    DESCRIPTION = "Tool for creating or updating products based on product SKUs and their properties."
+    ARGS_SCHEMA = UpsertProductBatchInput
     RETURN_DIRECT = False
 
     def __init__(
@@ -42,40 +48,40 @@ class UpsertProductDetailsTool(BaseLLMTool):
         self.llm = llm
         self.injector = injector
 
-    def run(self,
-            product_sku: str,
-            name: Optional[str] = None,
-            slug: Optional[str] = None,
-            description: Optional[str] = None,
-            price: Optional[float] = None,
-            categories: Optional[str] = None,
-            property_values_by_property_name_as_json: Optional[str] = None
-            ) -> Optional[str]:
+    def run(self, products: List[UpsertProductDetailsInput]) -> str:
         ecommerce_platform_connector = self.injector.ecommerce_platform_connector
 
         if not ecommerce_platform_connector:
             return "The user needs to configure an ecommerce platform connector first"
 
-        product_details = ProductUpdateDetails(
-            name=name,
-            slug=slug,
-            description=description,
-            price=price,
-            categories=categories,
-            properties=property_values_by_property_name_as_json
-        )
+        response = {}
 
-        try:
-            product_exists = ecommerce_platform_connector.get_product_by_sku(product_sku) is not None
+        for product in products:
+            product_sku = product.product_sku
+            product_details = ProductUpdateDetails(
+                name=product.name,
+                slug=product.slug,
+                description=product.description,
+                price=product.price,
+                categories=product.categories,
+                properties=product.property_values_by_property_name_as_json
+            )
+            product_upsert_result = ''
 
-            if product_exists:
-                self._update_product_details(ecommerce_platform_connector, product_sku, product_details)
-            else:
-                self._create_product(ecommerce_platform_connector, product_sku, product_details)
+            try:
+                product_exists = ecommerce_platform_connector.get_product_by_sku(product_sku) is not None
 
-        except Exception as e:
-            logger.error(e)
-            return f"Error: {str(e)}"
+                if product_exists:
+                    product_upsert_result = self._update_product_details(ecommerce_platform_connector, product_sku, product_details)
+                else:
+                    product_upsert_result = self._create_product(ecommerce_platform_connector, product_sku, product_details)
+
+            except Exception as e:
+                logger.error(e)
+                product_upsert_result =  f"Error: {str(e)}"
+
+            response[product_sku] = product_upsert_result
+        return json.dumps(response)
 
     @staticmethod
     def _update_product_details(connector: ECommercePlatformConnector,

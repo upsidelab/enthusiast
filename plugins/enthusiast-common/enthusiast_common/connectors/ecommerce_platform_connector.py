@@ -8,6 +8,8 @@ class ECommercePlatformConnector(ABC):
     """This is a basic interface for a platform connector, that allows agents to interact with e-commerce systems
     though a unified interface."""
 
+    required_product_create_fields: set[str] = set()
+
     @abstractmethod
     def create_empty_order(self, email: Optional[str] = None, address: Optional[Address] = None) -> str:
         pass
@@ -35,3 +37,12 @@ class ECommercePlatformConnector(ABC):
     @abstractmethod
     def get_admin_url_for_order_id(self, order_id: str) -> str:
         pass
+
+    def validate_create_product_data(self, product: ProductDetails) -> None:
+        missing = [
+            field for field in self.required_product_create_fields
+            if getattr(product, field) is None
+        ]
+
+        if missing:
+            raise ValueError(f"Missing required product fields: {missing}")

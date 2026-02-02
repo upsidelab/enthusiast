@@ -87,11 +87,10 @@ class UpsertProductDetailsTool(BaseLLMTool):
         else:
             return "Failed to update product properties"
 
-    def _create_product(self,
-                        connector: ECommercePlatformConnector,
+    @staticmethod
+    def _create_product(connector: ECommercePlatformConnector,
                         product_sku: str,
                         product_details: ProductUpdateDetails) -> str:
-
 
         product_create_details = ProductDetails(
             entry_id='',
@@ -104,31 +103,6 @@ class UpsertProductDetailsTool(BaseLLMTool):
             price=product_details.price,
         )
 
-        self._raise_missing_create_details(product_create_details)
-
         connector.create_product(product_create_details)
 
         return "Product created successfully"
-
-    @staticmethod
-    def _raise_missing_create_details(product_details: ProductDetails) -> None:
-        property_by_name = {
-            "sku": product_details.sku,
-            "name": product_details.name,
-            "slug": product_details.slug,
-            "description": product_details.description,
-            "properties": product_details.properties,
-            "categories": product_details.categories,
-            "price": product_details.price,
-        }
-
-        missing_properties = []
-
-        for key, value in property_by_name.items():
-            if value is None:
-                missing_properties.append(key)
-
-        if len(missing_properties) == 0:
-            return
-
-        raise Exception("Could not create product because of missing properties: " + str(missing_properties))

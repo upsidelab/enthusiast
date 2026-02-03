@@ -4,22 +4,16 @@ from importlib import import_module
 from typing import Type, Generic, TypeVar, List
 
 T = TypeVar("T")
+U = TypeVar("U")
 
 class BaseRegistry(ABC, Generic[T]):
-
     plugin_base: Type[T]
 
-    @abstractmethod
-    def get_plugin_paths(self) -> list[str]:
-        pass
+    def _get_plugin_class_by_path(self, path: str) -> Type[T]:
+        return self._get_class_by_path(path, self.plugin_base)
 
-    def get_plugin_classes(self) -> List[Type[T]]:
-        return [self.get_plugin_class_by_path(path) for path in self.get_plugin_paths()]
-
-    def get_plugin_classes_by_names(self) -> dict[str, Type[T]]:
-        return { plugin_class.NAME: plugin_class for plugin_class in self.get_plugin_classes() }
-
-    def get_plugin_class_by_path(self, path: str) -> Type[T]:
+    @staticmethod
+    def _get_class_by_path(path: str, base_class: Type[U]) -> Type[U]:
         module_path, plugin_name = path.rsplit(".", 1)
         try:
             plugin_module = import_module(module_path)
@@ -28,7 +22,7 @@ class BaseRegistry(ABC, Generic[T]):
         plugins = [
             cls_name
             for cls_name, cls in inspect.getmembers(plugin_module, inspect.isclass)
-            if issubclass(cls, self.plugin_base) and cls_name == plugin_name
+            if issubclass(cls, base_class) and cls_name == plugin_name
         ]
         if not plugins:
             raise ValueError(f"No valid plugin classes found in module '{module_path}'.")

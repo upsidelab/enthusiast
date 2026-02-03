@@ -1,31 +1,20 @@
-import inspect
-from importlib import import_module
 from typing import Type
 
 from django.conf import settings
 from enthusiast_common import DocumentSourcePlugin
 
 from sync.base import SourcePluginRegistry
+from utils.base_registry import BaseRegistry
 
 
-class DocumentSourcePluginRegistry(SourcePluginRegistry):
+class DocumentSourcePluginRegistry(SourcePluginRegistry, BaseRegistry[DocumentSourcePlugin]):
     """Registry of document source plugins."""
+
+    plugin_base = DocumentSourcePlugin
 
     def get_plugins(self):
         return settings.CATALOG_DOCUMENT_SOURCE_PLUGINS.items()
 
     def get_plugin_class_by_name(self, name: str) -> Type[DocumentSourcePlugin]:
         path = settings.CATALOG_DOCUMENT_SOURCE_PLUGINS[name]
-        module_path, plugin_name = path.rsplit(".", 1)
-        try:
-            plugin_module = import_module(module_path)
-        except ModuleNotFoundError as e:
-            raise ModuleNotFoundError(f"Cannot import module '{module_path}'.") from e
-        plugins = [
-            cls_name
-            for cls_name, cls in inspect.getmembers(plugin_module, inspect.isclass)
-            if issubclass(cls, DocumentSourcePlugin) and cls_name == plugin_name
-        ]
-        if not plugins:
-            raise ValueError(f"No valid plugin classes found in module '{module_path}'.")
-        return getattr(plugin_module, plugins[0])
+        return self._get_plugin_class_by_path(path)

@@ -75,7 +75,7 @@ class PromptExtension(RequiredFieldsModel):
     optional_test: str = Field(description="description", title="title", default="default")
 
 
-class DummyAgent:
+class DummyAgentBase:
     AGENT_ARGS = AgentArgs
     PROMPT_INPUT = PromptInput
     PROMPT_EXTENSION = PromptExtension
@@ -83,22 +83,25 @@ class DummyAgent:
     FILE_UPLOAD = False
 
 
+class DummyAgent1(DummyAgentBase):
+    TYPE = "agent_1"
+    NAME = "dummy agent 1"
+
+class DummyAgent2(DummyAgentBase):
+    TYPE = "agent_2"
+    NAME = "dummy agent 2"
+    AGENT_ARGS = AgentArgs
+    PROMPT_INPUT = PromptInput
+    PROMPT_EXTENSION = PromptExtension
+    TOOLS = [FunctionToolConfig(tool_class=DummyTool), FunctionToolConfig(tool_class=DummyTool)]
+    FILE_UPLOAD = False
+
+AGENT_CLASSES = [DummyAgent1, DummyAgent2]
+
+
 @pytest.fixture(autouse=True)
 def django_settings(settings):
-    settings.AVAILABLE_AGENTS = {
-        "agent_1": {
-            "name": "Agent 1",
-            "agent": "agent_path_1",
-            "config": "config_path_1",
-            "builder": "builder_path_1",
-        },
-        "agent_2": {
-            "name": "Agent 2",
-            "agent": "agent_path_2",
-            "config": "config_path_2",
-            "builder": "builder_path_2",
-        },
-    }
+    settings.AVAILABLE_AGENTS = ['agent_path_1.Agent1', 'agent_path_2.Agent2']
 
 
 @pytest.fixture
@@ -126,7 +129,7 @@ def config():
 class TestAgentTypesView:
     def test_get_agent_types_returns_200(self, api_client):
         url = reverse("agent-types")
-        with patch("agent.views.AgentRegistry.get_agent_class_by_type", return_value=DummyAgent):
+        with patch("agent.views.AgentRegistry.get_plugin_classes", return_value=AGENT_CLASSES):
             response = api_client.get(url)
 
             assert response.status_code == status.HTTP_200_OK
@@ -241,7 +244,7 @@ class TestAgentView:
             "agent_type": "agent_1",
         }
 
-        with patch("agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_type", return_value=DummyAgent):
+        with patch("agent.serializers.customs.fields.AgentRegistry.get_plugin_classes", return_value=AGENT_CLASSES):
             response = api_client.post(url, payload, format="json")
 
             assert response.status_code == status.HTTP_201_CREATED
@@ -276,7 +279,7 @@ class TestAgentView:
             "agent_type": "agent_1",
         }
 
-        with patch("agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_type", return_value=DummyAgent):
+        with patch("agent.serializers.customs.fields.AgentRegistry.get_plugin_classes", return_value=AGENT_CLASSES):
             response = api_client.post(url, payload, format="json")
 
             assert response.status_code == status.HTTP_201_CREATED
@@ -383,7 +386,7 @@ class TestAgentDetailsView:
             "dataset": dataset.id,
             "agent_type": "agent_1",
         }
-        with patch("agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_type", return_value=DummyAgent):
+        with patch("agent.serializers.customs.fields.AgentRegistry.get_plugin_classes", return_value=AGENT_CLASSES):
             response = api_client.put(url, payload, format="json")
 
             assert response.status_code == status.HTTP_200_OK
@@ -420,7 +423,7 @@ class TestAgentDetailsView:
             "dataset": dataset.id,
             "agent_type": "agent_1",
         }
-        with patch("agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_type", return_value=DummyAgent):
+        with patch("agent.serializers.customs.fields.AgentRegistry.get_plugin_classes", return_value=AGENT_CLASSES):
             response = api_client.put(url, payload, format="json")
 
             assert response.status_code == status.HTTP_200_OK

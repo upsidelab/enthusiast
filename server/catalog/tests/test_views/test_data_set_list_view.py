@@ -19,6 +19,8 @@ class TestArgs(RequiredFieldsModel):
 
 
 class MockAgentClass:
+    TYPE = "dummy_agent_type"
+    NAME= "Dummy Agent"
     AGENT_ARGS = TestArgs
     PROMPT_INPUT = TestArgs
     PROMPT_EXTENSION = TestArgs
@@ -61,19 +63,14 @@ class TestDataSetListViewPost:
         assert response.status_code == status.HTTP_201_CREATED
         assert not Agent.objects.filter(dataset=dataset).exists()
 
-    @patch.object(AgentRegistry, "get_agent_class_by_type")
+    @patch.object(AgentRegistry, "get_plugin_classes")
     @override_settings(
-        AVAILABLE_AGENTS={
-            "dummy_agent": {
-                "name": "Dummy Agent",
-                "agent_directory_path": "dummy_agent_directory_path",
-            }
-        }
+        AVAILABLE_AGENTS=['dummy_agent_directory_path.DummyAgent']
     )
     def test_staff_dataset_creation_with_agent_preconfiguration(
         self, mock_agent_registry, admin_api_client, url, payload_preconfigure_agents
     ):
-        mock_agent_registry.return_value = self.MOCK_AGENT_CLASS
+        mock_agent_registry.return_value = [self.MOCK_AGENT_CLASS]
         response = admin_api_client.post(url, payload_preconfigure_agents, format="json")
 
         dataset = DataSet.objects.get(name="New DataSet")

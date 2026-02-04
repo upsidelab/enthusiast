@@ -48,9 +48,7 @@ def agent_context():
 
 @pytest.fixture
 def available_agents():
-    return {
-        "dummy_agent": {"agent": "dummy.path.AgentClass"},
-    }
+    return [ "dummy_path.AgentClass" ]
 
 
 @patch("agent.core.registries.agents.agent_registry.settings")

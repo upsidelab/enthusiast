@@ -9,6 +9,7 @@ class AccountSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     email = serializers.EmailField()
     is_staff = serializers.BooleanField()
+    is_limited_admin = serializers.BooleanField()
 
 
 class UserSerializer(serializers.Serializer):

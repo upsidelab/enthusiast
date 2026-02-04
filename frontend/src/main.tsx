@@ -37,7 +37,7 @@ const protectedLoginLoader = async () => {
 
   if (apiDataSets.length === 0) {
     const accountData = await api.getAccount();
-    if (accountData.isStaff) {
+    if (accountData.isStaff || accountData.isLimitedAdmin) {
       return redirect("/onboarding");
     } else {
       return redirect("/no-data-sets");

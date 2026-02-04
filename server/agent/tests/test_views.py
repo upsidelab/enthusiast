@@ -12,9 +12,11 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from account.models import User
+from account.services import UserService
 from agent.models import Conversation
 from agent.models.agent import Agent
 from catalog.models import DataSet
+from catalog.utils import AdminRole
 
 pytestmark = pytest.mark.django_db
 
@@ -181,8 +183,7 @@ class TestAgentView:
         assert response.data[1]["id"] == newer.id
 
     def test_get_returns_corrupted_agents_to_admin(self, user, api_client, url, dataset_instance):
-        user.is_staff = True
-        user.save()
+        UserService.assign_role(user, AdminRole, dataset_instance)
         agent_1 = baker.make(Agent, dataset=dataset_instance)
         agent_2 = baker.make(Agent, dataset=dataset_instance, corrupted=True)
 

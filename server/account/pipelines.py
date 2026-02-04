@@ -2,6 +2,7 @@ import logging
 
 from django.conf import settings
 from social_core.exceptions import AuthForbidden
+
 from utils.functions import import_from_string
 
 logger = logging.getLogger(__name__)

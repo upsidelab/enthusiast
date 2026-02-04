@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 from model_bakery import baker
 
+from account.services import UserService
 from agent.conversation.manager import ConversationManager
 from agent.models import Agent, Conversation, Message
 from catalog.models import DataSet
@@ -132,7 +133,7 @@ class TestConversationManager:
     def test_get_conversation_with_wrong_user_ownership(self):
         """Test conversation retrieval with conversation owned by different user."""
         # Given
-        other_user = get_user_model().objects.create_user(email="other@example.com", password="testpass123")
+        other_user = UserService.create_user(email="other@example.com", password="testpass123")
         other_data_set = DataSet.objects.create(name="Other DataSet")
         other_user.data_sets.add(other_data_set)
 

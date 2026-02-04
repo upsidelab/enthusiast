@@ -19,3 +19,6 @@ class DataSet(models.Model):
             "List of various data sets. One data set may be the whole company's content such as blog "
             "posts, or some part of it: a data set may be represent a brand or department."
         )
+        permissions = [
+            ("manage_dataset_users", "Can manage users of a dataset"),
+        ]

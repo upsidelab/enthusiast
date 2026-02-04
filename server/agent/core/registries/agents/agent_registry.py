@@ -1,18 +1,17 @@
 import logging
 from abc import ABC, abstractmethod
 from importlib import import_module
-from typing import Type, List
+from typing import List, Type
 
 from django.conf import settings
-
 from enthusiast_common.agents import BaseAgent
 from enthusiast_common.builder import BaseAgentBuilder
 from enthusiast_common.config import AgentConfig
+from utils.base_registry import BaseRegistry
 
 from agent.core.agents.default_config import merge_config
 from agent.core.builder import AgentBuilder
 from agent.models import Conversation
-from utils.base_registry import BaseRegistry
 
 logger = logging.getLogger(__name__)
 

@@ -1,7 +1,7 @@
 import inspect
-from abc import ABC, abstractmethod
+from abc import ABC
 from importlib import import_module
-from typing import Type, Generic, TypeVar, List
+from typing import Generic, Type, TypeVar
 
 T = TypeVar("T")
 U = TypeVar("U")

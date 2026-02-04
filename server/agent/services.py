@@ -1,6 +1,5 @@
 import logging
 
-from django.conf import settings
 from enthusiast_common.agents import BaseAgent
 from utils.functions import get_model_descriptor_default_value_from_class
 

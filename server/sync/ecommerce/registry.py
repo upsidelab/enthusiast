@@ -1,10 +1,10 @@
-from typing import Type, List
+from typing import List, Type
 
 from django.conf import settings
 from enthusiast_common.interfaces import ECommerceIntegrationPlugin
+from utils.base_registry import BaseRegistry
 
 from catalog.models import ECommerceIntegration
-from utils.base_registry import BaseRegistry
 
 
 class ECommerceIntegrationPluginRegistry(BaseRegistry[ECommerceIntegrationPlugin]):

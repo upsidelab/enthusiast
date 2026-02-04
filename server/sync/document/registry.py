@@ -2,9 +2,9 @@ from typing import Type
 
 from django.conf import settings
 from enthusiast_common import DocumentSourcePlugin
+from utils.base_registry import BaseRegistry
 
 from sync.base import SourcePluginRegistry
-from utils.base_registry import BaseRegistry
 
 
 class DocumentSourcePluginRegistry(SourcePluginRegistry, BaseRegistry[DocumentSourcePlugin]):

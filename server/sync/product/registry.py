@@ -2,9 +2,9 @@ from typing import Type
 
 from django.conf import settings
 from enthusiast_common import ProductSourcePlugin
+from utils.base_registry import BaseRegistry
 
 from sync.base import SourcePluginRegistry
-from utils.base_registry import BaseRegistry
 
 
 class ProductSourcePluginRegistry(SourcePluginRegistry, BaseRegistry[ProductSourcePlugin]):

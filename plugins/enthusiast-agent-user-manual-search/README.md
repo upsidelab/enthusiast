@@ -12,10 +12,7 @@ poetry add enthusiast-agent-user-manual-search
 Then, register the agent in your config/settings_override.py.
 
 ```python
-AVAILABLE_AGENTS = {
-    "enthusiast-agent-user-manual-search": {
-        "name": "User Manual Search",
-        "agent_directory_path": "enthusiast_agent_user_manual_search"
-    },
-}
+AVAILABLE_AGENTS = [
+    'enthusiast_agent_user_manual_search.UserManualSearchToolCallingAgent',
+]
 ```

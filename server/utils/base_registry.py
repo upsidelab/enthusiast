@@ -1,12 +1,11 @@
 import inspect
-from abc import ABC
 from importlib import import_module
 from typing import Generic, Type, TypeVar
 
 T = TypeVar("T")
 U = TypeVar("U")
 
-class BaseRegistry(ABC, Generic[T]):
+class BaseRegistry(Generic[T]):
     plugin_base: Type[T]
 
     def _get_plugin_class_by_path(self, path: str) -> Type[T]:

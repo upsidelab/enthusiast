@@ -1,14 +1,14 @@
-from django.urls import path
+from django.urls import include, path
 
 import account.views.accounts
-import account.views.login
+import account.views.auth
 import account.views.service_accounts
 import account.views.users
 
 urlpatterns = [
-    path("api/auth/login", account.views.login.LoginView.as_view(), name="login"),
-    path("api/auth/logout", account.views.login.SessionLogoutView.as_view(), name="logout"),
-    path("api/auth/csrf", account.views.login.CSRFView.as_view(), name="csrf"),
+    path("api/auth/login", account.views.auth.LoginView.as_view(), name="login"),
+    path("api/auth/logout", account.views.auth.LogoutView.as_view(), name="logout"),
+    path("api/auth/csrf", account.views.auth.CSRFView.as_view(), name="csrf"),
     path("api/account", account.views.accounts.AccountView.as_view(), name="account"),
     path("api/users", account.views.users.UserListView.as_view(), name="user_list"),
     path("api/users/<int:id>", account.views.users.UserView.as_view(), name="user_details"),
@@ -29,4 +29,6 @@ urlpatterns = [
         account.views.service_accounts.CheckServiceNameView.as_view(),
         name="check_service_name",
     ),
+    path("login/sso/", account.views.auth.SSOProviderLoginView.as_view(), name="sso-login"),
+    path("", include("social_django.urls", namespace="social")),
 ]

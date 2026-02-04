@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from .models import User
+from account.models import User
 
 
 class ServiceAccountNameService:

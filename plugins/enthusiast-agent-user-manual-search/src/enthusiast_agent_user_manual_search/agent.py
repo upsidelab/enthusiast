@@ -6,7 +6,7 @@ from .tools import VerifySolutionTool
 
 
 class UserManualSearchToolCallingAgent(BaseToolCallingAgent):
-    TYPE = "enthusiast-agent-user-manual-search"
+    AGENT_KEY = "enthusiast-agent-user-manual-search"
     NAME = "User Manual Search"
     TOOLS = [
         LLMToolConfig(tool_class=VerifySolutionTool),

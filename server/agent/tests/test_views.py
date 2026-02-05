@@ -84,17 +84,12 @@ class DummyAgentBase:
 
 
 class DummyAgent1(DummyAgentBase):
-    TYPE = "agent_1"
+    AGENT_KEY = "agent_1"
     NAME = "dummy agent 1"
 
 class DummyAgent2(DummyAgentBase):
-    TYPE = "agent_2"
+    AGENT_KEY = "agent_2"
     NAME = "dummy agent 2"
-    AGENT_ARGS = AgentArgs
-    PROMPT_INPUT = PromptInput
-    PROMPT_EXTENSION = PromptExtension
-    TOOLS = [FunctionToolConfig(tool_class=DummyTool), FunctionToolConfig(tool_class=DummyTool)]
-    FILE_UPLOAD = False
 
 AGENT_CLASSES = [DummyAgent1, DummyAgent2]
 

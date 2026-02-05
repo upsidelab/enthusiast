@@ -19,7 +19,7 @@ class TestArgs(RequiredFieldsModel):
 
 
 class MockAgentClass:
-    TYPE = "dummy_agent_type"
+    AGENT_KEY = "dummy_agent_type"
     NAME= "Dummy Agent"
     AGENT_ARGS = TestArgs
     PROMPT_INPUT = TestArgs

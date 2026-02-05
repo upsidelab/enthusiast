@@ -40,7 +40,7 @@ class PromptExtension(RequiredFieldsModel):
 
 
 class MockAgentClass:
-    TYPE = "dummy_agent"
+    AGENT_KEY = "dummy_agent"
     NAME = "Dummy Agent"
     AGENT_ARGS = AgentArgs
     PROMPT_INPUT = PromptInput
@@ -54,7 +54,7 @@ class MockAgentClassFileUpload(MockAgentClass):
 
 
 class MockAgentClassWithoutDefaults:
-    TYPE = "dummy_agent_without_defaults"
+    AGENT_KEY = "dummy_agent_without_defaults"
     NAME = "Dummy Agent Without Defaults"
     AGENT_ARGS = AgentArgsWithoutDefaults
     PROMPT_INPUT = None

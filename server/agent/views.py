@@ -257,7 +257,7 @@ class AgentTypesView(APIView):
             choices.append(
                 {
                     "name": agent_class.NAME,
-                    "key": agent_class.TYPE,
+                    "key": agent_class.AGENT_KEY,
                     "agent_args": get_model_descriptor_from_class_field(agent_class, "AGENT_ARGS"),
                     "prompt_input": get_model_descriptor_from_class_field(agent_class, "PROMPT_INPUT"),
                     "prompt_extension": get_model_descriptor_from_class_field(agent_class, "PROMPT_EXTENSION"),

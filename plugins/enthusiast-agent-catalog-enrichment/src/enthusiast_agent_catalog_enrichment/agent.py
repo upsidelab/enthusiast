@@ -10,7 +10,7 @@ class ExtractDataPromptInput(RequiredFieldsModel):
 
 
 class CatalogEnrichmentToolCallingAgent(BaseToolCallingAgent):
-    TYPE = "enthusiast-agent-catalog-enrichment"
+    AGENT_KEY = "enthusiast-agent-catalog-enrichment"
     NAME = "Catalog Enrichment"
     PROMPT_INPUT = ExtractDataPromptInput
     FILE_UPLOAD = True

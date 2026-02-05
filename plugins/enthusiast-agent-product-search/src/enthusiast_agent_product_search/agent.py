@@ -6,7 +6,7 @@ from .tools import ProductSQLSearchTool
 
 
 class ProductSearchToolCallingAgent(BaseToolCallingAgent):
-    TYPE = "enthusiast-agent-product-search"
+    AGENT_KEY = "enthusiast-agent-product-search"
     NAME = "Product Search"
     TOOLS = [
         LLMToolConfig(tool_class=ProductSQLSearchTool),

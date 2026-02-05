@@ -32,7 +32,9 @@ class AgentImportError(AgentRegistryError):
     """Raised when an agent module or class cannot be imported."""
 
 
-class BaseAgentRegistry(ABC):
+class BaseAgentRegistry(ABC, BaseRegistry[BaseAgent]):
+    plugin_base = BaseAgent
+
     @abstractmethod
     def get_conversation_agent(self, *args, **kwargs) -> BaseAgent:
         pass
@@ -42,8 +44,7 @@ class BaseAgentRegistry(ABC):
         pass
 
 
-class AgentRegistry(BaseAgentRegistry, BaseRegistry[BaseAgent]):
-    plugin_base = BaseAgent
+class AgentRegistry(BaseAgentRegistry):
 
     def get_conversation_agent(self, conversation: Conversation, streaming: bool) -> BaseAgent:
         try:
@@ -55,7 +56,7 @@ class AgentRegistry(BaseAgentRegistry, BaseRegistry[BaseAgent]):
             raise AgentRegistryError(f"Failed to build agent for conversation {conversation.id}") from e
 
     def get_agent_class_by_type(self, agent_type: str) -> Type[BaseAgent]:
-        agents = [agent for agent in self.get_plugin_classes() if agent.TYPE == agent_type]
+        agents = [agent for agent in self.get_plugin_classes() if agent.AGENT_KEY == agent_type]
 
         if not agents:
             raise AgentNotFoundError(f"Could not find agent type '{agent_type}'.")
@@ -71,7 +72,7 @@ class AgentRegistry(BaseAgentRegistry, BaseRegistry[BaseAgent]):
 
     def _get_plugin_directory_paths_by_types(self) -> dict[str, str]:
         return {
-            self._get_plugin_class_by_path(path).TYPE: path.rsplit(".", 1)[0]
+            self._get_plugin_class_by_path(path).AGENT_KEY: path.rsplit(".", 1)[0]
             for path in self._get_plugin_paths()
         }
 
@@ -79,7 +80,7 @@ class AgentRegistry(BaseAgentRegistry, BaseRegistry[BaseAgent]):
         try:
             return self._get_plugin_directory_paths_by_types()[agent_type]
         except KeyError as e:
-            raise AgentNotFoundError(f"Agent with TYPE: '{agent_type}' is not defined in settings.AVAILABLE_AGENTS.") from e
+            raise AgentNotFoundError(f"Agent with AGENT_KEY: '{agent_type}' is not defined in settings.AVAILABLE_AGENTS.") from e
 
     def _get_config_by_name(self, agent_type: str) -> AgentConfig:
         agent_directory_path = self._get_agent_directory_path(agent_type)

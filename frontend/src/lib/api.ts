@@ -1,4 +1,4 @@
-import { AuthenticationProvider } from "./authentication-provider.ts";
+import { AuthenticationProvider, getCsrfToken } from "./authentication-provider.ts";
 import { UsersApiClient } from "@/lib/api/users.ts";
 import { CatalogApiClient } from "@/lib/api/catalog.ts";
 import { DataSetsApiClient } from "@/lib/api/data-sets.ts";
@@ -8,9 +8,7 @@ import { Account, SourcePlugin, User } from "@/lib/types.ts";
 import { ConfigApiClient } from "@/lib/api/config.ts";
 import {AgentsApiClient} from "@/lib/api/agents.ts";
 
-export type Token = {
-  token: string;
-}
+export type Token = { token: string };
 
 type AccountResponse = {
   email: string;
@@ -34,20 +32,29 @@ export class ApiClient {
     this.apiBase = import.meta.env.VITE_API_BASE;
   }
 
-  async login(email: string, password: string): Promise<Token> {
+  async login(email: string, password: string): Promise<void> {
+    const csrfRes = await fetch(`${this.apiBase}/api/auth/csrf`, { credentials: "include" });
+    const { csrfToken } = (await csrfRes.json()) as { csrfToken: string };
     const response = await fetch(`${this.apiBase}/api/auth/login`, {
+      credentials: "include",
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
+        "X-CSRFToken": csrfToken,
       },
-      method: 'POST',
-      body: JSON.stringify({ email, password })
+      method: "POST",
+      body: JSON.stringify({ email, password }),
     });
+    if (response.status !== 200) throw new Error("Could not sign in");
+  }
 
-    if (response.status !== 200) {
-      throw 'Could not sign in';
-    }
-
-    return await response.json() as Promise<Token>;
+  async logout(): Promise<void> {
+    const csrf = await fetch(`${this.apiBase}/api/auth/csrf`, { credentials: "include" }).then((r) => r.json()) as { csrfToken: string };
+    await fetch(`${this.apiBase}/api/auth/logout`, {
+      credentials: "include",
+      headers: { "X-CSRFToken": csrf.csrfToken },
+      method: "POST",
+    });
+    this.authenticationProvider.logout();
   }
 
   async getAccount(): Promise<Account> {
@@ -108,11 +115,11 @@ export class ApiClient {
   }
 
   _requestConfiguration(): RequestInit {
-    return {
-      headers: {
-        'Authorization': `Token ${this.authenticationProvider.token}`,
-        "Content-Type": "application/json"
-      }
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (this.authenticationProvider.isAuthenticated()) {
+      const csrf = getCsrfToken();
+      if (csrf) headers["X-CSRFToken"] = csrf;
     }
+    return { credentials: "include", headers };
   }
 }

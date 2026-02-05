@@ -1,33 +1,34 @@
 export interface AuthenticationProvider {
-  token: string | null;
   isAuthenticated(): boolean;
-  login(token: string): boolean;
+  login(): void;
   logout(): void;
 }
 
-const tokenKey = 'token';
+const sessionAuthKey = "auth_session";
 
-class DummyAuthenticationProvider implements AuthenticationProvider {
-  token: string | null;
+function getCookie(name: string): string | null {
+  const match = document.cookie.match(new RegExp("(?:^|; )" + name.replace(/([.*+?^${}()|[\]\\])/g, "\\$1") + "=([^;]*)"));
+  return match ? decodeURIComponent(match[1]) : null;
+}
 
-  constructor() {
-    this.token = localStorage.getItem(tokenKey);
-  }
+export function getCsrfToken(): string | null {
+  return getCookie("csrftoken");
+}
+
+class EnthusiastAuthenticationProvider implements AuthenticationProvider {
+  constructor() {}
 
   isAuthenticated(): boolean {
-    return this.token !== null;
+    return sessionStorage.getItem(sessionAuthKey) !== null;
   }
 
-  login(token: string): boolean {
-    this.token = token;
-    localStorage.setItem(tokenKey, token);
-    return true;
+  login(): void {
+    sessionStorage.setItem(sessionAuthKey, "true");
   }
 
   logout(): void {
-    localStorage.removeItem(tokenKey);
-    this.token = null;
+    sessionStorage.removeItem(sessionAuthKey);
   }
 }
 
-export const authenticationProviderInstance: AuthenticationProvider = new DummyAuthenticationProvider();
+export const authenticationProviderInstance: AuthenticationProvider = new EnthusiastAuthenticationProvider();

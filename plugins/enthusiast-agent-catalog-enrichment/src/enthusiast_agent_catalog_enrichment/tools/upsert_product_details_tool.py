@@ -18,12 +18,12 @@ class UpsertProductDetailsInput(BaseModel):
     name: Optional[str] = Field(description="string with product name")
     slug: Optional[str] = Field(description="string with product slug")
     description: Optional[str] = Field(description="string with product description")
-    price: Optional[float] = Field(description="float with product price")
+    price: Optional[str] = Field(description="string with product price as a decimal number")
     categories: Optional[str] = Field(description="comma separated string with product category names")
     property_values_by_property_name_as_json: Optional[str] = Field(description="""
     JSON string with product properties. It is to be decodable to a not nested, key-value dictionary,
     with property values by its name. It is to contain all product properties that were not matched 
-    to the remaining defined properties""")
+    to the remaining defined properties. Values are to be strings, even for numeric of boolean properties.""")
 
 
 class UpsertProductBatchInput(BaseModel):
@@ -62,11 +62,11 @@ class UpsertProductDetailsTool(BaseLLMTool):
                 name=product.name,
                 slug=product.slug,
                 description=product.description,
-                price=product.price,
+                price=float(product.price) if product.price else None,
                 categories=product.categories,
                 properties=product.property_values_by_property_name_as_json
             )
-            product_upsert_result = ''
+            product_upsert_result = None
 
             try:
                 product_exists = ecommerce_platform_connector.get_product_by_sku(product_sku) is not None

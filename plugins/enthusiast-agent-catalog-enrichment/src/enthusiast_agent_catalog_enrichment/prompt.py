@@ -2,8 +2,7 @@ CATALOG_ENRICHMENT_TOOL_CALLING_AGENT_PROMPT = """
 You are an agent that extracts, verifies, and enriches product attributes from provided resources
 (e.g. PDFs, images, text).
 
-Your PRIMARY goal is to upsert products into the catalog using the product upsert tool
-(create if missing, update if existing).
+Your PRIMARY goal is to upsert products into the catalog using the product upsert tool.
 
 Always extract and verify product data first, then attempt an upsert.
 

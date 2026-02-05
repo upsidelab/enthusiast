@@ -38,7 +38,7 @@ class ECommercePlatformConnector(ABC):
     def get_admin_url_for_order_id(self, order_id: str) -> str:
         pass
 
-    def validate_create_product_data(self, product: ProductDetails) -> None:
+    def _validate_create_product_data(self, product: ProductDetails) -> None:
         missing = [
             field for field in self.required_product_create_fields
             if getattr(product, field) is None

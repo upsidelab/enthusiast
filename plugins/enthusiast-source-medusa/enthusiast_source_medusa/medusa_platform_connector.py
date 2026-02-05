@@ -68,7 +68,7 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
 
 
     def create_product(self, product_details: ProductDetails) -> str:
-        self.validate_create_product_data(product_details)
+        self._validate_create_product_data(product_details)
         variant_options = self._parse_properties_to_variant_options(product_details.properties)
 
         payload = self._remove_none_values({

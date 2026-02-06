@@ -21,6 +21,9 @@ DEFAULT_ADDRESS = Address(
 )
 
 class MedusaPlatformConnector(ECommercePlatformConnector):
+
+    required_product_create_fields = { 'name', 'sku', 'price' }
+
     def __init__(self, base_url: str, admin_base_url: str, api_key: str, region_id: Optional[str] = None):
         self._client = MedusaAPIClient(base_url, api_key)
         self._base_url = base_url.rstrip("/")
@@ -50,7 +53,7 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
         response = self._client.post("/admin/draft-orders", payload)
         return response["draft_order"]["id"]
 
-    def get_product_by_sku(self, sku: str) -> ProductDetails | None:
+    def get_product_by_sku(self, sku: str) -> Optional[ProductDetails]:
         # On Medusa side, variants do have "sku" field, but it is not possible to filter products by that field.
         # The reason for this is that Medusa treats the SKU as an internal-purpose identifier, whereas the EAN is
         # treated as an external one. That is why EAN is treated as a counterpart of the of SKU on the Medusa side.
@@ -65,33 +68,34 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
 
 
     def create_product(self, product_details: ProductDetails) -> str:
+        self._validate_create_product_data(product_details)
         variant_options = self._parse_properties_to_variant_options(product_details.properties)
 
-        payload = {
+        payload = self._remove_none_values({
             "title": product_details.name,
             "description": product_details.description,
             "handle": product_details.slug,
-            "options":
-                self._parse_variant_options_to_product_options(variant_options)
-                if variant_options else
-                self._default_product_options(),
-            "variants": [
-                {
-                    "title": product_details.name,
-                    # SKU persisted as EAN on Medusa side. See the comment in get_product_by_sku for details.
-                    "ean": product_details.sku,
-                    "prices": [
-                        {
-                            "currency_code": self._get_default_store_currency_code(),
-                            "amount": product_details.price,
-                        }
-                    ]
-                }
-            ],
-        }
+            "options": self._parse_variant_options_to_product_options(variant_options)
+            if variant_options else
+            self._default_product_options()
+        })
 
-        if variant_options:
-            payload["variants"][0]["options"] = variant_options
+        variant = self._remove_none_values({
+            "title": product_details.name,
+            "options": variant_options,
+            # SKU persisted as EAN on Medusa side. See the comment in get_product_by_sku for details.
+            "ean": product_details.sku,
+            "prices": (
+                [{
+                    "currency_code": self._get_default_store_currency_code(),
+                    "amount": product_details.price,
+                }]
+                if product_details.price is not None
+                else None
+            ),
+        })
+
+        payload["variants"] = [variant]
 
         response = self._client.post("/admin/products", payload)
         return response["product"]["id"]
@@ -102,20 +106,17 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
         if not product_details_before_update:
             return False
 
-        def remove_none_values(d: dict) -> dict:
-            return {k: v for k, v in d.items() if v is not None}
-
         variant_id = self._get_default_variant_id_for_product_id(product_details_before_update.entry_id)
         variant_options = self._parse_properties_to_variant_options(product_details.properties)
 
-        payload = remove_none_values({
+        payload = self._remove_none_values({
             "title": product_details.name,
             "description": product_details.description,
             "handle": product_details.slug,
             "options": self._parse_variant_options_to_product_options(variant_options) if variant_options else None
         })
 
-        variant = remove_none_values({
+        variant = self._remove_none_values({
             "id": variant_id,
             "title": product_details.name,
             "options": variant_options,
@@ -204,3 +205,7 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
     @staticmethod
     def _default_product_options() -> list[dict[str, str | list[str]]]:
         return [{ "title": "Default", "values": ["Default"] }]
+
+    @staticmethod
+    def _remove_none_values(d: dict) -> dict:
+        return {k: v for k, v in d.items() if v is not None}

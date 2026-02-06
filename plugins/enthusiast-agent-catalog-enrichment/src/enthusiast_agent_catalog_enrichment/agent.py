@@ -1,5 +1,7 @@
 from enthusiast_agent_tool_calling import BaseToolCallingAgent
 from enthusiast_common.utils import RequiredFieldsModel
+from enthusiast_common.config.base import LLMToolConfig
+from .tools.upsert_product_details_tool import UpsertProductDetailsTool
 from pydantic import Field, Json
 
 
@@ -12,6 +14,9 @@ class ExtractDataPromptInput(RequiredFieldsModel):
 class CatalogEnrichmentToolCallingAgent(BaseToolCallingAgent):
     PROMPT_INPUT = ExtractDataPromptInput
     FILE_UPLOAD = True
+    TOOLS = [
+        LLMToolConfig(tool_class=UpsertProductDetailsTool),
+    ]
 
     def get_answer(self, input_text: str) -> str:
         agent_executor = self._build_agent_executor()

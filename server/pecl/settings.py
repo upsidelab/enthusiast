@@ -13,10 +13,12 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import json
 import os
 import sys
+import urllib
 from datetime import timedelta
 from pathlib import Path
 
 from environ import Env
+from social_core.pipeline import DEFAULT_AUTH_PIPELINE
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -80,6 +82,7 @@ INSTALLED_APPS = [
     "sync",
     "drf_yasg",
     "django_filters",
+    "social_django",
 ]
 
 MIDDLEWARE = [
@@ -92,6 +95,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "social_django.middleware.SocialAuthExceptionMiddleware",
 ]
 
 ROOT_URLCONF = "pecl.urls"
@@ -273,5 +277,24 @@ FILE_PARSER_CLASSES: dict[tuple[str] : str] = {
 UPLOADED_FILE_RETENTION_PERIOD_HOURS: int = 48
 
 SERVICE_ACCOUNT_DOMAIN = env.str("SERVICE_ACCOUNT_DOMAIN", "enthusiast.internal")
+
+AUTHENTICATION_BACKENDS = ("django.contrib.auth.backends.ModelBackend",)
+
+# Django social auth settings
+SOCIAL_AUTH_LOGIN_ERROR_URL = (
+    f"http://localhost:10001/login?{urllib.parse.urlencode({'error': 'Could not sign in. Please try again.'})}"
+)
+SOCIAL_AUTH_RAISE_EXCEPTIONS = False
+SOCIAL_AUTH_JSONFIELD_ENABLED = True
+SOCIAL_AUTH_PIPELINE = DEFAULT_AUTH_PIPELINE + ("account.pipelines.update_user",)
+LOGIN_URL = "/login/"
+LOGIN_REDIRECT_URL = "http://localhost:10001/"
+
+# SSO providers
+SSO_PROVIDER_SERVICE = "account.services.sso_provider.SSOProviderService"
+DEFAULT_SSO_PROVIDER_BACKEND = ""
+
+FRONTEND_BASE_URL = env.str("FRONTEND_BASE_URL", "http://localhost:10001")
+
 
 from .settings_override import *  # noqa

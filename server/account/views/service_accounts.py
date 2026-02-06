@@ -14,7 +14,7 @@ from account.serializers import (
     ServiceAccountSerializer,
     TokenResponseSerializer,
 )
-from account.services import ServiceAccountNameService
+from account.services.service_accounts import ServiceAccountNameService
 
 
 class CheckServiceNameView(APIView):

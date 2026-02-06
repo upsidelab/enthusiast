@@ -14,7 +14,7 @@ async function continueAfterLogin(navigate: (path: string) => void) {
   const dataSets = await api.dataSets().getDataSets();
   if (dataSets.length === 0) {
     const account = await api.getAccount();
-    if (account.isStaff) {
+    if (account.isStaff || account.isLimitedAdmin) {
       navigate("/onboarding");
     } else {
       navigate("/no-data-sets");

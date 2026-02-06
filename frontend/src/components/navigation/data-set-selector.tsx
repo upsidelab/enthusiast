@@ -76,7 +76,7 @@ export function DataSetSelector() {
             </DropdownMenuItem>
           ))
         )}
-        {account && account.isStaff &&
+        {account && (account.isStaff || account.isLimitedAdmin) &&
           <>
             <Separator className="my-2"/>
             <DropdownMenuItem

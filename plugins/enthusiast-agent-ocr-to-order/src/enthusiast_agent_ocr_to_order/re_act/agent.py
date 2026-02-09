@@ -8,6 +8,8 @@ from ..tools.place_order_tool import PlaceOrderTool
 
 
 class OCRToOrderReActAgent(BaseReActAgent):
+    AGENT_KEY = "enthusiast-agent-ocr-to-order"
+    NAME = "Purchase Order OCR"
     TOOLS = [
         LLMToolConfig(tool_class=ProductSearchTool),
         LLMToolConfig(tool_class=PlaceOrderTool),

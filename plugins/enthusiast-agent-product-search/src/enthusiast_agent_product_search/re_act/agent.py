@@ -7,6 +7,8 @@ from ..tools.product_search_tool import ProductSearchTool
 
 
 class ProductSearchReActAgent(BaseReActAgent):
+    AGENT_KEY = "enthusiast-agent-product-search"
+    NAME = "Product Search"
     TOOLS = [
         LLMToolConfig(tool_class=ProductSearchTool),
     ]

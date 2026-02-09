@@ -8,6 +8,8 @@ from ..tools import VerifySolutionTool
 
 
 class UserManualSearchAgent(BaseReActAgent):
+    AGENT_KEY = "enthusiast-agent-user-manual-search"
+    NAME = "User Manual Search"
     TOOLS = [LLMToolConfig(tool_class=VerifySolutionTool), LLMToolConfig(tool_class=RetrieveDocumentsTool)]
 
     def get_answer(self, input_text: str) -> str:

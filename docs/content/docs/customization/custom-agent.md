@@ -130,16 +130,12 @@ def get_config(conversation_id: int, streaming: bool) -> AgentConfigWithDefaults
         ],
     )
 ```
-5. Ensure your agent is available for import from directly your agent directory:
+5. Finally add your agent to `settings_override.py`:
 ```python
-# pdf_agent/__init__.py
-from .agent import ExamplePDFAgent
+AVAILABLE_AGENTS = {
+    "PDF Agent": "enthusiast_custom.pdf_agent",
+}
 
-__all__ = ['ExamplePDFAgent']
-```
-6. Finally add your agent to `settings_override.py`:
-```python
-AVAILABLE_AGENTS = ['pdf_agent.ExamplePDFAgent']
 ```
 Now Agent is available in UI to chat with it.
 

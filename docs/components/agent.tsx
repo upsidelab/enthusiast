@@ -9,7 +9,7 @@ export interface UseCase {
 }
 export interface IntegrationProps {
   name: string;
-  agentClassName: string;
+  integrationKey: string;
   pipName: string;
   agentDescription: string;
   videoUrl?: string;
@@ -28,9 +28,12 @@ export default async function Agent(props: IntegrationProps) {
   const installationInstructions = await compileMdx(`\`\`\`bash\npoetry add ${props.pipName}\n\`\`\``);
   const buildRegisterInstructionMd = (key: string, module: string) => {
     return `\`\`\`python
-AVAILABLE_AGENTS = [
-    '${module}.${props.agentClassName}',
-]
+AVAILABLE_AGENTS = {
+    "${props.integrationKey}": {
+        "name": "${props.name}",
+        "agent_directory_path": "${module}"
+    },
+}
 \`\`\``;
   }
 

@@ -6,6 +6,8 @@ from .tools.place_order_tool import PlaceOrderTool
 
 
 class OCRToOrderAgent(BaseToolCallingAgent):
+    AGENT_KEY = "enthusiast-agent-ocr-to-order"
+    NAME = "Purchase Order OCR"
     TOOLS = [
         LLMToolConfig(tool_class=ProductExamplesTool),
         LLMToolConfig(tool_class=ProductSQLSearchTool),

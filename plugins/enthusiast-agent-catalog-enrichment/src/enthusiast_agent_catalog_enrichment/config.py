@@ -1,7 +1,7 @@
 from enthusiast_common.config import AgentConfigWithDefaults
 from enthusiast_common.config.prompts import ChatPromptTemplateConfig, Message, MessageRole
 
-from .agent import CatalogEnrichmentToolCallingAgent
+from .agent import CatalogEnrichmentAgent
 from .prompt import CATALOG_ENRICHMENT_TOOL_CALLING_AGENT_PROMPT
 
 
@@ -18,6 +18,6 @@ def get_config() -> AgentConfigWithDefaults:
                 Message(role=MessageRole.PLACEHOLDER, content="{agent_scratchpad}"),
             ]
         ),
-        agent_class=CatalogEnrichmentToolCallingAgent,
-        tools=CatalogEnrichmentToolCallingAgent.TOOLS,
+        agent_class=CatalogEnrichmentAgent,
+        tools=CatalogEnrichmentAgent.TOOLS,
     )

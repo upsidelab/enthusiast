@@ -1,6 +1,5 @@
 import logging
 
-from django.conf import settings
 from enthusiast_common.agents import BaseAgent
 from utils.functions import get_model_descriptor_default_value_from_class
 
@@ -17,21 +16,20 @@ class AgentService:
     def preconfigure_available_agents(data_set: DataSet):
         registry = AgentService._get_registry()
 
-        for agent_type, agent_details in settings.AVAILABLE_AGENTS.items():
-            if Agent.all_objects.filter(dataset=data_set, agent_type=agent_type).exists():
+        for agent_class in registry.get_plugin_classes():
+            if Agent.all_objects.filter(dataset=data_set, agent_type=agent_class.AGENT_KEY).exists():
                 continue
 
-            agent_class = registry.get_agent_class_by_type(agent_type=agent_type)
             data = {
-                "name": agent_details["name"],
-                "description": agent_details.get("description", ""),
+                "name": agent_class.NAME,
+                "description": '',
                 "config": AgentService._build_default_agent_configuration(agent_class),
                 "dataset": data_set.pk,
-                "agent_type": agent_type,
+                "agent_type": agent_class.AGENT_KEY,
             }
             agent_serializer = AgentSerializer(data=data)
             if not agent_serializer.is_valid():
-                logger.warning(f"Cannot configure {agent_type}, reason: {agent_serializer.errors}")
+                logger.warning(f"Cannot configure {agent_class.AGENT_KEY}, reason: {agent_serializer.errors}")
                 continue
 
             agent_serializer.save()

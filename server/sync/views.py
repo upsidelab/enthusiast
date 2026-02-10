@@ -65,8 +65,7 @@ class GetECommerceIntegrationPlugins(APIView):
     def get(self, request):
         registry = ECommerceIntegrationPluginRegistry()
         choices = []
-        for plugin_path in registry.get_plugin_paths():
-            plugin_class = registry.get_plugin_class_by_path(plugin_path)
+        for plugin_class in registry.get_plugin_classes():
             plugin_name = plugin_class.NAME
             configuration_args = get_model_descriptor_from_class_field(plugin_class, "CONFIGURATION_ARGS")
             choices.append(

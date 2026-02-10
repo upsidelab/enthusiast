@@ -12,10 +12,7 @@ poetry add enthusiast-agent-ocr-to-order
 Then, register the agent in your config/settings_override.py.
 
 ```python
-AVAILABLE_AGENTS = {
-    "enthusiast-agent-ocr-to-order": {
-        "name": "Purchase Order OCR",
-        "agent_directory_path": "enthusiast_agent_ocr_to_order"
-    },
-}
+AVAILABLE_AGENTS = [
+    'enthusiast_agent_ocr_to_order.OCRToOrderAgent',
+]
 ```

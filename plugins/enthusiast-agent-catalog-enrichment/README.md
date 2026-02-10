@@ -12,10 +12,7 @@ poetry add enthusiast-agent-catalog-enrichment
 Then, register the agent in your config/settings_override.py.
 
 ```python
-AVAILABLE_AGENTS = {
-    "enthusiast-agent-catalog-enrichment": {
-        "name": "Catalog Enrichment",
-        "agent_directory_path": "enthusiast_agent_catalog_enrichment"
-    },
-}
+AVAILABLE_AGENTS = [
+    'enthusiast_agent_catalog_enrichment.CatalogEnrichmentAgent',
+]
 ```

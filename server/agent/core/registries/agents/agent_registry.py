@@ -1,19 +1,17 @@
-import inspect
 import logging
 from abc import ABC, abstractmethod
 from importlib import import_module
-from typing import Any, Type, TypeVar
+from typing import List, Type
 
 from django.conf import settings
 from enthusiast_common.agents import BaseAgent
 from enthusiast_common.builder import BaseAgentBuilder
 from enthusiast_common.config import AgentConfig
+from utils.base_registry import BaseRegistry
 
 from agent.core.agents.default_config import merge_config
 from agent.core.builder import AgentBuilder
 from agent.models import Conversation
-
-T = TypeVar("T", bound=BaseAgentBuilder)
 
 logger = logging.getLogger(__name__)
 
@@ -34,9 +32,8 @@ class AgentImportError(AgentRegistryError):
     """Raised when an agent module or class cannot be imported."""
 
 
-class BaseAgentRegistry(ABC):
-    def __init__(self, agents_config: dict[Any, Any]):
-        self._agents_config = agents_config
+class BaseAgentRegistry(ABC, BaseRegistry[BaseAgent]):
+    plugin_base = BaseAgent
 
     @abstractmethod
     def get_conversation_agent(self, *args, **kwargs) -> BaseAgent:
@@ -48,9 +45,6 @@ class BaseAgentRegistry(ABC):
 
 
 class AgentRegistry(BaseAgentRegistry):
-    def __init__(self):
-        agents_config = settings.AVAILABLE_AGENTS
-        super().__init__(agents_config)
 
     def get_conversation_agent(self, conversation: Conversation, streaming: bool) -> BaseAgent:
         try:
@@ -62,31 +56,31 @@ class AgentRegistry(BaseAgentRegistry):
             raise AgentRegistryError(f"Failed to build agent for conversation {conversation.id}") from e
 
     def get_agent_class_by_type(self, agent_type: str) -> Type[BaseAgent]:
-        agent_directory_path = self._get_agent_directory_path(agent_type)
-        agent_module_path = f"{agent_directory_path}.agent"
-        try:
-            agent_module = import_module(agent_module_path)
-        except ModuleNotFoundError as e:
-            raise AgentImportError(f"Cannot import module '{agent_module_path}' for agent '{agent_type}'.") from e
+        agents = [agent for agent in self.get_plugin_classes() if agent.AGENT_KEY == agent_type]
 
-        agents = [
-            cls
-            for _, cls in inspect.getmembers(agent_module, inspect.isclass)
-            if issubclass(cls, BaseAgent) and cls.__module__ == agent_module.__name__
-        ]
         if not agents:
-            raise AgentNotFoundError(f"No valid agent classes found in module '{agent_module_path}'.")
+            raise AgentNotFoundError(f"Could not find agent type '{agent_type}'.")
+
         return agents[0]
+
+    def get_plugin_classes(self) -> List[Type[BaseAgent]]:
+        return [self._get_plugin_class_by_path(path) for path in self._get_plugin_paths()]
+
+    @staticmethod
+    def _get_plugin_paths() -> List[str]:
+        return settings.AVAILABLE_AGENTS
+
+    def _get_plugin_directory_paths_by_types(self) -> dict[str, str]:
+        return {
+            self._get_plugin_class_by_path(path).AGENT_KEY: path.rsplit(".", 1)[0]
+            for path in self._get_plugin_paths()
+        }
 
     def _get_agent_directory_path(self, agent_type: str) -> str:
         try:
-            agent_settings = self._agents_config[agent_type]
+            return self._get_plugin_directory_paths_by_types()[agent_type]
         except KeyError as e:
-            raise AgentNotFoundError(f"Agent '{agent_type}' is not defined in settings.AVAILABLE_AGENTS.") from e
-        try:
-            return agent_settings["agent_directory_path"]
-        except KeyError as e:
-            raise AgentConfigError(f"agent_directory_path is not defined for key: '{agent_type}'") from e
+            raise AgentNotFoundError(f"Agent with AGENT_KEY: '{agent_type}' is not defined in settings.AVAILABLE_AGENTS.") from e
 
     def _get_config_by_name(self, agent_type: str) -> AgentConfig:
         agent_directory_path = self._get_agent_directory_path(agent_type)
@@ -105,18 +99,10 @@ class AgentRegistry(BaseAgentRegistry):
 
     def _get_builder_class_by_name(self, agent_type: str) -> Type[BaseAgentBuilder]:
         agent_directory_path = self._get_agent_directory_path(agent_type)
-        builder_module_path = f"{agent_directory_path}.builder"
         try:
-            builder_module = import_module(builder_module_path)
-        except ModuleNotFoundError:
+            return self._get_class_by_path(agent_directory_path, BaseAgentBuilder)
+        except (ModuleNotFoundError, ValueError):
             logger.info(
-                f"Cannot import module '{builder_module_path}' for agent '{agent_type}'. Defaulting to AgentBuilder."
+                f"Cannot import module '{BaseAgentBuilder.__name__}' from path '{agent_directory_path}'. Defaulting to AgentBuilder."
             )
             return AgentBuilder
-
-        try:
-            builder_class = getattr(builder_module, "Builder")
-        except AttributeError as e:
-            raise AgentImportError(f"Module '{builder_module_path}' has no attribute 'Builder'.") from e
-
-        return builder_class

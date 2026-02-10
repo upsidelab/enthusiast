@@ -40,6 +40,8 @@ class PromptExtension(RequiredFieldsModel):
 
 
 class MockAgentClass:
+    AGENT_KEY = "dummy_agent"
+    NAME = "Dummy Agent"
     AGENT_ARGS = AgentArgs
     PROMPT_INPUT = PromptInput
     PROMPT_EXTENSION = PromptExtension
@@ -52,6 +54,8 @@ class MockAgentClassFileUpload(MockAgentClass):
 
 
 class MockAgentClassWithoutDefaults:
+    AGENT_KEY = "dummy_agent_without_defaults"
+    NAME = "Dummy Agent Without Defaults"
     AGENT_ARGS = AgentArgsWithoutDefaults
     PROMPT_INPUT = None
     PROMPT_EXTENSION = None
@@ -69,12 +73,9 @@ EXPECTED_AGENT_CONFIG = {
 
 @pytest.fixture(autouse=True)
 def django_settings(settings):
-    settings.AVAILABLE_AGENTS = {
-        "dummy_agent": {
-            "name": "Dummy Agent",
-            "agent_directory_path": "dummy_agent_directory_path",
-        }
-    }
+    settings.AVAILABLE_AGENTS = [
+        "dummy_agent_directory_path.DummyAgent"
+    ]
 
 
 class TestAgentService:
@@ -89,11 +90,11 @@ class TestAgentService:
             (MockAgentClassFileUpload, True),
         ],
     )
-    @patch.object(AgentRegistry, "get_agent_class_by_type")
+    @patch.object(AgentRegistry, "get_plugin_classes")
     def test_preconfigure_available_agents_creates_agents(
         self, mock_agent_registry, agent_class, expected_file_upload_flag, dataset
     ):
-        mock_agent_registry.return_value = agent_class
+        mock_agent_registry.return_value = [agent_class]
 
         AgentService.preconfigure_available_agents(dataset)
 
@@ -102,14 +103,14 @@ class TestAgentService:
         assert agent.config == EXPECTED_AGENT_CONFIG
         assert agent.file_upload is expected_file_upload_flag
 
-    @patch.object(AgentRegistry, "get_agent_class_by_type")
+    @patch.object(AgentRegistry, "get_plugin_classes")
     def test_preconfigure_available_agents_skip_agents_without_defaults(self, mock_agent_registry, dataset):
-        mock_agent_registry.return_value = MockAgentClassWithoutDefaults
+        mock_agent_registry.return_value = [MockAgentClassWithoutDefaults]
 
         AgentService.preconfigure_available_agents(dataset)
         assert Agent.objects.filter(dataset=dataset).count() == 0
 
-    @patch.object(AgentRegistry, "get_agent_class_by_type")
+    @patch.object(AgentRegistry, "get_plugin_classes")
     def test_preconfigure_available_agents_skips_existing_agent(self, mock_agent_registry, dataset):
         Agent.objects.create(
             name="Existing Dummy Agent",
@@ -118,9 +119,8 @@ class TestAgentService:
             dataset=dataset,
             agent_type="dummy_agent",
         )
-        mock_agent_registry.return_value = MockAgentClass
+        mock_agent_registry.return_value = [MockAgentClass]
 
         AgentService.preconfigure_available_agents(dataset)
 
         assert Agent.objects.filter(dataset=dataset, agent_type="dummy_agent").count() == 1
-        mock_agent_registry.assert_not_called()

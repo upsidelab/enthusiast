@@ -1,9 +1,9 @@
 from enthusiast_agent_tool_calling import BaseToolCallingAgent
 from enthusiast_common.config.base import LLMToolConfig
 
-from ..tools.document_retriver_tool import RetrieveDocumentsTool
-from ..tools.solution_verification_tool import SolutionVerificationTool
+from ..tools.retrieve_documents_tool import RetrieveDocumentsTool
+from ..tools.verify_solution_tool import VerifySolutionTool
 
 
 class UserManualSearchToolCallingAgent(BaseToolCallingAgent):
-    TOOLS = [LLMToolConfig(tool_class=SolutionVerificationTool), LLMToolConfig(tool_class=RetrieveDocumentsTool)]
+    TOOLS = [LLMToolConfig(tool_class=VerifySolutionTool), LLMToolConfig(tool_class=RetrieveDocumentsTool)]

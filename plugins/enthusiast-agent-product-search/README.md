@@ -12,10 +12,7 @@ poetry add enthusiast-agent-product-search
 Then, register the agent in your config/settings_override.py.
 
 ```python
-AVAILABLE_AGENTS = {
-    "enthusiast-agent-product-search": {
-        "name": "Product Search",
-        "agent_directory_path": "enthusiast_agent_product_search"
-    },
-}
+AVAILABLE_AGENTS = [
+    'enthusiast_agent_product_search.ProductSearchAgent',
+]
 ```

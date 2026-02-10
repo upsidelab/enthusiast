@@ -59,6 +59,7 @@ export type SourcePlugin = {
 export type Agent = {
   id: number;
   name: string;
+  description: string;
   agent_type: string;
   created_at: string;
   updated_at: string;

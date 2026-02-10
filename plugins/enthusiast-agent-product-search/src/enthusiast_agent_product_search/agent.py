@@ -5,7 +5,7 @@ from .tools import ProductExamplesTool
 from .tools import ProductSQLSearchTool
 
 
-class ProductSearchToolCallingAgent(BaseToolCallingAgent):
+class ProductSearchAgent(BaseToolCallingAgent):
     AGENT_KEY = "enthusiast-agent-product-search"
     NAME = "Product Search"
     TOOLS = [

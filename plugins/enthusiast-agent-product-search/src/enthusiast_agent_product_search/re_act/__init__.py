@@ -1,3 +1,3 @@
-from .agent import ProductSearchReActAgent
+from .agent import ProductSearchAgent
 
-__all__ = ['ProductSearchReActAgent']
+__all__ = ['ProductSearchAgent']

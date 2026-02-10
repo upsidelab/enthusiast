@@ -1,7 +1,7 @@
 from enthusiast_common.config import AgentConfigWithDefaults
 from enthusiast_common.config.prompts import PromptTemplateConfig
 
-from .agent import ProductSearchReActAgent
+from .agent import ProductSearchAgent
 from .prompt import PRODUCT_SEARCH_AGENT_PROMPT
 
 
@@ -11,6 +11,6 @@ def get_config() -> AgentConfigWithDefaults:
             input_variables=["tools", "tool_names", "input", "agent_scratchpad"],
             prompt_template=PRODUCT_SEARCH_AGENT_PROMPT,
         ),
-        agent_class=ProductSearchReActAgent,
-        tools=ProductSearchReActAgent.TOOLS,
+        agent_class=ProductSearchAgent,
+        tools=ProductSearchAgent.TOOLS,
     )

@@ -3,7 +3,7 @@ from enthusiast_common.config import (
 )
 from enthusiast_common.config.prompts import PromptTemplateConfig
 
-from .agent import OCRToOrderReActAgent
+from .agent import OCRToOrderAgent
 from .prompt import OCR_AGENT_PROMPT
 
 
@@ -12,6 +12,6 @@ def get_config() -> AgentConfigWithDefaults:
         prompt_template=PromptTemplateConfig(
             input_variables=["tools", "tool_names", "input", "agent_scratchpad"], prompt_template=OCR_AGENT_PROMPT
         ),
-        agent_class=OCRToOrderReActAgent,
-        tools=OCRToOrderReActAgent.TOOLS,
+        agent_class=OCRToOrderAgent,
+        tools=OCRToOrderAgent.TOOLS,
     )

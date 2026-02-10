@@ -1,7 +1,7 @@
 from enthusiast_common.config import AgentConfigWithDefaults
 from enthusiast_common.config.prompts import ChatPromptTemplateConfig, Message, MessageRole
 
-from .agent import ProductSearchToolCallingAgent
+from .agent import ProductSearchAgent
 from .prompt import PRODUCT_SEARCH_TOOL_CALLING_AGENT_PROMPT
 
 
@@ -18,6 +18,6 @@ def get_config() -> AgentConfigWithDefaults:
                 Message(role=MessageRole.PLACEHOLDER, content="{agent_scratchpad}"),
             ]
         ),
-        agent_class=ProductSearchToolCallingAgent,
-        tools=ProductSearchToolCallingAgent.TOOLS,
+        agent_class=ProductSearchAgent,
+        tools=ProductSearchAgent.TOOLS,
     )

@@ -6,7 +6,7 @@ from langchain_core.tools import render_text_description_and_args
 from ..tools.product_search_tool import ProductSearchTool
 
 
-class ProductSearchReActAgent(BaseReActAgent):
+class ProductSearchAgent(BaseReActAgent):
     AGENT_KEY = "enthusiast-agent-product-search"
     NAME = "Product Search"
     TOOLS = [

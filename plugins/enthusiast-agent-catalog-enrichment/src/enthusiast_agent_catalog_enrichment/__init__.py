@@ -1,3 +1,3 @@
-from .agent import CatalogEnrichmentToolCallingAgent
+from .agent import CatalogEnrichmentAgent
 
-__all__ = ["CatalogEnrichmentToolCallingAgent"]
+__all__ = ["CatalogEnrichmentAgent"]

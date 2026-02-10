@@ -9,7 +9,7 @@ class ExtractDataPromptInput(RequiredFieldsModel):
                                 default='{"sku": "string", "name": "string"}')
 
 
-class CatalogEnrichmentToolCallingAgent(BaseToolCallingAgent):
+class CatalogEnrichmentAgent(BaseToolCallingAgent):
     AGENT_KEY = "enthusiast-agent-catalog-enrichment"
     NAME = "Catalog Enrichment"
     PROMPT_INPUT = ExtractDataPromptInput

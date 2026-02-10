@@ -13,6 +13,6 @@ Then, register the agent in your config/settings_override.py.
 
 ```python
 AVAILABLE_AGENTS = [
-    'enthusiast_agent_user_manual_search.UserManualSearchToolCallingAgent',
+    'enthusiast_agent_user_manual_search.UserManualSearchAgent',
 ]
 ```

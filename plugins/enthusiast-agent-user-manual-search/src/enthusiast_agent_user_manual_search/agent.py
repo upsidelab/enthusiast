@@ -5,7 +5,7 @@ from .tools import RetrieveDocumentsTool
 from .tools import VerifySolutionTool
 
 
-class UserManualSearchToolCallingAgent(BaseToolCallingAgent):
+class UserManualSearchAgent(BaseToolCallingAgent):
     AGENT_KEY = "enthusiast-agent-user-manual-search"
     NAME = "User Manual Search"
     TOOLS = [

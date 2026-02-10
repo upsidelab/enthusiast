@@ -1,3 +1,3 @@
-from .agent import UserManualSearchToolCallingAgent
+from .agent import UserManualSearchAgent
 
-__all__ = ["UserManualSearchToolCallingAgent"]
+__all__ = ["UserManualSearchAgent"]

@@ -7,7 +7,7 @@ from enthusiast_agent_product_search.tools import ProductSearchTool
 from ..tools.place_order_tool import PlaceOrderTool
 
 
-class OCRToOrderReActAgent(BaseReActAgent):
+class OCRToOrderAgent(BaseReActAgent):
     AGENT_KEY = "enthusiast-agent-ocr-to-order"
     NAME = "Purchase Order OCR"
     TOOLS = [

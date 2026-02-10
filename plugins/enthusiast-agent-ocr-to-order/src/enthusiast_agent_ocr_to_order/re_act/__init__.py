@@ -1,3 +1,3 @@
-from .agent import OCRToOrderReActAgent
+from .agent import OCRToOrderAgent
 
-__all__ = ['OCRToOrderReActAgent']
+__all__ = ['OCRToOrderAgent']

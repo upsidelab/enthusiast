@@ -5,7 +5,7 @@ from langchain_core.tools import render_text_description_and_args
 from pydantic import Field, Json
 
 
-class InvoiceScanningReActAgentPromptInput(RequiredFieldsModel):
+class InvoiceScanningAgentPromptInput(RequiredFieldsModel):
     output_format: Json = Field(
         title="Output format",
         description="Output format of the extracted data",
@@ -13,8 +13,10 @@ class InvoiceScanningReActAgentPromptInput(RequiredFieldsModel):
     )
 
 
-class InvoiceScanningReActAgent(BaseReActAgent):
-    PROMPT_INPUT = InvoiceScanningReActAgentPromptInput
+class InvoiceScanningAgent(BaseReActAgent):
+    AGENT_KEY = "enthusiast-agent-invoice-scanning"
+    NAME = "Invoice Scanning"
+    PROMPT_INPUT = InvoiceScanningAgentPromptInput
     FILE_UPLOAD = True
 
     def _build_agent_executor(self) -> AgentExecutor:

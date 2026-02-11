@@ -3,7 +3,7 @@ from enthusiast_common.utils import RequiredFieldsModel
 from pydantic import Field, Json
 
 
-class InvoiceScanningToolCallingAgentPromptInput(RequiredFieldsModel):
+class InvoiceScanningAgentPromptInput(RequiredFieldsModel):
     output_format: Json = Field(
         title="Output format",
         description="Output format of the extracted data",
@@ -11,8 +11,10 @@ class InvoiceScanningToolCallingAgentPromptInput(RequiredFieldsModel):
     )
 
 
-class InvoiceScanningToolCallingAgent(BaseToolCallingAgent):
-    PROMPT_INPUT = InvoiceScanningToolCallingAgentPromptInput
+class InvoiceScanningAgent(BaseToolCallingAgent):
+    AGENT_KEY = "enthusiast-agent-invoice-scanning"
+    NAME = "Invoice Scanning"
+    PROMPT_INPUT = InvoiceScanningAgentPromptInput
     FILE_UPLOAD = True
 
     def get_answer(self, input_text: str) -> str:

@@ -1,7 +1,7 @@
 from enthusiast_common.config import AgentConfigWithDefaults
 from enthusiast_common.config.prompts import ChatPromptTemplateConfig, Message, MessageRole
 
-from .agent import InvoiceScanningToolCallingAgent
+from .agent import InvoiceScanningAgent
 from .prompt import INVOICE_SCANNING_TOOL_CALLING_AGENT_PROMPT
 
 
@@ -18,6 +18,6 @@ def get_config() -> AgentConfigWithDefaults:
                 Message(role=MessageRole.PLACEHOLDER, content="{agent_scratchpad}"),
             ]
         ),
-        agent_class=InvoiceScanningToolCallingAgent,
-        tools=InvoiceScanningToolCallingAgent.TOOLS,
+        agent_class=InvoiceScanningAgent,
+        tools=InvoiceScanningAgent.TOOLS,
     )

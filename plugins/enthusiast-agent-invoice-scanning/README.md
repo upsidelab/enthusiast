@@ -12,10 +12,7 @@ poetry add enthusiast-agent-invoice-scanning
 Then, register the agent in your config/settings_override.py.
 
 ```python
-AVAILABLE_AGENTS = {
-    "enthusiast-agent-invoice-scanning": {
-        "name": "Invoice Scanning",
-        "agent_directory_path": "enthusiast_agent_invoice_scanning"
-    },
-}
+AVAILABLE_AGENTS = [
+    "enthusiast_agent_invoice_scanning.InvoiceScanningAgent"
+]
 ```

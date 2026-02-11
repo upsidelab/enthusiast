@@ -30,7 +30,7 @@ export default async function Page() {
         <AgentCard name="User Manual Search" imageSrc="/tools/enthusiast/img/agents/user-manual-search.png" href="/agents/user-manual-search" />
       </Cards>
       <H2>Build a Custom Agent</H2>
-      <P>These integrations are just the beginning, and we know that you may need more specialized functionality beyond what we've included here. Enthusiast gives you the flexibility to build entirely custom agents from the ground up, tailored to your needs.</P>
+      <P>These pre-built agents are just a starting point. Enthusiast lets you build custom agents from the ground up, tailored to your specific workflows.</P>
       <Cards.Card className="x:my-4" title="Learn How to Build a Custom Agent" href="/docs/agents/agent-architecture" arrow />
     </Wrapper>
   )

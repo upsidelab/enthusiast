@@ -44,6 +44,9 @@ export default async function Page() {
         <IntegrationCard name="Google Gemini" imageSrc="/tools/enthusiast/img/integrations/gemini.png" href="/integrations/gemini/" />
         <IntegrationCard name="Mistral" imageSrc="/tools/enthusiast/img/integrations/mistral.png" href="/integrations/mistral/" />
       </Cards>
+      <H2>Build a Custom Integration</H2>
+      <P>These ready-made integrations cover common use cases. If you need to connect a system that isn’t listed here, Enthusiast allows you to build custom integrations tailored to your stack.</P>
+      <Cards.Card className="x:my-4" title="Learn How to Build a Custom Integration" href="/docs/customization/custom-integration" arrow />
     </Wrapper>
   )
 }

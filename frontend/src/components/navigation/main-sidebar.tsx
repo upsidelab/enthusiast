@@ -132,7 +132,7 @@ export function MainSidebar() {
       <SidebarContent>
         <MainSidebarSection title="Ask" items={askItems} />
         <MainSidebarSection title="Configure" items={configureItems} />
-        <MainSidebarSection title="Synchronize" items={synchronizeItems} />
+        <MainSidebarSection title="Catalog" items={synchronizeItems} />
         {account && account.isStaff && (
           <>
             <MainSidebarSection className="mt-auto" title="Manage" items={manageItems} />

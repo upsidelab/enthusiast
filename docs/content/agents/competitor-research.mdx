@@ -1,0 +1,23 @@
+import Agent from "@/components/agent";
+
+export const description = "The Competitor Research agent extracts attributes from web pages. It can be customized to pull different attribute sets and can flag unclear or missing information, triggering a human-in-the-loop step when clarification is required.";
+
+export const useCases = [
+  {
+    title: "TO DO",
+    description: "TO DO"
+  },
+  {
+    title: "TO DO",
+    description: "TO DO"
+  },
+];
+
+<Agent
+  name="Competitor Research"
+  integrationKey="enthusiast-agent-competitor-research"
+  pipName="enthusiast-agent-competitor-research"
+  registerAgentModule="enthusiast_agent_competitor_research"
+  agentDescription={description}
+  agentUseCases={useCases}
+/>

@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Generic, Self, Type, TypeVar
+from typing import Generic, Type, TypeVar
+
+from utils.base_registry import BaseRegistry
 
 
 @dataclass
@@ -15,7 +17,7 @@ class DataSetSource:
 T = TypeVar("T")
 
 
-class SourcePluginRegistry(ABC):
+class SourcePluginRegistry(Generic[T], BaseRegistry[T], ABC):
     """Registry of available source plugins registered in ECL system."""
 
     def __init__(self):
@@ -23,7 +25,7 @@ class SourcePluginRegistry(ABC):
 
     def load_plugins(self):
         plugins = {}
-        for plugin_name, _ in self.get_plugins():
+        for plugin_name in self.get_plugin_names():
             plugins[plugin_name] = self.get_plugin_class_by_name(plugin_name)
         return plugins
 
@@ -42,11 +44,11 @@ class SourcePluginRegistry(ABC):
         return plugin_instance
 
     @abstractmethod
-    def get_plugins(self) -> dict:
+    def get_plugin_names(self) -> list[str]:
         pass
 
     @abstractmethod
-    def get_plugin_class_by_name(self, path: str) -> Type[Self]:
+    def get_plugin_class_by_name(self, path: str) -> Type[T]:
         pass
 
 

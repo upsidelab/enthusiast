@@ -361,7 +361,7 @@ export class DataSetsApiClient extends BaseApiClient {
   }
 
   async addDataSetECommerceIntegration(dataSetId: number, pluginName: string, config: object): Promise<void> {
-    await fetch(
+    const response = await fetch(
       `${this.apiBase}/api/data_sets/${dataSetId}/ecommerce_integration`,
       {
         ...this._requestConfiguration(),
@@ -369,6 +369,14 @@ export class DataSetsApiClient extends BaseApiClient {
         body: JSON.stringify({ plugin_name: pluginName, config: config })
       }
     );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new ApiError(`Failed to add e-commerce integration: ${response.statusText}`, {
+        data: errorData,
+        status: response.status
+      });
+    }
   }
 
   async configureDataSetECommerceIntegration(updated_source: CatalogSource): Promise<void> {
@@ -379,13 +387,21 @@ export class DataSetsApiClient extends BaseApiClient {
       data_set_id: updated_source.data_set_id
     };
 
-    await fetch(`${this.apiBase}/api/data_sets/${updated_source.data_set_id}/ecommerce_integration`,
+    const response = await fetch(`${this.apiBase}/api/data_sets/${updated_source.data_set_id}/ecommerce_integration`,
       {
         ...this._requestConfiguration(),
         body: JSON.stringify(body),
         method: 'PATCH'
       }
     );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new ApiError(`Failed to configure e-commerce integration: ${response.statusText}`, {
+        data: errorData,
+        status: response.status
+      });
+    }
   }
 
   async syncDataSetEcommerceIntegration(dataSetId: number): Promise<void> {

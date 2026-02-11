@@ -2,6 +2,7 @@ from rest_framework import serializers
 from utils.serializers import ParentDataContextSerializerMixin
 
 from sync.document.registry import DocumentSourcePluginRegistry
+from sync.ecommerce.registry import ECommerceIntegrationPluginRegistry
 from sync.product.registry import ProductSourcePluginRegistry
 
 from .models import DataSet, Document, DocumentSource, ECommerceIntegration, Product, ProductSource
@@ -20,6 +21,7 @@ class DataSetSerializer(serializers.ModelSerializer):
             "embedding_model",
             "embedding_vector_dimensions",
         ]
+
 
 class DataSetCreateSerializer(DataSetSerializer):
     preconfigure_agents = serializers.BooleanField(write_only=True, required=False, default=False)
@@ -63,6 +65,15 @@ class DocumentSourceConfigSerializer(serializers.Serializer):
     )
 
 
+class ECommerceIntegrationConfigSerializer(serializers.Serializer):
+    configuration_args = PydanticModelField(
+        config_field_name="CONFIGURATION_ARGS",
+        plugin_registry_class=ECommerceIntegrationPluginRegistry,
+        allow_null=True,
+        default=None,
+    )
+
+
 class ProductSourceSerializer(ParentDataContextSerializerMixin, serializers.ModelSerializer):
     context_keys_to_propagate = ["plugin_name"]
 
@@ -88,6 +99,7 @@ class DocumentSourceSerializer(ParentDataContextSerializerMixin, serializers.Mod
 class ECommerceIntegrationSerializer(ParentDataContextSerializerMixin, serializers.ModelSerializer):
     context_keys_to_propagate = ["plugin_name"]
 
+    config = ECommerceIntegrationConfigSerializer()
     task_id = serializers.CharField(read_only=True, required=False, allow_null=True)
 
     class Meta:

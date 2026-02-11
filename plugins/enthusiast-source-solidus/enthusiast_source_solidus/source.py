@@ -5,8 +5,8 @@ from pydantic import Field
 
 
 class SolidusConfig(RequiredFieldsModel):
-    base_url: str = Field(description="Solidus API base URL")
-    api_key: str = Field(description="Solidus API key")
+    base_url: str = Field(title="Base URL", description="Solidus API base URL")
+    api_key: str = Field(title="API key", description="Solidus API key")
 
 
 class SolidusProductSource(ProductSourcePlugin):

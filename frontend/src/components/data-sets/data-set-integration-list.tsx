@@ -157,30 +157,33 @@ export function DataSetIntegrationList({ dataSetId }: DataSetSourceListProps) {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem
+              className={'block'}
               onClick={() => setTimeout(() => handleAddSource('ecommerce'), 1)}
               disabled={!hasECommerceIntegrationPlugins}
             >
               E-Commerce system
               {!hasECommerceIntegrationPlugins && (
-                <span className="text-xs text-gray-500 ml-2">(No plugins available)</span>
+                <div className="text-xs text-gray-500 ml-2">(No plugins available)</div>
               )}
             </DropdownMenuItem>
             <DropdownMenuItem
+              className={'block'}
               onClick={() => setTimeout(() => handleAddSource('product'), 1)}
               disabled={!hasProductPlugins}
             >
               Product source
               {!hasProductPlugins && (
-                <span className="text-xs text-gray-500 ml-2">(No plugins available)</span>
+                <div className="text-xs text-gray-500 ml-2">(No plugins available)</div>
               )}
             </DropdownMenuItem>
             <DropdownMenuItem
+              className={'block'}
               onClick={() => setTimeout(() => handleAddSource('document'), 1)}
               disabled={!hasDocumentPlugins}
             >
               Document source
               {!hasDocumentPlugins && (
-                <span className="text-xs text-gray-500 ml-2">(No plugins available)</span>
+                <div className="text-xs text-gray-500 ml-2">(No plugins available)</div>
               )}
             </DropdownMenuItem>
           </DropdownMenuContent>

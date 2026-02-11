@@ -33,19 +33,3 @@ class BasePydanticModelField(serializers.Field):
             field_path = ".".join(str(x) for x in err["loc"])
             error_dict.setdefault(field_path, []).append(err["msg"])
         return error_dict
-
-
-class TypeInfoSerializer(serializers.Serializer):
-    container = serializers.CharField(
-        required=False, allow_null=True, help_text="e.g. 'list', 'dict', or null for flat types"
-    )
-    inner_type = serializers.CharField(required=False, allow_blank=True, help_text="e.g. 'str', 'int', etc.")
-    key_type = serializers.CharField(required=False, allow_blank=True, help_text="For dicts only")
-    value_type = serializers.CharField(required=False, allow_blank=True, help_text="For dicts only")
-    nullable = serializers.BooleanField(required=False, help_text="True if field is Optional")
-
-
-class ExtraArgDetailSerializer(serializers.Serializer):
-    type = TypeInfoSerializer()
-    description = serializers.CharField(allow_blank=True, required=False, allow_null=True)
-    title = serializers.CharField(allow_blank=True, required=False, allow_null=True)

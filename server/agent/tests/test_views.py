@@ -133,7 +133,7 @@ class TestAgentTypesView:
             assert response.data["choices"][1]["key"] == "agent_2"
             assert len(response.data["choices"][0]["tools"]) == 2
             assert len(response.data["choices"][1]["tools"]) == 2
-            assert list(response.data["choices"][0]["tools"][0].keys()) == ["required_test", "optional_test"]
+            assert list(response.data["choices"][0]["tools"][0].keys()) == ["properties", "required", "title", "type"]
 
     def test_get_agent_types_returns_401(self):
         response = APIClient().get(reverse("agent-types"))

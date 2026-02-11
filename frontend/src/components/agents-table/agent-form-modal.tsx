@@ -1,13 +1,29 @@
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Agent } from "@/lib/types";
+import { Agent, AGENT_CONFIG_SECTION_KEYS, type AgentConfig, type AgentConfigSectionKey } from "@/lib/types";
 import { useAgentForm } from "./hooks/use-agent-form";
-import { AgentConfigurationForm } from "./agent-configuration-form";
-import {AgentChoice} from "@/lib/api/agents.ts";
-import {Textarea} from "@/components/ui/textarea.tsx";
+import type { AgentChoice } from "@/lib/api/agents";
+import { Textarea } from "@/components/ui/textarea";
 import { FormModal } from "@/components/ui/form-modal";
 import { useEffect } from "react";
+import { RjsfForm } from "@/components/rjsf";
+
+function useScrollToFirstError(fieldErrors: Record<string, string>) {
+  useEffect(() => {
+    if (Object.keys(fieldErrors).length === 0) return;
+    const timer = setTimeout(() => {
+      document.querySelector("[data-field-error]")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [fieldErrors]);
+}
+
+const SECTION_TITLES: Record<AgentConfigSectionKey, string> = {
+  agent_args: "Agent args",
+  prompt_input: "Prompt input",
+  prompt_extension: "Prompt extension",
+};
 
 interface AgentFormModalProps {
   open: boolean;
@@ -36,8 +52,8 @@ export function AgentFormModal({
     type,
     setType,
     config,
-    setConfig,
-    agentConfigSections,
+    selectedType,
+    updateConfigSection,
     openSections,
     setOpenSections,
     fieldErrors,
@@ -53,6 +69,8 @@ export function AgentFormModal({
       resetForm();
     }
   }, [open, resetForm]);
+
+  useScrollToFirstError(fieldErrors);
 
   const onSubmit = async () => {
     await handleSubmit();
@@ -73,7 +91,7 @@ export function AgentFormModal({
       disabled={!name || !type}
       loading={loadingTypes}
       loadingText="Loading agent types..."
-      dependencies={[type, agentConfigSections, openSections, generalError, fieldErrors]}
+      dependencies={[type, selectedType, config, openSections, generalError, fieldErrors]}
     >
       {generalError && (
         <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
@@ -81,9 +99,9 @@ export function AgentFormModal({
         </div>
       )}
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1" {...(fieldErrors.type ? { "data-field-error": "true" } : {})}>
         <Label htmlFor="agent-type">Type</Label>
-        <Select value={type} onValueChange={setType} disabled={agentTypes.length == 0 || !!agent}>
+        <Select value={type} onValueChange={setType} disabled={agentTypes.length === 0 || !!agent}>
           <SelectTrigger id="agent-type" className={fieldErrors.type ? "border-destructive" : ""}>
             <SelectValue placeholder="Select type"/>
           </SelectTrigger>
@@ -93,7 +111,7 @@ export function AgentFormModal({
             ))}
           </SelectContent>
         </Select>
-        {agentTypes.length == 0 &&
+        {agentTypes.length === 0 &&
           <p className="text-[0.8rem] text-muted-foreground">First, you'll need to install an agent.<br /> To get started quickly, you can choose on of our <a href="https://upsidelab.io/tools/enthusiast/agents" className="underline">pre-built ones</a> to get started quick.</p>
         }
         {fieldErrors.type && (
@@ -101,7 +119,7 @@ export function AgentFormModal({
         )}
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1" {...(fieldErrors.name ? { "data-field-error": "true" } : {})}>
         <Label htmlFor="agent-name">Name</Label>
         <Input
           id="agent-name"
@@ -115,7 +133,7 @@ export function AgentFormModal({
         )}
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1" {...(fieldErrors.description ? { "data-field-error": "true" } : {})}>
         <Label htmlFor="agent-description">Description</Label>
         <Textarea
           id="agent-description"
@@ -128,14 +146,30 @@ export function AgentFormModal({
         )}
       </div>
 
-      {type && (
-        <AgentConfigurationForm
-          agentConfigSections={agentConfigSections}
-          openSections={openSections}
-          setOpenSections={setOpenSections}
+      {type && selectedType && (
+        <RjsfForm
+          choice={selectedType}
           config={config}
-          setConfig={setConfig}
+          sectionKeys={AGENT_CONFIG_SECTION_KEYS}
+          sectionTitles={SECTION_TITLES}
+          onConfigChange={(key, value) => updateConfigSection(key as keyof AgentConfig, value)}
           fieldErrors={fieldErrors}
+          openSections={openSections}
+          onOpenSectionsChange={setOpenSections}
+          header={
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-medium text-foreground">Configuration</h4>
+              <p className="text-xs text-muted-foreground">Configure agent parameters</p>
+            </div>
+          }
+          emptyMessage={
+            <>
+              <p className="text-sm text-muted-foreground mb-2">No configuration required</p>
+              <p className="text-xs text-muted-foreground">
+                This agent type doesn't require any additional configuration parameters.
+              </p>
+            </>
+          }
         />
       )}
     </FormModal>

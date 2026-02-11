@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.exceptions import APIException
-from utils.serializers import ExtraArgDetailSerializer, ParentDataContextSerializerMixin
+from utils.serializers import ParentDataContextSerializerMixin
 
 from agent.core.registries.agents.agent_registry import AgentRegistry
 from agent.models import Agent
@@ -11,10 +11,10 @@ from catalog.models import DataSet
 class AgentChoiceSerializer(serializers.Serializer):
     key = serializers.CharField()
     name = serializers.CharField()
-    agent_args = serializers.DictField(child=ExtraArgDetailSerializer(), allow_empty=True)
-    prompt_input = serializers.DictField(child=ExtraArgDetailSerializer(), allow_empty=True)
-    prompt_extension = serializers.DictField(child=ExtraArgDetailSerializer(), allow_empty=True)
-    tools = serializers.ListField(child=serializers.DictField(child=ExtraArgDetailSerializer()), allow_empty=True)
+    agent_args = serializers.DictField(allow_empty=True)
+    prompt_input = serializers.DictField(allow_empty=True)
+    prompt_extension = serializers.DictField(allow_empty=True)
+    tools = serializers.ListField(child=serializers.DictField(), allow_empty=True)
 
 
 class AvailableAgentsResponseSerializer(serializers.Serializer):
@@ -24,10 +24,10 @@ class AvailableAgentsResponseSerializer(serializers.Serializer):
 class AgentConfigSerializer(ParentDataContextSerializerMixin, serializers.Serializer):
     context_keys_to_propagate = ["agent_type"]
 
-    agent_args = PydanticModelField(agent_field_name="AGENT_ARGS")
-    prompt_input = PydanticModelField(agent_field_name="PROMPT_INPUT")
-    prompt_extension = PydanticModelField(agent_field_name="PROMPT_EXTENSION")
-    tools = PydanticModelToolListField(agent_field_name="TOOLS", tool_field_name="CONFIGURATION_ARGS")
+    agent_args = PydanticModelField(agent_field_name="AGENT_ARGS", required=False)
+    prompt_input = PydanticModelField(agent_field_name="PROMPT_INPUT", required=False)
+    prompt_extension = PydanticModelField(agent_field_name="PROMPT_EXTENSION", required=False)
+    tools = PydanticModelToolListField(agent_field_name="TOOLS", tool_field_name="CONFIGURATION_ARGS", required=False)
 
 
 class AgentSerializer(ParentDataContextSerializerMixin, serializers.ModelSerializer):

@@ -1,6 +1,6 @@
 import inspect
 import json
-from typing import Any, Dict, List, Union, get_args, get_origin
+from typing import Any, Dict, List, Union, get_args, get_origin, get_type_hints
 
 from pydantic import BaseModel, Json, model_validator
 from pydantic._internal._model_construction import ModelMetaclass
@@ -51,6 +51,18 @@ class RequiredFieldsMeta(ModelMetaclass):
     def __new__(cls, name, bases, namespace):
         new_cls = super().__new__(cls, name, bases, namespace)
 
+        annotations = namespace.get("__annotations__", {})
+        for field_name, field_type in annotations.items():
+            origin = get_origin(field_type)
+            args = get_args(field_type)
+
+            if origin is Union:
+                if len(args) != 2:
+                    raise TypeError(f"Field '{field_name}' in {name} Union must have exactly 2 types, got {len(args)}")
+
+                if type(None) not in args:
+                    raise TypeError(f"Field '{field_name}' in {name} Union must include NoneType")
+
         def check_type_depth(annotation: Any, current_depth=1):
             if current_depth > cls.MAX_DEPTH:
                 raise TypeError(f"Exceeded max depth of {cls.MAX_DEPTH} in field annotation")
@@ -71,6 +83,14 @@ class RequiredFieldsMeta(ModelMetaclass):
 
 
 class RequiredFieldsModel(BaseModel, metaclass=RequiredFieldsMeta):
+    def __init__(self, **data):
+        hints = get_type_hints(self.__class__)
+        for field_name, field_type in hints.items():
+            if hasattr(field_type, "__origin__") and field_type.__origin__ is Union:
+                if type(None) in field_type.__args__ and field_name not in data:
+                    data[field_name] = None
+        super().__init__(**data)
+
     @model_validator(mode="before")
     def convert_json_fields(cls, values: dict) -> dict:
         for name, field in cls.model_fields.items():

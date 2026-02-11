@@ -53,7 +53,8 @@ export type User = {
 
 export type SourcePlugin = {
   name: string;
-  configuration_args: Record<string, ExtraArgDetail>;
+  configuration_args: import("@rjsf/utils").RJSFSchema;
+  $defs?: Record<string, import("@rjsf/utils").RJSFSchema>;
 };
 
 export type Agent = {
@@ -98,26 +99,15 @@ export type ProvidersConfig = {
   embeddingProviders: string[];
 }
 
-export type TypeInfo = {
-  container: string | null;
-  inner_type?: string;
-  key_type?: string;
-  value_type?: string;
-  nullable?: boolean;
-};
-
-export type ExtraArgDetail = {
-  type: TypeInfo;
-  description?: string | null;
-  title?: string | null;
-};
-
 export type AgentConfig = {
-  agent_args?: Record<string, ExtraArgDetail>;
-  prompt_input?: Record<string, ExtraArgDetail>;
-  prompt_extension?: Record<string, ExtraArgDetail>;
-  tools?: Array<Record<string, ExtraArgDetail>>;
+  agent_args?: Record<string, unknown>;
+  prompt_input?: Record<string, unknown>;
+  prompt_extension?: Record<string, unknown>;
+  tools?: Record<string, unknown>[];
 };
+
+export const AGENT_CONFIG_SECTION_KEYS = ["agent_args", "prompt_input", "prompt_extension"] as const;
+export type AgentConfigSectionKey = (typeof AGENT_CONFIG_SECTION_KEYS)[number];
 
 export type AgentDetails = {
   id: number;

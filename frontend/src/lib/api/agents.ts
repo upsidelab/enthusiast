@@ -1,14 +1,16 @@
 import {BaseApiClient} from "@/lib/api/base.ts";
 import {Agent, AgentConfig, AgentDetails} from "@/lib/types.ts";
 import {ApiError} from "@/lib/api-error.ts";
+import type { RJSFSchema } from "@rjsf/utils";
 
 export type AgentChoice = {
   key: string;
   name: string;
-  agent_args: Record<string, string>;
-  prompt_inputs: Record<string, string>;
-  prompt_extension: Record<string, string>;
-  tools: Record<string, string>[];
+  agent_args: RJSFSchema;
+  prompt_input: RJSFSchema;
+  prompt_extension: RJSFSchema;
+  tools: RJSFSchema[];
+  $defs?: Record<string, RJSFSchema>;
 };
 
 type AvailableAgentsResponse = {
@@ -23,8 +25,8 @@ export class AgentsApiClient extends BaseApiClient {
             throw new Error(`Failed to fetch available agents: ${response.statusText}`);
         }
 
-        const result = await response.json() as AvailableAgentsResponse;
-        return result.choices;
+        const data = await response.json();
+        return Array.isArray(data) ? (data as AgentChoice[]) : (data as AvailableAgentsResponse).choices;
     }
     async getDatasetAvailableAgents(dataSetId: number): Promise<Agent[]> {
         const query = new URLSearchParams({ dataset: dataSetId.toString() });

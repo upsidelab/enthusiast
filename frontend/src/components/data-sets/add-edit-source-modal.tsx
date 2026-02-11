@@ -5,9 +5,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { CatalogSource, SourcePlugin } from "@/lib/types.ts";
 import { useSourceForm } from "./hooks/use-source-form.ts";
-import { ConfigurationForm } from "@/components/ui/configuration-form.tsx";
 import { FormModal } from "@/components/ui/form-modal";
 import { useEffect } from "react";
+import { RjsfForm } from "@/components/rjsf";
+
+const SOURCE_SECTION_KEYS = ["configuration_args"] as const;
+const SOURCE_SECTION_TITLES: Record<string, string> = { configuration_args: "Configuration" };
 
 const formSchema = z.object({
   pluginName: z.string().min(1, "Plugin is required"),
@@ -45,13 +48,15 @@ export function AddEditSourceModal({
   const {
     setPluginName,
     config,
-    setConfig,
     fieldErrors,
     generalError,
     submitting,
     handleSubmit,
     getSelectedPlugin,
-    resetForm
+    resetForm,
+    openSections,
+    setOpenSections,
+    updateConfigSection,
   } = useSourceForm(source, availablePlugins, dataSetId, sourceType, onSave);
 
   // Reset form when modal closes
@@ -135,11 +140,30 @@ export function AddEditSourceModal({
           />
 
           {selectedPlugin && (
-            <ConfigurationForm
-              configurationArgs={selectedPlugin.configuration_args}
+            <RjsfForm
+              choice={selectedPlugin}
               config={config}
-              setConfig={setConfig}
+              sectionKeys={SOURCE_SECTION_KEYS}
+              sectionTitles={SOURCE_SECTION_TITLES}
+              onConfigChange={updateConfigSection}
               fieldErrors={fieldErrors}
+              openSections={openSections}
+              onOpenSectionsChange={setOpenSections}
+              showToolsSection={false}
+              header={
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-medium text-foreground">Configuration</h4>
+                  <p className="text-xs text-muted-foreground">Configure connection parameters</p>
+                </div>
+              }
+              emptyMessage={
+                <>
+                  <p className="text-sm text-muted-foreground mb-2">No configuration required</p>
+                  <p className="text-xs text-muted-foreground">
+                    This connector doesn't require any additional configuration.
+                  </p>
+                </>
+              }
             />
           )}
         </form>

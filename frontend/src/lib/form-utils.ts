@@ -102,10 +102,14 @@ export function parseFieldErrors(errorData: unknown): Record<string, string> {
     return newFieldErrors;
   }
 
-  // Handle basic field errors
+  // Handle basic field errors (Django may return array e.g. ["error"] or string "error")
+  const skipKeys = ['config', 'detail', 'message'];
   Object.entries(errorData as Record<string, unknown>).forEach(([key, value]) => {
-    if (key !== 'config' && Array.isArray(value)) {
+    if (skipKeys.includes(key)) return;
+    if (Array.isArray(value) && value.length > 0) {
       newFieldErrors[key] = String(value[0]);
+    } else if (typeof value === 'string') {
+      newFieldErrors[key] = value;
     }
   });
 

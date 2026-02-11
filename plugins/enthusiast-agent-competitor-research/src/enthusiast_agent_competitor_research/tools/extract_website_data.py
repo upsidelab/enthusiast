@@ -30,7 +30,7 @@ class ExtractWebsiteDataToolConfigurationArgs(RequiredFieldsModel):
 class ExtractWebsiteDataTool(BaseLLMTool):
     NAME = "extract_website_data_tool"
     DESCRIPTION = "It's tool for extracting data from web page"
-    ARGS_SCHEMA = None
+    ARGS_SCHEMA = ExtractWebsiteDataToolInput
     RETURN_DIRECT = False
     CONFIGURATION_ARGS = ExtractWebsiteDataToolConfigurationArgs
 

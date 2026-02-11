@@ -1,7 +1,7 @@
 from enthusiast_common.config import AgentConfigWithDefaults
 from enthusiast_common.config.prompts import PromptTemplateConfig
 
-from .agent import CompetitorResearchReActAgent
+from .agent import CompetitorResearchAgent
 from .prompt import COMPETITOR_RESEARCH_RE_ACT_AGENT_PROMPT
 
 
@@ -11,6 +11,6 @@ def get_config() -> AgentConfigWithDefaults:
             input_variables=["tools", "tool_names", "input", "agent_scratchpad", "data_format"],
             prompt_template=COMPETITOR_RESEARCH_RE_ACT_AGENT_PROMPT,
         ),
-        agent_class=CompetitorResearchReActAgent,
-        tools=CompetitorResearchReActAgent.TOOLS,
+        agent_class=CompetitorResearchAgent,
+        tools=CompetitorResearchAgent.TOOLS,
     )

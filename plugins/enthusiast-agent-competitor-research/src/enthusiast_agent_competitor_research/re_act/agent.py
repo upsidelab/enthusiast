@@ -8,7 +8,7 @@ from pydantic import Field, Json
 from ..tools.extract_website_data import ExtractWebsiteDataTool
 
 
-class CompetitorResearchReActAgentPromptInput(RequiredFieldsModel):
+class CompetitorResearchAgentPromptInput(RequiredFieldsModel):
     output_format: Json = Field(
         title="Output format",
         description="Output format of the extracted data",
@@ -16,8 +16,10 @@ class CompetitorResearchReActAgentPromptInput(RequiredFieldsModel):
     )
 
 
-class CompetitorResearchReActAgent(BaseReActAgent):
-    PROMPT_INPUT = CompetitorResearchReActAgentPromptInput
+class CompetitorResearchAgent(BaseReActAgent):
+    AGENT_KEY = "enthusiast-agent-competitor-research"
+    NAME = "Competitor Research"
+    PROMPT_INPUT = CompetitorResearchAgentPromptInput
     TOOLS = [LLMToolConfig(tool_class=ExtractWebsiteDataTool)]
 
     def _build_agent_executor(self) -> AgentExecutor:

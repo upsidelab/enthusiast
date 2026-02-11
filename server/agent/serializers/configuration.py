@@ -90,4 +90,14 @@ class AgentListSerializer(ParentDataContextSerializerMixin, serializers.ModelSer
 
     class Meta:
         model = Agent
-        fields = ["id", "name", "dataset", "agent_type", "created_at", "updated_at", "deleted_at", "corrupted"]
+        fields = [
+            "id",
+            "name",
+            "description",
+            "dataset",
+            "agent_type",
+            "created_at",
+            "updated_at",
+            "deleted_at",
+            "corrupted",
+        ]

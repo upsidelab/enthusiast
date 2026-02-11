@@ -12,6 +12,7 @@ import { PaginatedTable } from "@/components/util/paginated-table.tsx";
 import { ApiClient } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { ButtonWithTooltip } from "@/components/ui/button-with-tooltip.tsx";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip.tsx";
 
 const api = new ApiClient(authenticationProviderInstance);
 
@@ -79,7 +80,7 @@ export default function AgentsTable() {
         loadItems={fetchAgents}
         itemsReloadDependencies={1}
         noItemsMessage="You haven't configured any agents yet"
-        tableHeaders={["Name", "Type", "Action"]}
+        tableHeaders={["Name", "Description", "Type", "Action"]}
         tableRow={(item, index) => {
           return (<TableRow key={index}>
             <TableCell>
@@ -89,6 +90,24 @@ export default function AgentsTable() {
                     {item.name}
                   </span>
               </div>
+            </TableCell>
+            <TableCell className="max-w-[200px]">
+              {item.description ? (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="truncate cursor-default">
+                        {item.description}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-sm">
+                      <p className="whitespace-pre-wrap">{item.description}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ) : (
+                <span className="text-muted-foreground">—</span>
+              )}
             </TableCell>
             <TableCell className={"w-1/4"}>
               {agentTypes.find(t => t.key === item.agent_type)?.name || item.agent_type || 'Unknown'}

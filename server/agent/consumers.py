@@ -25,6 +25,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             "message_created": self.handle_message_created,
             "action": self.handle_action,
             "error": self.handle_error,
+            "product_widget_start": self.handle_product_widget_start,
+            "product_widget_end": self.handle_product_widget_end,
+            "product_widget_product": self.handle_product_widget_product,
         }
 
         handler = handlers.get(event_type)
@@ -50,6 +53,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def handle_error(self, event):
         await self.send(json.dumps({"event": "error", "data": {"output": event.get("output")}}))
+
+    async def handle_product_widget_start(self, event):
+        await self.send(json.dumps({"event": "product_widget_start", "data": event.get("data")}))
+
+    async def handle_product_widget_end(self, event):
+        await self.send(json.dumps({"event": "product_widget_end", "data": event.get("data")}))
+
+    async def handle_product_widget_product(self, event):
+        await self.send(json.dumps({"event": "product_widget_product", "data": {"chunk": event.get("data")}}))
 
     async def save_message(self, output):
         from .models import Conversation, Message

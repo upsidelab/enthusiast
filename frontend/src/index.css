@@ -80,3 +80,62 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .primary a,
+  .secondary a {
+    @apply text-blue-600 underline underline-offset-2 hover:text-blue-800 transition-colors;
+  }
+  
+  .primary a:visited {
+    @apply text-purple-600 hover:text-purple-800;
+  }
+  
+  .secondary a:visited {
+    @apply text-purple-600 hover:text-purple-800;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fadeIn {
+    opacity: 0;
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+
+  .animate-fadeOut {
+    animation: fadeOut 0.5s ease-out forwards;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  .animate-shimmer {
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+}

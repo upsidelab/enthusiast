@@ -3,7 +3,8 @@ from typing import Optional
 
 from enthusiast_common.connectors import ECommercePlatformConnector
 from enthusiast_common.retrievers import BaseProductRetriever, BaseVectorStoreRetriever
-from enthusiast_common.structures import RepositoriesInstances, DocumentChunkDetails
+from enthusiast_common.structures import DocumentChunkDetails, RepositoriesInstances
+from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.memory import BaseMemory
 
 
@@ -34,4 +35,9 @@ class BaseInjector(ABC):
     @property
     @abstractmethod
     def chat_limited_memory(self) -> BaseMemory:
+        pass
+
+    @property
+    @abstractmethod
+    def callbacks_handler(self) -> BaseCallbackHandler:
         pass

@@ -82,6 +82,11 @@ export type Message = {
   id: number;
   type: string;
   text: string;
+  widget_data?: {
+    widget_type: string;
+    message?: string;
+    data?: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
+  };
 }
 
 export type ServiceAccount = {

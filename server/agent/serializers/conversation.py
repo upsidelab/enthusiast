@@ -88,10 +88,10 @@ class MessagesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Message
-        fields = ["id", "text", "type", "file_type", "file_name"]
+        fields = ["id", "text", "type", "file_type", "file_name", "widget_data"]
 
     def get_text(self, obj: Message):
-        if obj.type == Message.MessageType.FILE:
+        if obj.type == Message.MessageType.FILE or obj.type == Message.MessageType.WIDGET:
             return ""
         else:
             return obj.text

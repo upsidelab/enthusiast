@@ -28,6 +28,7 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
         self._data_set_id = None
         self._injector = None
         self._prompt = None
+        self._agent_callback_handler = None
         self._config = config
         self.conversation_id = conversation_id
         self.streaming = streaming
@@ -40,11 +41,12 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
         self._embeddings_registry = self._build_embeddings_registry()
         self._llm = self._build_llm(self._config.llm)
         self._default_llm = self._build_default_llm()
+        self._agent_callback_handler = self._build_agent_callback_handler()
         self._injector = self._build_injector()
         tools = self._build_tools(default_llm=self._default_llm, injector=self._injector)
-        agent_callback_handler = self._build_agent_callback_handler()
+
         self._prompt = self._build_prompt_template()
-        agent_instance = self._build_agent(tools, self._llm, agent_callback_handler)
+        agent_instance = self._build_agent(tools, self._llm, self._agent_callback_handler)
         self._inject_additional_arguments(agent_instance)
         return agent_instance
 

@@ -10,9 +10,9 @@ from .medusa_product_source import MedusaProductSource
 
 
 class MedusaIntegrationConfig(RequiredFieldsModel):
-    base_url: str = Field(description="Medusa API URL")
-    api_key: str = Field(description="Medusa API Key")
-    admin_base_url: Optional[str] = Field(description="(Optional) Medusa Admin URL, if different than the API URL", default=None)
+    base_url: str = Field(title="Base URL", description="Medusa API URL")
+    api_key: str = Field(title="API key", description="Medusa API Key")
+    admin_base_url: Optional[str] = Field(title="Admin base URL", description="(Optional) Medusa Admin URL, if different than the API URL", default=None)
 
 
 class MedusaIntegration(ECommerceIntegrationPlugin):

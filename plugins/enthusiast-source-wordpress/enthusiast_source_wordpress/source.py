@@ -12,8 +12,8 @@ logger = logging.getLogger(__name__)
 
 
 class WordpressConfig(RequiredFieldsModel):
-    base_url: str = Field(description="Base URL of the WordPress site")
-    user_agent: str = Field(default="", description="Custom User-Agent for requests")
+    base_url: str = Field(title="Base URL", description="Base URL of the WordPress site")
+    user_agent: str = Field(title="User agent", default="", description="Custom User-Agent for requests")
 
 
 class WordpressDocumentSource(DocumentSourcePlugin):

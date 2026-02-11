@@ -10,10 +10,10 @@ logger = logging.getLogger(__name__)
 
 
 class WoocommerceConfig(RequiredFieldsModel):
-    base_url: str = Field(description="WooCommerce site base URL")
-    per_page: int = Field(default=20, description="Number of products per page (10-100)")
-    consumer_key: str = Field(description="WooCommerce consumer key")
-    consumer_secret: str = Field(description="WooCommerce consumer secret")
+    base_url: str = Field(title="Base URL", description="WooCommerce site base URL")
+    per_page: int = Field(title="Products per page", default=20, description="Number of products per page (10-100)")
+    consumer_key: str = Field(title="Consumer key", description="WooCommerce consumer key")
+    consumer_secret: str = Field(title="Consumer secret", description="WooCommerce consumer secret")
 
 
 class WoocommerceProductSource(ProductSourcePlugin):

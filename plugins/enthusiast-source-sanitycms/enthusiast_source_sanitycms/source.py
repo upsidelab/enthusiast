@@ -5,12 +5,12 @@ from pydantic import Field
 
 
 class SanityCMSConfig(RequiredFieldsModel):
-    project_id: str = Field(description="Sanity project ID")
-    dataset: str = Field(description="Sanity dataset name")
-    schema_type: str = Field(description="Sanity schema type to query")
-    title_field_name: str = Field(description="Field name for document title")
-    content_field_name: str = Field(description="Field name for document content")
-    api_key: str = Field(description="Sanity API key", default="")
+    project_id: str = Field(title="Project ID", description="Sanity project ID")
+    dataset: str = Field(title="Dataset name", description="Sanity dataset name")
+    schema_type: str = Field(title="Schema type", description="Sanity schema type to query")
+    title_field_name: str = Field(title="Title field name", description="Field name for document title")
+    content_field_name: str = Field(title="Content field name", description="Field name for document content")
+    api_key: str = Field(title="API key", description="Sanity API key", default="")
 
 
 class SanityCMSDocumentSource(DocumentSourcePlugin):

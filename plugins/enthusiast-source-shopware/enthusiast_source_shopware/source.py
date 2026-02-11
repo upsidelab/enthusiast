@@ -5,10 +5,10 @@ from pydantic import Field
 
 
 class ShopwareConfig(RequiredFieldsModel):
-    base_url: str = Field(description="Shopware API base URL")
-    currency_iso_code: str = Field(description="Currency ISO code (e.g., EUR, USD)")
-    client_id: str = Field(description="Shopware client ID")
-    api_key: str = Field(description="Shopware API key")
+    base_url: str = Field(title="Base URL", description="Shopware API base URL")
+    currency_iso_code: str = Field(title="Currency ISO code", description="Currency ISO code (e.g., EUR, USD)")
+    client_id: str = Field(title="Client ID", description="Shopware client ID")
+    api_key: str = Field(title="API key", description="Shopware API key")
 
 
 class ShopwareProductSource(ProductSourcePlugin):

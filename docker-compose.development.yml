@@ -40,6 +40,7 @@ services:
     build:
       context: .
       dockerfile: server/Dockerfile.development
+    user: celery
     env_file:
       - ./server/.env
     environment:
@@ -53,6 +54,7 @@ services:
     build:
       context: .
       dockerfile: server/Dockerfile.development
+    user: celery
     environment:
       - RUN_MIGRATIONS=False
       - RUN_WORKER=False

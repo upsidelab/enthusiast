@@ -1,7 +1,5 @@
-import base64
-from typing import Any
+from typing import Any, Optional
 
-import requests
 from enthusiast_common import ProductDetails, ProductSourcePlugin
 from enthusiast_common.utils import RequiredFieldsModel
 from pydantic import Field
@@ -40,11 +38,9 @@ class MedusaProductSource(ProductSourcePlugin):
             entry_id=medusa_product.get("id"),
             name=medusa_product.get("title"),
             slug=medusa_product.get("handle"),
-            description=medusa_product.get("description"),
+            description=medusa_product.get("description") or "",
             sku=(medusa_product.get("variants") or [{}])[0].get("ean") or "",
-            price=medusa_product.get("variants", [{}])[0].get("prices", [{}])[0].get("amount")
-            if medusa_product.get("variants")
-            else None,
+            price=MedusaProductSource._extract_product_price(medusa_product),
             properties=MedusaProductSource._parse_properties(medusa_product.get("variants", [{}])[0].get('options', {})),
             categories=(medusa_product.get("collection") or {}).get("title", ""),
         )
@@ -55,6 +51,18 @@ class MedusaProductSource(ProductSourcePlugin):
     def _parse_properties(raw_properties: list[dict[str, str|dict]]) -> str:
         properties = { raw_property["option"]["title"]: raw_property["value"]  for raw_property in raw_properties}
         return json.dumps(properties)
+
+    @staticmethod
+    def _extract_product_price(medusa_product: dict[str, Any]) -> Optional[float]:
+        if not medusa_product.get("variants"):
+            return None
+
+        prices = medusa_product.get("variants", [{}])[0].get("prices", [{}])
+
+        if len(prices) == 0:
+            return None
+
+        return prices[0].get("amount")
 
     def fetch(self) -> list[ProductDetails]:
         """Fetch product list.

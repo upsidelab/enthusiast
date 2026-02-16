@@ -16,9 +16,9 @@ class CatalogEnrichmentAgent(BaseToolCallingAgent):
     NAME = "Catalog Enrichment"
     PROMPT_INPUT = ExtractDataPromptInput
     FILE_UPLOAD = True
-    TOOLS = [
-        LLMToolConfig(tool_class=UpsertProductDetailsTool),
-    ]
+    # TOOLS = [
+        # LLMToolConfig(tool_class=UpsertProductDetailsTool),
+    # ]
 
     def get_answer(self, input_text: str) -> str:
         agent_executor = self._build_agent_executor()

@@ -47,9 +47,9 @@ class ChatPromptTemplateConfig(BaseModel):
     def validate_messages(cls, values):
         messages = values.get("messages", [])
 
-        user_items = [message for message in messages if message.role == MessageRole.USER]
-        if len(user_items) > 1:
-            raise ValueError("Only one message of type USER is allowed.")
+        # user_items = [message for message in messages if message.role == MessageRole.USER]
+        # if len(user_items) > 1:
+        #     raise ValueError("Only one message of type USER is allowed.")
 
         return values
 

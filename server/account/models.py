@@ -4,32 +4,22 @@ from django.db import models
 
 
 class UserManager(BaseUserManager):
-    def _create_user(self, email, password=None, **extra_fields):
-        if not email:
-            raise ValueError("The email field must be set")
+    def create_user(self, username=None, email=None, password=None, role=None, **extra_fields):
+        from account.services.user import UserService
 
-        email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
-        if extra_fields.get("is_service_account", False):
-            user.set_unusable_password()
-        else:
-            user.set_password(password)
-        user.save(using=self._db)
-        return user
+        return UserService.create_user(username=username, email=email, password=password, role=role, **extra_fields)
 
-    def create_user(self, username=None, email=None, password=None, **extra_fields):
-        extra_fields.setdefault("is_staff", False)
-        extra_fields.setdefault("is_superuser", False)
-        return self._create_user(email, password, **extra_fields)
+    def create_superuser(self, username=None, email=None, password=None, role=None, **extra_fields):
+        from account.services.user import UserService
 
-    def create_superuser(self, username=None, email=None, password=None, **extra_fields):
-        extra_fields.setdefault("is_staff", True)
-        extra_fields.setdefault("is_superuser", True)
-        return self._create_user(email, password, **extra_fields)
+        return UserService.create_superuser(
+            username=username, email=email, password=password, role=role, **extra_fields
+        )
 
-    def create_service_account(self, email, **extra_fields):
-        extra_fields.setdefault("is_service_account", True)
-        return self._create_user(email, password=None, **extra_fields)
+    def create_service_account(self, email, role=None, **extra_fields):
+        from account.services.user import UserService
+
+        return UserService.create_service_account(email=email, role=role, **extra_fields)
 
 
 class User(AbstractUser):

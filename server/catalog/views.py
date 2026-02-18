@@ -1,10 +1,12 @@
 from django.conf import settings
 from django.db import transaction
 from django.db.models import Count
+from django.utils.decorators import method_decorator
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from guardian.shortcuts import get_objects_for_user
 from rest_framework import status
-from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIView, RetrieveAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIView, RetrieveAPIView, get_object_or_404
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
@@ -12,6 +14,7 @@ from rest_framework.views import APIView
 
 from account.models import User
 from account.serializers import UserSerializer
+from account.services.user import UserService
 from agent.core.registries.embeddings import EmbeddingProviderRegistry
 from agent.core.registries.language_models import LanguageModelRegistry
 from agent.services import AgentService
@@ -39,6 +42,9 @@ from .serializers import (
     ProductSourceSerializer,
     SyncResponseSerializer,
 )
+from .utils import AdminRole, ModelPermissions, UserRole, permission_required_with_global_perms
+
+_ds_perms = ModelPermissions(DataSet)
 
 
 class SyncAllSourcesView(APIView):
@@ -67,19 +73,14 @@ class DataSetListView(ListCreateAPIView):
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        if self.request.user and self.request.user.is_staff:
-            return DataSet.objects.all()
-
-        return DataSet.objects.filter(users=self.request.user)
+        return get_objects_for_user(self.request.user, _ds_perms.view, DataSet)
 
     @swagger_auto_schema(operation_description="Create a new data set", request_body=DataSetCreateSerializer)
+    @method_decorator(permission_required_with_global_perms(_ds_perms.add))
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
     def perform_create(self, serializer):
-        if not self.request.user.is_staff:
-            self.permission_denied(self.request)
-
         with transaction.atomic():
             preconfigure_agents = serializer.validated_data.pop("preconfigure_agents")
             data_set = serializer.save()
@@ -102,6 +103,7 @@ class DataSetDetailView(RetrieveAPIView):
             )
         ],
     )
+    @method_decorator(permission_required_with_global_perms(_ds_perms.view, (DataSet, "pk", "data_set_id")))
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -114,6 +116,7 @@ class DataSetDetailView(RetrieveAPIView):
             )
         ],
     )
+    @method_decorator(permission_required_with_global_perms(_ds_perms.change, (DataSet, "pk", "data_set_id")))
     def patch(self, request, *args, **kwargs):
         instance = self.get_object()
 
@@ -133,7 +136,7 @@ class DataSetDetailView(RetrieveAPIView):
 
 class DataSetUserListView(ListCreateAPIView):
     serializer_class = UserSerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_description="List users in a data set",
@@ -142,6 +145,9 @@ class DataSetUserListView(ListCreateAPIView):
                 "data_set_id", openapi.IN_PATH, description="ID of the data set", type=openapi.TYPE_INTEGER
             )
         ],
+    )
+    @method_decorator(
+        permission_required_with_global_perms(_ds_perms.manage_dataset_users, (DataSet, "pk", "data_set_id"))
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
@@ -156,17 +162,27 @@ class DataSetUserListView(ListCreateAPIView):
             properties={"user_id": openapi.Schema(type=openapi.TYPE_INTEGER, description="ID of the user")},
         ),
     )
+    @method_decorator(
+        permission_required_with_global_perms(_ds_perms.manage_dataset_users, (DataSet, "pk", "data_set_id"))
+    )
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
     def create(self, *args, **kwargs):
         user = User.objects.get(id=self.request.data["user_id"])
-        DataSet.objects.get(id=self.kwargs["data_set_id"]).users.add(user)
+        data_set = DataSet.objects.get(id=self.kwargs["data_set_id"])
+        data_set.users.add(user)
+
+        if user.is_staff:
+            UserService.assign_role(user, AdminRole, data_set)
+        else:
+            UserService.assign_role(user, UserRole, data_set)
+
         return Response({}, status=status.HTTP_201_CREATED)
 
 
 class DataSetUserView(GenericAPIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_description="Remove a user from a data set",
@@ -177,18 +193,22 @@ class DataSetUserView(GenericAPIView):
             openapi.Parameter("user_id", openapi.IN_PATH, description="ID of the user", type=openapi.TYPE_INTEGER),
         ],
     )
+    @method_decorator(
+        permission_required_with_global_perms(_ds_perms.manage_dataset_users, (DataSet, "pk", "data_set_id"))
+    )
     def delete(self, *args, **kwargs):
         DataSet.objects.get(id=self.kwargs["data_set_id"]).users.remove(self.kwargs["user_id"])
         return Response({}, status=status.HTTP_204_NO_CONTENT)
 
 
 class SyncDataSetAllSourcesView(APIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_description="Sync all sources in a data set",
         responses={200: SyncResponseSerializer},
     )
+    @method_decorator(permission_required_with_global_perms(_ds_perms.change, (DataSet, "pk", "data_set_id")))
     def post(self, request, *args, **kwargs):
         task = sync_data_set_all_sources.apply_async(args=[kwargs["data_set_id"]])
         serializer = SyncResponseSerializer({"task_id": task.id})
@@ -197,7 +217,7 @@ class SyncDataSetAllSourcesView(APIView):
 
 class DataSetProductSourceListView(ListCreateAPIView):
     serializer_class = ProductSourceSerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_description="List product sources in a data set",
@@ -207,6 +227,7 @@ class DataSetProductSourceListView(ListCreateAPIView):
             )
         ],
     )
+    @method_decorator(permission_required_with_global_perms(_ds_perms.view, (DataSet, "pk", "data_set_id")))
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -216,6 +237,7 @@ class DataSetProductSourceListView(ListCreateAPIView):
     @swagger_auto_schema(
         operation_description="Create a new product source in a data set", request_body=ProductSourceSerializer
     )
+    @method_decorator(permission_required_with_global_perms(_ds_perms.change, (DataSet, "pk", "data_set_id")))
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
@@ -237,7 +259,7 @@ class DataSetProductSourceListView(ListCreateAPIView):
 
 
 class DataSetProductSourceView(GenericAPIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
     serializer_class = ProductSourceSerializer
 
     @swagger_auto_schema(
@@ -251,14 +273,16 @@ class DataSetProductSourceView(GenericAPIView):
             ),
         ],
     )
+    @method_decorator(permission_required_with_global_perms(_ds_perms.view, (DataSet, "pk", "data_set_id")))
     def get(self, request, data_set_id, product_source_id):
-        product_source = ProductSource.objects.get(id=product_source_id)
+        product_source = ProductSource.objects.get(id=product_source_id, data_set_id=data_set_id)
         serializer = self.serializer_class(product_source)
         return Response(serializer.data)
 
     @swagger_auto_schema(operation_description="Update a product source", request_body=ProductSourceSerializer)
-    def patch(self, request, *args, **kwargs):
-        product_source = ProductSource.objects.get(id=kwargs.get("product_source_id"))
+    @method_decorator(permission_required_with_global_perms(_ds_perms.change, (DataSet, "pk", "data_set_id")))
+    def patch(self, request, data_set_id, product_source_id):
+        product_source = ProductSource.objects.get(id=product_source_id, data_set_id=data_set_id)
         serializer = self.serializer_class(product_source, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save(corrupted=False)
@@ -276,8 +300,9 @@ class DataSetProductSourceView(GenericAPIView):
             ),
         ],
     )
-    def delete(self, *args, **kwargs):
-        ProductSource.objects.filter(id=kwargs["product_source_id"]).delete()
+    @method_decorator(permission_required_with_global_perms(_ds_perms.delete, (DataSet, "pk", "data_set_id")))
+    def delete(self, request, data_set_id, product_source_id):
+        ProductSource.objects.filter(id=product_source_id, data_set_id=data_set_id).delete()
         return Response({}, status=status.HTTP_204_NO_CONTENT)
 
 
@@ -295,27 +320,29 @@ class SyncAllProductSourcesView(APIView):
 
 
 class SyncDataSetProductSourcesView(APIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_description="Sync all product sources in a data set",
         responses={200: SyncResponseSerializer},
     )
-    def post(self, request, *args, **kwargs):
-        task = sync_data_set_product_sources.apply_async(args=[kwargs["data_set_id"]])
+    @method_decorator(permission_required_with_global_perms(_ds_perms.change, (DataSet, "pk", "data_set_id")))
+    def post(self, request, data_set_id):
+        task = sync_data_set_product_sources.apply_async(args=[data_set_id])
         serializer = SyncResponseSerializer({"task_id": task.id})
         return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 
 
 class SyncDataSetProductSourceView(APIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_description="Sync a product source",
         responses={200: SyncResponseSerializer},
     )
-    def post(self, request, *args, **kwargs):
-        task = sync_product_source.apply_async(args=[kwargs["product_source_id"]])
+    @method_decorator(permission_required_with_global_perms(_ds_perms.change, (DataSet, "pk", "data_set_id")))
+    def post(self, request, data_set_id, product_source_id):
+        task = sync_product_source.apply_async(args=[product_source_id])
         serializer = SyncResponseSerializer({"task_id": task.id})
         return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 
@@ -333,14 +360,12 @@ class ProductListView(ListAPIView):
             )
         ],
     )
+    @method_decorator(permission_required_with_global_perms(_ds_perms.view, (DataSet, "pk", "data_set_id")))
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        if self.request.user.is_staff:
-            data_set = DataSet.objects.get(id=self.kwargs["data_set_id"])
-        else:
-            data_set = DataSet.objects.get(id=self.kwargs["data_set_id"], users=self.request.user)
+        data_set = get_object_or_404(DataSet, pk=self.kwargs["data_set_id"])
         return data_set.products.all()
 
 
@@ -357,20 +382,18 @@ class DocumentListView(ListAPIView):
             )
         ],
     )
+    @method_decorator(permission_required_with_global_perms(_ds_perms.view, (DataSet, "pk", "data_set_id")))
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        if self.request.user.is_staff:
-            data_set = DataSet.objects.get(id=self.kwargs["data_set_id"])
-        else:
-            data_set = DataSet.objects.get(id=self.kwargs["data_set_id"], users=self.request.user)
+        data_set = get_object_or_404(DataSet, pk=self.kwargs["data_set_id"])
         return data_set.documents.annotate(chunks_count=Count("chunks")).all()
 
 
 class DataSetDocumentSourceListView(ListCreateAPIView):
     serializer_class = DocumentSourceSerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_description="List document sources in a data set",
@@ -380,6 +403,7 @@ class DataSetDocumentSourceListView(ListCreateAPIView):
             )
         ],
     )
+    @method_decorator(permission_required_with_global_perms(_ds_perms.view, (DataSet, "pk", "data_set_id")))
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -389,6 +413,7 @@ class DataSetDocumentSourceListView(ListCreateAPIView):
     @swagger_auto_schema(
         operation_description="Create a new document source in a data set", request_body=DocumentSourceSerializer
     )
+    @method_decorator(permission_required_with_global_perms(_ds_perms.change, (DataSet, "pk", "data_set_id")))
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
@@ -410,7 +435,7 @@ class DataSetDocumentSourceListView(ListCreateAPIView):
 
 
 class DataSetDocumentSourceView(GenericAPIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
     serializer_class = DocumentSourceSerializer
 
     @swagger_auto_schema(
@@ -427,14 +452,16 @@ class DataSetDocumentSourceView(GenericAPIView):
             ),
         ],
     )
+    @method_decorator(permission_required_with_global_perms(_ds_perms.view, (DataSet, "pk", "data_set_id")))
     def get(self, request, data_set_id, document_source_id):
-        document_source = DocumentSource.objects.get(id=document_source_id)
+        document_source = DocumentSource.objects.get(id=document_source_id, data_set_id=data_set_id)
         serializer = self.serializer_class(document_source)
         return Response(serializer.data)
 
     @swagger_auto_schema(operation_description="Update a document source", request_body=DocumentSourceSerializer)
-    def patch(self, request, *args, **kwargs):
-        document_source = DocumentSource.objects.get(id=kwargs.get("document_source_id"))
+    @method_decorator(permission_required_with_global_perms(_ds_perms.change, (DataSet, "pk", "data_set_id")))
+    def patch(self, request, data_set_id, document_source_id):
+        document_source = DocumentSource.objects.get(id=document_source_id, data_set_id=data_set_id)
         serializer = self.serializer_class(document_source, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save(corrupted=False)
@@ -454,8 +481,9 @@ class DataSetDocumentSourceView(GenericAPIView):
             ),
         ],
     )
-    def delete(self, *args, **kwargs):
-        DocumentSource.objects.filter(id=kwargs["document_source_id"]).delete()
+    @method_decorator(permission_required_with_global_perms(_ds_perms.delete, (DataSet, "pk", "data_set_id")))
+    def delete(self, request, data_set_id, document_source_id):
+        DocumentSource.objects.filter(id=document_source_id, data_set_id=data_set_id).delete()
         return Response({}, status=status.HTTP_204_NO_CONTENT)
 
 
@@ -479,27 +507,29 @@ class SyncDataSetDocumentSourcesView(APIView):
         operation_description="Sync all document sources in a data set",
         responses={200: SyncResponseSerializer},
     )
-    def post(self, request, *args, **kwargs):
-        task = sync_data_set_document_sources.apply_async(args=[kwargs["data_set_id"]])
+    @method_decorator(permission_required_with_global_perms(_ds_perms.change, (DataSet, "pk", "data_set_id")))
+    def post(self, request, data_set_id):
+        task = sync_data_set_document_sources.apply_async(args=[data_set_id])
         serializer = SyncResponseSerializer({"task_id": task.id})
         return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 
 
 class SyncDataSetDocumentSourceView(APIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_description="Sync a document source",
         responses={200: SyncResponseSerializer},
     )
-    def post(self, request, *args, **kwargs):
-        task = sync_document_source.apply_async(args=[kwargs["document_source_id"]])
+    @method_decorator(permission_required_with_global_perms(_ds_perms.change, (DataSet, "pk", "data_set_id")))
+    def post(self, request, data_set_id, document_source_id):
+        task = sync_document_source.apply_async(args=[document_source_id])
         serializer = SyncResponseSerializer({"task_id": task.id})
         return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 
 
 class DataSetECommerceIntegrationView(GenericAPIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
     serializer_class = ECommerceIntegrationSerializer
 
     @swagger_auto_schema(
@@ -510,6 +540,7 @@ class DataSetECommerceIntegrationView(GenericAPIView):
             )
         ],
     )
+    @method_decorator(permission_required_with_global_perms(_ds_perms.view, (DataSet, "pk", "data_set_id")))
     def get(self, request, *args, **kwargs):
         data_set_id = kwargs["data_set_id"]
         try:
@@ -528,6 +559,7 @@ class DataSetECommerceIntegrationView(GenericAPIView):
             )
         ],
     )
+    @method_decorator(permission_required_with_global_perms(_ds_perms.change, (DataSet, "pk", "data_set_id")))
     def post(self, request, *args, **kwargs):
         data_set_id = kwargs["data_set_id"]
 
@@ -553,6 +585,7 @@ class DataSetECommerceIntegrationView(GenericAPIView):
             )
         ],
     )
+    @method_decorator(permission_required_with_global_perms(_ds_perms.change, (DataSet, "pk", "data_set_id")))
     def patch(self, request, *args, **kwargs):
         data_set_id = kwargs["data_set_id"]
         try:
@@ -572,6 +605,7 @@ class DataSetECommerceIntegrationView(GenericAPIView):
             )
         ],
     )
+    @method_decorator(permission_required_with_global_perms(_ds_perms.delete, (DataSet, "pk", "data_set_id")))
     def delete(self, *args, **kwargs):
         data_set_id = kwargs["data_set_id"]
         ECommerceIntegration.objects.filter(data_set_id=data_set_id).delete()
@@ -579,12 +613,13 @@ class DataSetECommerceIntegrationView(GenericAPIView):
 
 
 class DataSetECommerceIntegrationSyncView(GenericAPIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_description="Sync a document source",
         responses={200: SyncResponseSerializer},
     )
+    @method_decorator(permission_required_with_global_perms(_ds_perms.change, (DataSet, "pk", "data_set_id")))
     def post(self, request, *args, **kwargs):
         data_set_id = kwargs["data_set_id"]
         try:
@@ -597,6 +632,7 @@ class DataSetECommerceIntegrationSyncView(GenericAPIView):
         return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 
 
+# TODO Permissions
 class ConfigView(GenericAPIView):
     permission_classes = [IsAdminUser]
 

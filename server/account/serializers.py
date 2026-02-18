@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from account.models import User
 
-from .services import ServiceAccountNameService
+from .services import ServiceAccountNameService, UserService
 
 
 class AccountSerializer(serializers.Serializer):
@@ -40,7 +40,7 @@ class CreateUpdateServiceAccountSerializer(serializers.Serializer):
         is_active = validated_data.get("is_active")
         is_staff = validated_data.get("is_staff")
         dataset_ids = validated_data.get("data_set_ids", [])
-        service_account = User.objects.create_service_account(email=email, is_active=is_active, is_staff=is_staff)
+        service_account = UserService.create_service_account(email=email, is_active=is_active, is_staff=is_staff)
         service_account.data_sets.add(*dataset_ids)
         return service_account
 

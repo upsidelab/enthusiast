@@ -1,9 +1,11 @@
+from django.shortcuts import get_object_or_404
+from django.utils.decorators import method_decorator
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.generics import ListAPIView
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -15,11 +17,15 @@ from account.serializers import (
     TokenResponseSerializer,
 )
 from account.services.service_accounts import ServiceAccountNameService
+from catalog.utils import ModelPermissions, permission_required_with_global_perms
+
+_user_perms = ModelPermissions(User)
 
 
 class CheckServiceNameView(APIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
 
+    @method_decorator(permission_required_with_global_perms(_user_perms.view))
     @swagger_auto_schema(
         operation_description="Check if a service account name is available",
         request_body=openapi.Schema(
@@ -37,8 +43,9 @@ class CheckServiceNameView(APIView):
 
 
 class ResetTokenView(APIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
 
+    @method_decorator(permission_required_with_global_perms(_user_perms.change, (User, "pk", "id")))
     @swagger_auto_schema(
         operation_description="Revoke and regenerate a token for a service account",
         manual_parameters=[
@@ -47,7 +54,7 @@ class ResetTokenView(APIView):
         responses={200: TokenResponseSerializer},
     )
     def post(self, request, id):
-        service_account = User.objects.get(id=id, is_service_account=True)
+        service_account = get_object_or_404(User, id=id, is_service_account=True)
         Token.objects.filter(user=service_account).delete()
         token, created = Token.objects.get_or_create(user=service_account)
         serializer = TokenResponseSerializer({"token": token.key})
@@ -55,16 +62,18 @@ class ResetTokenView(APIView):
 
 
 class ServiceAccountListView(ListAPIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
     serializer_class = ServiceAccountSerializer
     queryset = User.objects.filter(is_service_account=True).order_by("-date_joined")
 
+    @method_decorator(permission_required_with_global_perms(_user_perms.view))
     @swagger_auto_schema(
         operation_description="Get list of service accounts",
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
+    @method_decorator(permission_required_with_global_perms(_user_perms.add))
     @swagger_auto_schema(
         operation_description="Create a new service account", request_body=CreateUpdateServiceAccountSerializer
     )
@@ -80,8 +89,9 @@ class ServiceAccountListView(ListAPIView):
 
 
 class ServiceAccountView(APIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
 
+    @method_decorator(permission_required_with_global_perms(_user_perms.change, (User, "pk", "id")))
     @swagger_auto_schema(
         operation_description="Update a service account",
         request_body=CreateUpdateServiceAccountSerializer,
@@ -90,7 +100,7 @@ class ServiceAccountView(APIView):
         ],
     )
     def patch(self, request, id):
-        service_account = User.objects.get(id=id, is_service_account=True)
+        service_account = get_object_or_404(User, id=id, is_service_account=True)
         serializer = CreateUpdateServiceAccountSerializer(service_account, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()

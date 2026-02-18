@@ -41,6 +41,9 @@ from agent.serializers.conversation import (
 )
 from agent.tasks import process_file_upload_task, respond_to_user_message_task
 from catalog.models import DataSet
+from catalog.utils import ModelPermissions
+
+_ds_perms = ModelPermissions(DataSet)
 
 
 class GetTaskStatus(APIView):
@@ -292,10 +295,17 @@ class AgentView(APIView):
         responses={200: AgentListSerializer(many=True)},
     )
     def get(self, request):
-        if request.user.is_staff:
-            queryset = Agent.objects.all().order_by("created_at")
-        else:
+        hide_corrupted_agents = not request.user.has_perm(_ds_perms.change)
+        if hide_corrupted_agents and request.GET.get("dataset"):
+            try:
+                dataset = DataSet.objects.get(pk=request.GET["dataset"])
+                hide_corrupted_agents = not request.user.has_perm(_ds_perms.change, dataset)
+            except DataSet.DoesNotExist:
+                pass
+        if hide_corrupted_agents:
             queryset = Agent.objects.filter(corrupted=False).order_by("created_at")
+        else:
+            queryset = Agent.objects.all().order_by("created_at")
         filterset = AgentFilter(request.GET, queryset=queryset)
         if not filterset.is_valid():
             return Response(filterset.errors, status=status.HTTP_400_BAD_REQUEST)

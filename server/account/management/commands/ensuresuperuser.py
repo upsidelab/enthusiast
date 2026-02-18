@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from account.models import User
+from account.services import UserService
 
 
 class Command(BaseCommand):
@@ -14,4 +15,4 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if not User.objects.exists():
-            User.objects.create_superuser(email=options["email"], password=options["password"])
+            UserService.create_superuser(email=options["email"], password=options["password"])

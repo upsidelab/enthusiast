@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "corsheaders",
+    "guardian",
     "catalog",
     "agent",
     "account",
@@ -278,7 +279,10 @@ UPLOADED_FILE_RETENTION_PERIOD_HOURS: int = 48
 
 SERVICE_ACCOUNT_DOMAIN = env.str("SERVICE_ACCOUNT_DOMAIN", "enthusiast.internal")
 
-AUTHENTICATION_BACKENDS = ("django.contrib.auth.backends.ModelBackend",)
+AUTHENTICATION_BACKENDS = (
+    "django.contrib.auth.backends.ModelBackend",
+    "guardian.backends.ObjectPermissionBackend",
+)
 
 # Django social auth settings
 SOCIAL_AUTH_LOGIN_ERROR_URL = (

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { PlusIcon } from "lucide-react";
 import { ApiClient, TaskHandle } from "@/lib/api.ts";
@@ -18,8 +18,16 @@ import type { AgentDetails } from "@/lib/types";
 import type { Conversation as ConversationSchema } from '@/lib/types.ts';
 import type { Message, MessageFile } from "@/components/conversation-view/message-composer.tsx";
 
+import { Thread } from "@/components/assistant-ui/thread";
+import { ThreadMessageLike } from "@assistant-ui/react";
+import {
+  AssistantRuntimeProvider,
+  useExternalStoreRuntime,
+} from "@assistant-ui/react";
+
 export type FileMessageProps = {
   id: number | null;
+  clientId: string;
   type: "file";
   file_name: string;
   file_type: string;
@@ -29,6 +37,7 @@ export type MessageProps = {
   type: "human" | "ai" | "system";
   text: string;
   id: number | null;
+  clientId: string;
 } | FileMessageProps;
 
 interface ChatSessionProps {
@@ -55,6 +64,7 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
   const usePolling = useRef(!streamingEnabled);
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
   const ws = useRef<WebSocket | null>(null);
+  const newClientId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
   const conversationId = Number(chatId);
   const isAgentDeleted = !!conversation?.agent.deleted_at;
@@ -91,7 +101,10 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
         return;
       }
 
-      const initialMessages = conversation.history as MessageProps[];
+      const initialMessages = (conversation.history as any[]).map((message) => ({
+        ...message,
+        clientId: message.id,
+      })) as MessageProps[];
       setMessages(initialMessages);
 
       scrollToLastMessage(100);
@@ -139,7 +152,10 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
               { ...lastMessage, text: lastMessage.text + data.data.chunk }
             ];
           } else {
-            return [...prevMessages, { type: "ai", text: data.data.chunk, id: null }];
+            return [
+              ...prevMessages,
+              { type: "ai", text: data.data.chunk, id: null, clientId: newClientId() },
+            ];
           }
         });
 
@@ -231,7 +247,7 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
         setIsAgentLoading(false);
         setMessages((prev) => [
           ...prev,
-          { type: "ai", text: response.text, id: response.id }
+          { type: "ai", text: response.text, id: response.id, clientId: newClientId() }
         ]);
         setIsLoading(false);
         scrollToLastMessage();
@@ -247,6 +263,7 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
   const addFileMessages = (files: MessageFile[]) => {
     const fileMessages = files.map<FileMessageProps>(file => ({
       id: null,
+      clientId: newClientId(),
       type: "file",
       file_name: file.name,
       file_type: file.type
@@ -258,7 +275,7 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
   const addUserMessage = (message: string) => {
     setMessages((prev) => [
       ...prev,
-      { type: "human", text: message, id: null }
+      { type: "human", text: message, id: null, clientId: newClientId() }
     ]);
     scrollToLastMessage();
   };
@@ -291,6 +308,37 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
     return message.type === "human" || message.type === "file";
   };
 
+  // hacky POC
+
+  type TextMessage = Exclude<MessageProps, FileMessageProps>;
+
+  const convertMessage = (message: TextMessage): ThreadMessageLike => {
+    const roleMap: Record<MessageProps['type'], ThreadMessageLike['role']> = {
+      human: 'user',
+      ai: 'assistant',
+      system: 'system',
+      file: 'user'
+    };
+
+    return {
+      id: message.clientId,
+      role: roleMap[message.type],
+      content: message.text
+    };
+  };
+
+  const runtime = useExternalStoreRuntime<TextMessage>({
+    messages: messages.filter(m => m.type !== 'file') as TextMessage[],
+    onNew: async (message) => {
+      onMessageComposerSubmit({
+        text: message?.content[0].text as string,
+        files: []
+      })
+    },
+    convertMessage,
+    isRunning: isLoading
+  });
+
   return (
     <PageMain className="h-full py-0">
       {conversation &&
@@ -305,50 +353,11 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
               New Chat
             </Button>
           </PageHeading>
-          <ChatWindow
-            className="pt-16"
-            onSubmit={onMessageComposerSubmit}
-            isLoading={isLoading}
-            conversationLocked={isAgentDeleted || isAgentCorrupted}
-            conversationId={conversationId}
-            agentId={agentId}
-            fileUploadEnabled={agentDetails?.file_upload}
-          >
-            <div className="grow flex-1 space-y-4">
-              {messages.map((message, index) => {
-                const inMessageGroup = isUserMessage(message) && index > 0 && isUserMessage(messages[index - 1]);
-
-                if (message.type === "system") {
-                  return (
-                    <MessageError key={index} text={message.text} />
-                  );
-                }
-
-                if (message.type === "file") {
-                  return (
-                    <AttachmentBubble key={index} variant="primary" message={message} inMessageGroup={inMessageGroup} />
-                  );
-                }
-
-                if (message.type === 'ai' && message.text === '') {
-                  return (<MessageBubbleTyping key={index} text={agentAction} />);
-                }
-
-                return (
-                  <MessageBubble
-                    key={index}
-                    text={message.text}
-                    variant={message.type === "human" ? "primary" : "secondary"}
-                    questionId={message.id}
-                    inMessageGroup={inMessageGroup}
-                  />
-                );
-              })}
-              {isAgentLoading && <MessageBubbleTyping text={agentAction} />}
-              <div className="mb-4" />
-              <div ref={lastMessageRef} />
+          <AssistantRuntimeProvider runtime={runtime}>
+            <div className="overflow-hidden h-[90vh] -mt-6">
+              <Thread/>
             </div>
-          </ChatWindow>
+          </AssistantRuntimeProvider>
         </>
       }
     </PageMain>

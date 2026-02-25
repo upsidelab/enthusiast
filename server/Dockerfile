@@ -21,7 +21,12 @@ RUN /root/.local/bin/poetry install
 
 COPY . .
 
-RUN chmod u+x /app/docker-entrypoint.sh
+RUN groupadd -r celery && useradd -r -g celery celery
+
+RUN mkdir -p /app/media && \
+    chown -R celery:celery /app/media && \
+    chmod u+x /app/docker-entrypoint.sh
+
 
 EXPOSE $PORT
 

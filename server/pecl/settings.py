@@ -253,7 +253,7 @@ CATALOG_MODELS = {
     "agent": "agent.models.Agent",
 }
 
-AVAILABLE_AGENTS: dict[str, dict[str, str]] = {}
+AVAILABLE_AGENTS: list[str] = []
 
 FILE_PARSER_CLASSES: dict[tuple[str] : str] = {
     (".txt",): "agent.file_parsers.text.PlainTextFileParser",

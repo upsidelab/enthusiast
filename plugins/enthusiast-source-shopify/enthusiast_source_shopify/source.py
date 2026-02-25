@@ -7,8 +7,8 @@ from pydantic import Field
 
 
 class ShopifyConfig(RequiredFieldsModel):
-    shop_url: str = Field(description="Shopify shop URL")
-    access_token: str = Field(description="Shopify access token")
+    shop_url: str = Field(title="Shop URL", description="Shopify shop URL")
+    access_token: str = Field(title="Access token", description="Shopify access token")
 
 
 class ShopifyProductSource(ProductSourcePlugin):

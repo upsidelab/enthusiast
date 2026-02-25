@@ -25,6 +25,8 @@ from langchain_community.document_loaders import PyPDFLoader
 logger = logging.getLogger(__name__)
 
 class PDFDocumentSourcePlugin(DocumentSourcePlugin):
+    NAME = "PDF Plugin"
+
     def __init__(self, data_set_id: int, config: dict):
         super().__init__(data_set_id, config)
 
@@ -53,9 +55,9 @@ class PDFDocumentSourcePlugin(DocumentSourcePlugin):
 ```
 3. To enable new plugin, add it to settings_override.py:
 ```python
-CATALOG_DOCUMENT_SOURCE_PLUGINS = {
-    "PDF Plugin": "<path_to_file>.PDFDocumentSourcePlugin"
-}
+CATALOG_DOCUMENT_SOURCE_PLUGINS = [
+    "<path_to_file>.PDFDocumentSourcePlugin",
+]
 ```
 Now this custom plugin will be available in Document source section.
 `config` variable used in above example could be provided while adding any source plugin:

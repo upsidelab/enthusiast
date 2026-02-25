@@ -22,8 +22,11 @@ const P = mdxComponents.p;
 
 export default async function Integration(props: IntegrationProps) {
   const installationInstructions = await compileMdx(`\`\`\`bash\npoetry add ${props.pipName}\n\`\`\``);
-  const buildRegisterInstructionMd = (key: string, module: string) => {
+  const buildRegisterDictInstructionMd = (key: string, module: string) => {
     return `\`\`\`python\n${key} = {\n    ...\n    "${props.name}": "${module}",\n}\n\`\`\``;
+  }
+  const buildRegisterListInstructionMd = (key: string, module: string) => {
+    return `\`\`\`python\n${key} = [\n    ...\n    "${module}",\n]\n\`\`\``;
   }
   const buildEnvInstructionMd = (keys: string[]) => {
       const lines = keys.map((key) => `${key}=<value_here>`).join("\n");
@@ -53,10 +56,10 @@ export default async function Integration(props: IntegrationProps) {
       <P>
         Then, register the integration in your config/settings_override.py.
       </P>
-      {props.registerProductModule && <MDXRemote compiledSource={await compileMdx(buildRegisterInstructionMd("CATALOG_PRODUCT_SOURCE_PLUGINS", props.registerProductModule))}/>}
-      {props.registerDocumentModule && <MDXRemote compiledSource={await compileMdx(buildRegisterInstructionMd("CATALOG_DOCUMENT_SOURCE_PLUGINS", props.registerDocumentModule))}/>}
-      {props.registerLanguageModelModule && <MDXRemote compiledSource={await compileMdx(buildRegisterInstructionMd("CATALOG_LANGUAGE_MODEL_PROVIDERS", props.registerLanguageModelModule))}/>}
-      {props.registerEmbeddingsModule && <MDXRemote compiledSource={await compileMdx(buildRegisterInstructionMd("CATALOG_EMBEDDING_PROVIDERS", props.registerEmbeddingsModule))}/>}
+      {props.registerProductModule && <MDXRemote compiledSource={await compileMdx(buildRegisterListInstructionMd("CATALOG_PRODUCT_SOURCE_PLUGINS", props.registerProductModule))}/>}
+      {props.registerDocumentModule && <MDXRemote compiledSource={await compileMdx(buildRegisterListInstructionMd("CATALOG_DOCUMENT_SOURCE_PLUGINS", props.registerDocumentModule))}/>}
+      {props.registerLanguageModelModule && <MDXRemote compiledSource={await compileMdx(buildRegisterDictInstructionMd("CATALOG_LANGUAGE_MODEL_PROVIDERS", props.registerLanguageModelModule))}/>}
+      {props.registerEmbeddingsModule && <MDXRemote compiledSource={await compileMdx(buildRegisterDictInstructionMd("CATALOG_EMBEDDING_PROVIDERS", props.registerEmbeddingsModule))}/>}
     </>
   )
 }

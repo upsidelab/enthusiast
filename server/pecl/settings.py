@@ -233,14 +233,14 @@ CATALOG_EMBEDDING_PROVIDERS = {
     "OpenAI": "enthusiast_model_openai.OpenAIEmbeddingProvider",
 }
 
-# Configuration of installed plugins {plugin_name: plugin_path}
-CATALOG_PRODUCT_SOURCE_PLUGINS = {
-    "Sample Product Source": "enthusiast_source_sample.SampleProductSource",
-}
-CATALOG_DOCUMENT_SOURCE_PLUGINS = {
-    "Sample Document Source": "enthusiast_source_sample.SampleDocumentSource",
-}
-CATALOG_ECOMMERCE_INTEGRATION_PLUGINS = []
+# Configuration of installed plugins
+CATALOG_PRODUCT_SOURCE_PLUGINS = [
+    "enthusiast_source_sample.SampleProductSource",
+]
+CATALOG_DOCUMENT_SOURCE_PLUGINS = [
+    "enthusiast_source_sample.SampleDocumentSource",
+]
+CATALOG_ECOMMERCE_INTEGRATION_PLUGINS: list[str] = []
 
 CATALOG_MODELS = {
     "user": "account.models.User",

@@ -2,7 +2,6 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from utils.functions import get_model_descriptor_from_class_field
 
 from sync.document.registry import DocumentSourcePluginRegistry
 from sync.ecommerce.registry import ECommerceIntegrationPluginRegistry
@@ -49,7 +48,7 @@ class GetProductSourcePlugins(APIView, PluginTypesMixin):
         return Response(serializer.data)
 
 
-class GetECommerceIntegrationPlugins(APIView):
+class GetECommerceIntegrationPlugins(APIView, PluginTypesMixin):
     """
     View to get list of ecommerce integration plugins registered in ECL settings.
     """
@@ -63,18 +62,6 @@ class GetECommerceIntegrationPlugins(APIView):
         responses={200: AvailablePluginsResponseSerializer(many=True)},
     )
     def get(self, request):
-        registry = ECommerceIntegrationPluginRegistry()
-        choices = []
-        for plugin_class in registry.get_plugin_classes():
-            plugin_name = plugin_class.NAME
-            configuration_args = get_model_descriptor_from_class_field(plugin_class, "CONFIGURATION_ARGS")
-            choices.append(
-                {
-                    "name": plugin_name,
-                    "configuration_args": configuration_args,
-                }
-            )
-
-        serializer = self.serializer_class(data={"choices": choices})
+        serializer = self.serializer_class(data=self.get_choices(ECommerceIntegrationPluginRegistry))
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data)

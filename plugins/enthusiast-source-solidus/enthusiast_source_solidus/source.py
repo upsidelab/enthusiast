@@ -10,6 +10,7 @@ class SolidusConfig(RequiredFieldsModel):
 
 
 class SolidusProductSource(ProductSourcePlugin):
+    NAME = "Solidus"
     CONFIGURATION_ARGS = SolidusConfig
 
     def __init__(self, data_set_id, **kwargs):

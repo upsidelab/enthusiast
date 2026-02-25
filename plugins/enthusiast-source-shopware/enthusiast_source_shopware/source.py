@@ -12,6 +12,7 @@ class ShopwareConfig(RequiredFieldsModel):
 
 
 class ShopwareProductSource(ProductSourcePlugin):
+    NAME = "Shopware"
     CONFIGURATION_ARGS = ShopwareConfig
 
     def __init__(self, data_set_id, **kwargs):

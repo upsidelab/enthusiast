@@ -12,10 +12,10 @@ pip install enthusiast-source-woocommerce
 ### Then, enable the plugin by adding it to the `settings.py`:
 
 ```python title="server/pecl/settings.py"
-CATALOG_PRODUCT_SOURCE_PLUGINS = {
+CATALOG_PRODUCT_SOURCE_PLUGINS = [
     ...
-    "WooCommerce": "enthusiast_source_woocommerce.WoocommerceProductSource"
-}
+    "enthusiast_source_woocommerce.WoocommerceProductSource",
+]
 ```
 
 ### Set WooCommerce consumer key and secret by setting enviroment variables

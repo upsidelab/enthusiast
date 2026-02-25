@@ -17,6 +17,7 @@ class WordpressConfig(RequiredFieldsModel):
 
 
 class WordpressDocumentSource(DocumentSourcePlugin):
+    NAME = "WordPress"
     CONFIGURATION_ARGS = WordpressConfig
 
     def __init__(self, data_set_id, **kwargs):

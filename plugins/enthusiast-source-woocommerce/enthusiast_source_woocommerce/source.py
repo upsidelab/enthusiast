@@ -17,6 +17,7 @@ class WoocommerceConfig(RequiredFieldsModel):
 
 
 class WoocommerceProductSource(ProductSourcePlugin):
+    NAME = "WooCommerce"
     CONFIGURATION_ARGS = WoocommerceConfig
 
     def __init__(self, data_set_id, **kwargs):

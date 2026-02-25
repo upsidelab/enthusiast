@@ -14,6 +14,7 @@ class MedusaProductSourceConfig(RequiredFieldsModel):
 
 
 class MedusaProductSource(ProductSourcePlugin):
+    NAME = "Medusa"
     CONFIGURATION_ARGS = MedusaProductSourceConfig
 
     def __init__(self, data_set_id):

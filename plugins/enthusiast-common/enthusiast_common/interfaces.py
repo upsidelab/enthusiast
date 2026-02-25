@@ -35,6 +35,7 @@ class SourceExtraArgsClassBase(metaclass=SourceExtraArgsClassBaseMeta):
 
 
 class ProductSourcePlugin(ABC, SourceExtraArgsClassBase):
+    NAME: str = None
     CONFIGURATION_ARGS = None
 
     def __init__(self, data_set_id):
@@ -51,6 +52,7 @@ class ProductSourcePlugin(ABC, SourceExtraArgsClassBase):
 
 
 class DocumentSourcePlugin(ABC, SourceExtraArgsClassBase):
+    NAME: str = None
     CONFIGURATION_ARGS = None
 
     def __init__(self, data_set_id):

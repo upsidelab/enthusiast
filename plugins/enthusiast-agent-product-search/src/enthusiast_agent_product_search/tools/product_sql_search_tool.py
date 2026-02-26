@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 
 class ProductSearchInput(BaseModel):
-    sql_query: str = Field(description="the SQL query targeting the catalog_product table")
+    sql_query: str = Field(description="SQL SELECT query on catalog_product table. MUST include id in SELECT clause.")
     expected_results: int = Field(description="expected number of results, pass 1 if not provided")
 
 

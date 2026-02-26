@@ -6,6 +6,8 @@ from enthusiast_common import DocumentDetails, DocumentSourcePlugin
 
 
 class SampleDocumentSource(DocumentSourcePlugin):
+    NAME = "Sample Document Source"
+
     def __init__(self, data_set_id: Any):
         super().__init__(data_set_id)
         self.sample_file_path = Path(__file__).parent / "sample_documents.csv"

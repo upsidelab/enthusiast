@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Generic, Self, Type, TypeVar
+from typing import Generic, List, Type, TypeVar
+
+from utils.base_registry import BaseRegistry
 
 
 @dataclass
@@ -15,38 +17,43 @@ class DataSetSource:
 T = TypeVar("T")
 
 
-class SourcePluginRegistry(ABC):
-    """Registry of available source plugins registered in ECL system."""
+class SourcePluginRegistry(BaseRegistry[T]):
+    """Registry of available source plugins registered in ECL system.
 
-    def __init__(self):
-        self.plugins = self.load_plugins()
+    Subclasses must implement ``_get_plugin_paths`` to return the list of
+    class paths from Django settings.
+    """
 
-    def load_plugins(self):
-        plugins = {}
-        for plugin_name, _ in self.get_plugins():
-            plugins[plugin_name] = self.get_plugin_class_by_name(plugin_name)
-        return plugins
+    def get_plugin_classes(self) -> List[Type[T]]:
+        """Returns all plugin classes registered in settings."""
+        return [self._get_plugin_class_by_path(path) for path in self._get_plugin_paths()]
 
-    def get_plugin_instance(self, data_set_source: DataSetSource):
-        """Creates an instance of catalog item source.
+    def _get_plugin_classes_by_names(self) -> dict[str, Type[T]]:
+        """Returns a mapping of plugin NAME to plugin class."""
+        return {plugin_class.NAME: plugin_class for plugin_class in self.get_plugin_classes()}
+
+    def get_plugin_class_by_name(self, name: str) -> Type[T]:
+        """Looks up a plugin class by its NAME attribute."""
+        return self._get_plugin_classes_by_names()[name]
+
+    def get_plugin_instance(self, source) -> T:
+        """Creates a configured instance of a plugin.
 
         Args:
-            data_set_source (DataSetSource): configuration of a plugin for a data set.
+            source: An object with ``plugin_name``, ``data_set_id``, and ``config`` attributes.
 
         Returns:
-            Instance of a plugin that is configured to fetch data from external source and load to a given dataset.
+            A plugin instance configured to fetch data from an external source.
         """
-        plugin_class = self.plugins[data_set_source.plugin_name]
-        plugin_instance = plugin_class(data_set_id=data_set_source.data_set_id)
-        plugin_instance.set_runtime_arguments(data_set_source.config)
+        plugin_class = self.get_plugin_class_by_name(source.plugin_name)
+        plugin_instance = plugin_class(data_set_id=source.data_set_id)
+        plugin_instance.set_runtime_arguments(source.config)
         return plugin_instance
 
+    @staticmethod
     @abstractmethod
-    def get_plugins(self) -> dict:
-        pass
-
-    @abstractmethod
-    def get_plugin_class_by_name(self, path: str) -> Type[Self]:
+    def _get_plugin_paths() -> List[str]:
+        """Returns the list of plugin class paths from settings."""
         pass
 
 

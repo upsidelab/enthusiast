@@ -14,6 +14,7 @@ class SanityCMSConfig(RequiredFieldsModel):
 
 
 class SanityCMSDocumentSource(DocumentSourcePlugin):
+    NAME = "Sanity CMS"
     CONFIGURATION_ARGS = SanityCMSConfig
 
     def __init__(self, data_set_id, **kwargs):

@@ -12,6 +12,7 @@ class ShopifyConfig(RequiredFieldsModel):
 
 
 class ShopifyProductSource(ProductSourcePlugin):
+    NAME = "Shopify"
     CONFIGURATION_ARGS = ShopifyConfig
 
     def __init__(self, data_set_id, **kwargs):

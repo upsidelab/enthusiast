@@ -24,7 +24,6 @@ from sync.tasks import (
     sync_data_set_product_sources,
     sync_document_source,
     sync_ecommerce_integration,
-    sync_ecommerce_integrations,
     sync_product_source,
 )
 
@@ -588,13 +587,12 @@ class DataSetECommerceIntegrationSyncView(GenericAPIView):
     def post(self, request, *args, **kwargs):
         data_set_id = kwargs["data_set_id"]
         try:
-            _ecommerce_integration = ECommerceIntegration.objects.get(data_set_id=data_set_id)
+            ecommerce_integration = ECommerceIntegration.objects.get(data_set_id=data_set_id)
+            task = sync_ecommerce_integration.apply_async(args=(ecommerce_integration.pk,))
+            serializer = SyncResponseSerializer({"task_id": task.id})
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         except ECommerceIntegration.DoesNotExist:
             return Response({}, status=status.HTTP_404_NOT_FOUND)
-
-        task = sync_ecommerce_integrations.apply_async(args=(data_set_id,))
-        serializer = SyncResponseSerializer({"task_id": task.id})
-        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 
 
 class ConfigView(GenericAPIView):

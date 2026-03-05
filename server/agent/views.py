@@ -86,15 +86,15 @@ class ConversationView(APIView):
         responses={200: ConversationContentSerializer()},
     )
     def get(self, request, conversation_id):
-        conversation = (
-            Conversation.objects.select_related("agent")
-            .prefetch_related(
+        conversation = get_object_or_404(
+            Conversation.objects.select_related("agent").prefetch_related(
                 Prefetch(
                     "messages",
                     queryset=Message.objects.exclude(type__in=Message.internal_message_types()).order_by("id"),
                 )
-            )
-            .get(id=conversation_id, user=request.user)
+            ),
+            id=conversation_id,
+            user=request.user,
         )
         serializer = ConversationContentSerializer(conversation)
         return Response(serializer.data, status=status.HTTP_200_OK)

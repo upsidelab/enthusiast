@@ -14,6 +14,7 @@ from rest_framework.test import APIClient
 from account.models import User
 from agent.models import Conversation
 from agent.models.agent import Agent
+from agent.models.agent_execution import AgentExecution
 from catalog.models import DataSet
 
 pytestmark = pytest.mark.django_db
@@ -690,3 +691,26 @@ class TestConversationListView:
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data["results"]) == 1
         assert response.data["results"][0]["id"] == user_conversation.id
+
+    def test_execution_conversations_are_excluded_from_list(self, api_client, user, dataset, url):
+        linked_agent = baker.make(Agent, deleted_at=None, dataset=dataset)
+        regular_conversation = baker.make(Conversation, user=user, agent=linked_agent, data_set=dataset)
+        execution_conversation = baker.make(Conversation, user=user, agent=linked_agent, data_set=dataset)
+        baker.make(AgentExecution, agent=linked_agent, conversation=execution_conversation, input={})
+
+        response = api_client.get(url)
+
+        assert response.status_code == status.HTTP_200_OK
+        conversation_ids = [conv["id"] for conv in response.data["results"]]
+        assert regular_conversation.id in conversation_ids
+        assert execution_conversation.id not in conversation_ids
+
+    def test_execution_conversation_is_accessible_via_detail_endpoint(self, api_client, user, dataset, url):
+        linked_agent = baker.make(Agent, deleted_at=None, dataset=dataset)
+        execution_conversation = baker.make(Conversation, user=user, agent=linked_agent, data_set=dataset)
+        baker.make(AgentExecution, agent=linked_agent, conversation=execution_conversation, input={})
+
+        response = api_client.get(reverse("conversation-details", kwargs={"conversation_id": execution_conversation.id}))
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data["id"] == execution_conversation.id

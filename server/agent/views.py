@@ -176,7 +176,7 @@ class ConversationListView(ListAPIView):
         data_set_id = self.request.query_params.get("data_set_id")
         agent_id = self.request.query_params.get("agent_id")
 
-        qs = Conversation.objects.filter(user=user)
+        qs = Conversation.objects.filter(user=user).exclude(agent_execution__isnull=False)
 
         if data_set_id:
             qs = qs.filter(data_set_id=data_set_id)

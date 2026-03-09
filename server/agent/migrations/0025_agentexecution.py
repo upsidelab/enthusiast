@@ -1,3 +1,4 @@
+import django.db.models.deletion
 from django.db import migrations, models
 
 
@@ -13,10 +14,23 @@ class Migration(migrations.Migration):
             fields=[
                 ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
                 (
-                    "execution_type",
-                    models.CharField(
-                        help_text="EXECUTION_KEY of the BaseAgentExecution subclass used for this run.",
-                        max_length=128,
+                    "agent",
+                    models.ForeignKey(
+                        help_text="The configured agent this execution runs against. Execution type is derived from agent.agent_type.",
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="executions",
+                        to="agent.agent",
+                    ),
+                ),
+                (
+                    "conversation",
+                    models.OneToOneField(
+                        blank=True,
+                        help_text="Conversation created internally by the plugin during run(); populated once the conversation exists.",
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="agent_execution",
+                        to="agent.conversation",
                     ),
                 ),
                 (

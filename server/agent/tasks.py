@@ -101,12 +101,12 @@ def process_file_upload_task(conversation_id: int, file_content: bytes, filename
 
 @shared_task(max_retries=0)
 def run_agent_execution_task(execution_id: int):
-    execution = AgentExecution.objects.get(pk=execution_id)
+    execution = AgentExecution.objects.select_related("agent").get(pk=execution_id)
     execution.mark_in_progress()
 
     try:
         registry = AgentExecutionRegistry()
-        execution_cls = registry.get_by_key(execution.execution_type)
+        execution_cls = registry.get_by_agent_type(execution.agent.agent_type)
         input_data = execution_cls.INPUT_TYPE(**execution.input)
         result = execution_cls().run(input_data)
         execution.mark_finished(result=result.output)

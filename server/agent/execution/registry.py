@@ -16,3 +16,9 @@ class AgentExecutionRegistry(BaseRegistry[BaseAgentExecution]):
             if cls.EXECUTION_KEY == key:
                 return cls
         raise KeyError(f"No agent execution registered with EXECUTION_KEY='{key}'.")
+
+    def get_by_agent_type(self, agent_type: str) -> Type[BaseAgentExecution]:
+        for cls in self.get_all():
+            if cls.AGENT_KEY == agent_type:
+                return cls
+        raise KeyError(f"No agent execution registered for agent type '{agent_type}'.")

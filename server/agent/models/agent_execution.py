@@ -14,9 +14,19 @@ class AgentExecution(models.Model):
         FINISHED = "finished", "Finished"
         FAILED = "failed", "Failed"
 
-    execution_type = models.CharField(
-        max_length=128,
-        help_text="EXECUTION_KEY of the BaseAgentExecution subclass used for this run.",
+    agent = models.ForeignKey(
+        "agent.Agent",
+        on_delete=models.PROTECT,
+        related_name="executions",
+        help_text="The configured agent this execution runs against. Execution type is derived from agent.agent_type.",
+    )
+    conversation = models.OneToOneField(
+        "agent.Conversation",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="agent_execution",
+        help_text="Conversation created internally by the plugin during run(); populated once the conversation exists.",
     )
     status = models.CharField(
         max_length=32,
@@ -35,7 +45,7 @@ class AgentExecution(models.Model):
         max_length=128,
         null=True,
         blank=True,
-        help_text="Standardised error code set when the execution fails.",
+        help_text="Standardised short error code set when the execution fails.",
     )
     failure_explanation = models.TextField(
         null=True,
@@ -65,12 +75,10 @@ class AgentExecution(models.Model):
             return None
         return (self.finished_at - self.started_at).total_seconds()
 
-    def mark_in_progress(self, celery_task_id: str | None = None) -> None:
-        """Transition the record to in_progress and optionally store the Celery task ID."""
+    def mark_in_progress(self) -> None:
+        """Transition the record to in_progress."""
         self.status = self.Status.IN_PROGRESS
-        if celery_task_id is not None:
-            self.celery_task_id = celery_task_id
-        self.save(update_fields=["status", "celery_task_id"])
+        self.save(update_fields=["status"])
 
     def mark_finished(self, result: dict) -> None:
         """Transition the record to finished and persist the execution output.

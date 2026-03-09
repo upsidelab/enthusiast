@@ -55,6 +55,7 @@ class BaseAgentExecution(ABC):
     """
 
     EXECUTION_KEY: ClassVar[str]
+    AGENT_KEY: ClassVar[str]
     NAME: ClassVar[str]
     INPUT_TYPE: ClassVar[Type[ExecutionInputType]] = ExecutionInputType
 

@@ -75,7 +75,7 @@ The pattern mirrors how agents are handled:
 ## 3. enthusiast-common — New module: `enthusiast_common/agent_execution/`
 
 - `ExecutionStatus` — enum: `PENDING`, `IN_PROGRESS`, `FINISHED`, `FAILED`
-- `ExecutionResult` — dataclass with output payload, optional summary, and list of non-fatal issue descriptions
+- `ExecutionResult` — dataclass with output payload and list of non-fatal issue descriptions
 - `ExecutionInputType` — Pydantic `BaseModel` subclassed per plugin to declare and validate structured execution input; the server derives the JSON Schema from it for API responses and request validation
 - `BaseExecutionValidator` — ABC for pluggable continue/stop strategies; implementations track per-item success/failure rates and expose an issue summary via `should_continue()` and `get_issue_summary()`
 - `BaseAgentExecution` — ABC for all agentic executions; subclasses declare `EXECUTION_KEY` (slug), `NAME` (UI label), and optionally a `ExecutionInputType` subclass; must implement `run() -> ExecutionResult`
@@ -94,7 +94,6 @@ The pattern mirrors how agents are handled:
 | `result` | JSONField (nullable) | Output from `ExecutionResult.output` (set on finish) |
 | `failure_code` | CharField (nullable) | Standardized error code (set on failure) |
 | `failure_explanation` | TextField (nullable) | LLM-generated explanation of what went wrong (set on failure) |
-| `summary` | TextField (nullable) | From `ExecutionResult.summary` or validator issues |
 | `celery_task_id` | CharField (nullable) | ID of the Celery task running this execution |
 | `started_at` | DateTimeField | Auto-set on creation |
 | `finished_at` | DateTimeField (nullable) | Set when reaching a terminal state |

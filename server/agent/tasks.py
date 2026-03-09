@@ -8,8 +8,10 @@ from django.utils import timezone
 
 from agent.conversation import ConversationManager
 from agent.core.callbacks import BaseWebSocketHandler
+from agent.execution.registry import AgentExecutionRegistry
 from agent.file_service import FileService
 from agent.models import Message
+from agent.models.agent_execution import AgentExecution
 from agent.models.conversation import Conversation, ConversationFile
 from agent.serializers.conversation import ConversationFileSerializer
 from pecl import settings
@@ -95,6 +97,25 @@ def process_file_upload_task(conversation_id: int, file_content: bytes, filename
         return {"status": "FAILURE", "error": f"Conversation {conversation_id} not found"}
     except Exception as e:
         return {"status": "FAILURE", "error": str(e)}
+
+
+@shared_task(max_retries=0)
+def run_agent_execution_task(execution_id: int):
+    execution = AgentExecution.objects.get(pk=execution_id)
+    execution.mark_in_progress()
+
+    try:
+        registry = AgentExecutionRegistry()
+        execution_cls = registry.get_by_key(execution.execution_type)
+        input_data = execution_cls.INPUT_TYPE(**execution.input)
+        result = execution_cls().run(input_data)
+        execution.mark_finished(result=result.output)
+    except Exception as exc:
+        execution.mark_failed(
+            failure_code=type(exc).__name__,
+            failure_explanation=str(exc),
+        )
+        raise
 
 
 @shared_task

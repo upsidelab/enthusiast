@@ -1,3 +1,3 @@
-from .base import BaseAgentTool, BaseFileTool, BaseFunctionTool, BaseLLMTool
+from .base import BaseAgentTool, BaseFileTool, BaseFunctionTool, BaseLLMTool, BaseWidgetResponseLLMTool
 
-__all__ = ["BaseLLMTool", "BaseAgentTool", "BaseFunctionTool", "BaseFileTool"]
+__all__ = ["BaseLLMTool", "BaseAgentTool", "BaseFunctionTool", "BaseFileTool", "BaseWidgetResponseLLMTool"]

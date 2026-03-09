@@ -12,6 +12,7 @@ class Message(models.Model):
         SYSTEM = "system"
         INTERMEDIATE_STEP = "intermediate_step"
         FILE = "file"
+        WIDGET = "widget"
 
     conversation = models.ForeignKey(Conversation, related_name="messages", on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -25,6 +26,7 @@ class Message(models.Model):
     function_name = models.CharField(max_length=50, blank=True, null=True)
     file_name = models.CharField(max_length=256, blank=True, null=True)
     file_type = models.CharField(max_length=50, blank=True, null=True)
+    widget_data = models.JSONField(blank=True, null=True)
 
     @classmethod
     def internal_message_types(cls):
@@ -33,12 +35,13 @@ class Message(models.Model):
     @property
     def langchain_type(self):
         langchain_type_mapping = {
-            self.MessageType.FUNCTION: "ai",
             self.MessageType.FILE: "human",
-            self.MessageType.INTERMEDIATE_STEP: "ai",
             self.MessageType.HUMAN: "human",
-            self.MessageType.AI: "ai",
             self.MessageType.SYSTEM: "system",
+            self.MessageType.INTERMEDIATE_STEP: "ai",
+            self.MessageType.AI: "ai",
+            self.MessageType.FUNCTION: "ai",
+            self.MessageType.WIDGET: "ai",
         }
         return langchain_type_mapping[self.type]
 

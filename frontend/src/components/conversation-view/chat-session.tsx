@@ -13,23 +13,52 @@ import { AttachmentBubble } from "@/components/conversation-view/attachment-bubb
 import { MessageError } from "@/components/conversation-view/message-error.tsx";
 import { MessageBubbleTyping } from "@/components/conversation-view/message-bubble-typing.tsx";
 import { ChatWindow } from "@/components/conversation-view/chat-window.tsx";
+import { ProductWidget } from "@/components/conversation-view/product-widget.tsx";
 
-import type { AgentDetails } from "@/lib/types";
-import type { Conversation as ConversationSchema } from '@/lib/types.ts';
-import type { Message, MessageFile } from "@/components/conversation-view/message-composer.tsx";
+import type {AgentDetails, Conversation as ConversationSchema} from '@/lib/types.ts';
+import type {Message, MessageFile} from "@/components/conversation-view/message-composer.tsx";
+import { Message as ApiMessage } from "src/lib/types.ts"
 
-export type FileMessageProps = {
+export type BaseMessageProps = {
   id: number | null;
+  type: "file" | "human" | "ai" | "system" | "widget";
+}
+
+export type FileMessageProps = BaseMessageProps & {
   type: "file";
   file_name: string;
   file_type: string;
 };
+export type WidgetMessageProps = BaseMessageProps & {
+  type: "widget";
+  widget_data: WidgetData;
+  isStreaming: boolean;
+};
 
-export type MessageProps = {
+export type TextMessage = BaseMessageProps & {
   type: "human" | "ai" | "system";
   text: string;
-  id: number | null;
-} | FileMessageProps;
+  isStreaming?: boolean;
+}
+export type MessageProps = FileMessageProps | WidgetMessageProps | TextMessage;
+
+export interface ProductData {
+  id: number;
+  name: string;
+  sku: string;
+  slug: string;
+  description: string;
+  categories: string;
+  properties: string;
+  price?: number;
+}
+
+export interface WidgetData {
+  widget_type: string;
+  message?: string;
+  data?: ProductData[];
+}
+
 
 interface ChatSessionProps {
   pendingMessage?: Message;
@@ -155,6 +184,67 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
       action: () => {
         setAgentAction(data.data.output);
       },
+      product_widget_start: () => {
+        setIsLoading(false);
+        setIsAgentLoading(false);
+
+        let widgetData;
+        try {
+          widgetData = typeof data.data === 'string' ? JSON.parse(data.data) : data.data;
+        } catch {
+          widgetData = { message: String(data.data), number_of_products: 0 };
+        }
+
+        const newWidget: WidgetMessageProps = {
+          type: "widget",
+          id: null,
+          widget_data: {
+            widget_type: "product_widget",
+            message: widgetData.message || '',
+            data: [],
+          },
+          isStreaming: true,
+        };
+
+        setMessages((prevMessages) => [...prevMessages, newWidget]);
+        scrollToLastMessage();
+      },
+      product_widget_end: () => {
+        setMessages((prevMessages) => {
+          const lastMessage = prevMessages[prevMessages.length - 1];
+          if (lastMessage && lastMessage.type === "widget" && lastMessage.isStreaming) {
+            return [
+              ...prevMessages.slice(0, -1),
+              { ...lastMessage, isStreaming: false }
+            ];
+          }
+          return prevMessages;
+        });
+      },
+      product_widget_product: () => {
+        const productData = data.data.chunk as ProductData;
+
+        setMessages((prevMessages) => {
+          const lastMessage = prevMessages[prevMessages.length - 1];
+
+          if (lastMessage && lastMessage.type === "widget" && lastMessage.widget_data) {
+            const updatedData = [...(lastMessage.widget_data.data || []), productData];
+            return [
+              ...prevMessages.slice(0, -1),
+              {
+                ...lastMessage,
+                widget_data: {
+                  ...lastMessage.widget_data,
+                  data: updatedData
+                }
+              }
+            ];
+          }
+          return prevMessages;
+        });
+
+        scrollToLastMessage();
+      },
       error: () => {
         setIsLoading(false);
         setIsAgentLoading(false);
@@ -219,6 +309,23 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
     });
   };
 
+  const createMessageFromResponse = (response: ApiMessage): MessageProps => {
+    if (response.widget_data) {
+      return {
+        type: "widget",
+        id: response.id,
+        widget_data: response.widget_data as WidgetData,
+        isStreaming: false,
+      } as WidgetMessageProps;
+    } else {
+      return {
+        type: response.type as "ai" | "system",
+        text: response.text,
+        id: response.id,
+      } as TextMessage;
+    }
+  };
+
   const updateTaskStatus = async (conversationId: number, taskHandle: TaskHandle, streaming: boolean) => {
     if (streaming) {
       return;
@@ -229,10 +336,8 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
 
       if (response) {
         setIsAgentLoading(false);
-        setMessages((prev) => [
-          ...prev,
-          { type: "ai", text: response.text, id: response.id }
-        ]);
+        const message = createMessageFromResponse(response);
+        setMessages((prev) => [...prev, message]);
         setIsLoading(false);
         scrollToLastMessage();
       } else {
@@ -317,7 +422,6 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
             <div className="grow flex-1 space-y-4">
               {messages.map((message, index) => {
                 const inMessageGroup = isUserMessage(message) && index > 0 && isUserMessage(messages[index - 1]);
-
                 if (message.type === "system") {
                   return (
                     <MessageError key={index} text={message.text} />
@@ -329,20 +433,42 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
                     <AttachmentBubble key={index} variant="primary" message={message} inMessageGroup={inMessageGroup} />
                   );
                 }
-
-                if (message.type === 'ai' && message.text === '') {
-                  return (<MessageBubbleTyping key={index} text={agentAction} />);
+                if (message.type === 'ai' && message.text === '' && index === messages.length) {
+                  return (<MessageBubbleTyping key={index} text={"agentAction"} />);
                 }
-
-                return (
-                  <MessageBubble
+                if (message.type === 'ai' && message.text !== '') {
+                  return (
+                      <MessageBubble
                     key={index}
                     text={message.text}
-                    variant={message.type === "human" ? "primary" : "secondary"}
+                    variant="secondary"
                     questionId={message.id}
                     inMessageGroup={inMessageGroup}
                   />
-                );
+                  );
+                }
+                if (message.type === "widget" && message.widget_data?.widget_type === "product_widget") {
+                    return (
+                        <ProductWidget
+                            key={index}
+                            message={message.widget_data.message}
+                            products={message.widget_data.data || []}
+                            isStreaming={message.isStreaming}
+                            expectedProductCount={message.widget_data.data?.length}
+                        />
+                    );
+                }
+                if (message.type === "human") {
+                  return (
+                      <MessageBubble
+                          key={index}
+                          text={message.text}
+                          variant="primary"
+                          questionId={message.id}
+                          inMessageGroup={inMessageGroup}
+                      />
+                  );
+                }
               })}
               {isAgentLoading && <MessageBubbleTyping text={agentAction} />}
               <div className="mb-4" />

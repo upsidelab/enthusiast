@@ -78,11 +78,77 @@ The pattern mirrors how agents are handled:
 
 ## 3. enthusiast-common — New module: `enthusiast_common/agent_execution/`
 
-- `ExecutionStatus` — enum: `PENDING`, `IN_PROGRESS`, `FINISHED`, `FAILED`
-- `ExecutionResult` — dataclass with output payload and list of non-fatal issue descriptions
-- `ExecutionInputType` — Pydantic `BaseModel` subclassed per plugin to declare and validate structured execution input; the server derives the JSON Schema from it for API responses and request validation
-- `BaseExecutionValidator` — ABC for pluggable continue/stop strategies; implementations track per-item success/failure rates and expose an issue summary via `should_continue()` and `get_issue_summary()`
-- `BaseAgentExecution` — ABC for all agentic executions; subclasses declare `EXECUTION_KEY` (slug), `NAME` (UI label), and optionally a `ExecutionInputType` subclass; must implement `run() -> ExecutionResult`
+### `ExecutionStatus`
+Enum: `PENDING`, `IN_PROGRESS`, `FINISHED`, `FAILED`.
+
+### `ExecutionFailureCode`
+`StrEnum` that defines standardised failure codes stored on `AgentExecution.failure_code`. Defined in `enthusiast_common/agent_execution/errors.py` and attached to `BaseAgentExecution` via `FAILURE_CODES`. The two base codes are:
+
+| Code | Set by | Meaning |
+|------|--------|---------|
+| `runtime_error` | `MarkExecutionFailedOnErrorTask.on_failure` | Unexpected exception escaped the execution |
+| `max_retries_exceeded` | `BaseAgentExecution.run()` | LLM failed to pass validators after `MAX_RETRIES` correction cycles |
+
+Plugins extend this enum to add domain-specific codes and point `FAILURE_CODES` at the subclass::
+
+```python
+from enthusiast_common.agent_execution import ExecutionFailureCode
+
+class CatalogEnrichmentFailureCode(ExecutionFailureCode):
+    TOO_MANY_UPSERT_FAILURES = "too_many_upsert_failures"
+
+class CatalogEnrichmentExecution(BaseAgentExecution):
+    FAILURE_CODES = CatalogEnrichmentFailureCode
+    ...
+```
+
+### `ExecutionResult`
+Dataclass returned by `BaseAgentExecution.run()`. Fields:
+- `success: bool` — whether the execution completed successfully
+- `output: dict` — structured output payload (meaningful only when `success=True`)
+- `failure_code: ExecutionFailureCode | None` — standardised failure code (set when `success=False`; plugins may use a subclass of `ExecutionFailureCode` for domain-specific codes)
+- `failure_summary: str | None` — LLM-generated plain-language explanation of what went wrong (set when `success=False`)
+
+### `ExecutionInputType`
+Pydantic `BaseModel` subclassed per plugin to declare and validate structured execution input. The server derives the JSON Schema from it for API responses and request validation.
+
+### `BaseExecutionValidator`
+ABC for response validators. A validator inspects the raw string response produced by a single `execute()` call and either approves it or returns a natural-language feedback message that gets forwarded to the LLM for correction.
+
+```python
+class BaseExecutionValidator(ABC):
+    def validate(self, response: str) -> str | None:
+        """Return None if the response is valid, or a feedback string to send back to the LLM."""
+```
+
+A concrete validator is provided in `enthusiast-common` out of the box:
+
+**`IsValidJsonValidator`** — attempts `json.loads(response)`; if it raises, returns `"The response is not valid JSON. Please return the same data in valid JSON format."`.
+
+Plugins can define their own validators (e.g. schema-specific checks, business rule assertions) and attach them via `VALIDATORS`.
+
+### `BaseAgentExecution`
+The base class carries a concrete `run()` that implements the **validator retry loop**, and an abstract `execute()` that subclasses fill in with the actual single-attempt logic.
+
+**Class-level declarations:**
+- `EXECUTION_KEY: ClassVar[str]` — unique slug
+- `AGENT_KEY: ClassVar[str]` — must match the `AGENT_KEY` of the agent plugin this execution targets
+- `NAME: ClassVar[str]` — human-readable UI label
+- `INPUT_TYPE: ClassVar[type[ExecutionInputType]]` — defaults to base `ExecutionInputType`
+- `VALIDATORS: ClassVar[list[type[BaseExecutionValidator]]]` — ordered list of validator classes applied after each `execute()` call; defaults to `[IsValidJsonValidator]`
+- `MAX_RETRIES: ClassVar[int] = 3` — maximum number of validator-feedback correction cycles before giving up
+- `FAILURE_CODES: ClassVar[type[ExecutionFailureCode]]` — the failure code enum for this execution class; defaults to `ExecutionFailureCode`. Override with a subclass to expose domain-specific codes alongside the base ones.
+
+**`execute(input_data, conversation) -> str` (abstract):** performs one attempt at the execution task and returns the raw LLM response string. The base `run()` loop calls this repeatedly until all validators pass or retries are exhausted.
+
+**`run(input_data, agent_execution) -> ExecutionResult` (concrete):** orchestrates the retry loop:
+1. Creates a `Conversation` internally via `ConversationManager` and stores it on `agent_execution.conversation`
+2. Calls `execute(input_data, conversation)` to get the LLM response string
+3. Runs each validator in `VALIDATORS` in order; if any returns a feedback string, sends it to the conversation and calls `execute()` again (up to `MAX_RETRIES` times)
+4. If all validators pass → returns `ExecutionResult(success=True, output=...)`
+5. If `MAX_RETRIES` is exhausted → sends a final prompt asking the LLM for a succinct failure summary, then returns `ExecutionResult(success=False, failure_code=FAILURE_CODES.MAX_RETRIES_EXCEEDED, failure_summary=<LLM response>)`
+
+No exceptions are raised for expected execution failures — all outcomes (including validator exhaustion) are expressed through `ExecutionResult`. Unexpected errors (programming errors, network failures) are not caught and propagate naturally; the server task's `on_failure` hook catches them and sets `failure_code=ExecutionFailureCode.RUNTIME_ERROR` on the record.
 
 ---
 
@@ -113,13 +179,15 @@ The key used for lookup is `agent.agent_key` — the same slug that the agent pl
 
 ### Celery Task — `run_agent_execution_task`
 
-1. Load record → `mark_in_progress()`
-2. Resolve execution class via `AgentExecutionRegistry.get_by_key(execution.agent.agent_key)`
-3. Instantiate and call `run()`
-4. On success → `mark_finished()`
-5. On exception → `mark_failed(failure_code, failure_explanation)`
+1. Load record (with `select_related("agent")`) → `mark_in_progress()`
+2. Resolve execution class via `AgentExecutionRegistry.get_by_agent_type(execution.agent.agent_type)`
+3. Instantiate, deserialise `execution.input` into `INPUT_TYPE`, call `run(input_data, agent_execution)`
+4. If `result.success` → `mark_finished(result.output)`
+5. If `not result.success` → `mark_failed(failure_code="max_retries_exceeded", failure_explanation=result.failure_summary)`
 
-`max_retries=0` — resilience is the execution's own responsibility.
+The task has no try/except around the execution call. Expected failures (validator exhaustion, invalid LLM response) are communicated through `ExecutionResult` — the task inspects `result.success` and branches accordingly. Unexpected errors propagate naturally to Celery, which marks the task as failed.
+
+`max_retries=0` — no Celery-level retries; resilience is entirely the execution loop's own responsibility.
 
 ### REST API
 
@@ -175,10 +243,11 @@ The catalog enrichment plugin is the reference implementation. The existing `Cat
 **`CatalogEnrichmentExecutionInput`** (`ExecutionInputType` subclass): field `max_failures: int` (default 5). The dataset is not part of the input — it is derived from `agent.data_set` at runtime.
 
 **`CatalogEnrichmentExecution`** (`BaseAgentExecution`):
-- `EXECUTION_KEY = "catalog-enrichment"`
-- `run()` — creates a `Conversation` internally (stores its ID on the execution record), iterates over all products in the agent's dataset, drives `CatalogEnrichmentAgent` for each (full LLM loop, no user interaction), uses `ProductUpsertTracker` to stop early on too many failures, returns `ExecutionResult` with per-product outcomes
+- `EXECUTION_KEY = "catalog-enrichment"`, `AGENT_KEY = "enthusiast-agent-catalog-enrichment"`
+- `VALIDATORS = [IsValidJsonValidator, ProductUpsertValidator]` — first checks structural JSON validity, then domain-level validity
+- `execute(input_data, conversation)` — iterates over all products in the agent's dataset, drives `CatalogEnrichmentAgent` per product (full LLM loop, no user interaction), uses `ProductUpsertTracker` to stop early on too many failures, returns the final LLM response string for the batch
 
-**`ProductUpsertTracker`** (`BaseExecutionValidator`): `should_continue()` returns `False` once failures reach `max_failures`; `get_issue_summary()` returns per-product failure descriptions.
+**`ProductUpsertTracker`** (`BaseExecutionValidator`): validates that the LLM response represents a successful upsert; returns a feedback message string if failures exceed `max_failures`, `None` otherwise.
 
 ---
 
@@ -200,15 +269,19 @@ API client (`frontend/src/lib/api/agent-executions.ts`) exposes `list(filters?)`
 
 ## 7. Testing
 
-**`test_registry.py`**: `get_all()`, `get_by_key()` happy path, `get_by_key()` raises `KeyError` for unknown key.
+**`test_registry.py`**: `get_all()`, `get_by_agent_type()` happy path, `get_by_agent_type()` raises `KeyError` for unknown type.
 
-**`test_task.py`**: `pending → in_progress → finished`; `pending → in_progress → failed` on exception.
+**`test_task.py`**: `pending → in_progress → finished` when `result.success=True`; `pending → in_progress → failed` when `result.success=False` with `failure_summary` stored; unexpected exception propagates without calling `mark_finished`.
 
-**`test_views.py`**: valid start (202); unknown agent (404); agent type has no execution class (400); invalid input (400, no record created); list (200); get (200); get missing (404).
+**`test_views.py`**: valid start (202); unknown agent (404); soft-deleted agent (404); agent type has no execution class (400); invalid input (400, no record created); list (200); list ordered newest first; get (200); get missing (404); execution conversation excluded from conversation list; execution conversation accessible via detail endpoint.
 
-**`test_product_upsert_tracker.py`**: `should_continue()` below/at threshold; `get_issue_summary()` format.
+**`test_is_valid_json_validator.py`**: valid JSON returns `None`; invalid JSON returns the feedback string.
 
-**`test_catalog_enrichment_execution.py`**: stops early when validator returns False; correct counts in `ExecutionResult.output`; conversation FK is populated after run.
+**`test_base_agent_execution.py`**: all validators pass on first attempt → `ExecutionResult(success=True)`; one validator fails → feedback sent to conversation and `execute()` retried; `MAX_RETRIES` exhausted → failure summary requested from LLM → `ExecutionResult(success=False, failure_summary=...)`.
+
+**`test_product_upsert_tracker.py`**: returns `None` below failure threshold; returns feedback string at/above threshold.
+
+**`test_catalog_enrichment_execution.py`**: stops early when `ProductUpsertTracker` signals failure; correct counts in `ExecutionResult.output`; conversation FK is populated after `run()`.
 
 ---
 

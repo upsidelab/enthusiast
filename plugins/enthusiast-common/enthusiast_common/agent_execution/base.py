@@ -1,78 +1,84 @@
+import json
 from abc import ABC, abstractmethod
-from typing import ClassVar, Type
+from typing import ClassVar, Protocol, Type
 
+from .errors import ExecutionFailureCode
 from .input import ExecutionInputType
 from .result import ExecutionResult
+from .validators import BaseExecutionValidator, IsValidJsonValidator
 
 
-class BaseExecutionValidator(ABC):
-    """Pluggable strategy that decides whether an execution should continue.
+class ExecutionConversationInterface(Protocol):
+    """Minimal protocol for conversation interaction during an execution run."""
 
-    Implementations track per-item success/failure rates and produce a human-
-    readable issue summary when the execution completes or is stopped early.
-    """
-
-    @abstractmethod
-    def should_continue(self) -> bool:
-        """Return True if the execution should proceed to the next item.
-
-        Returns:
-            bool: False when the stop threshold has been reached.
-        """
-        pass
-
-    @abstractmethod
-    def get_issue_summary(self) -> list[str]:
-        """Return a list of human-readable descriptions of non-fatal issues.
-
-        Returns:
-            list[str]: Issue descriptions collected during the run so far.
-        """
-        pass
+    def ask(self, message: str) -> str:
+        ...
 
 
 class BaseAgentExecution(ABC):
-    """Abstract base class for all agentic executions.
-
-    Subclasses must declare :attr:`EXECUTION_KEY` (a unique slug used as the
-    identifier throughout the system) and :attr:`NAME` (a human-readable UI
-    label).  Optionally override :attr:`INPUT_TYPE` with a concrete
-    :class:`ExecutionInputType` subclass to declare structured input.
-
-    The server discovers available execution types via
-    ``settings.AVAILABLE_AGENT_EXECUTIONS`` and registers them in
-    ``AgentExecutionRegistry``.
-
-    Example::
-
-        class CatalogEnrichmentExecution(BaseAgentExecution):
-            EXECUTION_KEY = "catalog-enrichment"
-            NAME = "Catalog Enrichment"
-            INPUT_TYPE = CatalogEnrichmentExecutionInput
-
-            def run(self, input_data: CatalogEnrichmentExecutionInput) -> ExecutionResult:
-                ...
-    """
+    """Abstract base class for all agentic executions."""
 
     EXECUTION_KEY: ClassVar[str]
     AGENT_KEY: ClassVar[str]
     NAME: ClassVar[str]
     INPUT_TYPE: ClassVar[Type[ExecutionInputType]] = ExecutionInputType
+    VALIDATORS: ClassVar[list[Type[BaseExecutionValidator]]] = [IsValidJsonValidator]
+    MAX_RETRIES: ClassVar[int] = 3
+    FAILURE_CODES: ClassVar[Type[ExecutionFailureCode]] = ExecutionFailureCode
+    FAILURE_SUMMARY_PROMPT: ClassVar[str] = (
+        "You were unable to produce a valid response after multiple attempts. "
+        "Please provide a brief (max 100 words), plain-language summary of what went wrong."
+    )
+
+    def run(
+        self,
+        input_data: ExecutionInputType,
+        conversation: ExecutionConversationInterface,
+    ) -> ExecutionResult:
+        """Orchestrate the validator retry loop and return the final result."""
+
+        response = self.execute(input_data, conversation)
+
+        for attempt in range(self.MAX_RETRIES + 1):
+            feedback = self._first_validator_feedback(response)
+
+            if feedback is None:
+                return ExecutionResult(success=True, output=self._build_output(response))
+
+            if attempt < self.MAX_RETRIES:
+                response = conversation.ask(feedback)
+            else:
+                failure_summary = conversation.ask(self.FAILURE_SUMMARY_PROMPT)
+                return ExecutionResult(
+                    success=False,
+                    failure_code=self.FAILURE_CODES.MAX_RETRIES_EXCEEDED,
+                    failure_summary=failure_summary,
+                )
+
+        # Unreachable — satisfies the type checker.
+        return ExecutionResult(success=False)  # pragma: no cover
 
     @abstractmethod
-    def run(self, input_data: ExecutionInputType) -> ExecutionResult:
-        """Execute the agent job and return its result.
+    def execute(
+        self,
+        input_data: ExecutionInputType,
+        conversation: ExecutionConversationInterface,
+    ) -> str:
+        """Perform a single execution attempt and return the raw LLM response."""
 
-        This method is called by the Celery task after the execution record has
-        been marked ``in_progress``.  It must return an :class:`ExecutionResult`
-        on success and raise an exception on failure — the task wrapper handles
-        transitioning the record to the appropriate terminal state.
-
-        Args:
-            input_data: Validated input produced by deserializing the stored
-                ``AgentExecution.input`` JSON via :attr:`INPUT_TYPE`.
-
-        Returns:
-            ExecutionResult: The structured output and optional summary/issues.
-        """
         pass
+
+    def _first_validator_feedback(self, response: str) -> str | None:
+        """Run all validators and return the first feedback message, or None."""
+
+        for validator_cls in self.VALIDATORS:
+            feedback = validator_cls().validate(response)
+            if feedback is not None:
+                return feedback
+        return None
+
+    def _build_output(self, response: str) -> dict:
+        try:
+            return json.loads(response)
+        except (json.JSONDecodeError, TypeError):
+            return {"response": response}

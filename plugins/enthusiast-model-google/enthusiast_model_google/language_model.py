@@ -19,6 +19,7 @@ class GoogleAIFileContent(BaseContent):
 
 
 class GoogleLanguageModelProvider(LanguageModelProvider):
+    NAME = "Google"
     STREAMING_AVAILABLE = False
 
     def provide_language_model(self, callbacks: list[BaseCallbackHandler] | None = None) -> BaseLanguageModel:

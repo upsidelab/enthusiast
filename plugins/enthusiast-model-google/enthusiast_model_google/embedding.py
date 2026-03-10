@@ -7,6 +7,8 @@ PRIORITIZED_MODELS = ["models/embedding-001", "models/text-embedding-004"]
 
 
 class GoogleEmbeddingProvider(EmbeddingProvider):
+    NAME = "Google"
+
     def generate_embeddings(self, content: str) -> list[float]:
         """
         Generates and returns an embedding vector for the given content using OpenAI's embeddings API.

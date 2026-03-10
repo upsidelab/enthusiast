@@ -24,6 +24,8 @@ class OpenAIFileContent(BaseContent):
 
 
 class OpenAILanguageModelProvider(LanguageModelProvider):
+    NAME = "OpenAI"
+
     def provide_language_model(self, callbacks: list[BaseCallbackHandler] | None = None) -> BaseLanguageModel:
         return ChatOpenAI(model=self._model, callbacks=callbacks)
 

@@ -23,7 +23,7 @@ const P = mdxComponents.p;
 export default async function Integration(props: IntegrationProps) {
   const installationInstructions = await compileMdx(`\`\`\`bash\npoetry add ${props.pipName}\n\`\`\``);
   const buildRegisterInstructionMd = (key: string, module: string) => {
-    return `\`\`\`python\n${key} = {\n    ...\n    "${props.name}": "${module}",\n}\n\`\`\``;
+    return `\`\`\`python\n${key} = [\n    ...\n    "${module}",\n]\n\`\`\``;
   }
   const buildEnvInstructionMd = (keys: string[]) => {
       const lines = keys.map((key) => `${key}=<value_here>`).join("\n");

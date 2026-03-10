@@ -10,7 +10,7 @@ from agent.execution.registry import AgentExecutionRegistry
 from agent.models.agent import Agent
 from agent.models.agent_execution import AgentExecution
 from agent.serializers.agent_execution import AgentExecutionSerializer, StartAgentExecutionSerializer
-from agent.tasks import run_agent_execution_task
+from agent.execution.tasks import run_agent_execution_task
 
 
 class StartAgentExecutionView(APIView):

@@ -1,10 +1,14 @@
 from dataclasses import dataclass, field
 from typing import Any
 
+from .errors import ExecutionFailureCode
+
 
 @dataclass
 class ExecutionResult:
     """The outcome of a completed agent execution."""
 
-    output: dict[str, Any]
-    issues: list[str] = field(default_factory=list)
+    success: bool
+    output: dict[str, Any] = field(default_factory=dict)
+    failure_code: ExecutionFailureCode | None = None
+    failure_summary: str | None = None

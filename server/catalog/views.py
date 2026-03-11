@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.db import transaction
 from django.db.models import Count
 from drf_yasg import openapi
@@ -623,8 +622,12 @@ class ConfigView(GenericAPIView):
     )
     def get(self, request, *args, **kwargs):
         response_body = {
-            "language_model_providers": settings.CATALOG_LANGUAGE_MODEL_PROVIDERS.keys(),
-            "embedding_providers": settings.CATALOG_EMBEDDING_PROVIDERS.keys(),
+            "language_model_providers": [
+                cls.NAME for cls in LanguageModelRegistry().get_provider_classes()
+            ],
+            "embedding_providers": [
+                cls.NAME for cls in EmbeddingProviderRegistry().get_provider_classes()
+            ],
         }
 
         return Response(response_body)

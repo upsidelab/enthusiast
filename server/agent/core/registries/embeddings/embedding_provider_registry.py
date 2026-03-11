@@ -1,35 +1,43 @@
-from importlib import import_module
-from typing import Type
+from typing import List, Type
 
 from enthusiast_common.registry import BaseEmbeddingProviderRegistry
 from enthusiast_common.registry.embeddings import EmbeddingProvider
 from enthusiast_common.repositories import BaseDataSetRepository
+from utils.base_registry import BaseRegistry
 
 from agent.core.repositories import DjangoDataSetRepository
 from pecl import settings
 
 
-class EmbeddingProviderRegistry(BaseEmbeddingProviderRegistry):
+class EmbeddingProviderRegistry(BaseRegistry[EmbeddingProvider], BaseEmbeddingProviderRegistry):
+    """Registry of available embedding providers registered in the system."""
+
+    plugin_base = EmbeddingProvider
+
     def __init__(self, data_set_repo: BaseDataSetRepository | None = None):
-        providers = settings.CATALOG_EMBEDDING_PROVIDERS
-        super().__init__(providers)
-        self._providers = providers
         if data_set_repo is None:
-            module_name, class_name = settings.CATALOG_MODELS["data_set"].rsplit(".", 1)
-            module = import_module(module_name)
-            provider_class = getattr(module, class_name)
-            self._data_set_repo = DjangoDataSetRepository(provider_class)
+            self._data_set_repo = DjangoDataSetRepository(settings.CATALOG_MODELS["data_set"])
         else:
             self._data_set_repo = data_set_repo
 
+    def get_provider_classes(self) -> List[Type[EmbeddingProvider]]:
+        """Returns all registered provider classes."""
+        return [self._get_plugin_class_by_path(path) for path in self._get_plugin_paths()]
+
+    def _get_provider_classes_by_name(self) -> dict[str, Type[EmbeddingProvider]]:
+        """Returns a mapping of provider NAME to provider class."""
+        return {cls.NAME: cls for cls in self.get_provider_classes()}
+
     def provider_class_by_name(self, name: str) -> Type[EmbeddingProvider]:
-        provider_class_name = self._providers[name]
-        module_name, class_name = provider_class_name.rsplit(".", 1)
-        module = import_module(module_name)
-        provider_class = getattr(module, class_name)
-        return provider_class
+        """Looks up a provider class by its ``NAME`` attribute."""
+        return self._get_provider_classes_by_name()[name]
 
     def provider_for_dataset(self, data_set_id: int) -> Type[EmbeddingProvider]:
+        """Returns the provider class configured for the given data set."""
         data_set = self._data_set_repo.get_by_id(data_set_id)
-        provider_class = self.provider_class_by_name(data_set.embedding_provider)
-        return provider_class
+        return self.provider_class_by_name(data_set.embedding_provider)
+
+    @staticmethod
+    def _get_plugin_paths() -> List[str]:
+        """Returns the list of provider class paths from settings."""
+        return settings.CATALOG_EMBEDDING_PROVIDERS

@@ -3,6 +3,8 @@ from ollama import Client
 
 
 class OllamaEmbeddingProvider(EmbeddingProvider):
+    NAME = "Ollama"
+
     def generate_embeddings(self, content: str) -> list[float]:
         """
         Generates and returns an embedding vector for the given content using Ollama's embeddings API.

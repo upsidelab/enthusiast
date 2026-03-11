@@ -94,6 +94,7 @@ class OllamaPrepareFileMapper:
 
 
 class OllamaLanguageModelProvider(LanguageModelProvider):
+    NAME = "Ollama"
     STREAMING_AVAILABLE = False
     MODEL_MAPPING_CLASS = OllamaPrepareFileMapper
 

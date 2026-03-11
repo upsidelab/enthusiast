@@ -225,13 +225,13 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 
-CATALOG_LANGUAGE_MODEL_PROVIDERS = {
-    "OpenAI": "enthusiast_model_openai.OpenAILanguageModelProvider",
-}
+CATALOG_LANGUAGE_MODEL_PROVIDERS = [
+    "enthusiast_model_openai.OpenAILanguageModelProvider",
+]
 
-CATALOG_EMBEDDING_PROVIDERS = {
-    "OpenAI": "enthusiast_model_openai.OpenAIEmbeddingProvider",
-}
+CATALOG_EMBEDDING_PROVIDERS = [
+    "enthusiast_model_openai.OpenAIEmbeddingProvider",
+]
 
 # Configuration of installed plugins
 CATALOG_PRODUCT_SOURCE_PLUGINS = [

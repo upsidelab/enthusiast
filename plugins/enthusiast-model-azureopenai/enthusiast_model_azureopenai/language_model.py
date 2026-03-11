@@ -24,6 +24,8 @@ class AzureOpenAIFileContent(BaseContent):
 
 
 class AzureOpenAILanguageModelProvider(LanguageModelProvider):
+    NAME = "Azure OpenAI"
+
     def provide_language_model(self, callbacks: list[BaseCallbackHandler] | None = None) -> BaseLanguageModel:
         return AzureChatOpenAI(model=self._model, callbacks=callbacks)
 

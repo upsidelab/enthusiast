@@ -20,6 +20,8 @@ class MistralAIFileContent(BaseContent):
 
 
 class MistralAILanguageModelProvider(LanguageModelProvider):
+    NAME = "Mistral AI"
+
     def provide_language_model(self, callbacks: list[BaseCallbackHandler] | None = None) -> BaseLanguageModel:
         return ChatMistralAI(model=self._model, callbacks=callbacks)
 

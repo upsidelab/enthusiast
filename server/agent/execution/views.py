@@ -7,10 +7,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from agent.execution.registry import AgentExecutionRegistry
+from agent.execution.tasks import run_agent_execution_task
 from agent.models.agent import Agent
 from agent.models.agent_execution import AgentExecution
 from agent.serializers.agent_execution import AgentExecutionSerializer, StartAgentExecutionSerializer
-from agent.execution.tasks import run_agent_execution_task
 
 
 class StartAgentExecutionView(APIView):

@@ -5,18 +5,25 @@ from agent.core.registries.agents.agent_registry import AgentRegistry
 from agent.models import Conversation, Message
 from agent.models.agent import Agent
 from catalog.models import DataSet
+from enthusiast_common.agents import ConfigType
 
 
 class ConversationManager:
     DEFAULT_ERROR_MESSAGE = "We couldn't process your request at this time"
 
-    def get_answer(self, conversation: Conversation, question_message: str, streaming: bool) -> str:
+    def get_answer(
+        self,
+        conversation: Conversation,
+        question_message: str,
+        streaming: bool,
+        config_type: ConfigType = ConfigType.CONVERSATION,
+    ) -> str:
         """Formulate an answer to a given question and store the decision-making process.
 
         Engine calculates embedding for a question and using similarity search collects documents that may contain
         relevant content.
         """
-        agent = AgentRegistry().get_conversation_agent(conversation, streaming)
+        agent = AgentRegistry().get_conversation_agent(conversation, streaming, config_type=config_type)
         response = agent.get_answer(question_message)
 
         return response

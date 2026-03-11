@@ -1,10 +1,11 @@
+import inspect
 import logging
 from abc import ABC, abstractmethod
 from importlib import import_module
 from typing import List, Type
 
 from django.conf import settings
-from enthusiast_common.agents import BaseAgent
+from enthusiast_common.agents import BaseAgent, BaseAgentConfigProvider, ConfigType
 from enthusiast_common.builder import BaseAgentBuilder
 from enthusiast_common.config import AgentConfig
 from utils.base_registry import BaseRegistry
@@ -46,10 +47,15 @@ class BaseAgentRegistry(ABC, BaseRegistry[BaseAgent]):
 
 class AgentRegistry(BaseAgentRegistry):
 
-    def get_conversation_agent(self, conversation: Conversation, streaming: bool) -> BaseAgent:
+    def get_conversation_agent(
+        self,
+        conversation: Conversation,
+        streaming: bool,
+        config_type: ConfigType = ConfigType.CONVERSATION,
+    ) -> BaseAgent:
         try:
             builder = self._get_builder_class_by_name(agent_type=conversation.agent.agent_type)
-            config = self._get_config_by_name(agent_type=conversation.agent.agent_type)
+            config = self._get_config_by_name(agent_type=conversation.agent.agent_type, config_type=config_type)
             config = merge_config(partial=config)
             return builder(config=config, conversation_id=conversation.id, streaming=streaming).build()
         except Exception as e:
@@ -82,20 +88,23 @@ class AgentRegistry(BaseAgentRegistry):
         except KeyError as e:
             raise AgentNotFoundError(f"Agent with AGENT_KEY: '{agent_type}' is not defined in settings.AVAILABLE_AGENTS.") from e
 
-    def _get_config_by_name(self, agent_type: str) -> AgentConfig:
+    def _get_config_by_name(self, agent_type: str, config_type: ConfigType = ConfigType.CONVERSATION) -> AgentConfig:
         agent_directory_path = self._get_agent_directory_path(agent_type)
-        config_module_path = f"{agent_directory_path}.config"
         try:
-            config_module = import_module(config_module_path)
+            plugin_module = import_module(agent_directory_path)
         except ModuleNotFoundError as e:
-            raise AgentImportError(f"Cannot import module '{config_module_path}' for agent '{agent_type}'.") from e
+            raise AgentImportError(f"Cannot import module '{agent_directory_path}' for agent '{agent_type}'.") from e
 
-        try:
-            get_config = getattr(config_module, "get_config")
-        except AttributeError as e:
-            raise AgentImportError(f"Module '{config_module_path}' has no attribute 'get_config'.") from e
+        for _, cls in inspect.getmembers(plugin_module, inspect.isclass):
+            if (
+                issubclass(cls, BaseAgentConfigProvider)
+                and cls is not BaseAgentConfigProvider
+            ):
+                return cls().get_config(config_type=config_type)
 
-        return get_config()
+        raise AgentImportError(
+            f"No {BaseAgentConfigProvider.__name__} subclass found in '{agent_directory_path}' for agent '{agent_type}'."
+        )
 
     def _get_builder_class_by_name(self, agent_type: str) -> Type[BaseAgentBuilder]:
         agent_directory_path = self._get_agent_directory_path(agent_type)

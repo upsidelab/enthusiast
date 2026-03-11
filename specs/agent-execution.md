@@ -45,6 +45,8 @@ The diagram below shows the full system with the catalog enrichment plugin as a 
 │    ExecutionResult (dataclass)                                         │
 │    ExecutionStatus (Enum)                                              │
 │    ExecutionInputType (Pydantic BaseModel — subclassed per plugin)     │
+│    BaseAgentConfigProvider (ABC)  ← agent config interface             │
+│    ConfigType (StrEnum)           ← "conversation" | "agent_execution" │
 └────────────────────────────────────────────────────────────────────────┘
 
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -52,6 +54,7 @@ The diagram below shows the full system with the catalog enrichment plugin as a 
 │    CatalogEnrichmentExecution  (BaseAgentExecution)                    │
 │    CatalogEnrichmentExecutionInput  (ExecutionInputType)               │
 │    ProductUpsertTracker (BaseExecutionValidator)                       │
+│    CatalogEnrichmentConfigProvider (BaseAgentConfigProvider)           │
 └────────────────────────────────────────────────────────────────────────┘
 
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -126,6 +129,39 @@ A concrete validator is provided in `enthusiast-common` out of the box:
 **`IsValidJsonValidator`** — attempts `json.loads(response)`; if it raises, returns `"The response is not valid JSON. Please return the same data in valid JSON format."`.
 
 Plugins can define their own validators (e.g. schema-specific checks, business rule assertions) and attach them via `VALIDATORS`.
+
+### `ConfigType` and `BaseAgentConfigProvider`
+
+Agent plugins may need a different system prompt for execution runs than the one used in interactive conversations — one that drops conversational scaffolding and focuses the LLM entirely on the batch task at hand.
+
+This is handled through the **agent config provider** interface, which lives in `enthusiast_common/agents/config.py` and is separate from `agent_execution/`.
+
+**`ConfigType`** is a `StrEnum` with two members:
+
+| Member | Value | Used when |
+|--------|-------|-----------|
+| `ConfigType.CONVERSATION` | `"conversation"` | Regular user-facing conversation |
+| `ConfigType.AGENT_EXECUTION` | `"agent_execution"` | Autonomous batch execution run |
+
+**`BaseAgentConfigProvider`** is an ABC that each agent plugin exports from its `__init__.py`. The `AgentRegistry` discovers the subclass at runtime by inspecting the plugin module and calls `get_config(config_type)` to obtain the appropriate `AgentConfig`.
+
+```python
+class BaseAgentConfigProvider(ABC):
+    @abstractmethod
+    def get_config(self, config_type: ConfigType = ConfigType.CONVERSATION) -> AgentConfig:
+        ...
+```
+
+Plugins that do not need context-specific behaviour can ignore the `config_type` argument and always return the same configuration. Plugins that do need a different execution prompt implement the branching in `get_config()`:
+
+```python
+class MyAgentConfigProvider(BaseAgentConfigProvider):
+    def get_config(self, config_type: ConfigType = ConfigType.CONVERSATION) -> AgentConfigWithDefaults:
+        system_prompt = EXECUTION_PROMPT if config_type == ConfigType.AGENT_EXECUTION else CONVERSATION_PROMPT
+        return AgentConfigWithDefaults(prompt_template=..., ...)
+```
+
+The `config_type` flows from `ExecutionConversation` (hardcoded to `ConfigType.AGENT_EXECUTION`) through `ConversationManager.get_answer()` and `AgentRegistry.get_conversation_agent()` to the config provider. Regular conversation calls default to `ConfigType.CONVERSATION` and the provider is invoked with that value.
 
 ### `BaseAgentExecution`
 The base class carries a concrete `run()` that implements the **validator retry loop**, and an abstract `execute()` that subclasses fill in with the actual single-attempt logic.
@@ -239,6 +275,10 @@ server/agent/
 ## 5. Plugin Implementation — Catalog Enrichment (example)
 
 The catalog enrichment plugin is the reference implementation. The existing `CatalogEnrichmentAgent` is driven internally.
+
+**`CatalogEnrichmentConfigProvider`** (`BaseAgentConfigProvider`): exported from the plugin's `__init__.py`. Implements `get_config(config_type)` and returns a different system prompt depending on the context:
+- `ConfigType.CONVERSATION` — the standard conversational prompt (`CATALOG_ENRICHMENT_TOOL_CALLING_AGENT_PROMPT`) that includes user-interaction guidance
+- `ConfigType.AGENT_EXECUTION` — a stripped-down execution prompt (`CATALOG_ENRICHMENT_EXECUTION_SYSTEM_PROMPT`) that drops conversational tone, states the LLM is in a batch pipeline, and mandates a JSON-only response of the form `{"<product identifier>": "<upsert success or failure reason>", ...}`
 
 **`CatalogEnrichmentExecutionInput`** (`ExecutionInputType` subclass): field `max_failures: int` (default 5). The dataset is not part of the input — it is derived from `agent.data_set` at runtime.
 

@@ -2,6 +2,7 @@ from datetime import datetime
 
 from celery import Task, shared_task
 from enthusiast_common.agent_execution import ExecutionConversationInterface, ExecutionFailureCode
+from enthusiast_common.agents import ConfigType
 
 from agent.conversation import ConversationManager
 from agent.execution.registry import AgentExecutionRegistry
@@ -14,7 +15,9 @@ class ExecutionConversation(ExecutionConversationInterface):
         self._conversation = conversation
 
     def ask(self, message: str) -> str:
-        return ConversationManager().get_answer(self._conversation, message, streaming=False)
+        return ConversationManager().get_answer(
+            self._conversation, message, streaming=False, config_type=ConfigType.AGENT_EXECUTION
+        )
 
 
 class MarkExecutionFailedOnErrorTask(Task):

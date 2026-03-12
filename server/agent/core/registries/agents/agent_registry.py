@@ -1,7 +1,5 @@
-import inspect
 import logging
 from abc import ABC, abstractmethod
-from importlib import import_module
 from typing import List, Type
 
 from django.conf import settings
@@ -91,20 +89,11 @@ class AgentRegistry(BaseAgentRegistry):
     def _get_config_by_name(self, agent_type: str, config_type: ConfigType = ConfigType.CONVERSATION) -> AgentConfig:
         agent_directory_path = self._get_agent_directory_path(agent_type)
         try:
-            plugin_module = import_module(agent_directory_path)
-        except ModuleNotFoundError as e:
-            raise AgentImportError(f"Cannot import module '{agent_directory_path}' for agent '{agent_type}'.") from e
+            config_cls = self._get_class_by_path(agent_directory_path, BaseAgentConfigProvider)
+            return config_cls().get_config(config_type=config_type)
+        except (ModuleNotFoundError, ValueError):
+            raise AgentImportError(f"Cannot config module of a BaseAgentConfigProvider class for agent '{agent_type}'.")
 
-        for _, cls in inspect.getmembers(plugin_module, inspect.isclass):
-            if (
-                issubclass(cls, BaseAgentConfigProvider)
-                and cls is not BaseAgentConfigProvider
-            ):
-                return cls().get_config(config_type=config_type)
-
-        raise AgentImportError(
-            f"No {BaseAgentConfigProvider.__name__} subclass found in '{agent_directory_path}' for agent '{agent_type}'."
-        )
 
     def _get_builder_class_by_name(self, agent_type: str) -> Type[BaseAgentBuilder]:
         agent_directory_path = self._get_agent_directory_path(agent_type)

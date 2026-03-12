@@ -1,6 +1,6 @@
 import Agent from "@/components/agent";
 
-export const description = "The Purchase Order OCR agent converts handwritten notes, scans, and filled purchase-order PDFs into structured orders created directly in your e-commerce system. It can also detect when the provided input is incomplete or unclear; in those cases, it initiates a human-in-the-loop clarification step to confirm missing details before creating the order.";
+export const description = "The Order Intake agent converts handwritten notes, scans, and filled purchase-order PDFs into structured orders created directly in your e-commerce system. It can also detect when the provided input is incomplete or unclear; in those cases, it initiates a human-in-the-loop clarification step to confirm missing details before creating the order.";
 
 export const useCases = [
   {
@@ -18,10 +18,10 @@ export const useCases = [
 ]
 
 <Agent
-    name="Purchase Order OCR"
-    agentClassName="OCRToOrderAgent"
-    pipName="enthusiast-agent-ocr-to-order"
-    registerAgentModule="enthusiast_agent_ocr_to_order"
+    name="Order Intake"
+    integrationKey="enthusiast-agent-order-intake"
+    pipName="enthusiast-agent-order-intake"
+    registerAgentModule="enthusiast_agent_order_intake"
     agentDescription={description}
     agentUseCases={useCases}
     videoUrl="https://content.upsidelab.io/enthusiast/purchase-order-ocr.mp4"

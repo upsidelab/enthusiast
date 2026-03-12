@@ -4,7 +4,7 @@ export default {
       breadcrumb: false
     }
   },
-  "purchase-order-ocr": {
-    title: "Purchase Order OCR"
+  "order-intake": {
+    title: "Order Intake"
   }
 }

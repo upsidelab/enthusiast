@@ -18,3 +18,5 @@ class ExecutionFailureCode(StrEnum):
     """An unexpected exception escaped the execution — set by the Celery task's ``on_failure`` hook."""
     MAX_RETRIES_EXCEEDED = "max_retries_exceeded"
     """The LLM failed to produce a valid response after ``MAX_RETRIES`` correction cycles."""
+    UNKNOWN = "unknown"
+    """The execution reported failure but did not provide a failure code."""

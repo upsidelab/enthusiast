@@ -9,6 +9,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from account.models import User
+from agent.execution.registry import AgentExecutionRegistry
 from agent.execution.services import FileUploadNotSupportedError, UnsupportedFileTypeError
 from agent.models.agent import Agent
 from agent.models.agent_execution import AgentExecution
@@ -131,7 +132,7 @@ class TestAgentExecutionDetailView:
         response = api_client.get(url)
 
         assert response.status_code == status.HTTP_200_OK
-        for field in ("id", "agent", "conversation", "status", "input", "result",
+        for field in ("id", "agent", "execution_key", "conversation", "status", "input", "result",
                       "failure_code", "failure_explanation", "celery_task_id",
                       "started_at", "finished_at", "duration_seconds"):
             assert field in response.data
@@ -151,6 +152,55 @@ class TestAgentExecutionDetailView:
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
+class TestAgentExecutionTypesView:
+    @pytest.fixture
+    def url(self, agent):
+        return reverse("agent-execution-types", kwargs={"agent_id": agent.pk})
+
+    @pytest.fixture(autouse=True)
+    def mock_registry(self):
+        with patch(
+            "agent.execution.services.AgentExecutionRegistry.get_by_agent_type",
+            return_value=[DummyExecution, AllDefaultsExecution],
+        ) as mock:
+            yield mock
+
+    def test_returns_200_with_execution_types(self, api_client, url):
+        response = api_client.get(url)
+
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 2
+
+    def test_returns_expected_fields_for_each_type(self, api_client, url):
+        response = api_client.get(url)
+
+        assert response.status_code == status.HTTP_200_OK
+        for item in response.data:
+            for field in ("key", "name", "description", "input_schema"):
+                assert field in item
+
+    def test_returns_correct_keys(self, api_client, url):
+        response = api_client.get(url)
+
+        keys = [item["key"] for item in response.data]
+        assert "dummy" in keys
+        assert "all-defaults" in keys
+
+    def test_returns_404_for_nonexistent_agent(self, api_client):
+        url = reverse("agent-execution-types", kwargs={"agent_id": 99999})
+
+        response = api_client.get(url)
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_returns_401_when_unauthenticated(self, agent):
+        url = reverse("agent-execution-types", kwargs={"agent_id": agent.pk})
+
+        response = APIClient().get(url)
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
 class TestStartAgentExecutionView:
     @pytest.fixture
     def url(self, agent):
@@ -158,16 +208,15 @@ class TestStartAgentExecutionView:
 
     @pytest.fixture(autouse=True)
     def mock_registry(self):
-        with patch(
-            "agent.execution.services.AgentExecutionRegistry.get_by_agent_type",
-            return_value=DummyExecution,
-        ) as mock:
+        with patch.object(AgentExecutionRegistry, "get_by_key", return_value=DummyExecution) as mock:
             yield mock
 
     def test_returns_404_for_nonexistent_agent(self, api_client):
         url = reverse("agent-execution-start", kwargs={"agent_id": 99999})
 
-        response = api_client.post(url, {"input": {"required_field": "hello"}}, format="json")
+        response = api_client.post(
+            url, {"execution_key": "dummy", "input": {"required_field": "hello"}}, format="json"
+        )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -175,32 +224,42 @@ class TestStartAgentExecutionView:
         deleted_agent = baker.make(Agent, deleted_at=timezone.now(), dataset=dataset, agent_type=DUMMY_AGENT_TYPE)
         url = reverse("agent-execution-start", kwargs={"agent_id": deleted_agent.pk})
 
-        response = api_client.post(url, {"input": {"required_field": "hello"}}, format="json")
+        response = api_client.post(
+            url, {"execution_key": "dummy", "input": {"required_field": "hello"}}, format="json"
+        )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-    def test_returns_400_when_agent_type_has_no_execution_class(self, api_client, url, mock_registry):
+    def test_returns_400_when_execution_key_has_no_class(self, api_client, url, mock_registry):
         mock_registry.side_effect = KeyError("no class")
 
-        response = api_client.post(url, {"input": {"required_field": "hello"}}, format="json")
+        response = api_client.post(
+            url, {"execution_key": "unknown", "input": {"required_field": "hello"}}, format="json"
+        )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_returns_400_when_required_input_field_missing(self, api_client, url):
-        response = api_client.post(url, {"input": {}}, format="json")
+        response = api_client.post(url, {"execution_key": "dummy", "input": {}}, format="json")
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "required_field" in response.data["input"]
 
     def test_returns_400_when_input_field_has_wrong_type(self, api_client, url):
-        response = api_client.post(url, {"input": {"required_field": "ok", "optional_field": "not-an-int"}}, format="json")
+        response = api_client.post(
+            url,
+            {"execution_key": "dummy", "input": {"required_field": "ok", "optional_field": "not-an-int"}},
+            format="json",
+        )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "optional_field" in response.data["input"]
 
     def test_returns_400_when_input_has_extra_fields(self, api_client, url):
         response = api_client.post(
-            url, {"input": {"required_field": "ok", "unknown_field": "surprise"}}, format="json"
+            url,
+            {"execution_key": "dummy", "input": {"required_field": "ok", "unknown_field": "surprise"}},
+            format="json",
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -208,21 +267,27 @@ class TestStartAgentExecutionView:
 
     def test_returns_400_when_service_raises_file_upload_not_supported(self, api_client, url):
         with patch("agent.execution.views.AgentExecutionService.start", side_effect=FileUploadNotSupportedError()):
-            response = api_client.post(url, {"input": {"required_field": "hello"}}, format="json")
+            response = api_client.post(
+                url, {"execution_key": "dummy", "input": {"required_field": "hello"}}, format="json"
+            )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "file upload" in response.data["detail"].lower()
 
     def test_returns_400_when_service_raises_unsupported_file_type(self, api_client, url):
         with patch("agent.execution.views.AgentExecutionService.start", side_effect=UnsupportedFileTypeError(".xyz", [".pdf"])):
-            response = api_client.post(url, {"input": {"required_field": "hello"}}, format="json")
+            response = api_client.post(
+                url, {"execution_key": "dummy", "input": {"required_field": "hello"}}, format="json"
+            )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_returns_401_when_unauthenticated(self, agent):
         url = reverse("agent-execution-start", kwargs={"agent_id": agent.pk})
 
-        response = APIClient().post(url, {"input": {"required_field": "hello"}}, format="json")
+        response = APIClient().post(
+            url, {"execution_key": "dummy", "input": {"required_field": "hello"}}, format="json"
+        )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -232,19 +297,24 @@ class TestStartAgentExecutionView:
             mock_execution = baker.prepare(AgentExecution)
             mock_execution.pk = 1
             mock_start.return_value = mock_execution
-            response = api_client.post(url, {"input": {"required_field": "hello"}}, format="json")
+            response = api_client.post(
+                url, {"execution_key": "dummy", "input": {"required_field": "hello"}}, format="json"
+            )
 
         assert response.status_code == status.HTTP_202_ACCEPTED
 
     def test_happy_path_passes_correct_args_to_service(self, api_client, url, agent, user):
         with patch("agent.execution.views.AgentExecutionService.start") as mock_start, \
              patch("agent.execution.services.run_agent_execution_task.delay"):
-            mock_start.return_value = baker.make(AgentExecution, agent=agent)
-            api_client.post(url, {"input": {"required_field": "hello"}}, format="json")
+            mock_start.return_value = baker.make(AgentExecution, agent=agent, execution_key="dummy")
+            api_client.post(
+                url, {"execution_key": "dummy", "input": {"required_field": "hello"}}, format="json"
+            )
 
         mock_start.assert_called_once()
         call_kwargs = mock_start.call_args.kwargs
         assert call_kwargs["agent"] == agent
         assert call_kwargs["user"] == user
+        assert call_kwargs["execution_key"] == "dummy"
         assert call_kwargs["validated_input"] == {"required_field": "hello", "optional_field": 10}
         assert call_kwargs["uploaded_files"] == []

@@ -38,7 +38,7 @@ def run_agent_execution_task(execution_id: int):
     execution.mark_in_progress()
 
     registry = AgentExecutionRegistry()
-    execution_cls = registry.get_by_agent_type(execution.agent.agent_type)
+    execution_cls = registry.get_by_key(execution.execution_key)
     input_data = execution_cls.INPUT_TYPE(**execution.input)
 
     result = execution_cls().run(input_data, ExecutionConversation(execution.conversation))

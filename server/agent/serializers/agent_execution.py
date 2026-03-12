@@ -16,6 +16,7 @@ class AgentExecutionSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "agent",
+            "execution_key",
             "conversation",
             "status",
             "input",
@@ -30,14 +31,24 @@ class AgentExecutionSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
+class AgentExecutionTypeSerializer(serializers.Serializer):
+    """Read serializer for an available execution type on an agent."""
+
+    key = serializers.CharField()
+    name = serializers.CharField()
+    description = serializers.CharField(allow_null=True)
+    input_schema = serializers.DictField()
+
+
 class StartAgentExecutionSerializer(serializers.Serializer):
     """Write serializer for starting a new execution.
 
-    The agent is resolved from the URL; this serializer only validates the
-    input payload against the matching ExecutionInputType. Pass the resolved
-    execution class as ``context["execution_cls"]``.
+    The agent is resolved from the URL; this serializer validates the
+    ``execution_key`` and the input payload against the matching ExecutionInputType.
+    Pass the resolved execution class as ``context["execution_cls"]``.
     """
 
+    execution_key = serializers.CharField()
     input = serializers.DictField(default=dict)
 
     def to_internal_value(self, data):

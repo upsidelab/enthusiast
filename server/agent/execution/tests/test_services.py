@@ -9,7 +9,6 @@ from account.models import User
 from agent.execution.services import (
     AgentExecutionService,
     FileUploadNotSupportedError,
-    NoExecutionClassError,
     UnsupportedFileTypeError,
 )
 from agent.models.agent import Agent
@@ -63,19 +62,6 @@ def _make_file(name="doc.pdf", content=b"data", content_type="application/pdf"):
     return f
 
 
-class TestResolveExecutionClass:
-    def test_returns_execution_class_for_known_agent_type(self, service, agent):
-        with patch("agent.execution.services.AgentExecutionRegistry.get_by_agent_type", return_value=DummyExecution):
-            result = service.resolve_execution_class(agent)
-
-        assert result is DummyExecution
-
-    def test_raises_no_execution_class_error_for_unknown_type(self, service, agent):
-        with patch("agent.execution.services.AgentExecutionRegistry.get_by_agent_type", side_effect=KeyError):
-            with pytest.raises(NoExecutionClassError):
-                service.resolve_execution_class(agent)
-
-
 class TestStart:
     @pytest.fixture(autouse=True)
     def mock_task(self):
@@ -84,25 +70,26 @@ class TestStart:
             yield mock
 
     def test_creates_conversation_linked_to_agent_and_user(self, service, agent, user):
-        execution = service.start(agent=agent, user=user, validated_input={}, uploaded_files=[])
+        execution = service.start(agent=agent, user=user, execution_key="dummy", validated_input={}, uploaded_files=[])
 
         assert execution.conversation.agent == agent
         assert execution.conversation.data_set == agent.dataset
         assert execution.conversation.user == user
 
-    def test_creates_execution_record_with_input(self, service, agent, user):
-        execution = service.start(agent=agent, user=user, validated_input={"foo": "bar"}, uploaded_files=[])
+    def test_creates_execution_record_with_input_and_key(self, service, agent, user):
+        execution = service.start(agent=agent, user=user, execution_key="dummy", validated_input={"foo": "bar"}, uploaded_files=[])
 
         assert execution.input == {"foo": "bar"}
+        assert execution.execution_key == "dummy"
         assert execution.status == AgentExecution.Status.PENDING
 
     def test_stores_celery_task_id(self, service, agent, user):
-        execution = service.start(agent=agent, user=user, validated_input={}, uploaded_files=[])
+        execution = service.start(agent=agent, user=user, execution_key="dummy", validated_input={}, uploaded_files=[])
 
         assert execution.celery_task_id == "fake-celery-id"
 
     def test_enqueues_task_with_execution_id(self, service, agent, user, mock_task):
-        execution = service.start(agent=agent, user=user, validated_input={}, uploaded_files=[])
+        execution = service.start(agent=agent, user=user, execution_key="dummy", validated_input={}, uploaded_files=[])
 
         mock_task.assert_called_once_with(execution.pk)
 
@@ -110,12 +97,12 @@ class TestStart:
         non_upload_agent = baker.make(Agent, deleted_at=None, dataset=dataset, file_upload=False)
 
         with pytest.raises(FileUploadNotSupportedError):
-            service.start(agent=non_upload_agent, user=user, validated_input={}, uploaded_files=[_make_file()])
+            service.start(agent=non_upload_agent, user=user, execution_key="dummy", validated_input={}, uploaded_files=[_make_file()])
 
     def test_raises_for_unsupported_file_extension(self, service, agent, user):
         with patch("agent.execution.services.settings.FILE_PARSER_CLASSES", SUPPORTED_EXTENSIONS):
             with pytest.raises(UnsupportedFileTypeError) as exc_info:
-                service.start(agent=agent, user=user, validated_input={}, uploaded_files=[_make_file("photo.jpg")])
+                service.start(agent=agent, user=user, execution_key="dummy", validated_input={}, uploaded_files=[_make_file("photo.jpg")])
 
         assert exc_info.value.ext == ".jpg"
 
@@ -123,7 +110,7 @@ class TestStart:
         with patch("agent.execution.services.settings.FILE_PARSER_CLASSES", SUPPORTED_EXTENSIONS), \
              patch("agent.execution.services.FileService.process", return_value="extracted"):
             execution = service.start(
-                agent=agent, user=user, validated_input={}, uploaded_files=[_make_file()]
+                agent=agent, user=user, execution_key="dummy", validated_input={}, uploaded_files=[_make_file()]
             )
 
         conv_files = ConversationFile.objects.filter(conversation=execution.conversation)
@@ -137,13 +124,13 @@ class TestStart:
         with patch("agent.execution.services.settings.FILE_PARSER_CLASSES", {(".jpg",): "some.Class"}), \
              patch("agent.execution.services.FileService.process", return_value=""):
             execution = service.start(
-                agent=agent, user=user, validated_input={}, uploaded_files=[_make_file("photo.jpg", content_type="image/jpeg")]
+                agent=agent, user=user, execution_key="dummy", validated_input={}, uploaded_files=[_make_file("photo.jpg", content_type="image/jpeg")]
             )
 
         cf = ConversationFile.objects.get(conversation=execution.conversation)
         assert cf.file_category == ConversationFile.FileCategory.IMAGE
 
     def test_no_conversation_files_created_when_no_files(self, service, agent, user):
-        execution = service.start(agent=agent, user=user, validated_input={}, uploaded_files=[])
+        execution = service.start(agent=agent, user=user, execution_key="dummy", validated_input={}, uploaded_files=[])
 
         assert ConversationFile.objects.filter(conversation=execution.conversation).count() == 0

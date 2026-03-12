@@ -28,18 +28,17 @@ class FileUploadNotSupportedError(Exception):
     """Raised when files are submitted to an agent that does not support file uploads."""
 
 
-class NoExecutionClassError(Exception):
-    """Raised when no execution class is registered for the agent's type."""
-
-    def __init__(self, agent_type: str):
-        self.agent_type = agent_type
-        super().__init__(f"No execution class registered for agent type '{agent_type}'.")
-
-
 class AgentExecutionService:
     """Orchestrates the creation of an AgentExecution and its associated resources."""
 
-    def start(self, agent: Agent, user: User, validated_input: dict, uploaded_files: list[UploadedFile]) -> AgentExecution:
+    def start(
+        self,
+        agent: Agent,
+        user: User,
+        execution_key: str,
+        validated_input: dict,
+        uploaded_files: list[UploadedFile],
+    ) -> AgentExecution:
         if uploaded_files and not agent.file_upload:
             raise FileUploadNotSupportedError()
 
@@ -57,6 +56,7 @@ class AgentExecutionService:
 
         execution = AgentExecution.objects.create(
             agent=agent,
+            execution_key=execution_key,
             conversation=conversation,
             input=validated_input,
         )
@@ -66,11 +66,9 @@ class AgentExecutionService:
 
         return execution
 
-    def resolve_execution_class(self, agent: Agent):
-        try:
-            return AgentExecutionRegistry().get_by_agent_type(agent.agent_type)
-        except KeyError:
-            raise NoExecutionClassError(agent.agent_type)
+    def get_execution_types(self, agent: Agent) -> list:
+        """Return all registered execution classes for the given agent type."""
+        return AgentExecutionRegistry().get_by_agent_type(agent.agent_type)
 
     def _validate_file_extensions(self, uploaded_files: list[UploadedFile]) -> None:
         supported = []

@@ -16,10 +16,18 @@ class Migration(migrations.Migration):
                 (
                     "agent",
                     models.ForeignKey(
-                        help_text="The configured agent this execution runs against. Execution type is derived from agent.agent_type.",
+                        help_text="The configured agent this execution runs against.",
                         on_delete=django.db.models.deletion.PROTECT,
                         related_name="executions",
                         to="agent.agent",
+                    ),
+                ),
+                (
+                    "execution_key",
+                    models.CharField(
+                        default="",
+                        help_text="EXECUTION_KEY of the execution class used to run this record. Used to resolve the correct class at task time.",
+                        max_length=128,
                     ),
                 ),
                 (

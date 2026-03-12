@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from celery import Task, shared_task
 from enthusiast_common.agent_execution import ExecutionConversationInterface, ExecutionFailureCode
 from enthusiast_common.agents import ConfigType
@@ -36,23 +34,14 @@ class MarkExecutionFailedOnErrorTask(Task):
 
 @shared_task(base=MarkExecutionFailedOnErrorTask, max_retries=0)
 def run_agent_execution_task(execution_id: int):
-    execution = AgentExecution.objects.select_related("agent__dataset").get(pk=execution_id)
+    execution = AgentExecution.objects.select_related("agent", "conversation").get(pk=execution_id)
     execution.mark_in_progress()
 
     registry = AgentExecutionRegistry()
     execution_cls = registry.get_by_agent_type(execution.agent.agent_type)
     input_data = execution_cls.INPUT_TYPE(**execution.input)
 
-    conversation = Conversation.objects.create(
-        started_at=datetime.now(),
-        user=execution.agent.dataset.users.first(),
-        data_set=execution.agent.dataset,
-        agent=execution.agent,
-    )
-    execution.conversation = conversation
-    execution.save(update_fields=["conversation"])
-
-    result = execution_cls().run(input_data, ExecutionConversation(conversation))
+    result = execution_cls().run(input_data, ExecutionConversation(execution.conversation))
 
     if result.success:
         execution.mark_finished(result.output)

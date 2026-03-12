@@ -25,7 +25,7 @@ class TestConversationFileSerializer:
         serializer = ConversationFileSerializer(conversation_file)
         data = serializer.data
 
-        assert data["id"] == 1
+        assert data["id"] == conversation_file.id
         assert data["filename"] == "test.txt"
         assert data["content_type"] == "text/plain"
 

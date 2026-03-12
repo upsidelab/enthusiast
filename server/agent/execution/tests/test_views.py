@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 from django.urls import reverse
@@ -9,6 +9,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from account.models import User
+from agent.execution.services import FileUploadNotSupportedError, UnsupportedFileTypeError
 from agent.models.agent import Agent
 from agent.models.agent_execution import AgentExecution
 from catalog.models import DataSet
@@ -158,7 +159,7 @@ class TestStartAgentExecutionView:
     @pytest.fixture(autouse=True)
     def mock_registry(self):
         with patch(
-            "agent.execution.views.AgentExecutionRegistry.get_by_agent_type",
+            "agent.execution.services.AgentExecutionRegistry.get_by_agent_type",
             return_value=DummyExecution,
         ) as mock:
             yield mock
@@ -191,18 +192,6 @@ class TestStartAgentExecutionView:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "required_field" in response.data["input"]
 
-    def test_empty_input_succeeds_when_all_fields_have_defaults(self, api_client, agent, mock_registry):
-        mock_registry.return_value = AllDefaultsExecution
-        url = reverse("agent-execution-start", kwargs={"agent_id": agent.pk})
-
-        with patch("agent.execution.views.run_agent_execution_task.delay") as mock_delay:
-            mock_delay.return_value = MagicMock(id="fake-celery-id")
-            response = api_client.post(url, {"input": {}}, format="json")
-
-        assert response.status_code == status.HTTP_202_ACCEPTED
-        execution = AgentExecution.objects.get(pk=response.data["id"])
-        assert execution.input == {"optional_field": 10}
-
     def test_returns_400_when_input_field_has_wrong_type(self, api_client, url):
         response = api_client.post(url, {"input": {"required_field": "ok", "optional_field": "not-an-int"}}, format="json")
 
@@ -217,6 +206,19 @@ class TestStartAgentExecutionView:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "unknown_field" in response.data["input"]
 
+    def test_returns_400_when_service_raises_file_upload_not_supported(self, api_client, url):
+        with patch("agent.execution.views.AgentExecutionService.start", side_effect=FileUploadNotSupportedError()):
+            response = api_client.post(url, {"input": {"required_field": "hello"}}, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "file upload" in response.data["detail"].lower()
+
+    def test_returns_400_when_service_raises_unsupported_file_type(self, api_client, url):
+        with patch("agent.execution.views.AgentExecutionService.start", side_effect=UnsupportedFileTypeError(".xyz", [".pdf"])):
+            response = api_client.post(url, {"input": {"required_field": "hello"}}, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
     def test_returns_401_when_unauthenticated(self, agent):
         url = reverse("agent-execution-start", kwargs={"agent_id": agent.pk})
 
@@ -224,42 +226,25 @@ class TestStartAgentExecutionView:
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_happy_path_creates_execution_record(self, api_client, url, agent):
-        with patch("agent.execution.views.run_agent_execution_task.delay") as mock_delay:
-            mock_delay.return_value = MagicMock(id="fake-celery-id")
+    def test_happy_path_returns_202_with_execution_data(self, api_client, url):
+        with patch("agent.execution.views.AgentExecutionService.start") as mock_start, \
+             patch("agent.execution.services.run_agent_execution_task.delay"):
+            mock_execution = baker.prepare(AgentExecution)
+            mock_execution.pk = 1
+            mock_start.return_value = mock_execution
             response = api_client.post(url, {"input": {"required_field": "hello"}}, format="json")
 
         assert response.status_code == status.HTTP_202_ACCEPTED
-        assert AgentExecution.objects.filter(agent=agent).exists()
-        execution = AgentExecution.objects.get(agent=agent)
-        assert execution.input == {"required_field": "hello", "optional_field": 10}
-        assert execution.status == AgentExecution.Status.PENDING
 
-    def test_happy_path_coerces_input_types(self, api_client, url):
-        with patch("agent.execution.views.run_agent_execution_task.delay") as mock_delay:
-            mock_delay.return_value = MagicMock(id="fake-celery-id")
-            response = api_client.post(
-                url, {"input": {"required_field": "hello", "optional_field": "42"}}, format="json"
-            )
+    def test_happy_path_passes_correct_args_to_service(self, api_client, url, agent, user):
+        with patch("agent.execution.views.AgentExecutionService.start") as mock_start, \
+             patch("agent.execution.services.run_agent_execution_task.delay"):
+            mock_start.return_value = baker.make(AgentExecution, agent=agent)
+            api_client.post(url, {"input": {"required_field": "hello"}}, format="json")
 
-        assert response.status_code == status.HTTP_202_ACCEPTED
-        execution = AgentExecution.objects.get(pk=response.data["id"])
-        assert execution.input["optional_field"] == 42
-
-    def test_happy_path_enqueues_celery_task_with_execution_id(self, api_client, url):
-        with patch("agent.execution.views.run_agent_execution_task.delay") as mock_delay:
-            mock_delay.return_value = MagicMock(id="fake-celery-id")
-            response = api_client.post(url, {"input": {"required_field": "hello"}}, format="json")
-
-        assert response.status_code == status.HTTP_202_ACCEPTED
-        execution_id = response.data["id"]
-        mock_delay.assert_called_once_with(execution_id)
-
-    def test_happy_path_stores_celery_task_id(self, api_client, url):
-        with patch("agent.execution.views.run_agent_execution_task.delay") as mock_delay:
-            mock_delay.return_value = MagicMock(id="fake-celery-id")
-            response = api_client.post(url, {"input": {"required_field": "hello"}}, format="json")
-
-        assert response.status_code == status.HTTP_202_ACCEPTED
-        execution = AgentExecution.objects.get(pk=response.data["id"])
-        assert execution.celery_task_id == "fake-celery-id"
+        mock_start.assert_called_once()
+        call_kwargs = mock_start.call_args.kwargs
+        assert call_kwargs["agent"] == agent
+        assert call_kwargs["user"] == user
+        assert call_kwargs["validated_input"] == {"required_field": "hello", "optional_field": 10}
+        assert call_kwargs["uploaded_files"] == []

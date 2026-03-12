@@ -2,12 +2,17 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.generics import ListAPIView, RetrieveAPIView
+from rest_framework.parsers import JSONParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from agent.execution.registry import AgentExecutionRegistry
-from agent.execution.tasks import run_agent_execution_task
+from agent.execution.services import (
+    AgentExecutionService,
+    FileUploadNotSupportedError,
+    NoExecutionClassError,
+    UnsupportedFileTypeError,
+)
 from agent.models.agent import Agent
 from agent.models.agent_execution import AgentExecution
 from agent.serializers.agent_execution import AgentExecutionSerializer, StartAgentExecutionSerializer
@@ -16,14 +21,15 @@ from agent.serializers.agent_execution import AgentExecutionSerializer, StartAge
 class StartAgentExecutionView(APIView):
     """Start a new execution for a specific agent."""
 
+    parser_classes = (MultiPartParser, JSONParser)
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
-        operation_description="Start a new execution for the given agent.",
+        operation_description="Start a new execution for the given agent. Accepts application/json or multipart/form-data (with optional files when agent.file_upload=True).",
         request_body=StartAgentExecutionSerializer,
         responses={
             202: AgentExecutionSerializer(),
-            400: "Bad Request — agent type has no registered execution class or input is invalid.",
+            400: "Bad Request — agent type has no registered execution class, input is invalid, or files sent to a non-file-upload agent.",
             404: "Not Found — agent does not exist.",
         },
     )
@@ -33,26 +39,29 @@ class StartAgentExecutionView(APIView):
         except Agent.DoesNotExist:
             return Response({"detail": "Agent not found."}, status=status.HTTP_404_NOT_FOUND)
 
+        service = AgentExecutionService()
+
         try:
-            execution_cls = AgentExecutionRegistry().get_by_agent_type(agent.agent_type)
-        except KeyError:
-            return Response(
-                {"detail": f"No execution class registered for agent type '{agent.agent_type}'."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            execution_cls = service.resolve_execution_class(agent)
+        except NoExecutionClassError as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = StartAgentExecutionSerializer(
             data=request.data, context={"execution_cls": execution_cls}
         )
         serializer.is_valid(raise_exception=True)
 
-        execution = AgentExecution.objects.create(
-            agent=agent,
-            input=serializer.validated_data["input"],
-        )
-        task = run_agent_execution_task.delay(execution.pk)
-        execution.celery_task_id = task.id
-        execution.save(update_fields=["celery_task_id"])
+        try:
+            execution = service.start(
+                agent=agent,
+                user=request.user,
+                validated_input=serializer.validated_data["input"],
+                uploaded_files=request.FILES.getlist("files"),
+            )
+        except FileUploadNotSupportedError:
+            return Response({"detail": "This agent does not support file uploads."}, status=status.HTTP_400_BAD_REQUEST)
+        except UnsupportedFileTypeError as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(AgentExecutionSerializer(execution).data, status=status.HTTP_202_ACCEPTED)
 

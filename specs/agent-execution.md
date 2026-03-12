@@ -82,6 +82,7 @@ Enum: `PENDING`, `IN_PROGRESS`, `FINISHED`, `FAILED`.
 |------|--------|---------|
 | `runtime_error` | `MarkExecutionFailedOnErrorTask.on_failure` | Unexpected exception escaped the execution |
 | `max_retries_exceeded` | `BaseAgentExecution.run()` | LLM failed to pass validators after `MAX_RETRIES` correction cycles |
+| `unknown` | Celery task | Execution reported failure but returned no failure code |
 
 Plugins extend this enum to add domain-specific codes and point `FAILURE_CODES` at the subclass::
 
@@ -213,7 +214,7 @@ Mirrors `AgentRegistry`. Reads `settings.AVAILABLE_AGENT_EXECUTIONS` (dotted imp
 2. Resolve execution class via `AgentExecutionRegistry.get_by_key(execution.execution_key)`
 3. Instantiate, deserialise `execution.input` into `INPUT_TYPE`, call `run(input_data, conversation)`
 4. If `result.success` → `mark_finished(result.output)`
-5. If `not result.success` → `mark_failed(failure_code="max_retries_exceeded", failure_explanation=result.failure_summary)`
+5. If `not result.success` → `mark_failed(failure_code=result.failure_code or "unknown", failure_explanation=result.failure_summary)`
 
 The `Conversation` is always created by the view before the task is enqueued — the task reads it directly from `execution.conversation` and never creates one itself.
 

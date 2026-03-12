@@ -47,6 +47,6 @@ def run_agent_execution_task(execution_id: int):
         execution.mark_finished(result.output)
     else:
         execution.mark_failed(
-            failure_code=result.failure_code or ExecutionFailureCode.MAX_RETRIES_EXCEEDED,
-            failure_explanation=result.failure_summary or "",
+            failure_code=result.failure_code or ExecutionFailureCode.UNKNOWN,
+            failure_explanation=result.failure_summary,
         )

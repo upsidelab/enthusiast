@@ -16,3 +16,11 @@ AVAILABLE_AGENTS = [
     'enthusiast_agent_catalog_enrichment.CatalogEnrichmentAgent',
 ]
 ```
+
+To also register the agent execution, add the following to your config/settings_override.py:
+
+```python
+AVAILABLE_AGENT_EXECUTIONS = [
+    'enthusiast_agent_catalog_enrichment.CatalogEnrichmentExecution',
+]
+```

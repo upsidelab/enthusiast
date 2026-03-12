@@ -1,7 +1,7 @@
 # Agent Execution — Feature Spec
 
 > **Ticket**: ENT-236
-> **Status**: Planning
+> **Status**: In Progress (backend + catalog enrichment plugin implemented; frontend pending)
 > **Date**: 2026-03-04
 
 ---
@@ -10,7 +10,7 @@
 
 Agent Execution introduces **agentic execution** as a first-class concept, distinct from the existing conversation-based agent flow. Where conversations are interactive (user ↔ agent), executions are **autonomous, programmatic LLM-driven batch jobs**: submitted via API, the LLM agent runs to completion without user interaction, and the caller inspects the result afterward.
 
-Each execution is tightly coupled to an existing, configured `Agent` instance. This is deliberate — an `Agent` already carries the dataset association, LLM provider choice, system prompt, and tool configuration needed to run. The execution wrapper handles everything the agent normally needs from a conversation — message management, tool call loops, response processing — so the caller only needs to provide structured input and wait for a structured output. There is no human in the loop.
+Each execution is tightly coupled to an existing, configured `Agent` instance. This is deliberate — an `Agent` already carries the dataset association, system prompt, and tool configuration needed to run. The execution wrapper handles everything the agent normally needs from a conversation — message management, tool call loops, response processing — so the caller only needs to provide structured input and wait for a structured output. There is no human in the loop.
 
 A single agent plugin can register **multiple execution classes**, each with a distinct `EXECUTION_KEY` and all sharing the same `AGENT_KEY`. The caller selects which execution type to run by passing `execution_key` in the POST body. This allows, for example, a catalog enrichment agent to expose separate executions for different enrichment strategies. The `execution_key` is persisted on the `AgentExecution` record so the Celery task can always resolve the correct class regardless of later registry changes.
 
@@ -20,18 +20,10 @@ During the execution run, the plugin creates a `Conversation` internally to driv
 
 - Trigger long-running LLM agent jobs programmatically ("fire and forget").
 - Track the full execution lifecycle: `pending → in_progress → finished | failed`.
-- Support a **pluggable validator** that the execution consults to decide whether to continue.
+- Support **pluggable validators** that the execution consults to decide whether to continue.
 - Persist execution history with timing, status, result, and a human-readable summary.
 - Expose the above through a REST API and a frontend history/launch view.
 - Follow the existing plugin architecture — concrete execution logic lives in agent plugins, shared interfaces live in `enthusiast-common`, and the server discovers available executions via `settings.AVAILABLE_AGENT_EXECUTIONS`.
-
-### Non-Goals (for this iteration)
-
-- Real-time streaming of intermediate execution steps to the browser.
-- Chaining executions into pipelines.
-- Execution scheduling / cron triggering.
-
----
 
 ## 2. Architecture
 
@@ -53,7 +45,6 @@ The diagram below shows the full system with the catalog enrichment plugin as a 
 │  plugins/enthusiast-agent-catalog-enrichment  (example)                │
 │    CatalogEnrichmentExecution  (BaseAgentExecution)                    │
 │    CatalogEnrichmentExecutionInput  (ExecutionInputType)               │
-│    ProductUpsertTracker (BaseExecutionValidator)                       │
 │    CatalogEnrichmentConfigProvider (BaseAgentConfigProvider)           │
 └────────────────────────────────────────────────────────────────────────┘
 
@@ -178,7 +169,7 @@ The base class carries a concrete `run()` that implements the **validator retry 
 
 **`execute(input_data, conversation) -> str` (abstract):** performs one attempt at the execution task and returns the raw LLM response string. The base `run()` loop calls this repeatedly until all validators pass or retries are exhausted.
 
-**`run(input_data, agent_execution) -> ExecutionResult` (concrete):** orchestrates the retry loop:
+**`run(input_data, conversation) -> ExecutionResult` (concrete):** orchestrates the retry loop:
 1. Calls `execute(input_data, conversation)` to get the LLM response string
 2. Runs each validator in `VALIDATORS` in order; if any returns a feedback string, sends it to the conversation and calls `execute()` again (up to `MAX_RETRIES` times)
 3. If all validators pass → returns `ExecutionResult(success=True, output=...)`
@@ -220,7 +211,7 @@ Mirrors `AgentRegistry`. Reads `settings.AVAILABLE_AGENT_EXECUTIONS` (dotted imp
 
 1. Load record (with `select_related("agent")`) → `mark_in_progress()`
 2. Resolve execution class via `AgentExecutionRegistry.get_by_key(execution.execution_key)`
-3. Instantiate, deserialise `execution.input` into `INPUT_TYPE`, call `run(input_data, agent_execution)`
+3. Instantiate, deserialise `execution.input` into `INPUT_TYPE`, call `run(input_data, conversation)`
 4. If `result.success` → `mark_finished(result.output)`
 5. If `not result.success` → `mark_failed(failure_code="max_retries_exceeded", failure_explanation=result.failure_summary)`
 
@@ -261,10 +252,10 @@ The POST endpoint is nested under `/api/agents/` following the existing conventi
 
 Conversations created internally by an execution are implementation details — they represent the agent's internal message loop, not a user-initiated dialogue. Returning them in the standard `GET /api/conversations/` response would clutter the agent history UI with entries the user never started.
 
-**Approach**: `AgentExecution` holds a nullable FK to `Conversation`. The `ConversationListView` queryset is updated to exclude conversations that are referenced by any `AgentExecution` record:
+**Approach**: `AgentExecution` holds a FK to `Conversation`. The `ConversationListView` queryset is updated to exclude conversations that are referenced by any `AgentExecution` record:
 
 ```python
-queryset = queryset.exclude(agentexecution__isnull=False)
+queryset = queryset.exclude(agent_execution__isnull=False)
 ```
 
 No new field is added to `Conversation` — the reverse relation from `AgentExecution.conversation` is sufficient. This means the exclusion is implicit and automatic: as soon as an execution links its conversation, it disappears from the standard history.
@@ -275,19 +266,17 @@ The conversation remains accessible directly via `GET /api/conversations/<id>/` 
 
 ```
 server/agent/
-├── models/agent_execution.py     ← NEW
+├── models/agent_execution.py      ← NEW
 ├── serializers/agent_execution.py ← NEW
-├── tasks.py                       ← updated
 └── execution/
     ├── registry.py                ← NEW
     ├── services.py                ← NEW
+    ├── tasks.py                   ← NEW
     ├── views.py                   ← NEW
     ├── urls.py                    ← NEW
     └── tests/
-        ├── test_registry.py
         ├── test_services.py
-        ├── test_views.py
-        └── test_task.py
+        └── test_views.py
 ```
 
 ---
@@ -300,14 +289,12 @@ The catalog enrichment plugin is the reference implementation. The existing `Cat
 - `ConfigType.CONVERSATION` — the standard conversational prompt (`CATALOG_ENRICHMENT_TOOL_CALLING_AGENT_PROMPT`) that includes user-interaction guidance
 - `ConfigType.AGENT_EXECUTION` — a stripped-down execution prompt (`CATALOG_ENRICHMENT_EXECUTION_SYSTEM_PROMPT`) that drops conversational tone, states the LLM is in a batch pipeline, and mandates a JSON-only response of the form `{"<product identifier>": "<upsert success or failure reason>", ...}`
 
-**`CatalogEnrichmentExecutionInput`** (`ExecutionInputType` subclass): field `max_failures: int` (default 5). The dataset is not part of the input — it is derived from `agent.data_set` at runtime.
+**`CatalogEnrichmentExecutionInput`** (`ExecutionInputType` subclass): field `additional_instructions: Optional[str]` (default `None`) — free-text instructions appended to the default prompt. The dataset is not part of the input; it is derived from `agent.data_set` at runtime.
 
 **`CatalogEnrichmentExecution`** (`BaseAgentExecution`):
 - `EXECUTION_KEY = "catalog-enrichment"`, `AGENT_KEY = "enthusiast-agent-catalog-enrichment"`
-- `VALIDATORS = [IsValidJsonValidator, ProductUpsertValidator]` — first checks structural JSON validity, then domain-level validity
-- `execute(input_data, conversation)` — iterates over all products in the agent's dataset, drives `CatalogEnrichmentAgent` per product (full LLM loop, no user interaction), uses `ProductUpsertTracker` to stop early on too many failures, returns the final LLM response string for the batch
-
-**`ProductUpsertTracker`** (`BaseExecutionValidator`): validates that the LLM response represents a successful upsert; returns a feedback message string if failures exceed `max_failures`, `None` otherwise.
+- Uses the default `VALIDATORS = [IsValidJsonValidator]`
+- `execute(input_data, conversation)` — sends a single message to the agent (the `additional_instructions` value, or a default prompt when absent) and returns its raw response string. The agent's tool stack (including the product upsert tool) handles the actual product enrichment within that turn.
 
 ---
 
@@ -329,37 +316,6 @@ API client (`frontend/src/lib/api/agent-executions.ts`) exposes `list(filters?)`
 
 ## 7. Testing
 
-**`test_registry.py`**: `get_all()`, `get_by_agent_type()` happy path, `get_by_agent_type()` raises `KeyError` for unknown type.
+**`test_services.py`**: conversation and execution record created correctly; `execution_key` persisted; Celery task enqueued with execution ID; file upload validation (unsupported extension, non-file-upload agent); file attached as `ConversationFile(is_hidden=False)` with correct category.
 
-**`test_task.py`**: `pending → in_progress → finished` when `result.success=True`; `pending → in_progress → failed` when `result.success=False` with `failure_summary` stored; unexpected exception propagates without calling `mark_finished`.
-
-**`test_views.py`**: `GET execution-types` returns 200 with list of types; returns 404 for unknown agent. `POST executions` — valid start (202); unknown agent (404); soft-deleted agent (404); unknown `execution_key` (400); `execution_key` belongs to different agent type (400); invalid input (400, no record created); list (200); list ordered newest first; get (200); get missing (404); execution conversation excluded from conversation list; execution conversation accessible via detail endpoint.
-
-File upload tests (within `test_views.py` or a separate `test_file_upload_views.py`):
-- Any valid POST → `AgentExecution.conversation` is always set (non-null) immediately after creation.
-- Agent with `file_upload=True`, multipart POST with a file → 202, `Conversation` and `ConversationFile(is_hidden=False)` created synchronously in the view.
-- Agent with `file_upload=False`, multipart POST with a file → 400, no records created.
-- Unsupported file extension → 400.
-- `FileListTool` returns the uploaded file during execution (query `ConversationFile` for the execution's conversation).
-
-**`test_is_valid_json_validator.py`**: valid JSON returns `None`; invalid JSON returns the feedback string.
-
-**`test_base_agent_execution.py`**: all validators pass on first attempt → `ExecutionResult(success=True)`; one validator fails → feedback sent to conversation and `execute()` retried; `MAX_RETRIES` exhausted → failure summary requested from LLM → `ExecutionResult(success=False, failure_summary=...)`.
-
-**`test_product_upsert_tracker.py`**: returns `None` below failure threshold; returns feedback string at/above threshold.
-
-**`test_catalog_enrichment_execution.py`**: stops early when `ProductUpsertTracker` signals failure; correct counts in `ExecutionResult.output`; conversation FK is populated after `run()`.
-
----
-
-## 8. Implementation Order
-
-1. **enthusiast-common** — core interfaces (`BaseAgentExecution`, `BaseExecutionValidator`, `ExecutionResult`, `ExecutionStatus`, `ExecutionInputType`)
-2. **Server: Model + Migration** — `agent` FK, nullable `conversation` FK, drop `execution_type`
-3. **Server: Registry + Settings key**
-4. **Server: Celery Task**
-5. **Server: Serializers + Views + URLs**
-6. **Server: Tests**
-7. **Plugin: CatalogEnrichmentExecution** — implementation, registration, plugin tests
-8. **Frontend: API Client**
-9. **Frontend: Pages & Components**
+**`test_views.py`**: `GET execution-types` — 200 with list, 404 for unknown agent. `POST executions` — 202 on valid start; 404 for unknown or soft-deleted agent; 400 for unknown `execution_key`, mismatched agent type, invalid input, or files sent to a non-file-upload agent. List — 200, ordered newest first, filterable by `agent_id`. Detail — 200, 404 for missing. Execution conversation excluded from the standard conversation list; accessible via the detail endpoint.

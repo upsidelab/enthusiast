@@ -25,10 +25,8 @@ class Migration(migrations.Migration):
                 (
                     "conversation",
                     models.OneToOneField(
-                        blank=True,
-                        help_text="Conversation created internally by the plugin during run(); populated once the conversation exists.",
-                        null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
+                        help_text="Conversation created by the view before the execution task is enqueued.",
+                        on_delete=django.db.models.deletion.PROTECT,
                         related_name="agent_execution",
                         to="agent.conversation",
                     ),

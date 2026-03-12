@@ -1,3 +1,5 @@
+import json
+
 from pydantic import ValidationError as PydanticValidationError
 from rest_framework import serializers
 
@@ -37,6 +39,19 @@ class StartAgentExecutionSerializer(serializers.Serializer):
     """
 
     input = serializers.DictField(default=dict)
+
+    def to_internal_value(self, data):
+        # When the request is multipart/form-data, `input` arrives as a JSON-encoded string.
+        # QueryDict must be collapsed to a plain dict so that DictField.get_value uses the
+        # normal dict path rather than the HTML form-parsing path.
+        if isinstance(data.get("input"), str):
+            try:
+                plain_data = data.dict() if hasattr(data, "dict") else dict(data)
+                plain_data["input"] = json.loads(plain_data["input"])
+                data = plain_data
+            except json.JSONDecodeError as exc:
+                raise serializers.ValidationError({"input": f"Invalid JSON: {exc}"})
+        return super().to_internal_value(data)
 
     def validate_input(self, value):
         execution_cls = self.context["execution_cls"]

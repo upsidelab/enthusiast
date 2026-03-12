@@ -22,11 +22,9 @@ class AgentExecution(models.Model):
     )
     conversation = models.OneToOneField(
         "agent.Conversation",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        on_delete=models.PROTECT,
         related_name="agent_execution",
-        help_text="Conversation created internally by the plugin during run(); populated once the conversation exists.",
+        help_text="Conversation created by the view before the execution task is enqueued.",
     )
     status = models.CharField(
         max_length=32,

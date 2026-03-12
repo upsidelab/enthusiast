@@ -178,11 +178,10 @@ The base class carries a concrete `run()` that implements the **validator retry 
 **`execute(input_data, conversation) -> str` (abstract):** performs one attempt at the execution task and returns the raw LLM response string. The base `run()` loop calls this repeatedly until all validators pass or retries are exhausted.
 
 **`run(input_data, agent_execution) -> ExecutionResult` (concrete):** orchestrates the retry loop:
-1. Creates a `Conversation` internally via `ConversationManager` and stores it on `agent_execution.conversation`
-2. Calls `execute(input_data, conversation)` to get the LLM response string
-3. Runs each validator in `VALIDATORS` in order; if any returns a feedback string, sends it to the conversation and calls `execute()` again (up to `MAX_RETRIES` times)
-4. If all validators pass → returns `ExecutionResult(success=True, output=...)`
-5. If `MAX_RETRIES` is exhausted → sends a final prompt asking the LLM for a succinct failure summary, then returns `ExecutionResult(success=False, failure_code=FAILURE_CODES.MAX_RETRIES_EXCEEDED, failure_summary=<LLM response>)`
+1. Calls `execute(input_data, conversation)` to get the LLM response string
+2. Runs each validator in `VALIDATORS` in order; if any returns a feedback string, sends it to the conversation and calls `execute()` again (up to `MAX_RETRIES` times)
+3. If all validators pass → returns `ExecutionResult(success=True, output=...)`
+4. If `MAX_RETRIES` is exhausted → sends a final prompt asking the LLM for a succinct failure summary, then returns `ExecutionResult(success=False, failure_code=FAILURE_CODES.MAX_RETRIES_EXCEEDED, failure_summary=<LLM response>)`
 
 No exceptions are raised for expected execution failures — all outcomes (including validator exhaustion) are expressed through `ExecutionResult`. Unexpected errors (programming errors, network failures) are not caught and propagate naturally; the server task's `on_failure` hook catches them and sets `failure_code=ExecutionFailureCode.RUNTIME_ERROR` on the record.
 
@@ -195,7 +194,7 @@ No exceptions are raised for expected execution failures — all outcomes (inclu
 | Field | Type | Notes |
 |-------|------|-------|
 | `agent` | ForeignKey → `Agent` | Non-nullable; the configured agent this execution runs against. Execution type is derived from `agent.agent_key`. |
-| `conversation` | ForeignKey → `Conversation` (nullable) | Created by the plugin during `run()`; populated once the conversation exists |
+| `conversation` | ForeignKey → `Conversation` | Always created by the view before the task is enqueued |
 | `status` | CharField | `pending \| in_progress \| finished \| failed` |
 | `input` | JSONField | Input payload validated against `ExecutionInputType` at request time |
 | `result` | JSONField (nullable) | Output from `ExecutionResult.output` (set on finish) |
@@ -221,9 +220,23 @@ The key used for lookup is `agent.agent_key` — the same slug that the agent pl
 4. If `result.success` → `mark_finished(result.output)`
 5. If `not result.success` → `mark_failed(failure_code="max_retries_exceeded", failure_explanation=result.failure_summary)`
 
+The `Conversation` is always created by the view before the task is enqueued — the task reads it directly from `execution.conversation` and never creates one itself.
+
 The task has no try/except around the execution call. Expected failures (validator exhaustion, invalid LLM response) are communicated through `ExecutionResult` — the task inspects `result.success` and branches accordingly. Unexpected errors propagate naturally to Celery, which marks the task as failed.
 
 `max_retries=0` — no Celery-level retries; resilience is entirely the execution loop's own responsibility.
+
+### Conversation Creation
+
+The `Conversation` is always created synchronously during the API request — before the Celery task is enqueued. `AgentExecution.conversation` is therefore non-nullable and always populated by the time the task runs.
+
+### File Upload
+
+When an agent's `file_upload` flag is `True`, the execution API accepts files alongside the input payload via `multipart/form-data`. Files are parsed and stored synchronously during the request, attached to the conversation that is created at the same time. The Celery task then runs against an already-populated conversation and requires no knowledge of files — the agent's file tools discover them through the conversation as normal.
+
+Sending files to an agent with `file_upload=False` returns a 400. Unsupported file types are also rejected with a 400 before any records are created.
+
+The `input` payload is a JSON-encoded string when sent as part of multipart form data; the serializer handles the decoding transparently so the rest of the pipeline is unaffected.
 
 ### REST API
 
@@ -232,10 +245,10 @@ The POST endpoint is nested under `/api/agents/` following the existing conventi
 | Method | URL | Description |
 |--------|-----|-------------|
 | GET | `/api/agent-executions/` | Paginated execution history (newest first, 25/page). Supports `?agent_id=` filter. |
-| POST | `/api/agents/<int:agent_id>/executions/` | Start a new execution for the given agent |
+| POST | `/api/agents/<int:agent_id>/executions/` | Start a new execution for the given agent. Accepts `application/json` or `multipart/form-data`. |
 | GET | `/api/agent-executions/<int:pk>/` | Fetch a single execution (used for polling) |
 
-**POST `api/agents/<agent_id>/executions/`**: resolves the agent, derives the execution class from `agent.agent_key`, validates the request body (`input` dict) against the matching `ExecutionInputType`, creates the record, and enqueues the Celery task. Returns 404 if the agent does not exist, 400 if the agent type has no registered execution class or if `input` fails validation.
+**POST `api/agents/<agent_id>/executions/`**: resolves the agent, derives the execution class from `agent.agent_key`, validates the `input` payload against the matching `ExecutionInputType`, optionally processes uploaded files, creates the record, and enqueues the Celery task. Returns 404 if the agent does not exist, 400 if the agent type has no registered execution class, if `input` fails validation, or if files are sent to an agent with `file_upload=False`.
 
 There is no separate "list types" endpoint. The frontend derives the available input schema by resolving the agent's key against the execution registry — this is done at the API level and returned as `input_schema` on the agent detail response, or fetched on demand before rendering the launch form.
 
@@ -262,10 +275,12 @@ server/agent/
 ├── tasks.py                       ← updated
 └── execution/
     ├── registry.py                ← NEW
+    ├── services.py                ← NEW
     ├── views.py                   ← NEW
     ├── urls.py                    ← NEW
     └── tests/
         ├── test_registry.py
+        ├── test_services.py
         ├── test_views.py
         └── test_task.py
 ```
@@ -314,6 +329,13 @@ API client (`frontend/src/lib/api/agent-executions.ts`) exposes `list(filters?)`
 **`test_task.py`**: `pending → in_progress → finished` when `result.success=True`; `pending → in_progress → failed` when `result.success=False` with `failure_summary` stored; unexpected exception propagates without calling `mark_finished`.
 
 **`test_views.py`**: valid start (202); unknown agent (404); soft-deleted agent (404); agent type has no execution class (400); invalid input (400, no record created); list (200); list ordered newest first; get (200); get missing (404); execution conversation excluded from conversation list; execution conversation accessible via detail endpoint.
+
+File upload tests (within `test_views.py` or a separate `test_file_upload_views.py`):
+- Any valid POST → `AgentExecution.conversation` is always set (non-null) immediately after creation.
+- Agent with `file_upload=True`, multipart POST with a file → 202, `Conversation` and `ConversationFile(is_hidden=False)` created synchronously in the view.
+- Agent with `file_upload=False`, multipart POST with a file → 400, no records created.
+- Unsupported file extension → 400.
+- `FileListTool` returns the uploaded file during execution (query `ConversationFile` for the execution's conversation).
 
 **`test_is_valid_json_validator.py`**: valid JSON returns `None`; invalid JSON returns the feedback string.
 

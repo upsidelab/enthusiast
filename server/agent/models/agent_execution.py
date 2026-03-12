@@ -18,7 +18,12 @@ class AgentExecution(models.Model):
         "agent.Agent",
         on_delete=models.PROTECT,
         related_name="executions",
-        help_text="The configured agent this execution runs against. Execution type is derived from agent.agent_type.",
+        help_text="The configured agent this execution runs against.",
+    )
+    execution_key = models.CharField(
+        max_length=128,
+        default="",
+        help_text="EXECUTION_KEY of the execution class used to run this record. Used to resolve the correct class at task time.",
     )
     conversation = models.OneToOneField(
         "agent.Conversation",

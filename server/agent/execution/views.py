@@ -7,15 +7,50 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from agent.execution.registry import AgentExecutionRegistry
 from agent.execution.services import (
     AgentExecutionService,
     FileUploadNotSupportedError,
-    NoExecutionClassError,
     UnsupportedFileTypeError,
 )
 from agent.models.agent import Agent
 from agent.models.agent_execution import AgentExecution
-from agent.serializers.agent_execution import AgentExecutionSerializer, StartAgentExecutionSerializer
+from agent.serializers.agent_execution import (
+    AgentExecutionSerializer,
+    AgentExecutionTypeSerializer,
+    StartAgentExecutionSerializer,
+)
+
+
+class AgentExecutionTypesView(APIView):
+    """List available execution types for a specific agent."""
+
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Return all execution types registered for the given agent.",
+        responses={
+            200: AgentExecutionTypeSerializer(many=True),
+            404: "Not Found — agent does not exist.",
+        },
+    )
+    def get(self, request, agent_id):
+        try:
+            agent = Agent.objects.get(pk=agent_id)
+        except Agent.DoesNotExist:
+            return Response({"detail": "Agent not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        execution_classes = AgentExecutionService().get_execution_types(agent)
+        data = [
+            {
+                "key": cls.EXECUTION_KEY,
+                "name": cls.NAME,
+                "description": cls.DESCRIPTION,
+                "input_schema": cls.INPUT_TYPE.model_json_schema(),
+            }
+            for cls in execution_classes
+        ]
+        return Response(AgentExecutionTypeSerializer(data, many=True).data)
 
 
 class StartAgentExecutionView(APIView):
@@ -29,7 +64,7 @@ class StartAgentExecutionView(APIView):
         request_body=StartAgentExecutionSerializer,
         responses={
             202: AgentExecutionSerializer(),
-            400: "Bad Request — agent type has no registered execution class, input is invalid, or files sent to a non-file-upload agent.",
+            400: "Bad Request — execution_key is invalid, input is invalid, or files sent to a non-file-upload agent.",
             404: "Not Found — agent does not exist.",
         },
     )
@@ -39,22 +74,32 @@ class StartAgentExecutionView(APIView):
         except Agent.DoesNotExist:
             return Response({"detail": "Agent not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        service = AgentExecutionService()
-
+        execution_key = request.data.get("execution_key", "")
         try:
-            execution_cls = service.resolve_execution_class(agent)
-        except NoExecutionClassError as exc:
-            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+            execution_cls = AgentExecutionRegistry().get_by_key(execution_key)
+        except KeyError:
+            return Response(
+                {"detail": f"No execution class registered with EXECUTION_KEY='{execution_key}'."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if execution_cls.AGENT_KEY != agent.agent_type:
+            return Response(
+                {"detail": f"Execution '{execution_key}' does not belong to this agent."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         serializer = StartAgentExecutionSerializer(
             data=request.data, context={"execution_cls": execution_cls}
         )
         serializer.is_valid(raise_exception=True)
 
+        service = AgentExecutionService()
         try:
             execution = service.start(
                 agent=agent,
                 user=request.user,
+                execution_key=execution_key,
                 validated_input=serializer.validated_data["input"],
                 uploaded_files=request.FILES.getlist("files"),
             )

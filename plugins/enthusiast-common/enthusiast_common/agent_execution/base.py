@@ -1,6 +1,6 @@
 import json
 from abc import ABC, abstractmethod
-from typing import ClassVar, Protocol, Type
+from typing import ClassVar, Optional, Protocol, Type
 
 from .errors import ExecutionFailureCode
 from .input import ExecutionInputType
@@ -21,6 +21,7 @@ class BaseAgentExecution(ABC):
     EXECUTION_KEY: ClassVar[str]
     AGENT_KEY: ClassVar[str]
     NAME: ClassVar[str]
+    DESCRIPTION: ClassVar[Optional[str]] = None
     INPUT_TYPE: ClassVar[Type[ExecutionInputType]] = ExecutionInputType
     VALIDATORS: ClassVar[list[Type[BaseExecutionValidator]]] = [IsValidJsonValidator]
     MAX_RETRIES: ClassVar[int] = 3

@@ -12,7 +12,7 @@ Agent Execution introduces **agentic execution** as a first-class concept, disti
 
 Each execution is tightly coupled to an existing, configured `Agent` instance. This is deliberate — an `Agent` already carries the dataset association, LLM provider choice, system prompt, and tool configuration needed to run. The execution wrapper handles everything the agent normally needs from a conversation — message management, tool call loops, response processing — so the caller only needs to provide structured input and wait for a structured output. There is no human in the loop.
 
-The execution type is **derived from the agent's key** (e.g. an agent with key `catalog-enrichment` maps to `CatalogEnrichmentExecution`). Because multiple agents of the same type can exist on the same dataset, the `Agent` FK is the canonical identifier — passing `execution_type` directly is intentionally not supported.
+A single agent plugin can register **multiple execution classes**, each with a distinct `EXECUTION_KEY` and all sharing the same `AGENT_KEY`. The caller selects which execution type to run by passing `execution_key` in the POST body. This allows, for example, a catalog enrichment agent to expose separate executions for different enrichment strategies. The `execution_key` is persisted on the `AgentExecution` record so the Celery task can always resolve the correct class regardless of later registry changes.
 
 During the execution run, the plugin creates a `Conversation` internally to drive the agent's message loop. This conversation ID is stored on the record once created, making it inspectable after the fact.
 
@@ -167,9 +167,10 @@ The `config_type` flows from `ExecutionConversation` (hardcoded to `ConfigType.A
 The base class carries a concrete `run()` that implements the **validator retry loop**, and an abstract `execute()` that subclasses fill in with the actual single-attempt logic.
 
 **Class-level declarations:**
-- `EXECUTION_KEY: ClassVar[str]` — unique slug
-- `AGENT_KEY: ClassVar[str]` — must match the `AGENT_KEY` of the agent plugin this execution targets
+- `EXECUTION_KEY: ClassVar[str]` — unique slug used to identify and persist this execution type
+- `AGENT_KEY: ClassVar[str]` — must match the `AGENT_KEY` of the agent plugin this execution targets; multiple execution classes may share the same `AGENT_KEY`
 - `NAME: ClassVar[str]` — human-readable UI label
+- `DESCRIPTION: ClassVar[Optional[str]]` — optional longer description shown in the execution type selector (defaults to `None`)
 - `INPUT_TYPE: ClassVar[type[ExecutionInputType]]` — defaults to base `ExecutionInputType`
 - `VALIDATORS: ClassVar[list[type[BaseExecutionValidator]]]` — ordered list of validator classes applied after each `execute()` call; defaults to `[IsValidJsonValidator]`
 - `MAX_RETRIES: ClassVar[int] = 3` — maximum number of validator-feedback correction cycles before giving up
@@ -193,7 +194,8 @@ No exceptions are raised for expected execution failures — all outcomes (inclu
 
 | Field | Type | Notes |
 |-------|------|-------|
-| `agent` | ForeignKey → `Agent` | Non-nullable; the configured agent this execution runs against. Execution type is derived from `agent.agent_key`. |
+| `agent` | ForeignKey → `Agent` | Non-nullable; the configured agent this execution runs against. |
+| `execution_key` | CharField | `EXECUTION_KEY` of the execution class selected at creation time. Persisted so the Celery task can resolve the correct class via `AgentExecutionRegistry.get_by_key()`. |
 | `conversation` | ForeignKey → `Conversation` | Always created by the view before the task is enqueued |
 | `status` | CharField | `pending \| in_progress \| finished \| failed` |
 | `input` | JSONField | Input payload validated against `ExecutionInputType` at request time |
@@ -208,14 +210,16 @@ Computed property `duration_seconds`. Helper methods: `mark_in_progress()`, `mar
 
 ### Registry — `AgentExecutionRegistry`
 
-Mirrors `AgentRegistry`. Reads `settings.AVAILABLE_AGENT_EXECUTIONS` (dotted import paths, consistent with `AVAILABLE_AGENTS`), imports each class dynamically, and exposes `get_all()` and `get_by_key(key)`.
+Mirrors `AgentRegistry`. Reads `settings.AVAILABLE_AGENT_EXECUTIONS` (dotted import paths, consistent with `AVAILABLE_AGENTS`), imports each class dynamically, and exposes:
 
-The key used for lookup is `agent.agent_key` — the same slug that the agent plugin declares as `AGENT_KEY`.
+- `get_all()` — all registered execution classes
+- `get_by_key(key)` — returns the single class with the matching `EXECUTION_KEY`; raises `KeyError` if not found
+- `get_by_agent_type(agent_type)` — returns a **list** of all execution classes whose `AGENT_KEY` matches; returns an empty list if none are registered
 
 ### Celery Task — `run_agent_execution_task`
 
 1. Load record (with `select_related("agent")`) → `mark_in_progress()`
-2. Resolve execution class via `AgentExecutionRegistry.get_by_agent_type(execution.agent.agent_type)`
+2. Resolve execution class via `AgentExecutionRegistry.get_by_key(execution.execution_key)`
 3. Instantiate, deserialise `execution.input` into `INPUT_TYPE`, call `run(input_data, agent_execution)`
 4. If `result.success` → `mark_finished(result.output)`
 5. If `not result.success` → `mark_failed(failure_code="max_retries_exceeded", failure_explanation=result.failure_summary)`
@@ -244,13 +248,14 @@ The POST endpoint is nested under `/api/agents/` following the existing conventi
 
 | Method | URL | Description |
 |--------|-----|-------------|
-| GET | `/api/agent-executions/` | Paginated execution history (newest first, 25/page). Supports `?agent_id=` filter. |
+| GET | `/api/agents/<int:agent_id>/execution-types/` | List all execution types registered for this agent (key, name, description, input_schema). |
 | POST | `/api/agents/<int:agent_id>/executions/` | Start a new execution for the given agent. Accepts `application/json` or `multipart/form-data`. |
+| GET | `/api/agent-executions/` | Paginated execution history (newest first, 25/page). Supports `?agent_id=` filter. |
 | GET | `/api/agent-executions/<int:pk>/` | Fetch a single execution (used for polling) |
 
-**POST `api/agents/<agent_id>/executions/`**: resolves the agent, derives the execution class from `agent.agent_key`, validates the `input` payload against the matching `ExecutionInputType`, optionally processes uploaded files, creates the record, and enqueues the Celery task. Returns 404 if the agent does not exist, 400 if the agent type has no registered execution class, if `input` fails validation, or if files are sent to an agent with `file_upload=False`.
+**GET `api/agents/<agent_id>/execution-types/`**: returns a list of `{key, name, description, input_schema}` objects for all execution classes registered for the agent's type. The frontend calls this when rendering the launch form to populate the execution type selector and derive the dynamic input form from `input_schema`. Returns 404 if the agent does not exist; returns an empty list if no execution classes are registered.
 
-There is no separate "list types" endpoint. The frontend derives the available input schema by resolving the agent's key against the execution registry — this is done at the API level and returned as `input_schema` on the agent detail response, or fetched on demand before rendering the launch form.
+**POST `api/agents/<agent_id>/executions/`**: resolves the agent, uses the `execution_key` field from the request body to look up the execution class (via `get_by_key()`), validates that the class belongs to the agent's type, validates `input` against the matching `ExecutionInputType`, optionally processes uploaded files, creates the record (persisting `execution_key`), and enqueues the Celery task. Returns 404 if the agent does not exist; 400 if `execution_key` is unknown or belongs to a different agent type, if `input` fails validation, or if files are sent to an agent with `file_upload=False`.
 
 ### Hiding Execution Conversations from the Conversation History
 
@@ -316,9 +321,9 @@ Three routes added to the authenticated router in `frontend/src/main.tsx`:
 | `/agent-executions/new` | `NewAgentExecutionPage` | Select agent (filtered to those with a registered execution class), fill input form, submit |
 | `/agent-executions/:id` | `AgentExecutionDetailPage` | Status polling + result/failure display, link to the created conversation |
 
-API client (`frontend/src/lib/api/agent-executions.ts`) exposes `list(filters?)`, `get(id)`, `start(agentId, input)` and is integrated into `ApiClient` via `agentExecutions()`.
+API client (`frontend/src/lib/api/agent-executions.ts`) exposes `list(filters?)`, `get(id)`, `getTypes(agentId)`, `start(agentId, executionKey, input)` and is integrated into `ApiClient` via `agentExecutions()`.
 
-`NewAgentExecutionPage` first renders an agent selector (only agents whose `agent_key` maps to a registered execution class are shown). Once an agent is selected, it fetches the `input_schema` and renders a dynamic form (React Hook Form + Zod). `AgentExecutionDetailPage` polls every 3 seconds while `pending` or `in_progress` and links to the execution's conversation when available.
+`NewAgentExecutionPage` first renders an agent selector. Once an agent is selected, it calls `GET /api/agents/<id>/execution-types/` to fetch available execution types. If more than one type is returned, the user selects one; if exactly one, it is pre-selected automatically. The selected type's `input_schema` drives a dynamic form (React Hook Form + Zod). The resolved `execution_key` is submitted alongside `input` in the POST body. `AgentExecutionDetailPage` polls every 3 seconds while `pending` or `in_progress` and links to the execution's conversation when available.
 
 ---
 
@@ -328,7 +333,7 @@ API client (`frontend/src/lib/api/agent-executions.ts`) exposes `list(filters?)`
 
 **`test_task.py`**: `pending → in_progress → finished` when `result.success=True`; `pending → in_progress → failed` when `result.success=False` with `failure_summary` stored; unexpected exception propagates without calling `mark_finished`.
 
-**`test_views.py`**: valid start (202); unknown agent (404); soft-deleted agent (404); agent type has no execution class (400); invalid input (400, no record created); list (200); list ordered newest first; get (200); get missing (404); execution conversation excluded from conversation list; execution conversation accessible via detail endpoint.
+**`test_views.py`**: `GET execution-types` returns 200 with list of types; returns 404 for unknown agent. `POST executions` — valid start (202); unknown agent (404); soft-deleted agent (404); unknown `execution_key` (400); `execution_key` belongs to different agent type (400); invalid input (400, no record created); list (200); list ordered newest first; get (200); get missing (404); execution conversation excluded from conversation list; execution conversation accessible via detail endpoint.
 
 File upload tests (within `test_views.py` or a separate `test_file_upload_views.py`):
 - Any valid POST → `AgentExecution.conversation` is always set (non-null) immediately after creation.

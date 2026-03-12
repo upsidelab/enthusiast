@@ -5,9 +5,9 @@ from enthusiast_agent_product_search.tools import ProductExamplesTool, ProductSQ
 from .tools.place_order_tool import PlaceOrderTool
 
 
-class OCRToOrderAgent(BaseToolCallingAgent):
-    AGENT_KEY = "enthusiast-agent-ocr-to-order"
-    NAME = "Purchase Order OCR"
+class OrderIntakeAgent(BaseToolCallingAgent):
+    AGENT_KEY = "enthusiast-agent-order-intake"
+    NAME = "Order Intake"
     TOOLS = [
         LLMToolConfig(tool_class=ProductExamplesTool),
         LLMToolConfig(tool_class=ProductSQLSearchTool),

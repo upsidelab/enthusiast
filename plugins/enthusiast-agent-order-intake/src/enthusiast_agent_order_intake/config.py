@@ -3,8 +3,8 @@ from enthusiast_common.config import (
 )
 from enthusiast_common.config.prompts import ChatPromptTemplateConfig, Message, MessageRole
 
-from .agent import OCRToOrderAgent
-from .prompt import OCR_TOOL_CALLING_AGENT_PROMPT
+from .agent import OrderIntakeAgent
+from .prompt import ORDER_INTAKE_TOOL_CALLING_AGENT_PROMPT
 
 
 def get_config() -> AgentConfigWithDefaults:
@@ -13,13 +13,13 @@ def get_config() -> AgentConfigWithDefaults:
             messages=[
                 Message(
                     role=MessageRole.SYSTEM,
-                    content=OCR_TOOL_CALLING_AGENT_PROMPT,
+                    content=ORDER_INTAKE_TOOL_CALLING_AGENT_PROMPT,
                 ),
                 Message(role=MessageRole.PLACEHOLDER, content="{chat_history}"),
                 Message(role=MessageRole.USER, content="{input}"),
                 Message(role=MessageRole.PLACEHOLDER, content="{agent_scratchpad}"),
             ]
         ),
-        agent_class=OCRToOrderAgent,
-        tools=OCRToOrderAgent.TOOLS,
+        agent_class=OrderIntakeAgent,
+        tools=OrderIntakeAgent.TOOLS,
     )

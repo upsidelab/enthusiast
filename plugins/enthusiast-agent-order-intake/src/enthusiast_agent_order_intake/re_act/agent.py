@@ -7,9 +7,9 @@ from enthusiast_agent_product_search.tools import ProductSearchTool
 from ..tools.place_order_tool import PlaceOrderTool
 
 
-class OCRToOrderAgent(BaseReActAgent):
-    AGENT_KEY = "enthusiast-agent-ocr-to-order"
-    NAME = "Purchase Order OCR"
+class OrderIntakeAgent(BaseReActAgent):
+    AGENT_KEY = "enthusiast-agent-order-intake"
+    NAME = "Order Intake"
     TOOLS = [
         LLMToolConfig(tool_class=ProductSearchTool),
         LLMToolConfig(tool_class=PlaceOrderTool),

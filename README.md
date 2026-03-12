@@ -32,7 +32,7 @@ Get started with Enthusiast by either:
 
 - [**User Manual Search**](https://upsidelab.io/tools/enthusiast/agents/user-manual-search) Provide precise answers from technical documentation and manuals.
 
-- [**Purchase Order OCR**](https://upsidelab.io/tools/enthusiast/agents/purchase-order-ocr) Convert unstructured inputs — such as scanned purchase order documents or notes - into e-commerce orders.
+- [**Order Intake**](https://upsidelab.io/tools/enthusiast/agents/order-intake) Convert unstructured inputs — such as scanned purchase order documents or notes - into e-commerce orders.
 
 - [**Product Catalog Enrichment**](https://upsidelab.io/tools/enthusiast/agents/catalog-enrichment) Extract product descriptions, attributes, or translations from unstructured product sheets.
 

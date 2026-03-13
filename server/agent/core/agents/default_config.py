@@ -1,7 +1,5 @@
-import logging
-from typing import Type
+from typing import Optional, Type
 
-from enthusiast_common.agents import AgentType, BaseAgent
 from enthusiast_common.config import (
     AgentCallbackHandlerConfig,
     AgentConfig,
@@ -18,11 +16,7 @@ from enthusiast_common.config import (
 )
 from pydantic import BaseModel
 
-from agent.core.callbacks import (
-    AgentActionWebsocketCallbackHandler,
-    ConversationWebSocketCallbackHandler,
-    ReactAgentWebsocketCallbackHandler,
-)
+from agent.core.callbacks import ConversationWebSocketCallbackHandler
 from agent.core.injector import Injector
 from agent.core.registries.embeddings import EmbeddingProviderRegistry
 from agent.core.registries.language_models import LanguageModelRegistry
@@ -40,8 +34,6 @@ from agent.core.repositories import (
 from agent.core.retrievers import DocumentRetriever, ProductRetriever
 from agent.core.retrievers.product_retriever import QUERY_PROMPT_TEMPLATE
 
-logger = logging.getLogger(__name__)
-
 
 class DefaultAgentConfig(BaseModel):
     repositories: RepositoriesConfig
@@ -49,18 +41,10 @@ class DefaultAgentConfig(BaseModel):
     injector: Type[Injector]
     registry: RegistryConfig
     llm: LLMConfig
-    agent_callback_handler: AgentCallbackHandlerConfig | None = None
+    agent_callback_handler: Optional[AgentCallbackHandlerConfig] = None
 
 
-def get_default_config(type: AgentType) -> DefaultAgentConfig:
-    llm_callback_handler_class = (
-        ReactAgentWebsocketCallbackHandler if type == AgentType.RE_ACT else ConversationWebSocketCallbackHandler
-    )
-    agent_callback_handler_config = (
-        AgentCallbackHandlerConfig(handler_class=AgentActionWebsocketCallbackHandler)
-        if type == AgentType.RE_ACT
-        else None
-    )
+def get_default_config() -> DefaultAgentConfig:
     return DefaultAgentConfig(
         repositories=RepositoriesConfig(
             user=DjangoUserRepository,
@@ -91,10 +75,10 @@ def get_default_config(type: AgentType) -> DefaultAgentConfig:
         ),
         llm=LLMConfig(
             callbacks=[
-                CallbackHandlerConfig(handler_class=llm_callback_handler_class),
+                CallbackHandlerConfig(handler_class=ConversationWebSocketCallbackHandler),
             ],
         ),
-        agent_callback_handler=agent_callback_handler_config,
+        agent_callback_handler=None,
     )
 
 
@@ -102,8 +86,7 @@ def merge_config(
     partial: AgentConfigWithDefaults,
 ) -> AgentConfig:
     merged: dict[str, object] = {}
-    agent_type = get_agent_type(partial.agent_class)
-    defaults = get_default_config(type=agent_type)
+    defaults = get_default_config()
     for name in AgentConfig.model_fields:
         value = getattr(partial, name, None)
 
@@ -113,16 +96,3 @@ def merge_config(
             merged[name] = getattr(defaults, name, None)
 
     return AgentConfig(**merged)
-
-
-def get_agent_type(agent_class: Type[BaseAgent]) -> AgentType:
-    agent_type = getattr(agent_class, "AGENT_TYPE", None)
-    if agent_type is not None:
-        return agent_type
-
-    is_react = getattr(agent_class, "IS_REACT", None)
-    if is_react is True:
-        logger.warning("IS_REACT flag is deprecated, and will be removed in the future. Use AGENT_TYPE instead.")
-        return AgentType.RE_ACT
-
-    return AgentType.BASE

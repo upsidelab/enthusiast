@@ -1,4 +1,4 @@
-OCR_AGENT_PROMPT = """
+ORDER_INTAKE_AGENT_PROMPT = """
 I want you to help finding products and placing order using the ReACT (Reasoning and Acting) approach.
 You need to find matching products and place order for them with corresponding quantity.
 Search for products one by one.

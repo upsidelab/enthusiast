@@ -1,7 +1,7 @@
 [project]
-name = "enthusiast-agent-ocr-to-order"
+name = "enthusiast-agent-order-intake"
 version = "1.2.0"
-description = "Purchase Order OCR Agent for Enthusiast"
+description = "Order Intake Agent for Enthusiast"
 authors = [
     {name = "Damian Sowiński",email = "damian.sowinski@upsidelab.io"}
 ]
@@ -17,12 +17,12 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://upsidelab.io/tools/enthusiast"
-Documentation = "https://upsidelab.io/tools/enthusiast/agents/purchase-order-ocr"
+Documentation = "https://upsidelab.io/tools/enthusiast/agents/order-intake"
 Repository = "https://github.com/upsidelab/enthusiast.git"
 Issues = "https://github.com/upsidelab/enthusiast/issues"
 
 [tool.poetry]
-packages = [{include = "enthusiast_agent_ocr_to_order", from = "src"}]
+packages = [{include = "enthusiast_agent_order_intake", from = "src"}]
 
 
 [build-system]

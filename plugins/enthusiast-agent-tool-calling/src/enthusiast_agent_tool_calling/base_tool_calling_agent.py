@@ -1,14 +1,12 @@
 from typing import Any
 
-from enthusiast_common.agents import AgentType, BaseAgent
+from enthusiast_common.agents import BaseAgent
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_core.memory import BaseMemory
 from langchain_core.tools import BaseTool
 
 
 class BaseToolCallingAgent(BaseAgent):
-    AGENT_TYPE = AgentType.TOOL_CALLING
-
     def get_answer(self, input_text: str) -> str:
         agent_executor = self._build_agent_executor()
         response = agent_executor.invoke({"input": input_text}, config=self._build_invoke_config())

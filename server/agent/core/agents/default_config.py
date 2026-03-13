@@ -1,4 +1,4 @@
-from typing import Type, Optional
+from typing import Optional, Type
 
 from enthusiast_common.config import (
     AgentCallbackHandlerConfig,

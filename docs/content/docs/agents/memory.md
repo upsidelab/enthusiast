@@ -188,12 +188,12 @@ Add it to injector:
 All memory instances are accessible inside Agent class via `self.injector`
 ```python
 from enthusiast_common.agents import BaseAgent
-from langchain.agents import AgentExecutor, create_react_agent
+from langchain.agents import AgentExecutor, create_tool_calling_agent
 
 class MyAgent(BaseAgent):
     def _build_agent_executor(self) -> AgentExecutor:
         tools = self._build_tools()
-        agent = create_react_agent(
+        agent = create_tool_calling_agent(
             tools=tools,
             llm=self._llm,
             prompt=self._prompt,

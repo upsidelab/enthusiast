@@ -3,85 +3,22 @@ sidebar_position: 5
 ---
 
 # Concept: Product search Agent
-This example will walk you through a concept of Agent(ReAct), which search for products and verifies results based on user's input. It will also cover more complex customizations.
+This example will walk you through a concept of a tool calling agent that searches for products and verifies results based on user's input. It will also cover more complex customizations.
 
 
 ## Creating an Agent
 As usual, start by creating an agent directory, and then create:
 
 ### Prompt
-A structured ReAct-style prompt:
+Define the prompt as a plain string in `prompt.py`:
 ````python
 PRODUCT_FINDER_AGENT_PROMPT = """
-I want you to help finding {products_type} products using the ReACT (Reasoning and Acting) approach.
-Always verify your answer
-Use a json blob to specify a tool by providing an action key (tool name) and an action_input key (tool input).
-
-Valid "action" values: {tool_names}
-
-Provide only ONE action per $JSON_BLOB, as shown:
-
-```
-{{
-  "action": $TOOL_NAME,
-  "action_input": $INPUT
-}}
-```
-For each step, follow the format:
-User query: the user's question or request
-Thought: what you should do next
-Action: 
-{{
-  "action": "<tool>",
-  "action_input": <tool_input>
-}}
-Observation: the result returned by the tool
-... (repeat Thought/Action/Action Input/Observation as needed)
-Thought: I now have the necessary information
-Final Answer: the response to the user
-
-Here are the tools you can use:
-{tools}
-
-Example 1:
-User query: I want to buy a blue van.
-Thought: I need to find products which meets user criteria.
-Action: {{
- "action": the tool to use, one of [{tool_names}],
- "action_input": <tool_input>
- }}
-Observation: I got one car.
-Thought: I need to verify if this product meets user's criteria.
-Action:
- {{
- "action": the verification tool to use, one of [{tool_names}],
- "action_input": <tool_input>
- }}
-Observation: I got a car that meets users criteria.
-Final Answer: This car may suits your needs - Blue Mercedes Sprinter 2025
-
-Example 2:
-User query: I'm looking for a pc
-Thought: I need to find products which meets user criteria.
-Action: 
-{{
-"action": the tool to use, one of [{tool_names}],
-"action_input": <tool_input>
-}}
-Observation: There a lot of pc
-Thought: Now I need to limit this number by providing more criteria
-Final Answer: What operating system you prefer Windows or MacOS?
-
-Do not came up with any other types of JSON than specified above.
-Your output to user should always begin with '''Final Answer: <output>'''
-Begin!
-Chat history: {chat_history}
-User query: {input}
-{agent_scratchpad}"""
-
+You are a helpful product search assistant.
+Help the user find {products_type} products that match their criteria.
+Always search for products first, then verify the results match the user's requirements.
+If no products match, ask the user to refine their criteria.
+"""
 ````
-### Output parser
-Because the prompt uses structured tool input, we need to use a custom output parser: `StructuredReActOutputParser` from `enthusiast-agent-re-act`
 
 ### Tools
 Create two tools
@@ -185,138 +122,38 @@ class ProductVerificationTool(BaseLLMTool):
 
 ```
 ### Agent
+Define the agent class with its required class variables in `agent.py`:
 ```python
-from enthusiast_agent_re_act import BaseReActAgent
+from enthusiast_agent_tool_calling import BaseToolCallingAgent
+from enthusiast_common.config.base import LLMToolConfig
+from enthusiast_common.utils import RequiredFieldsModel
+from pydantic import Field
+
+from .tools.product_search import ProductVectorStoreSearchTool
+from .tools.product_verification import ProductVerificationTool
 
 
-class ProductSearchReActAgent(BaseReActAgent):
+class ProductSearchPromptInput(RequiredFieldsModel):
+    products_type: str = Field(title="Products type", description="Type of products to search for", default="any")
+
+
+class ProductSearchAgent(BaseToolCallingAgent):
+    AGENT_KEY = "enthusiast-agent-product-search-concept"
+    NAME = "Product Search"
+    PROMPT_INPUT = ProductSearchPromptInput
+    TOOLS = [
+        LLMToolConfig(tool_class=ProductVectorStoreSearchTool),
+        LLMToolConfig(tool_class=ProductVerificationTool),
+    ]
+
     def get_answer(self, input_text: str) -> str:
         agent_executor = self._build_agent_executor()
         agent_output = agent_executor.invoke(
-            {"input": input_text, "products_type": "any"},
+            {"input": input_text, "products_type": self.PROMPT_INPUT.products_type},
             config=self._build_invoke_config(),
         )
         return agent_output["output"]
 
-
-```
-
-### Callback handlers
-As React Agent's output differ from standard agents, we need to override default callbacks handlers:
-```python
-from typing import Any, Optional
-from uuid import UUID
-
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
-from langchain_core.agents import AgentAction
-from langchain_core.callbacks import BaseCallbackHandler
-
-
-class BaseWebSocketHandler(BaseCallbackHandler):
-    def __init__(self, conversation_id: int):
-        self.group_name = f"conversation_{conversation_id}"
-        self.channel_layer = get_channel_layer()
-        self.run_id = None
-
-    def send_message(self, message_data: Any) -> None:
-        async_to_sync(self.channel_layer.group_send)(self.group_name, message_data)
-
-
-class ConversationWebSocketCallbackHandler(BaseWebSocketHandler):
-    def on_chain_start(self, serialized, inputs, run_id, **kwargs):
-        self.run_id = run_id
-        self.send_message(
-            {
-                "type": "chat_message",
-                "event": "start",
-                "run_id": run_id,
-            },
-        )
-
-    def on_llm_new_token(self, token: str, **kwargs):
-        self.send_message(
-            {
-                "type": "chat_message",
-                "event": "stream",
-                "run_id": self.run_id,
-                "token": token,
-            },
-        )
-
-    def on_chain_end(self, outputs, **kwargs):
-        self.send_message(
-            {"type": "chat_message", "event": "end", "run_id": self.run_id, "output": outputs.get("output")},
-        )
-
-
-class ReactAgentWebsocketCallbackHandler(ConversationWebSocketCallbackHandler):
-    def __init__(self, conversation):
-        super().__init__(conversation)
-        self.first_final_answer_chunk = False
-        self.second_final_answer_chunk = False
-        self.third_final_answer_chunk = False
-
-    def _restore_final_answer_chunks(self):
-        self.first_final_answer_chunk = False
-        self.second_final_answer_chunk = False
-        self.third_final_answer_chunk = False
-
-    def _is_final_answer_chunk(self, chunk: str):
-        chunk = chunk.strip(" ").lower()
-        if not self.first_final_answer_chunk:
-            if not chunk == "final":
-                self._restore_final_answer_chunks()
-            else:
-                self.first_final_answer_chunk = True
-            return False
-        elif not self.second_final_answer_chunk:
-            if not chunk == "answer":
-                self._restore_final_answer_chunks()
-            else:
-                self.second_final_answer_chunk = True
-            return False
-        elif not self.third_final_answer_chunk:
-            if not chunk == ":":
-                self._restore_final_answer_chunks()
-            else:
-                self.third_final_answer_chunk = True
-            return False
-        else:
-            return True
-
-    def on_llm_new_token(self, token: str, **kwargs):
-        if self._is_final_answer_chunk(token):
-            self.send_message(
-                {
-                    "type": "chat_message",
-                    "event": "stream",
-                    "run_id": self.run_id,
-                    "token": token,
-                },
-            )
-
-
-class AgentActionWebsocketCallbackHandler(BaseWebSocketHandler):
-    def on_agent_action(
-        self,
-        action: AgentAction,
-        *,
-        run_id: UUID,
-        parent_run_id: Optional[UUID] = None,
-        **kwargs: Any,
-    ) -> Any:
-        output = action.log.split("Action:")[0]
-        output = output.split("Thought:")[-1]
-        output = output.strip()
-        self.send_message(
-            {
-                "type": "chat_message",
-                "event": "action",
-                "run_id": self.run_id,
-                "output": output,
-            },
-        )
 
 ```
 
@@ -676,48 +513,33 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
 ### Configuration
 Create configuration inside `config.py` file:
 ```python
-from enthusiast_common.config import (
-    AgentCallbackHandlerConfig,
-    AgentConfigWithDefaults,
-    LLMConfig,
-    LLMToolConfig,
-    RetrieverConfig,
-    RetrieversConfig,
-)
-from langchain_core.callbacks import StdOutCallbackHandler
-from langchain_core.prompts import PromptTemplate
+from enthusiast_common.config import AgentConfigWithDefaults
+from enthusiast_common.config.base import RetrieverConfig, RetrieversConfig
+from enthusiast_common.config.prompts import ChatPromptTemplateConfig, Message, MessageRole
 
-from .callbacks import AgentActionWebsocketCallbackHandler, ReactAgentWebsocketCallbackHandler
-from .agent import ProductSearchReActAgent
+from .agent import ProductSearchAgent
 from .prompt import PRODUCT_FINDER_AGENT_PROMPT
 from .retrievers import ProductVectorStoreRetriever, DocumentRetriever
-from .tools.product_search import ProductVectorStoreSearchTool
-from .tools.product_verification import ProductVerificationTool
 
 
-def get_config(conversation_id: int, streaming: bool) -> AgentConfigWithDefaults:
+def get_config() -> AgentConfigWithDefaults:
     return AgentConfigWithDefaults(
-        conversation_id=conversation_id,
-        prompt_template=PromptTemplate(
-            input_variables=["tools", "tool_names", "input", "agent_scratchpad"], template=PRODUCT_FINDER_AGENT_PROMPT
+        prompt_template=ChatPromptTemplateConfig(
+            messages=[
+                Message(
+                    role=MessageRole.SYSTEM,
+                    content=PRODUCT_FINDER_AGENT_PROMPT,
+                ),
+                Message(role=MessageRole.PLACEHOLDER, content="{chat_history}"),
+                Message(role=MessageRole.USER, content="{input}"),
+                Message(role=MessageRole.PLACEHOLDER, content="{agent_scratchpad}"),
+            ]
         ),
-        agent_class=ProductSearchReActAgent,
-        llm_tools=[
-            LLMToolConfig(
-                tool_class=ProductVectorStoreSearchTool,
-            ),
-            LLMToolConfig(tool_class=ProductVerificationTool),
-        ],
-        llm=LLMConfig(
-            callbacks=[ReactAgentWebsocketCallbackHandler(conversation_id), StdOutCallbackHandler()],
-            streaming=streaming,
-        ),
+        agent_class=ProductSearchAgent,
+        tools=ProductSearchAgent.TOOLS,
         retrievers=RetrieversConfig(
             document=RetrieverConfig(retriever_class=DocumentRetriever),
             product=RetrieverConfig(retriever_class=ProductVectorStoreRetriever, extra_kwargs={"max_objects": 30}),
-        ),
-        agent_callback_handler=AgentCallbackHandlerConfig(
-            handler_class=AgentActionWebsocketCallbackHandler, args={"conversation_id": conversation_id}
         ),
     )
 

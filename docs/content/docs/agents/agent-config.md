@@ -34,7 +34,7 @@ class AgentConfig(ArbitraryTypeBaseModel, Generic[InjectorT]):
 - **Type**: `Type[BaseAgent]`
 - **Required**: Yes
 - **Description**: The specific agent implementation class to instantiate
-- **Example**: `ProductSearchReActAgent`, `ToolCallingAgent`
+- **Example**: `ProductSearchAgent`, `UserManualSearchAgent`
 
 #### 2. **llm**
 - **Type**: `LLMConfig`

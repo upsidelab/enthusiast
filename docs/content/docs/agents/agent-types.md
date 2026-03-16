@@ -96,23 +96,16 @@ Those arguments can be accessed by agent like this:
 
 ```
 
-## ReAct Agent
+## Tool Calling Agent
 
 ### Overview
 
-The `BaseReActAgent` implements the ReAct (Reasoning + Acting) pattern, which enables agents to:
-
-- **Reason**: Think through problems step by step
-- **Act**: Use tools to gather information or perform actions
-- **Observe**: Process tool results and continue reasoning
-- **Iterate**: Repeat the process until a solution is reached
-
-It also comes with attached ReAct-style output parser and structured tools description, which allows to use it with multiple input arguments tools with ease.
+The `BaseToolCallingAgent` implements the standard tool calling pattern, leveraging native function calling support built into all modern LLMs. It is the recommended base class for all custom agents.
 
 ### Implementation
 
 ```python
-class BaseReActAgent(BaseAgent):
+class BaseToolCallingAgent(BaseAgent):
     def get_answer(self, input_text: str) -> str:
         # Build and execute the agent
         agent_executor = self._build_agent_executor()
@@ -139,46 +132,14 @@ class BaseReActAgent(BaseAgent):
     def _build_agent_executor(self) -> AgentExecutor:
         """Create the LangChain agent executor"""
         tools = self._build_tools()
-        agent = create_react_agent(
+        agent = create_tool_calling_agent(
             tools=tools,
             llm=self._llm,
             prompt=self._prompt,
-            tools_renderer=render_text_description_and_args,
-            output_parser=StructuredReActOutputParser(),
         )
-        return AgentExecutor(agent=agent, tools=tools, memory=self._build_memory())
-```
-
-### ReAct Reasoning Process
-
-The ReAct agent follows a structured reasoning process:
-
-1. **Input Analysis**: Parse and understand the user's request
-2. **Reasoning**: Think through the problem step by step
-3. **Action Selection**: Choose appropriate tools to use
-4. **Tool Execution**: Execute selected tools with parameters
-5. **Observation**: Process tool results and observations
-6. **Iteration**: Continue reasoning based on new information
-7. **Final Answer**: Provide a comprehensive response
-
-### Structured Output Parsing
-
-The ReAct agent uses a structured output parser that expects:
-
-```json
-{
-  "action": "tool_name",
-  "action_input": {
-    "parameter1": "value1",
-    "parameter2": "value2"
-  }
-}
-```
-
-Or for final answers:
-
-```
-Final Answer: The comprehensive response to the user's question
+        return AgentExecutor(
+            agent=agent, tools=tools, verbose=True, memory=self._build_memory(), return_intermediate_steps=True
+        )
 ```
 
 ## Summary
@@ -186,6 +147,6 @@ Final Answer: The comprehensive response to the user's question
 The Enthusiast agent system provides a robust foundation for building intelligent, tool-using agents:
 
 - **BaseAgent**: Abstract base class with required interface and validation
-- **BaseReActAgent**: Concrete implementation of the ReAct reasoning pattern
+- **BaseToolCallingAgent**: Standard implementation using native LLM tool calling
 
 By following the established patterns and implementing the required interfaces, developers can create powerful, specialized agents that leverage the full capabilities of the Enthusiast framework.

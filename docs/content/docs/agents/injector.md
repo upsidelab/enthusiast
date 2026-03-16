@@ -153,7 +153,7 @@ Agents receive the injector during construction and can access all resources:
 class ExampleAgent(BaseAgent):
     def _build_agent_executor(self) -> AgentExecutor:
         tools = self._build_tools()
-        agent = create_react_agent(
+        agent = create_tool_calling_agent(
             tools=tools,
             llm=self._llm,
             prompt=self._prompt,

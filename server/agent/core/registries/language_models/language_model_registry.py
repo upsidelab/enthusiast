@@ -1,3 +1,4 @@
+from importlib import import_module
 from typing import List, Type
 
 from enthusiast_common.registry import BaseLanguageModelRegistry
@@ -16,7 +17,9 @@ class LanguageModelRegistry(BaseRegistry[LanguageModelProvider], BaseLanguageMod
 
     def __init__(self, data_set_repo: BaseDataSetRepository | None = None):
         if data_set_repo is None:
-            self._data_set_repo = DjangoDataSetRepository(settings.CATALOG_MODELS["data_set"])
+            module_path, class_name = settings.CATALOG_MODELS["data_set"].rsplit(".", 1)
+            data_set_model = getattr(import_module(module_path), class_name)
+            self._data_set_repo = DjangoDataSetRepository(data_set_model)
         else:
             self._data_set_repo = data_set_repo
 

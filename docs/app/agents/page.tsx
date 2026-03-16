@@ -26,7 +26,7 @@ export default async function Page() {
       <Cards className="x:py-4" num={2}>
         <AgentCard name="Product Search" imageSrc="/tools/enthusiast/img/agents/product-search.png" href="/agents/product-search" />
         <AgentCard name="Catalog Enrichment" imageSrc="/tools/enthusiast/img/agents/catalog-enrichment.png" href="/agents/catalog-enrichment" />
-        <AgentCard name="Purchase Order OCR" imageSrc="/tools/enthusiast/img/agents/purchase-order-ocr.png" href="/agents/purchase-order-ocr" />
+        <AgentCard name="Order Intake" imageSrc="/tools/enthusiast/img/agents/order-intake.png" href="/agents/order-intake" />
         <AgentCard name="User Manual Search" imageSrc="/tools/enthusiast/img/agents/user-manual-search.png" href="/agents/user-manual-search" />
       </Cards>
       <H2>Build a Custom Agent</H2>

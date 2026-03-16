@@ -182,34 +182,34 @@ files = [
 
 [[package]]
 name = "enthusiast-agent-tool-calling"
-version = "1.0.0"
+version = "1.1.0"
 description = "Base implementation of a Tool Calling agent for Enthusiast"
 optional = false
 python-versions = "<4,>=3.10"
 groups = ["main"]
 files = [
-    {file = "enthusiast_agent_tool_calling-1.0.0-py3-none-any.whl", hash = "sha256:5930d7d7b43318dca9a32e11a55b6184b056b1ffbfec6b08804d657d14ec311b"},
-    {file = "enthusiast_agent_tool_calling-1.0.0.tar.gz", hash = "sha256:5ba32dbf2ba580c0b55b07aab57831591f44b27d37d581824c4ae088d6d51a27"},
+    {file = "enthusiast_agent_tool_calling-1.1.0-py3-none-any.whl", hash = "sha256:cd238caeee626c30303fab0084ebe9ddc7caf7f3847412f8a628f34ec7532d4a"},
+    {file = "enthusiast_agent_tool_calling-1.1.0.tar.gz", hash = "sha256:14959d6d532ef95cc4cc0962970b0e6ac1a340b785c8ebbe8a172f5ed1434e28"},
 ]
 
 [package.dependencies]
-enthusiast-common = ">=1.4.0,<2.0.0"
+enthusiast-common = ">=1.6.0,<2.0.0"
 langchain = ">=0.3.26,<0.4.0"
 
 [[package]]
 name = "enthusiast-common"
-version = "1.5.0"
+version = "1.6.0"
 description = "Core interfaces for developing custom Enthusiast plugins and integrations."
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "enthusiast_common-1.5.0-py3-none-any.whl", hash = "sha256:7b8353b9e10d57d52459ac8391b81f5deceaad798a39c4637464ccc6e5862300"},
-    {file = "enthusiast_common-1.5.0.tar.gz", hash = "sha256:644d0f1202ce87c6283704d7084aa487c8fcceb302a8a1b44e8001e6bb5dcb7d"},
+    {file = "enthusiast_common-1.6.0-py3-none-any.whl", hash = "sha256:5b09eeae58520c9e0917db4358394ce70da7d7034495ac2f00a378e81cb86dea"},
+    {file = "enthusiast_common-1.6.0.tar.gz", hash = "sha256:1b647e380ce5a63b096b78ea28320162088bb98a2bba6a04853931867c8652d7"},
 ]
 
 [package.dependencies]
-langchain-core = ">=0.3.66,<0.4.0"
+langchain-core = ">=0.3.83,<0.4.0"
 
 [[package]]
 name = "exceptiongroup"
@@ -1343,4 +1343,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4"
-content-hash = "45b9cfe7c9d6e410123f827ed668e6ee040d93a38e1b84a459d6eccb4f382d07"
+content-hash = "be11e505631d6c3fd49c7ad5d9fa184ef6535e21d4a164831f5372c743abdbda"

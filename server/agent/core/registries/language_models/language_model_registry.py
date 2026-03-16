@@ -1,32 +1,46 @@
 from importlib import import_module
-from typing import Type
+from typing import List, Type
 
 from enthusiast_common.registry import BaseLanguageModelRegistry
 from enthusiast_common.registry.llm import LanguageModelProvider
 from enthusiast_common.repositories import BaseDataSetRepository
+from utils.base_registry import BaseRegistry
 
 from agent.core.repositories import DjangoDataSetRepository
 from pecl import settings
 
 
-class LanguageModelRegistry(BaseLanguageModelRegistry):
+class LanguageModelRegistry(BaseRegistry[LanguageModelProvider], BaseLanguageModelRegistry):
+    """Registry of available language model providers registered in the system."""
+
+    plugin_base = LanguageModelProvider
+
     def __init__(self, data_set_repo: BaseDataSetRepository | None = None):
-        providers = settings.CATALOG_LANGUAGE_MODEL_PROVIDERS
-        super().__init__(providers)
-        self._providers = providers
         if data_set_repo is None:
-            self._data_set_repo = DjangoDataSetRepository(settings.CATALOG_MODELS["data_set"])
+            module_path, class_name = settings.CATALOG_MODELS["data_set"].rsplit(".", 1)
+            data_set_model = getattr(import_module(module_path), class_name)
+            self._data_set_repo = DjangoDataSetRepository(data_set_model)
         else:
             self._data_set_repo = data_set_repo
 
+    def get_provider_classes(self) -> List[Type[LanguageModelProvider]]:
+        """Returns all registered provider classes."""
+        return [self._get_plugin_class_by_path(path) for path in self._get_plugin_paths()]
+
+    def _get_provider_classes_by_name(self) -> dict[str, Type[LanguageModelProvider]]:
+        """Returns a mapping of provider NAME to provider class."""
+        return {cls.NAME: cls for cls in self.get_provider_classes()}
+
     def provider_class_by_name(self, name: str) -> Type[LanguageModelProvider]:
-        provider_class_name = self._providers[name]
-        module_name, class_name = provider_class_name.rsplit(".", 1)
-        module = import_module(module_name)
-        provider_class = getattr(module, class_name)
-        return provider_class
+        """Looks up a provider class by its ``NAME`` attribute."""
+        return self._get_provider_classes_by_name()[name]
 
     def provider_for_dataset(self, data_set_id: int) -> Type[LanguageModelProvider]:
+        """Returns the provider class configured for the given data set."""
         data_set = self._data_set_repo.get_by_id(data_set_id)
-        provider_class = self.provider_class_by_name(data_set.language_model_provider)
-        return provider_class
+        return self.provider_class_by_name(data_set.language_model_provider)
+
+    @staticmethod
+    def _get_plugin_paths() -> List[str]:
+        """Returns the list of provider class paths from settings."""
+        return settings.CATALOG_LANGUAGE_MODEL_PROVIDERS

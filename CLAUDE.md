@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Enthusiast is an open-source Agentic AI Framework for E-commerce. It provides RAG, vector search, and workflow orchestration for building AI-powered agents (product search, catalog enrichment, OCR-to-order, user manual search). Full-stack: Django backend + React frontend with a plugin architecture for agents, LLM providers, and data sources.
+Enthusiast is an open-source Agentic AI Framework for E-commerce. It provides RAG, vector search, and workflow orchestration for building AI-powered agents (product search, catalog enrichment, order intake, user manual search). Full-stack: Django backend + React frontend with a plugin architecture for agents, LLM providers, and data sources.
 
 ## Repository Structure
 
@@ -80,14 +80,14 @@ Four Django apps under `server/`:
 ### Plugin System
 
 Plugins are standalone Python packages in `plugins/`:
-- **Agent plugins** (`enthusiast-agent-*`): product-search, catalog-enrichment, ocr-to-order, user-manual-search, tool-calling, react
+- **Agent plugins** (`enthusiast-agent-*`): product-search, catalog-enrichment, order-intake, user-manual-search, tool-calling
 - **Model plugins** (`enthusiast-model-*`): openai, azureopenai, google, mistral, ollama
 - **Source plugins** (`enthusiast-source-*`): sample, medusa, shopify, shopware, solidus, woocommerce, wordpress, sanitycms
 - **Shared**: `enthusiast-common`, `enthusiast-file-parsers`
 
 **`enthusiast-common`** is the core interfaces package that all plugins depend on. It defines the abstract base classes and contracts that the plugin system is built around:
 - **Plugin interfaces**: `ProductSourcePlugin`, `DocumentSourcePlugin`, `ECommerceIntegrationPlugin` — ABCs that source plugins implement
-- **Agent framework**: `BaseAgent` (with `get_answer()`), `BaseAgentBuilder` (factory), agent type enum (BASE, RE_ACT, TOOL_CALLING)
+- **Agent framework**: `BaseAgent` (with `get_answer()`), `BaseAgentBuilder` (factory), `BaseToolCallingAgent` (standard implementation via LangChain tool calling)
 - **Registry bases**: `BaseAgentRegistry`, `BaseLanguageModelRegistry`, `BaseEmbeddingProviderRegistry` — for dynamic plugin discovery
 - **Repository pattern**: Generic `BaseRepository[T]` and specialized bases (`BaseProductRepository`, `BaseConversationRepository`, etc.) for data access
 - **Retriever bases**: `BaseRetriever`, `BaseProductRetriever`, `BaseVectorStoreRetriever` — for RAG/vector search

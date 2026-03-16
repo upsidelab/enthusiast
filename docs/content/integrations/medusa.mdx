@@ -1,3 +1,9 @@
 import Integration from "@/components/integration";
 
-<Integration name="Medusa" integrationKey="medusa" pipName="enthusiast-source-medusa" registerProductModule="enthusiast_source_medusa.MedusaProductSource"/>
+<Integration
+    name="Medusa"
+    description={<>The <a href="https://medusajs.com/">Medusa</a> integration for Enthusiast allows AI Agents to access your product catalog and perform actions within Medusa. For example, it allows the <a href="/agents/purchase-order-ocr">Purchase Order OCR Agent</a> to find matching products in the catalog, and automatically create orders in Medusa based on uploaded documents.</>}
+    integrationKey="medusa"
+    pipName="enthusiast-source-medusa"
+    registerECommerceIntegrationModule="enthusiast_source_medusa.MedusaIntegration"
+/>

@@ -8,6 +8,8 @@ PRIORITIZED_MODELS = ["mistral-embed"]
 
 
 class MistralAIEmbeddingProvider(EmbeddingProvider):
+    NAME = "Mistral AI"
+
     def generate_embeddings(self, content: str) -> list[float]:
         """
         Generates and returns an embedding vector for the given content using Mistral's embeddings API.

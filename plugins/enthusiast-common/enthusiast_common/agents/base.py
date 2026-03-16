@@ -1,5 +1,4 @@
 from abc import ABC, ABCMeta, abstractmethod
-from enum import Enum
 from typing import Any
 
 from langchain_core.callbacks import BaseCallbackHandler
@@ -12,12 +11,6 @@ from ..injectors import BaseInjector
 from ..tools.files.list_files_tool import FileListTool
 from ..tools.files.perform_file_operation_tool import FileRetrievalTool
 from ..utils import RequiredFieldsModel, validate_required_vars
-
-
-class AgentType(str, Enum):
-    BASE = "base"
-    RE_ACT = "re_act"
-    TOOL_CALLING = "tool_calling"
 
 
 class ExtraArgsClassBaseMeta(ABCMeta):
@@ -51,7 +44,6 @@ class BaseAgent(ABC, ExtraArgsClassBase):
     PROMPT_EXTENSION = None
     TOOLS = []
 
-    AGENT_TYPE: AgentType = AgentType.BASE
     FILE_UPLOAD = False
     DEFAULT_FILE_TOOLS = [FileListTool, FileRetrievalTool]
 

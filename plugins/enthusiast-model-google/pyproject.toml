@@ -1,14 +1,14 @@
 [tool.poetry]
 name = "enthusiast-model-google"
-version = "1.2.0"
+version = "1.3.0"
 description = "A plugin for Enthusiast that provides a Google Gemini connector."
 authors = ["Damian Sowiński <damian.sowinski@upsidelab.io>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-langchain-core = ">=0.3.66,<1"
+langchain-core = ">=0.3.83,<1"
 python = "^3.10"
-enthusiast-common = ">=1,<2"
+enthusiast-common = ">=1.6.0,<2"
 google-genai = "=1.18.0"
 langchain-google-genai = "^2.1.5"
 

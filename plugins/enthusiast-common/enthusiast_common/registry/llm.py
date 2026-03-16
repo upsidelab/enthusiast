@@ -8,6 +8,14 @@ from ..structures import BaseFileContent, BaseImageContent, FileTypes, LLMFile
 
 
 class LanguageModelProvider(ABC):
+    """Base class for language model providers.
+
+    Subclasses must set the ``NAME`` class attribute to a human-readable
+    provider name (e.g. ``"OpenAI"``).  This value is used for display
+    in the UI and for looking up the provider in the registry.
+    """
+
+    NAME: str = None
     STREAMING_AVAILABLE = True
 
     def __init__(self, model: str):
@@ -67,13 +75,21 @@ class LanguageModelProvider(ABC):
 
 
 class BaseLanguageModelRegistry(ABC):
-    def __init__(self, providers: dict[Any, Any]):
-        self._providers = providers
+    """Registry of available language model providers.
+
+    Subclasses must implement ``_get_plugin_paths`` to return the list of
+    class paths from settings and ``provider_for_dataset`` to resolve a
+    provider for a given data set.
+    """
+
+    @abstractmethod
+    def get_provider_classes(self) -> list[Type[LanguageModelProvider]]:
+        """Returns all registered provider classes."""
 
     @abstractmethod
     def provider_class_by_name(self, name: str) -> Type[LanguageModelProvider]:
-        pass
+        """Looks up a provider class by its ``NAME`` attribute."""
 
     @abstractmethod
     def provider_for_dataset(self, data_set_id: Any) -> Type[LanguageModelProvider]:
-        pass
+        """Returns the provider class configured for the given data set."""

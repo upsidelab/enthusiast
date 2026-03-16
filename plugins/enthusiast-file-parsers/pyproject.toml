@@ -1,14 +1,15 @@
 [tool.poetry]
 name = "enthusiast-file-parsers"
-version = "1.0.0"
+version = "1.1.0"
 description = "A plugin for Enthusiast that provides a file parsers."
 authors = ["Damian Sowiński <damian.sowinski@upsidelab.io>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-enthusiast-common = ">=1,<2"
-pypdf = ">=6.0.0,<7.0.0"
-pillow = ">=11.3.0,<12.0.0"
+python = "^3.10"
+enthusiast-common = ">=1.6.0,<2"
+pypdf = ">=6.8.0,<7.0.0"
+pillow = ">=12.1.1,<13.0.0"
 
 
 [build-system]

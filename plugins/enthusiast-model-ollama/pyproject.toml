@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "enthusiast-model-ollama"
-version = "1.3.0"
+version = "1.2.0"
 description = "A plugin for Enthusiast that provides an Ollama connector."
 authors = ["Rafal Cymerys <rafal@upsidelab.io>"]
 readme = "README.md"
@@ -8,7 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 langchain-core = "^0.3.83"
 python = "^3.10"
-enthusiast-common = ">=1.6.0,<2"
+enthusiast-common = ">=1,<2"
 langchain-ollama = "^0.3.3"
 
 

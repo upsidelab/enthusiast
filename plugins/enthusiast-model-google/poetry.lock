@@ -340,18 +340,18 @@ test-randomorder = ["pytest-randomly"]
 
 [[package]]
 name = "enthusiast-common"
-version = "1.6.0"
+version = "1.5.0"
 description = "Core interfaces for developing custom Enthusiast plugins and integrations."
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "enthusiast_common-1.6.0-py3-none-any.whl", hash = "sha256:5b09eeae58520c9e0917db4358394ce70da7d7034495ac2f00a378e81cb86dea"},
-    {file = "enthusiast_common-1.6.0.tar.gz", hash = "sha256:1b647e380ce5a63b096b78ea28320162088bb98a2bba6a04853931867c8652d7"},
+    {file = "enthusiast_common-1.5.0-py3-none-any.whl", hash = "sha256:7b8353b9e10d57d52459ac8391b81f5deceaad798a39c4637464ccc6e5862300"},
+    {file = "enthusiast_common-1.5.0.tar.gz", hash = "sha256:644d0f1202ce87c6283704d7084aa487c8fcceb302a8a1b44e8001e6bb5dcb7d"},
 ]
 
 [package.dependencies]
-langchain-core = ">=0.3.83,<0.4.0"
+langchain-core = ">=0.3.66,<0.4.0"
 
 [[package]]
 name = "exceptiongroup"
@@ -1668,4 +1668,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "b03ae94a4a958bc3b4bbc40d61977fe6ef6ed454d67ca51898b6c3f7499cb5f9"
+content-hash = "8edc32ebc241b1a06e5990b30745a994f018799cd0995ac0c94fe41541388e77"

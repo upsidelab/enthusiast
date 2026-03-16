@@ -746,51 +746,51 @@ validation = ["swagger-spec-validator (>=2.1.0)"]
 
 [[package]]
 name = "enthusiast-common"
-version = "1.5.0"
+version = "1.6.0"
 description = "Core interfaces for developing custom Enthusiast plugins and integrations."
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "enthusiast_common-1.5.0-py3-none-any.whl", hash = "sha256:7b8353b9e10d57d52459ac8391b81f5deceaad798a39c4637464ccc6e5862300"},
-    {file = "enthusiast_common-1.5.0.tar.gz", hash = "sha256:644d0f1202ce87c6283704d7084aa487c8fcceb302a8a1b44e8001e6bb5dcb7d"},
+    {file = "enthusiast_common-1.6.0-py3-none-any.whl", hash = "sha256:5b09eeae58520c9e0917db4358394ce70da7d7034495ac2f00a378e81cb86dea"},
+    {file = "enthusiast_common-1.6.0.tar.gz", hash = "sha256:1b647e380ce5a63b096b78ea28320162088bb98a2bba6a04853931867c8652d7"},
 ]
 
 [package.dependencies]
-langchain-core = ">=0.3.66,<0.4.0"
+langchain-core = ">=0.3.83,<0.4.0"
 
 [[package]]
 name = "enthusiast-model-openai"
-version = "1.3.0"
+version = "1.4.0"
 description = "A plugin for Enthusiast that provides an OpenAI connector."
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "enthusiast_model_openai-1.3.0-py3-none-any.whl", hash = "sha256:8910bd7e81ac93c51528316dfd2ee3ca241abeb4edea1b6abd7ffb9e0cb035e6"},
-    {file = "enthusiast_model_openai-1.3.0.tar.gz", hash = "sha256:6bc464e876b598e25a10d09bf2795ab23a9715b22b9dbda69f1c239bc3694974"},
+    {file = "enthusiast_model_openai-1.4.0-py3-none-any.whl", hash = "sha256:b0c914af8c5088bb3f07ef0486372caeb64a786f65382d461f21255a22d9bb59"},
+    {file = "enthusiast_model_openai-1.4.0.tar.gz", hash = "sha256:158e30cee06d10b5d5b511bebdcd4cc0e3ae7be333930628c4c9398c36924c13"},
 ]
 
 [package.dependencies]
-enthusiast-common = ">=1,<2"
-langchain-core = ">=0.3.66,<0.4.0"
+enthusiast-common = ">=1.6.0,<2"
+langchain-core = ">=0.3.83,<0.4.0"
 langchain-openai = ">=0.3.27,<0.4.0"
 openai = ">=1.86.0,<2.0.0"
 
 [[package]]
 name = "enthusiast-source-sample"
-version = "1.2.0"
+version = "1.3.0"
 description = "A plugin for Enthusiast that provides a sample data source for demo purposes."
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "enthusiast_source_sample-1.2.0-py3-none-any.whl", hash = "sha256:f1d019764d94855b4d7acd81e79fe0f0230889520ba24e786779126aa68a91ff"},
-    {file = "enthusiast_source_sample-1.2.0.tar.gz", hash = "sha256:499e7413f919de8d6e62d6c9c41d961349066a676447aea8889bf885f27fe06c"},
+    {file = "enthusiast_source_sample-1.3.0-py3-none-any.whl", hash = "sha256:73587ba8c56a05ec1e9a9cb4d611e76597c07fc647edcb15afd892c280f50d4b"},
+    {file = "enthusiast_source_sample-1.3.0.tar.gz", hash = "sha256:771542e2d57e1378761f220fc8ff5a0fa4d7f4a50c6082a376225144fff65346"},
 ]
 
 [package.dependencies]
-enthusiast-common = ">=1.4,<2"
+enthusiast-common = ">=1.6.0,<2"
 
 [[package]]
 name = "exceptiongroup"
@@ -2970,4 +2970,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10, <4.0"
-content-hash = "7db3fb4c08e148b71dbe83960bf7ab739727a5307116f4feac8a21f534706bc4"
+content-hash = "14d3e015bb843497fbfb0d9cff6e4855ad4a997bce7ff0622fb979c22e886de7"

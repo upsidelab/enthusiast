@@ -12,26 +12,35 @@ class MedusaAPIClient:
         self._headers = self._build_headers(api_key)
 
     def get(self, path: str, body: dict[str, Any] = None, params: dict[str, Any] = None) -> dict[str, Any]:
-        url = f"{self._base_url}{path}"
-        response = requests.get(url, json=body, headers=self._headers, params=params)
-        self._raise_for_error(response)
-        return response.json()
+        return self._request("GET", path, json=body, params=params)
 
     def post(self, path: str, body: dict[str, Any] = None) -> dict[str, Any]:
-        url = f"{self._base_url}{path}"
-        response = requests.post(url, json=body, headers=self._headers)
-        self._raise_for_error(response)
-        return response.json()
+        return self._request("POST", path, json=body)
 
-    def _raise_for_error(self, response: requests.Response) -> None:
-        """Raise MedusaAPIError with the Medusa error message if the response indicates failure."""
-        if response.ok:
-            return
+    def _request(self, method: str, path: str, **kwargs) -> dict[str, Any]:
+        """Execute an HTTP request and raise MedusaAPIError for any failure."""
+        url = f"{self._base_url}{path}"
         try:
-            message = response.json().get("message") or response.text
-        except Exception:
-            message = response.text
-        raise MedusaAPIError(message, status_code=response.status_code)
+            response = requests.request(method, url, headers=self._headers, **kwargs)
+        except requests.exceptions.ConnectionError:
+            raise MedusaAPIError(
+                f"Could not connect to the Medusa API at {url}. "
+                "Please check if the service is running and the base URL is configured correctly."
+            )
+        except requests.exceptions.Timeout:
+            raise MedusaAPIError(f"Request to the Medusa API timed out at {url}.")
+        except requests.exceptions.RequestException as e:
+            root_cause = e
+            while root_cause.__cause__ is not None or root_cause.__context__ is not None:
+                root_cause = root_cause.__cause__ or root_cause.__context__
+            raise MedusaAPIError(f"Medusa API request failed: {root_cause}")
+        if not response.ok:
+            try:
+                message = response.json().get("message") or response.text
+            except Exception:
+                message = response.text
+            raise MedusaAPIError(message, status_code=response.status_code)
+        return response.json()
 
     def _build_headers(self, api_key: str) -> dict[str, str]:
         encoded_api_key_bytes = base64.b64encode(api_key.encode("utf-8"))

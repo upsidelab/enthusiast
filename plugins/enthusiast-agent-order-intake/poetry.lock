@@ -182,68 +182,51 @@ files = [
 
 [[package]]
 name = "enthusiast-agent-product-search"
-version = "1.2.0"
+version = "1.3.0"
 description = "Product Search Agent for Enthusiast"
 optional = false
 python-versions = "<4,>=3.10"
 groups = ["main"]
 files = [
-    {file = "enthusiast_agent_product_search-1.2.0-py3-none-any.whl", hash = "sha256:99d3d4976fda27785b088a3831d39737d961efed1f33850286c4b1733b575438"},
-    {file = "enthusiast_agent_product_search-1.2.0.tar.gz", hash = "sha256:9fcdaf0bda768c8ad1df3b6c2fa79007891b81944b6a0637ea2c758e00addf88"},
+    {file = "enthusiast_agent_product_search-1.3.0-py3-none-any.whl", hash = "sha256:ab472530dde011c875afdfe5ce5dae7a17561460e4d17f99bde779f5b66b3ff7"},
+    {file = "enthusiast_agent_product_search-1.3.0.tar.gz", hash = "sha256:cef4170cfd8ccafd04cf15431d23f056ca84bc81bf7559d0f4bd342a8200b2ed"},
 ]
 
 [package.dependencies]
-enthusiast_agent_re_act = ">=1.2.0"
-enthusiast_agent_tool_calling = ">=1.0.0"
-enthusiast-common = ">=1.5.0,<2.0.0"
-langchain = ">=0.3.26,<0.4.0"
-
-[[package]]
-name = "enthusiast-agent-re-act"
-version = "1.3.0"
-description = "Base implementation of a ReAct agent for Enthusiast"
-optional = false
-python-versions = "<4,>=3.10"
-groups = ["main"]
-files = [
-    {file = "enthusiast_agent_re_act-1.3.0-py3-none-any.whl", hash = "sha256:b2f0acba6de9111a627960b446f5054ca54a8ad65264f7670ee42d7ab03d904e"},
-    {file = "enthusiast_agent_re_act-1.3.0.tar.gz", hash = "sha256:bcceaa28a00a14877db4c50506778191d83a5473197dbe6de56dc17485f40ab5"},
-]
-
-[package.dependencies]
-enthusiast-common = ">=1.4.0,<2.0.0"
+enthusiast_agent_tool_calling = ">=1.1.0"
+enthusiast-common = ">=1.6.0,<2.0.0"
 langchain = ">=0.3.26,<0.4.0"
 
 [[package]]
 name = "enthusiast-agent-tool-calling"
-version = "1.0.0"
+version = "1.1.0"
 description = "Base implementation of a Tool Calling agent for Enthusiast"
 optional = false
 python-versions = "<4,>=3.10"
 groups = ["main"]
 files = [
-    {file = "enthusiast_agent_tool_calling-1.0.0-py3-none-any.whl", hash = "sha256:5930d7d7b43318dca9a32e11a55b6184b056b1ffbfec6b08804d657d14ec311b"},
-    {file = "enthusiast_agent_tool_calling-1.0.0.tar.gz", hash = "sha256:5ba32dbf2ba580c0b55b07aab57831591f44b27d37d581824c4ae088d6d51a27"},
+    {file = "enthusiast_agent_tool_calling-1.1.0-py3-none-any.whl", hash = "sha256:cd238caeee626c30303fab0084ebe9ddc7caf7f3847412f8a628f34ec7532d4a"},
+    {file = "enthusiast_agent_tool_calling-1.1.0.tar.gz", hash = "sha256:14959d6d532ef95cc4cc0962970b0e6ac1a340b785c8ebbe8a172f5ed1434e28"},
 ]
 
 [package.dependencies]
-enthusiast-common = ">=1.4.0,<2.0.0"
+enthusiast-common = ">=1.6.0,<2.0.0"
 langchain = ">=0.3.26,<0.4.0"
 
 [[package]]
 name = "enthusiast-common"
-version = "1.5.0"
+version = "1.6.0"
 description = "Core interfaces for developing custom Enthusiast plugins and integrations."
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "enthusiast_common-1.5.0-py3-none-any.whl", hash = "sha256:7b8353b9e10d57d52459ac8391b81f5deceaad798a39c4637464ccc6e5862300"},
-    {file = "enthusiast_common-1.5.0.tar.gz", hash = "sha256:644d0f1202ce87c6283704d7084aa487c8fcceb302a8a1b44e8001e6bb5dcb7d"},
+    {file = "enthusiast_common-1.6.0-py3-none-any.whl", hash = "sha256:5b09eeae58520c9e0917db4358394ce70da7d7034495ac2f00a378e81cb86dea"},
+    {file = "enthusiast_common-1.6.0.tar.gz", hash = "sha256:1b647e380ce5a63b096b78ea28320162088bb98a2bba6a04853931867c8652d7"},
 ]
 
 [package.dependencies]
-langchain-core = ">=0.3.66,<0.4.0"
+langchain-core = ">=0.3.83,<0.4.0"
 
 [[package]]
 name = "exceptiongroup"
@@ -1377,4 +1360,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4"
-content-hash = "a2224c0a515356c8d7c24ea27c67b6dc818c602160d6a0373a1bc0ac5f59698a"
+content-hash = "d82ea4f2cdb24c5a7869bf84cfd4b57bc98b42314ce8156f6b0bb94ad3b2f4b5"

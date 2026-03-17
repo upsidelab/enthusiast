@@ -30,6 +30,11 @@ class MedusaAPIClient:
         except requests.exceptions.Timeout:
             raise MedusaAPIError(f"Request to the Medusa API timed out at {url}.")
         except requests.exceptions.RequestException as e:
+            # Walk the exception chain to find the root cause.
+            # requests wraps low-level errors (e.g. OSError, socket errors) in its own exception types,
+            # so str(e) would give a vague wrapper message. __cause__ is set by explicit "raise X from Y"
+            # chaining, __context__ is set implicitly when an exception is raised inside an except block.
+            # The loop traverses both until it reaches the original error with no further cause.
             root_cause = e
             while root_cause.__cause__ is not None or root_cause.__context__ is not None:
                 root_cause = root_cause.__cause__ or root_cause.__context__

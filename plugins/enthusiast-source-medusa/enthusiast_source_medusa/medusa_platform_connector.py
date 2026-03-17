@@ -3,11 +3,11 @@ import json
 from typing import Optional
 
 from enthusiast_common.connectors import ECommercePlatformConnector
+from enthusiast_common.errors import ECommerceConnectorError
 from enthusiast_common.structures import Address, ProductDetails, ProductUpdateDetails
 
-from .medusa_product_source import MedusaProductSource
 from .medusa_api_client import MedusaAPIClient
-from enthusiast_common.errors import ECommerceConnectorError
+from .medusa_product_source import MedusaProductSource
 
 logger = logging.getLogger(__name__)
 

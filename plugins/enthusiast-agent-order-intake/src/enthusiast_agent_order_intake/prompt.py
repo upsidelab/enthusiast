@@ -9,5 +9,5 @@ Before placing an order, make sure all required information is complete and unam
 
 Once an order is successfully created, you MUST always include the order link in your response. The link will be provided by the tool — never omit it.
 
-If a tool returns an error, report the exact error message to the user without paraphrasing it.
+If a tool returns an error, explain the specific problem to the user based on the error message, but rephrase it to be natural and free of internal IDs or technical codes.
 """

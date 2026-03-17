@@ -546,9 +546,9 @@ def get_config() -> AgentConfigWithDefaults:
 ```
 Finally add your agent to `settings_override.py`:
 ```python
-AVAILABLE_AGENTS = {
-    "Product Search Agent": "enthusiast_custom.examples.product_search.product_search",
-}
+AVAILABLE_AGENTS = [
+    "enthusiast_custom.examples.product_search.product_search",
+]
 
 ```
 Now use product source plugin to load your products into DB.

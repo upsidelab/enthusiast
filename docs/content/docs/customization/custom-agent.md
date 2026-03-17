@@ -5,59 +5,40 @@ sidebar_position: 4
 # Creating custom Agent
 Custom Agent will allow to customize any part of agent providing its configuration, while enthusiast take care of building it.
 
-## Creating a simple PDF Agent - which will answer question about pdf documents.
+## Creating a simple Document Context Agent - which will answer questions about documents.
 
-1. Create a directory for you agent (e.g. `pdf_agent`). Then inside it create `agent.py` file:
+### Proposed folder structure
+
+```
+document_context_agent/
+├── __init__.py
+├── agent.py
+├── config.py
+├── prompt.py
+└── tools/
+    ├── __init__.py
+    └── document_context_tool.py
+```
+
+1. Create a directory for you agent (e.g. `document_context_agent`). Then inside it create `agent.py` file:
 ```python
-from enthusiast_common.agents import BaseAgent
-from enthusiast_common.injectors import BaseInjector
-from enthusiast_common.tools.base import BaseTool
-from langchain.agents import AgentExecutor, create_tool_calling_agent
-from langchain_core.callbacks import BaseCallbackHandler
-from langchain_core.language_models import BaseLanguageModel
-from langchain_core.prompts import ChatPromptTemplate
+from enthusiast_agent_tool_calling import BaseToolCallingAgent
+from enthusiast_common.config.base import LLMToolConfig
 
+from .tools import ContextSearchTool
 
-class ExamplePDFAgent(BaseAgent):
-    def __init__(
-        self,
-        tools: list[BaseTool],
-        llm: BaseLanguageModel,
-        prompt: ChatPromptTemplate,
-        conversation_id: int,
-        injector: BaseInjector,
-        callback_handler: BaseCallbackHandler | None = None,
-    ):
-        super().__init__(
-            tools=tools,
-            llm=llm,
-            prompt=prompt,
-            conversation_id=conversation_id,
-            callback_handler=callback_handler,
-            injector=injector,
-        )
-        self._agent_executor = self._create_agent_executor()
-
-    def _create_agent_executor(self, **kwargs) -> AgentExecutor:
-        tools = self._create_tools()
-        agent = create_tool_calling_agent(self._llm, tools, self._prompt)
-        return AgentExecutor(
-            agent=agent, tools=tools, verbose=True, memory=self._injector.chat_summary_memory, **kwargs
-        )
-
-    def _create_tools(self):
-        return [tool_class.as_tool() for tool_class in self._tools]
-
-    def get_answer(self, input_text: str) -> str:
-        agent_output = self._agent_executor.invoke(
-            {"input": input_text}, config={"callbacks": [self._callback_handler] if self._callback_handler else []}
-        )
-        return agent_output["output"]
+class ExampleDocumentContextAgent(BaseToolCallingAgent):
+    AGENT_KEY = "enthusiast-agent-example-document-context"
+    NAME = "Example Document Context Agent"
+    
+    TOOLS = [LLMToolConfig(tool_class=ContextSearchTool)]
 ```
 2. Create Prompt in prompt.py file.
 ```python
-PDF_AGENT_SYSTEM_PROMPT="""
-You are a helpful agent, answering questions about pdf document. Always use context tool
+DOCUMENT_CONTEXT_AGENT_SYSTEM_PROMPT="""
+You are a helpful agent, answering questions about documents and resources mentioned in them.
+
+Whenever the user asks a question — whether about a document itself or about a resource, topic, or entity mentioned in a document — always use the document context tool first to extract relevant context. Do not ask the user for details that the tool can retrieve; use it proactively to gather the necessary information before answering.
 """
 ```
 
@@ -75,7 +56,7 @@ class ContextSearchToolInput(BaseModel):
 
 class ContextSearchTool(BaseLLMTool):
     NAME = "context_search_tool"
-    DESCRIPTION = "Use it to get context from pdf required for answering questions"
+    DESCRIPTION = "Use it to get context from documents required for answering questions"
     ARGS_SCHEMA = ContextSearchToolInput
     RETURN_DIRECT = False
 
@@ -98,48 +79,49 @@ class ContextSearchTool(BaseLLMTool):
         return content
 ```
 
-4. Create configuration inside `config.py` file:
+4. Create `tools/__init__.py` to expose the tool:
 ```python
-from enthusiast_common.config import AgentConfigWithDefaults, LLMToolConfig
-from langchain_core.prompts import ChatPromptTemplate
+from .document_context_tool import ContextSearchTool
 
-from .tools.pdf_context_tool import ContextSearchTool
-from .agent import ExamplePDFAgent
-from .prompt import PDF_AGENT_SYSTEM_PROMPT
+__all__ = ["ContextSearchTool"]
+```
+
+5. Create configuration inside `config.py` file:
+```python
+from enthusiast_common.config import AgentConfigWithDefaults
+from enthusiast_common.config.prompts import ChatPromptTemplateConfig, Message, MessageRole
+
+from .agent import ExampleDocumentContextAgent
+from .prompt import DOCUMENT_CONTEXT_AGENT_SYSTEM_PROMPT
 
 
-def get_config(conversation_id: int, streaming: bool) -> AgentConfigWithDefaults:
+def get_config() -> AgentConfigWithDefaults:
     return AgentConfigWithDefaults(
-        conversation_id=conversation_id,
-        prompt_template=ChatPromptTemplate.from_messages(
-            [
-                (
-                    "system",
-                    PDF_AGENT_SYSTEM_PROMPT,
+        prompt_template=ChatPromptTemplateConfig(
+            messages=[
+                Message(
+                    role=MessageRole.SYSTEM,
+                    content=DOCUMENT_CONTEXT_AGENT_SYSTEM_PROMPT,
                 ),
-                ("placeholder", "{chat_history}"),
-                ("human", "{input}"),
-                ("placeholder", "{agent_scratchpad}"),
+                Message(role=MessageRole.PLACEHOLDER, content="{chat_history}"),
+                Message(role=MessageRole.USER, content="{input}"),
+                Message(role=MessageRole.PLACEHOLDER, content="{agent_scratchpad}"),
             ]
         ),
-        agent_class=ExamplePDFAgent,
-        llm_tools=[
-            LLMToolConfig(
-                tool_class=ContextSearchTool,
-            )
-        ],
+        agent_class=ExampleDocumentContextAgent,
+        tools=ExampleDocumentContextAgent.TOOLS,
     )
 ```
-5. Ensure your agent is available for import from directly your agent directory:
+6. Ensure your agent is available for import from directly your agent directory:
 ```python
-# pdf_agent/__init__.py
-from .agent import ExamplePDFAgent
+# document_context_agent/__init__.py
+from .agent import ExampleDocumentContextAgent
 
-__all__ = ['ExamplePDFAgent']
+__all__ = ["ExampleDocumentContextAgent"]
 ```
-6. Finally add your agent to `settings_override.py`:
+7. Finally add your agent to `settings_override.py`:
 ```python
-AVAILABLE_AGENTS = ['pdf_agent.ExamplePDFAgent']
+AVAILABLE_AGENTS = ['document_context_agent.ExampleDocumentContextAgent']
 ```
 Now Agent is available in UI to chat with it.
 

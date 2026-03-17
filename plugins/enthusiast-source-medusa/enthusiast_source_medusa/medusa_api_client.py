@@ -40,6 +40,8 @@ class MedusaAPIClient:
                 root_cause = root_cause.__cause__ or root_cause.__context__
             raise MedusaAPIError(f"Medusa API request failed: {root_cause}")
         if not response.ok:
+            # response.json() can fail if the body is not valid JSON (e.g. HTML error page, empty body),
+            # so the except falls back to response.text to always produce a meaningful error message.
             try:
                 message = response.json().get("message") or response.text
             except Exception:

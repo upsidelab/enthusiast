@@ -102,7 +102,10 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
         payload["variants"] = [variant]
 
         response = self._client.post("/admin/products", payload)
-        return response["product"]["id"]
+        try:
+            return response["product"]["id"]
+        except (KeyError, TypeError):
+            raise MedusaAPIError(f"Medusa returned an unexpected response when creating the product: {response}")
 
     def update_product(self, sku: str, product_details: ProductUpdateDetails) -> bool:
         product_details_before_update = self.get_product_by_sku(sku)
@@ -191,10 +194,16 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
             (currency for currency in store_data['supported_currencies'] if currency.get("is_default") is True),
             None
         )
+        if default_currency is None:
+            raise MedusaAPIError("No default currency is configured in Medusa. At least one default currency must exist.")
         return default_currency["currency_code"]
 
     def _get_default_store_data(self):
-        return self._client.get("/admin/stores")["stores"][0]
+        response = self._client.get("/admin/stores")
+        try:
+            return response["stores"][0]
+        except (KeyError, IndexError):
+            raise MedusaAPIError(f"Medusa returned an unexpected response when fetching store data: {response}")
 
     @staticmethod
     def _parse_properties_to_variant_options(properties: str):

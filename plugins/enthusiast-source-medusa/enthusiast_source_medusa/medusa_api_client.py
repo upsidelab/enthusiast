@@ -3,7 +3,7 @@ from typing import Any
 
 import requests
 
-from .exceptions import MedusaAPIError
+from enthusiast_common.errors import ECommerceConnectorError
 
 
 class MedusaAPIClient:
@@ -18,17 +18,17 @@ class MedusaAPIClient:
         return self._request("POST", path, json=body)
 
     def _request(self, method: str, path: str, **kwargs) -> dict[str, Any]:
-        """Execute an HTTP request and raise MedusaAPIError for any failure."""
+        """Execute an HTTP request and raise ECommerceConnectorError for any failure."""
         url = f"{self._base_url}{path}"
         try:
             response = requests.request(method, url, headers=self._headers, **kwargs)
         except requests.exceptions.ConnectionError:
-            raise MedusaAPIError(
+            raise ECommerceConnectorError(
                 f"Could not connect to the Medusa API at {url}. "
                 "Please check if the service is running and the base URL is configured correctly."
             )
         except requests.exceptions.Timeout:
-            raise MedusaAPIError(f"Request to the Medusa API timed out at {url}.")
+            raise ECommerceConnectorError(f"Request to the Medusa API timed out at {url}.")
         except requests.exceptions.RequestException as e:
             # Walk the exception chain to find the root cause.
             # requests wraps low-level errors (e.g. OSError, socket errors) in its own exception types,
@@ -38,7 +38,7 @@ class MedusaAPIClient:
             root_cause = e
             while root_cause.__cause__ is not None or root_cause.__context__ is not None:
                 root_cause = root_cause.__cause__ or root_cause.__context__
-            raise MedusaAPIError(f"Medusa API request failed: {root_cause}")
+            raise ECommerceConnectorError(f"Medusa API request failed: {root_cause}")
         if not response.ok:
             # response.json() can fail if the body is not valid JSON (e.g. HTML error page, empty body),
             # so the except falls back to response.text to always produce a meaningful error message.
@@ -46,7 +46,7 @@ class MedusaAPIClient:
                 message = response.json().get("message") or response.text
             except Exception:
                 message = response.text
-            raise MedusaAPIError(message, status_code=response.status_code)
+            raise ECommerceConnectorError(message, status_code=response.status_code)
         return response.json()
 
     def _build_headers(self, api_key: str) -> dict[str, str]:

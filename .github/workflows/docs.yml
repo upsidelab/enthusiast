@@ -1,35 +1,34 @@
 name: Upload docs
 
 on:
-  pull_request:
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
 
 jobs:
-  # detect-changes:
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     changed: ${{ steps.changed.outputs.changed }}
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-  #       with:
-  #         fetch-depth: 0
-  #
-  #     - name: Check if docs changed
-  #       id: changed
-  #       run: |
-  #         CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
-  #         if echo "$CHANGED" | grep -q '^docs/'; then
-  #           echo "changed=true" >> "$GITHUB_OUTPUT"
-  #         else
-  #           echo "changed=false" >> "$GITHUB_OUTPUT"
-  #         fi
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.changed.outputs.changed }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if docs changed
+        id: changed
+        run: |
+          CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+          if echo "$CHANGED" | grep -q '^docs/'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
 
   upload-docs:
-      # needs: detect-changes
-      # if: needs.detect-changes.outputs.changed == 'true'
+      needs: detect-changes
+      if: needs.detect-changes.outputs.changed == 'true'
       runs-on: ubuntu-latest
 
       defaults:

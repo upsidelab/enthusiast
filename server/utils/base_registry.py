@@ -13,7 +13,10 @@ class BaseRegistry(Generic[T]):
 
     @staticmethod
     def _get_class_by_path(path: str, base_class: Type[U]) -> Type[U]:
-        module_path, plugin_name = path.rsplit(".", 1)
+        if "." in path:
+            module_path, plugin_name = path.rsplit(".", 1)
+        else:
+            module_path, plugin_name = path, None
         try:
             plugin_module = import_module(module_path)
         except ModuleNotFoundError as e:
@@ -21,7 +24,7 @@ class BaseRegistry(Generic[T]):
         plugins = [
             cls_name
             for cls_name, cls in inspect.getmembers(plugin_module, inspect.isclass)
-            if issubclass(cls, base_class) and cls_name == plugin_name
+            if issubclass(cls, base_class) and (plugin_name is None or cls_name == plugin_name)
         ]
         if not plugins:
             raise ValueError(f"No valid plugin classes found in module '{module_path}'.")

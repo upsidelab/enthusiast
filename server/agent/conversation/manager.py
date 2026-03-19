@@ -7,6 +7,7 @@ from agent.core.registries.agents.agent_registry import AgentRegistry
 from agent.models import Conversation, Message
 from agent.models.agent import Agent
 from catalog.models import DataSet
+from enthusiast_common.agents import ConfigType
 
 
 class ConversationManager:

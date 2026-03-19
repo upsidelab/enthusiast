@@ -5,7 +5,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("agent", "0024_alter_agent_description"),
+        ("agent", "0025_migrate_re_act_to_tool_calling"),
     ]
 
     operations = [

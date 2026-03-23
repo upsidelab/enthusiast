@@ -119,6 +119,40 @@ export type AgentConfig = {
   tools?: Array<Record<string, ExtraArgDetail>>;
 };
 
+export type ConversationFile = {
+  id: number;
+  filename: string;
+  file_url: string;
+  content_type: string;
+};
+
+export type AgentExecution = {
+  id: number;
+  agent: number;
+  execution_key: string;
+  conversation: number;
+  status: 'pending' | 'in_progress' | 'finished' | 'failed';
+  input: Record<string, unknown>;
+  result: Record<string, unknown> | null;
+  failure_code: string | null;
+  failure_explanation: string | null;
+  celery_task_id: string | null;
+  started_at: string;
+  finished_at: string | null;
+  duration_seconds: number | null;
+};
+
+export type AgentExecutionDetail = AgentExecution & {
+  files: ConversationFile[];
+};
+
+export type ExecutionType = {
+  key: string;
+  name: string;
+  description: string | null;
+  input_schema: Record<string, unknown>;
+};
+
 export type AgentDetails = {
   id: number;
   name: string;

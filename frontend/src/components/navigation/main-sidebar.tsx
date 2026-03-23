@@ -10,6 +10,7 @@ import {
   HelpCircleIcon,
   HistoryIcon,
   LinkIcon,
+  PlayIcon,
   PlugZapIcon,
   Settings2Icon,
   SparklesIcon,
@@ -115,6 +116,12 @@ export function MainSidebar() {
         link: `/data-sets/${dataSetId}/agents`,
         key: "agents",
         icon: <BotMessageSquareIcon />
+      },
+      {
+        title: "Agent Executions",
+        link: `/data-sets/${dataSetId}/agent-executions`,
+        key: "agent-executions",
+        icon: <PlayIcon />
       },
       {
         title: "Integrations",

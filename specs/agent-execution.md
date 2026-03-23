@@ -238,12 +238,12 @@ The `input` payload is a JSON-encoded string when sent as part of multipart form
 
 The POST endpoint is nested under `/api/agents/` following the existing convention for child resources (e.g. `api/data_sets/<id>/products`, `api/data_sets/<id>/users`). Read endpoints remain at the flat `/api/agent-executions/` collection, again consistent with how conversations are a flat collection despite belonging to a dataset.
 
-| Method | URL | Description |
-|--------|-----|-------------|
-| GET | `/api/agents/<int:agent_id>/execution-types/` | List all execution types registered for this agent (key, name, description, input_schema). |
-| POST | `/api/agents/<int:agent_id>/executions/` | Start a new execution for the given agent. Accepts `application/json` or `multipart/form-data`. |
-| GET | `/api/agent-executions/` | Paginated execution history (newest first, 25/page). Supports `?agent_id=` filter. |
-| GET | `/api/agent-executions/<int:pk>/` | Fetch a single execution (used for polling) |
+| Method | URL | Description                                                                                                        |
+|--------|-----|--------------------------------------------------------------------------------------------------------------------|
+| GET | `/api/agents/<int:agent_id>/execution-types/` | List all execution types registered for this agent (key, name, description, input_schema).                         |
+| POST | `/api/agents/<int:agent_id>/executions/` | Start a new execution for the given agent. Accepts `application/json` or `multipart/form-data`.                    |
+| GET | `/api/agent-executions/` | Paginated execution history (newest first, 25/page). Supports `?agent_id=`, `?status=` and `?dataset_id=` filters. |
+| GET | `/api/agent-executions/<int:pk>/` | Fetch a single execution (used for polling)                                                                        |
 
 **GET `api/agents/<agent_id>/execution-types/`**: returns a list of `{key, name, description, input_schema}` objects for all execution classes registered for the agent's type. The frontend calls this when rendering the launch form to populate the execution type selector and derive the dynamic input form from `input_schema`. Returns 404 if the agent does not exist; returns an empty list if no execution classes are registered.
 
@@ -301,17 +301,19 @@ The catalog enrichment plugin is the reference implementation. The existing `Cat
 
 ## 6. Frontend
 
-Three routes added to the authenticated router in `frontend/src/main.tsx`:
+Three views are added, all dataset-scoped following the `/data-sets/:dataSetId/...` convention. An **Executions** link is added to the **Configure** section of the sidebar, visible to all authenticated users.
 
-| Path | Component | Purpose |
-|------|-----------|---------|
-| `/agent-executions` | `AgentExecutionsPage` | History table + "New execution" button |
-| `/agent-executions/new` | `NewAgentExecutionPage` | Select agent (filtered to those with a registered execution class), fill input form, submit |
-| `/agent-executions/:id` | `AgentExecutionDetailPage` | Status polling + result/failure display, link to the created conversation |
+| Path | Purpose |
+|------|---------|
+| `/data-sets/:dataSetId/agent-executions` | History dashboard — paginated table filterable by agent and status, "New Execution" button |
+| `/data-sets/:dataSetId/agent-executions/new` | Launch form — agent selector → execution-type selector → dynamic input form → submit |
+| `/data-sets/:dataSetId/agent-executions/:executionId` | Detail view — live status polling, result or failure display, link to the execution's conversation |
 
-API client (`frontend/src/lib/api/agent-executions.ts`) exposes `list(filters?)`, `get(id)`, `getTypes(agentId)`, `start(agentId, executionKey, input)` and is integrated into `ApiClient` via `agentExecutions()`.
+**History dashboard** lists past executions for the current dataset with agent and status filters. Filter state is kept in URL search params so it survives refresh.
 
-`NewAgentExecutionPage` first renders an agent selector. Once an agent is selected, it calls `GET /api/agents/<id>/execution-types/` to fetch available execution types. If more than one type is returned, the user selects one; if exactly one, it is pre-selected automatically. The selected type's `input_schema` drives a dynamic form (React Hook Form + Zod). The resolved `execution_key` is submitted alongside `input` in the POST body. `AgentExecutionDetailPage` polls every 3 seconds while `pending` or `in_progress` and links to the execution's conversation when available.
+**Launch form** walks the user through three progressive steps: pick an agent (from the current dataset), pick an execution type (auto-selected when only one is available), then fill in the input form. The input form is generated dynamically from the `input_schema` returned by the execution-types endpoint, covering scalar field types. Submitting redirects to the detail view.
+
+**Detail view** polls the execution status every 3 seconds while the job is running and stops once a terminal state is reached. Finished executions show the structured result; failed executions show the failure code and the LLM-generated explanation. A link to the underlying conversation is always shown, giving visibility into the agent's internal message loop.
 
 ---
 

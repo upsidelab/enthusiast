@@ -301,17 +301,14 @@ The catalog enrichment plugin is the reference implementation. The existing `Cat
 
 ## 6. Frontend
 
-Three views are added, all dataset-scoped following the `/data-sets/:dataSetId/...` convention. An **Executions** link is added to the **Configure** section of the sidebar, visible to all authenticated users.
+Two views are added, all dataset-scoped following the `/data-sets/:dataSetId/...` convention. An **Executions** link is added to the **Configure** section of the sidebar, visible to all authenticated users. Executions are started programmatically via the REST API — there is no launch form in the UI.
 
 | Path | Purpose |
 |------|---------|
-| `/data-sets/:dataSetId/agent-executions` | History dashboard — paginated table filterable by agent and status, "New Execution" button |
-| `/data-sets/:dataSetId/agent-executions/new` | Launch form — agent selector → execution-type selector → dynamic input form → submit |
+| `/data-sets/:dataSetId/agent-executions` | History dashboard — paginated table filterable by agent and status |
 | `/data-sets/:dataSetId/agent-executions/:executionId` | Detail view — live status polling, result or failure display, link to the execution's conversation |
 
 **History dashboard** lists past executions for the current dataset with agent and status filters. Filter state is kept in URL search params so it survives refresh.
-
-**Launch form** walks the user through three progressive steps: pick an agent (from the current dataset), pick an execution type (auto-selected when only one is available), then fill in the input form. The input form is generated dynamically from the `input_schema` returned by the execution-types endpoint, covering scalar field types. Submitting redirects to the detail view.
 
 **Detail view** polls the execution status every 3 seconds while the job is running and stops once a terminal state is reached. Finished executions show the structured result; failed executions show the failure code and the LLM-generated explanation. A link to the underlying conversation is always shown, giving visibility into the agent's internal message loop.
 

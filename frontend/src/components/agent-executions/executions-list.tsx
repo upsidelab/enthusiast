@@ -2,8 +2,6 @@ import { useCallback, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { TableCell, TableRow } from "@/components/ui/table.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select.tsx";
-import { Button } from "@/components/ui/button.tsx";
-import { Plus } from "lucide-react";
 import { DEFAULT_PAGE_PARAM, PaginatedTable } from "@/components/util/paginated-table.tsx";
 import { ExecutionStatusBadge } from "@/components/agent-executions/execution-status-badge.tsx";
 import { ApiClient } from "@/lib/api.ts";
@@ -55,11 +53,6 @@ export function ExecutionsList() {
 
   return (
     <div>
-      <div className="flex items-center justify-end mb-4">
-        <Button onClick={() => navigate(`/data-sets/${dataSetId}/agent-executions/new`)}>
-          <Plus className="h-4 w-4" />New Execution
-        </Button>
-      </div>
 
       {(hasItems || hasActiveFilters) && <div className="flex gap-3 mb-6">
         <Select

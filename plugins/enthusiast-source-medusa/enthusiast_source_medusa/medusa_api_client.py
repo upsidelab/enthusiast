@@ -29,7 +29,8 @@ class MedusaAPIClient:
             raise ECommerceConnectorError(message, status_code=response.status_code)
         return response.json()
 
-    def _propagate_request_error(self, url: str, exc: requests.exceptions.RequestException) -> None:
+    @staticmethod
+    def _propagate_request_error(url: str, exc: requests.exceptions.RequestException) -> None:
         """Translate a requests exception into an ECommerceConnectorError and raise it.
 
         Walks the exception chain to find the root cause, since requests wraps low-level

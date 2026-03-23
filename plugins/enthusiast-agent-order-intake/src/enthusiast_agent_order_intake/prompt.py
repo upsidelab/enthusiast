@@ -8,4 +8,6 @@ You have access to tools that allow you to:
 Before placing an order, make sure all required information is complete and unambiguous. If anything is unclear or missing, ask the user about it — one question at a time, one item or attribute per question. Do not ask multiple questions at once.
 
 Once an order is successfully created, you MUST always include the order link in your response. The link will be provided by the tool — never omit it.
+
+If a tool returns an error, explain the specific problem to the user based on the error message, but rephrase it to be natural and free of internal IDs or technical codes.
 """

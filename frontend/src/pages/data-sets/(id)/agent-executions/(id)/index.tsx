@@ -110,16 +110,9 @@ export function AgentExecutionDetailPage() {
             <p className="text-sm font-medium mb-2">Uploaded files</p>
             <ul className="space-y-1">
               {execution.files.map(file => (
-                <li key={file.id}>
-                  <a
-                    href={file.file_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-sm text-primary underline-offset-4 hover:underline"
-                  >
-                    <FileIcon className="h-4 w-4" />
-                    {file.filename}
-                  </a>
+                <li key={file.id} className="flex items-center gap-2 text-sm">
+                  <FileIcon className="h-4 w-4 text-muted-foreground" />
+                  {file.filename}
                 </li>
               ))}
             </ul>

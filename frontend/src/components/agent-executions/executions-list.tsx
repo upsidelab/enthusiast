@@ -4,7 +4,7 @@ import { TableCell, TableRow } from "@/components/ui/table.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Plus } from "lucide-react";
-import { PaginatedTable } from "@/components/util/paginated-table.tsx";
+import { DEFAULT_PAGE_PARAM, PaginatedTable } from "@/components/util/paginated-table.tsx";
 import { ExecutionStatusBadge } from "@/components/agent-executions/execution-status-badge.tsx";
 import { ApiClient } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
@@ -39,6 +39,7 @@ export function ExecutionsList() {
       const next = new URLSearchParams(prev);
       if (value) next.set(key, value);
       else next.delete(key);
+      next.delete(DEFAULT_PAGE_PARAM);
       return next;
     });
   };
@@ -94,7 +95,6 @@ export function ExecutionsList() {
 
       <PaginatedTable
         loadItems={loadItems}
-        itemsReloadDependencies={[agentId, status]}
         noItemsMessage={hasActiveFilters ? "No agent executions match your criteria" : "No agent executions created yet"}
         tableHeaders={["Status", "Agent", "Execution type", "Started", "Duration"]}
         tableHeaderWidths={["11%", "26%", "26%", "26%", "11%"]}

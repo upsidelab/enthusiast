@@ -147,7 +147,7 @@ class AgentExecutionListView(ListAPIView):
         status = self.request.query_params.get("status")
         if status:
             qs = qs.filter(status=status)
-        return qs
+        return qs.order_by("-started_at")
 
 
 class AgentExecutionDetailView(RetrieveAPIView):

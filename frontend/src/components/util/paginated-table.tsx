@@ -18,6 +18,7 @@ interface PaginatedTableProps<T> {
   noItemsMessage: string;
   tableFooter?: string;
   tableHeaders: string[];
+  tableHeaderWidths?: string[];
   tableRow: (item: T, index: number) => ReactNode;
 }
 
@@ -26,6 +27,7 @@ export function PaginatedTable<T>({
                                     itemsReloadDependencies,
                                     noItemsMessage,
                                     tableHeaders,
+                                    tableHeaderWidths,
                                     tableRow,
                                     tableFooter
                                   }: PaginatedTableProps<T>) {
@@ -72,6 +74,11 @@ export function PaginatedTable<T>({
   return (
     <SkeletonLoader skeleton={<Skeleton className="w-full h-[100px]"/>} isLoading={isLoading}>
       <Table>
+        {tableHeaderWidths && (
+          <colgroup>
+            {tableHeaderWidths.map((w, i) => <col key={i} style={{ width: w }} />)}
+          </colgroup>
+        )}
         {tableFooter && <TableCaption>{tableFooter}</TableCaption>}
         <TableHeader>
           <TableRow>

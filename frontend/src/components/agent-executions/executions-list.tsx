@@ -97,6 +97,7 @@ export function ExecutionsList() {
         itemsReloadDependencies={[agentId, status]}
         noItemsMessage={hasActiveFilters ? "No agent executions match your criteria" : "No agent executions created yet"}
         tableHeaders={["Status", "Agent", "Execution type", "Started", "Duration"]}
+        tableHeaderWidths={["11%", "26%", "26%", "26%", "11%"]}
         tableRow={(item: AgentExecution, index) => (
           <TableRow
             key={index}

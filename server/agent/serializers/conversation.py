@@ -102,10 +102,14 @@ class ConversationContentSerializer(serializers.ModelSerializer):
     history = MessagesSerializer(many=True, source="messages")
 
     agent = AgentListSerializer()
+    is_execution_conversation = serializers.SerializerMethodField()
 
     class Meta:
         model = Conversation
-        fields = ["id", "started_at", "summary", "history", "agent"]
+        fields = ["id", "started_at", "summary", "history", "agent", "is_execution_conversation"]
+
+    def get_is_execution_conversation(self, obj) -> bool:
+        return hasattr(obj, "agent_execution")
 
 
 class ConversationFileSerializer(serializers.ModelSerializer):

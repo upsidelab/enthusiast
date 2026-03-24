@@ -116,7 +116,7 @@ class ConversationView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         if not request.user.has_dataset_access(conversation.data_set):
             return Response({"detail": "No dataset access."}, status=status.HTTP_403_FORBIDDEN)
-        if conversation.agent.deleted_at is not None:
+        if conversation.agent.deleted_at is not None or hasattr(conversation, "agent_execution"):
             return Response({"detail": "Conversation locked."}, status=status.HTTP_400_BAD_REQUEST)
 
         if file_ids := serializer.validated_data.get("file_ids"):

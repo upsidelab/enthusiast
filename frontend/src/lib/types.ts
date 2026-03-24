@@ -76,6 +76,7 @@ export type Conversation = {
   summary?: string;
   agent: Agent;
   history?: Message[];
+  is_execution_conversation: boolean;
 }
 
 export type Message = {

@@ -500,6 +500,19 @@ class TestConversationView:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.data["detail"] == "Conversation locked."
 
+    def test_execution_conversation_post_returns_400(self, api_client, conversation, url):
+        baker.make(AgentExecution, agent=conversation.agent, conversation=conversation, input={})
+
+        payload = {
+            "data_set_id": conversation.data_set.id,
+            "question_message": "Hello?",
+            "streaming": False,
+        }
+        response = api_client.post(url, payload, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data["detail"] == "Conversation locked."
+
     def test_conversation_not_found_returns_404(self, api_client):
         url = reverse("conversation-details", kwargs={"conversation_id": 99999})
         payload = {

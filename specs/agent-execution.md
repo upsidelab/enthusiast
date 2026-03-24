@@ -263,6 +263,16 @@ No new field is added to `Conversation` — the reverse relation from `AgentExec
 
 The conversation remains accessible directly via `GET /api/conversations/<id>/` (e.g. for debugging or admin inspection) and is surfaced in context through the execution detail response which includes the `conversation_id`.
 
+### Read-only Enforcement for Execution Conversations
+
+Execution conversations are created by the system, not by the user, and must not receive further user messages. Both the API and the frontend enforce this constraint.
+
+**API**: `ConversationView.post()` (the "ask a question" endpoint) checks whether the conversation is linked to an `AgentExecution` record via `hasattr(conversation, "agent_execution")`. If it is, the request is rejected with `400 Conversation locked.` — the same response returned for deleted-agent conversations.
+
+**Serializer**: `ConversationContentSerializer` exposes an `is_execution_conversation: bool` field computed from the `agent_execution` reverse relation. This lets the frontend determine at render time whether the conversation is read-only without a separate API call.
+
+**Frontend**: When `is_execution_conversation` is `true` on the loaded conversation, `ChatSession` includes it in the `conversationLocked` flag passed to `ChatWindow`. The `MessageComposer` disables the textarea and send button and shows the placeholder "This conversation is read-only." — consistent with the existing locked-conversation behaviour for deleted or corrupted agents.
+
 ### File Map
 
 ```

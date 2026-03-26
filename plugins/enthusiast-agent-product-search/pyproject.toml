@@ -9,9 +9,13 @@ readme = "README.md"
 requires-python = ">=3.10,<4"
 dependencies = [
     "enthusiast-common (>=1.6.0,<2.0.0)",
-    "langchain (>=0.3.26,<0.4.0)",
-    "enthusiast_agent_tool_calling (>=1.1.0)"
+    "langchain (>=1.2.0,<2.0.0)",
+    "enthusiast-agent-tool-calling (>=1.1.0)",
 ]
+
+[tool.poetry.dependencies]
+enthusiast-common = {path = "../enthusiast-common", develop = true}
+enthusiast-agent-tool-calling = {path = "../enthusiast-agent-tool-calling", develop = true}
 
 [project.urls]
 Homepage = "https://upsidelab.io/tools/enthusiast"

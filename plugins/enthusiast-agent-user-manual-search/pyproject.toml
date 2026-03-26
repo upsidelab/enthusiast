@@ -13,6 +13,10 @@ dependencies = [
     "enthusiast-agent-tool-calling (>=1.1.0)",
 ]
 
+[tool.poetry.dependencies]
+enthusiast-common = {path = "../enthusiast-common", develop = true}
+enthusiast-agent-tool-calling = {path = "../enthusiast-agent-tool-calling", develop = true}
+
 [project.urls]
 Homepage = "https://upsidelab.io/tools/enthusiast"
 Documentation = "https://upsidelab.io/tools/enthusiast/agents/user-manual-search"

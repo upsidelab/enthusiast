@@ -1,20 +1,21 @@
 [project]
 name = "enthusiast"
-requires-python = ">=3.10, <4.0"
+requires-python = ">=3.12, <4.0"
 dependencies = [
     "celery (==5.5.3)",
     "channels (==4.2.2)",
     "channels-redis (==4.2.1)",
     "daphne (==4.2.1)",
-    "django (>=5.2.12,<6.0.0)",
+    "django (==5.2.9)",
     "django-cors-headers (==4.7.0)",
     "django-environ (==0.12.0)",
     "djangorestframework (==3.16.0)",
     "drf-yasg (==1.21.10)",
-    "enthusiast-common (==1.6.1)",
-    "enthusiast-source-sample (==1.3.0)",
-    "enthusiast-model-openai (==1.4.0)",
-    "langchain (==0.3.27)",
+    "enthusiast-common @ file:///Users/dawid/PycharmProjects/enthusiast/plugins/enthusiast-common",
+    "enthusiast-source-sample @ file:///Users/dawid/PycharmProjects/enthusiast/plugins/enthusiast-source-sample",
+    "enthusiast-model-openai @ file:///Users/dawid/PycharmProjects/enthusiast/plugins/enthusiast-model-openai",
+    "langchain (>=1.0.0,<2.0.0)",
+    "langchain-classic (>=1.0.0,<2.0.0)",
     "pgvector (==0.4.1)",
     "psycopg2 (==2.9.10)",
     "pytest-django (==4.11.1)",
@@ -23,10 +24,24 @@ dependencies = [
     "whitenoise (==6.9.0)",
     "model-bakery (>=1.20.5,<2.0.0)",
     "django-filter (>=25.1,<26.0)",
-    "pypdf (>=6.8.0,<7.0.0)",
-    "pillow (>=12.1.1,<13.0.0)",
+    "pypdf (>=6.0.0, <7.0.0)",
+    "pillow (>=11.3.0,<12.0.0)",
     "sqlglot (>=28.5.0,<29.0.0)",
+    "enthusiast-agent-catalog-enrichment @ file:///Users/dawid/PycharmProjects/enthusiast/plugins/enthusiast-agent-catalog-enrichment",
+    "enthusiast-agent-product-search @ file:///Users/dawid/PycharmProjects/enthusiast/plugins/enthusiast-agent-product-search",
+    "enthusiast-source-winderen @ file:///Users/dawid/PycharmProjects/enthusiast/plugins/enthusiast-source-winderen",
+    "enthusiast-agent-tool-calling @ file:///Users/dawid/PycharmProjects/enthusiast/plugins/enthusiast-agent-tool-calling",
+    "enthusiast-agent-user-manual-search @ file:///Users/dawid/PycharmProjects/enthusiast/plugins/enthusiast-agent-user-manual-search",
+    "enthusiast-source-medusa @ file:///Users/dawid/PycharmProjects/enthusiast/plugins/enthusiast-source-medusa",
+    "enthusiast-agent-order-intake @ file:///Users/dawid/PycharmProjects/enthusiast/plugins/enthusiast-agent-order-intake",
 ]
 
 [tool.poetry]
 package-mode = false
+[tool.poetry.dependencies]
+enthusiast-agent-order-intake = {develop = true}
+enthusiast-common = {path = "../plugins/enthusiast-common", develop = true}
+enthusiast-agent-tool-calling = {path = "../plugins/enthusiast-agent-tool-calling", develop = true}
+enthusiast-agent-catalog-enrichment = {path = "../plugins/enthusiast-agent-catalog-enrichment", develop = true}
+enthusiast-agent-product-search = {path = "../plugins/enthusiast-agent-product-search", develop = true}
+enthusiast-agent-user-manual-search = {path = "../plugins/enthusiast-agent-user-manual-search", develop = true}

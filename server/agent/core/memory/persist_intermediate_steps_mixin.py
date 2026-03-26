@@ -1,8 +1,8 @@
 from abc import ABC
 from typing import Any, Dict, cast
 
-from langchain.agents.output_parsers.tools import ToolAgentAction
-from langchain.memory import ConversationBufferMemory
+from langchain_classic.agents.output_parsers.tools import ToolAgentAction
+from langchain_classic.memory import ConversationBufferMemory
 from langchain_core.messages import AIMessage, BaseMessage, FunctionMessage, HumanMessage
 
 from agent.models import Message

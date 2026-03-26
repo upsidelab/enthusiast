@@ -1,4 +1,4 @@
-from langchain.memory import ConversationSummaryBufferMemory
+from langchain_classic.memory import ConversationSummaryBufferMemory
 
 from .persist_intermediate_steps_mixin import PersistIntermediateStepsMixin
 

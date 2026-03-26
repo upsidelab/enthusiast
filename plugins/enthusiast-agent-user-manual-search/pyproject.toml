@@ -8,8 +8,8 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.10,<4"
 dependencies = [
-    "enthusiast-common (>=1.6.0,<2.0.0)",
-    "langchain (>=0.3.26,<0.4.0)",
+    "enthusiast-common (>=2.0.0,<3.0.0)",
+    "langchain (>=1.0.0,<2.0.0)",
     "enthusiast_agent_tool_calling (>=1.1.0)"
 ]
 
@@ -21,6 +21,10 @@ Issues = "https://github.com/upsidelab/enthusiast/issues"
 
 [tool.poetry]
 packages = [{include = "enthusiast_agent_user_manual_search", from = "src"}]
+
+[tool.poetry.dependencies]
+enthusiast-common = {path = "../enthusiast-common", develop = true}
+enthusiast-agent-tool-calling = {path = "../enthusiast-agent-tool-calling", develop = true}
 
 
 [build-system]

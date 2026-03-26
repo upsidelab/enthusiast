@@ -4,7 +4,7 @@ from typing import Optional
 from enthusiast_common.connectors import ECommercePlatformConnector
 from enthusiast_common.retrievers import BaseProductRetriever, BaseVectorStoreRetriever
 from enthusiast_common.structures import RepositoriesInstances, DocumentChunkDetails
-from langchain_core.memory import BaseMemory
+from langchain_classic.schema import BaseMemory
 
 
 class BaseInjector(ABC):

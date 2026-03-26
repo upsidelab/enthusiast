@@ -3,7 +3,7 @@ from typing import Any, Generic, Optional, TypeVar
 
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.memory import BaseMemory
+from langchain_classic.schema import BaseMemory
 from langchain_core.prompts import BasePromptTemplate
 from langchain_core.tools import BaseTool
 

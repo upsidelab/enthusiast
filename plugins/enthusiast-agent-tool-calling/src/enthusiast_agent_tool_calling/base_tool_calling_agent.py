@@ -1,8 +1,8 @@
 from typing import Any
 
 from enthusiast_common.agents import BaseAgent
-from langchain.agents import AgentExecutor, create_tool_calling_agent
-from langchain_core.memory import BaseMemory
+from langchain_classic.agents import AgentExecutor, create_tool_calling_agent
+from langchain_classic.schema import BaseMemory
 from langchain_core.tools import BaseTool
 
 

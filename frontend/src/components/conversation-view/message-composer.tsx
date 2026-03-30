@@ -270,7 +270,7 @@ const handleFilesChange = async (files: UploadedFile[]) => {
           <Textarea
             id="message"
             ref={inputRef}
-            placeholder={conversationLocked ? "This agent is no longer available." : "Type your message..."}
+            placeholder={conversationLocked ? "This conversation is read-only." : "Type your message..."}
             className="w-full resize-none border-0 focus-visible:ring-0 focus-visible:outline-none shadow-none pt-3"
             autoComplete="off"
             value={input}

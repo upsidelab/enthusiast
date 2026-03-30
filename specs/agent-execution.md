@@ -238,12 +238,12 @@ The `input` payload is a JSON-encoded string when sent as part of multipart form
 
 The POST endpoint is nested under `/api/agents/` following the existing convention for child resources (e.g. `api/data_sets/<id>/products`, `api/data_sets/<id>/users`). Read endpoints remain at the flat `/api/agent-executions/` collection, again consistent with how conversations are a flat collection despite belonging to a dataset.
 
-| Method | URL | Description |
-|--------|-----|-------------|
-| GET | `/api/agents/<int:agent_id>/execution-types/` | List all execution types registered for this agent (key, name, description, input_schema). |
-| POST | `/api/agents/<int:agent_id>/executions/` | Start a new execution for the given agent. Accepts `application/json` or `multipart/form-data`. |
-| GET | `/api/agent-executions/` | Paginated execution history (newest first, 25/page). Supports `?agent_id=` filter. |
-| GET | `/api/agent-executions/<int:pk>/` | Fetch a single execution (used for polling) |
+| Method | URL | Description                                                                                                        |
+|--------|-----|--------------------------------------------------------------------------------------------------------------------|
+| GET | `/api/agents/<int:agent_id>/execution-types/` | List all execution types registered for this agent (key, name, description, input_schema).                         |
+| POST | `/api/agents/<int:agent_id>/executions/` | Start a new execution for the given agent. Accepts `application/json` or `multipart/form-data`.                    |
+| GET | `/api/agent-executions/` | Paginated execution history (newest first, 25/page). Supports `?agent_id=`, `?status=` and `?dataset_id=` filters. |
+| GET | `/api/agent-executions/<int:pk>/` | Fetch a single execution (used for polling)                                                                        |
 
 **GET `api/agents/<agent_id>/execution-types/`**: returns a list of `{key, name, description, input_schema}` objects for all execution classes registered for the agent's type. The frontend calls this when rendering the launch form to populate the execution type selector and derive the dynamic input form from `input_schema`. Returns 404 if the agent does not exist; returns an empty list if no execution classes are registered.
 
@@ -262,6 +262,16 @@ queryset = queryset.exclude(agent_execution__isnull=False)
 No new field is added to `Conversation` — the reverse relation from `AgentExecution.conversation` is sufficient. This means the exclusion is implicit and automatic: as soon as an execution links its conversation, it disappears from the standard history.
 
 The conversation remains accessible directly via `GET /api/conversations/<id>/` (e.g. for debugging or admin inspection) and is surfaced in context through the execution detail response which includes the `conversation_id`.
+
+### Read-only Enforcement for Execution Conversations
+
+Execution conversations are created by the system, not by the user, and must not receive further user messages. Both the API and the frontend enforce this constraint.
+
+**API**: `ConversationView.post()` (the "ask a question" endpoint) checks whether the conversation is linked to an `AgentExecution` record via `hasattr(conversation, "agent_execution")`. If it is, the request is rejected with `400 Conversation locked.` — the same response returned for deleted-agent conversations.
+
+**Serializer**: `ConversationContentSerializer` exposes an `is_execution_conversation: bool` field computed from the `agent_execution` reverse relation. This lets the frontend determine at render time whether the conversation is read-only without a separate API call.
+
+**Frontend**: When `is_execution_conversation` is `true` on the loaded conversation, `ChatSession` includes it in the `conversationLocked` flag passed to `ChatWindow`. The `MessageComposer` disables the textarea and send button and shows the placeholder "This conversation is read-only." — consistent with the existing locked-conversation behaviour for deleted or corrupted agents.
 
 ### File Map
 
@@ -301,17 +311,16 @@ The catalog enrichment plugin is the reference implementation. The existing `Cat
 
 ## 6. Frontend
 
-Three routes added to the authenticated router in `frontend/src/main.tsx`:
+Two views are added, all dataset-scoped following the `/data-sets/:dataSetId/...` convention. An **Executions** link is added to the **Configure** section of the sidebar, visible to all authenticated users. Executions are started programmatically via the REST API — there is no launch form in the UI.
 
-| Path | Component | Purpose |
-|------|-----------|---------|
-| `/agent-executions` | `AgentExecutionsPage` | History table + "New execution" button |
-| `/agent-executions/new` | `NewAgentExecutionPage` | Select agent (filtered to those with a registered execution class), fill input form, submit |
-| `/agent-executions/:id` | `AgentExecutionDetailPage` | Status polling + result/failure display, link to the created conversation |
+| Path | Purpose |
+|------|---------|
+| `/data-sets/:dataSetId/agent-executions` | History dashboard — paginated table filterable by agent and status |
+| `/data-sets/:dataSetId/agent-executions/:executionId` | Detail view — live status polling, result or failure display, link to the execution's conversation |
 
-API client (`frontend/src/lib/api/agent-executions.ts`) exposes `list(filters?)`, `get(id)`, `getTypes(agentId)`, `start(agentId, executionKey, input)` and is integrated into `ApiClient` via `agentExecutions()`.
+**History dashboard** lists past executions for the current dataset with agent and status filters. Filter state is kept in URL search params so it survives refresh.
 
-`NewAgentExecutionPage` first renders an agent selector. Once an agent is selected, it calls `GET /api/agents/<id>/execution-types/` to fetch available execution types. If more than one type is returned, the user selects one; if exactly one, it is pre-selected automatically. The selected type's `input_schema` drives a dynamic form (React Hook Form + Zod). The resolved `execution_key` is submitted alongside `input` in the POST body. `AgentExecutionDetailPage` polls every 3 seconds while `pending` or `in_progress` and links to the execution's conversation when available.
+**Detail view** polls the execution status every 3 seconds while the job is running and stops once a terminal state is reached. Finished executions show the structured result; failed executions show the failure code and the LLM-generated explanation. A link to the underlying conversation is always shown, giving visibility into the agent's internal message loop.
 
 ---
 

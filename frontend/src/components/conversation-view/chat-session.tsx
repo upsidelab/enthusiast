@@ -59,6 +59,7 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
   const conversationId = Number(chatId);
   const isAgentDeleted = !!conversation?.agent.deleted_at;
   const isAgentCorrupted = !!conversation?.agent.corrupted;
+  const isExecutionConversation = !!conversation?.is_execution_conversation;
 
   const scrollToLastMessage = (timeout = 0) => {
     setTimeout(() => {
@@ -309,7 +310,7 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
             className="pt-16"
             onSubmit={onMessageComposerSubmit}
             isLoading={isLoading}
-            conversationLocked={isAgentDeleted || isAgentCorrupted}
+            conversationLocked={isAgentDeleted || isAgentCorrupted || isExecutionConversation}
             conversationId={conversationId}
             agentId={agentId}
             fileUploadEnabled={agentDetails?.file_upload}

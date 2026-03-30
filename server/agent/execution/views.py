@@ -16,6 +16,7 @@ from agent.execution.services import (
 from agent.models.agent import Agent
 from agent.models.agent_execution import AgentExecution
 from agent.serializers.agent_execution import (
+    AgentExecutionDetailSerializer,
     AgentExecutionSerializer,
     AgentExecutionTypeSerializer,
     StartAgentExecutionSerializer,
@@ -121,8 +122,14 @@ class AgentExecutionListView(ListAPIView):
         operation_description="List all past agent executions, newest first. Optionally filter by agent_id.",
         manual_parameters=[
             openapi.Parameter(
+                "dataset_id", openapi.IN_QUERY, description="Filter by dataset ID", type=openapi.TYPE_INTEGER
+            ),
+            openapi.Parameter(
                 "agent_id", openapi.IN_QUERY, description="Filter by agent ID", type=openapi.TYPE_INTEGER
-            )
+            ),
+            openapi.Parameter(
+                "status", openapi.IN_QUERY, description="Filter by status (pending, in_progress, finished, failed)", type=openapi.TYPE_STRING
+            ),
         ],
         responses={200: AgentExecutionSerializer(many=True)},
     )
@@ -131,27 +138,33 @@ class AgentExecutionListView(ListAPIView):
 
     def get_queryset(self):
         qs = AgentExecution.objects.select_related("agent")
+        dataset_id = self.request.query_params.get("dataset_id")
+        if dataset_id:
+            qs = qs.filter(agent__dataset_id=dataset_id)
         agent_id = self.request.query_params.get("agent_id")
         if agent_id:
             qs = qs.filter(agent_id=agent_id)
-        return qs
+        status = self.request.query_params.get("status")
+        if status:
+            qs = qs.filter(status=status)
+        return qs.order_by("-started_at")
 
 
 class AgentExecutionDetailView(RetrieveAPIView):
     """Fetch a single execution record (used for status polling)."""
 
     permission_classes = [IsAuthenticated]
-    serializer_class = AgentExecutionSerializer
+    serializer_class = AgentExecutionDetailSerializer
 
     @swagger_auto_schema(
         operation_description="Fetch a single execution record by ID.",
         manual_parameters=[
             openapi.Parameter("id", openapi.IN_PATH, description="ID of the execution", type=openapi.TYPE_INTEGER)
         ],
-        responses={200: AgentExecutionSerializer(), 404: "Not Found"},
+        responses={200: AgentExecutionDetailSerializer(), 404: "Not Found"},
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        return AgentExecution.objects.select_related("agent")
+        return AgentExecution.objects.select_related("agent", "conversation")

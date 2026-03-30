@@ -4,31 +4,48 @@ from pydantic import ValidationError as PydanticValidationError
 from rest_framework import serializers
 
 from agent.models.agent_execution import AgentExecution
+from agent.serializers.conversation import ConversationFileSerializer
+
+_BASE_FIELDS = [
+    "id",
+    "agent",
+    "execution_key",
+    "conversation",
+    "status",
+    "input",
+    "result",
+    "failure_code",
+    "failure_explanation",
+    "celery_task_id",
+    "started_at",
+    "finished_at",
+    "duration_seconds",
+]
 
 
 class AgentExecutionSerializer(serializers.ModelSerializer):
-    """Read serializer for AgentExecution records."""
+    """Lightweight read serializer used for list responses."""
 
     duration_seconds = serializers.FloatField(read_only=True)
 
     class Meta:
         model = AgentExecution
-        fields = [
-            "id",
-            "agent",
-            "execution_key",
-            "conversation",
-            "status",
-            "input",
-            "result",
-            "failure_code",
-            "failure_explanation",
-            "celery_task_id",
-            "started_at",
-            "finished_at",
-            "duration_seconds",
-        ]
+        fields = _BASE_FIELDS
+        read_only_fields = _BASE_FIELDS
+
+
+class AgentExecutionDetailSerializer(AgentExecutionSerializer):
+    """Extended read serializer used for the detail endpoint. Includes uploaded files."""
+
+    files = serializers.SerializerMethodField()
+
+    class Meta(AgentExecutionSerializer.Meta):
+        fields = _BASE_FIELDS + ["files"]
         read_only_fields = fields
+
+    def get_files(self, obj: AgentExecution):
+        """Return non-hidden files attached to the execution's conversation."""
+        return ConversationFileSerializer(obj.conversation.files.filter(is_hidden=False), many=True).data
 
 
 class AgentExecutionTypeSerializer(serializers.Serializer):

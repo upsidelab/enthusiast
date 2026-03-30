@@ -22,6 +22,8 @@ import { ConfigureDataSetDocumentSource } from "@/pages/data-sets/(id)/document-
 import { UsersIndex } from "@/pages/users";
 import { OnboardingIndex } from "@/pages/onboarding";
 import AgentsPage from "@/pages/data-sets/(id)/agents";
+import { AgentExecutionsPage } from "@/pages/data-sets/(id)/agent-executions/index.tsx";
+import { AgentExecutionDetailPage } from "@/pages/data-sets/(id)/agent-executions/(id)/index.tsx";
 
 const api = new ApiClient(authenticationProviderInstance);
 
@@ -117,6 +119,14 @@ const router = createBrowserRouter([
       {
         path: '/data-sets/:dataSetId/agents',
         element: <AgentsPage />
+      },
+      {
+        path: '/data-sets/:id/agent-executions',
+        element: <AgentExecutionsPage />
+      },
+      {
+        path: '/data-sets/:id/agent-executions/:executionId',
+        element: <AgentExecutionDetailPage />
       }
     ]
   },

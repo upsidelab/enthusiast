@@ -35,14 +35,14 @@ class PersistentChatHistory(BaseChatMessageHistory):
             )
 
     def _create_intermediate_step_message(self, message: AIMessage) -> None:
-        tool_call = message.tool_calls[0]
-        text = f"Invoking `{tool_call['name']}` with `{tool_call['args']}`."
-        self._conversation.messages.create(
-            type=Message.MessageType.INTERMEDIATE_STEP,
-            text=text,
-            function_name=tool_call["name"],
-            tool_call_id=tool_call["id"],
-        )
+        for tool_call in message.tool_calls:
+            text = f"Invoking `{tool_call['name']}` with `{tool_call['args']}`."
+            self._conversation.messages.create(
+                type=Message.MessageType.INTERMEDIATE_STEP,
+                text=text,
+                function_name=tool_call["name"],
+                tool_call_id=tool_call["id"],
+            )
 
     def create_tool_message(self, message: ToolMessage) -> None:
         self._conversation.messages.create(

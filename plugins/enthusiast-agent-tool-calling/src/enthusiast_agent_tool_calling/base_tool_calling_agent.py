@@ -4,7 +4,7 @@ from langchain_core.chat_history import BaseChatMessageHistory
 
 from enthusiast_common.agents import BaseAgent
 from langchain.agents import create_agent
-from langchain_core.messages import AIMessage, HumanMessage, ToolMessage, trim_messages, BaseMessage
+from langchain_core.messages import AIMessage, HumanMessage, trim_messages, BaseMessage
 from langchain_core.prompts import SystemMessagePromptTemplate
 from langchain_core.tools import BaseTool
 
@@ -16,17 +16,18 @@ class BaseToolCallingAgent(BaseAgent):
         history = self._injector.chat_history
 
         agent = self._build_agent()
-        input_messages = self._build_limited_history(history) + [HumanMessage(content=input_text)]
+        limited_history = self._build_limited_history(history)
+        input_messages = limited_history + [HumanMessage(content=input_text)]
         result = agent.invoke({ "messages": input_messages }, config=self._build_invoke_config())
 
-        new_messages = result["messages"][len(input_messages):]
+        new_messages = result["messages"][len(limited_history):]
         final_message = next(
             m for m in reversed(new_messages)
             if isinstance(m, AIMessage) and not m.tool_calls
         )
 
-        self._persist_turn(history, input_text, new_messages)
-        return final_message.text()
+        history.add_messages(new_messages)
+        return final_message.text
 
     def _build_limited_history(self, history: BaseChatMessageHistory) -> list[BaseMessage]:
         return trim_messages(
@@ -38,28 +39,6 @@ class BaseToolCallingAgent(BaseAgent):
             include_system=True,
             allow_partial=False,
         )
-
-    def _persist_turn(self, history: BaseChatMessageHistory, input_text: str, new_messages: list) -> None:
-        """Persist one conversation turn to history in the correct storage order.
-
-        AIMessages that contain multiple tool calls are split into individual
-        INTERMEDIATE_STEP records, each paired immediately with its FUNCTION result,
-        so that the 1:1 INTERMEDIATE_STEP → FUNCTION pairing invariant is maintained.
-        """
-        tool_results = {msg.tool_call_id: msg for msg in new_messages if isinstance(msg, ToolMessage)}
-
-        history.add_message(HumanMessage(content=input_text))
-        for msg in new_messages:
-            if isinstance(msg, AIMessage) and msg.tool_calls:
-                for tool_call in msg.tool_calls:
-                    history.add_message(AIMessage(content="", tool_calls=[tool_call]))
-                    result_msg = tool_results.get(tool_call["id"])
-                    if result_msg:
-                        history.add_message(result_msg)
-            elif isinstance(msg, ToolMessage):
-                pass  # already written inline above
-            else:
-                history.add_message(msg)
 
     def _build_tools(self) -> list[BaseTool]:
         return [tool.as_tool() for tool in self._tools]

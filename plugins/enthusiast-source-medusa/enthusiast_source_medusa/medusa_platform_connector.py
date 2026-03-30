@@ -3,10 +3,11 @@ import json
 from typing import Optional
 
 from enthusiast_common.connectors import ECommercePlatformConnector
+from enthusiast_common.errors import ECommerceConnectorError
 from enthusiast_common.structures import Address, ProductDetails, ProductUpdateDetails
 
-from .medusa_product_source import MedusaProductSource
 from .medusa_api_client import MedusaAPIClient
+from .medusa_product_source import MedusaProductSource
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +52,10 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
             ]
         }
         response = self._client.post("/admin/draft-orders", payload)
-        return response["draft_order"]["id"]
+        try:
+            return response["draft_order"]["id"]
+        except (KeyError, TypeError):
+            raise ECommerceConnectorError(f"Medusa returned an unexpected response when creating the draft order: {response}")
 
     def get_product_by_sku(self, sku: str) -> Optional[ProductDetails]:
         # On Medusa side, variants do have "sku" field, but it is not possible to filter products by that field.
@@ -98,7 +102,10 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
         payload["variants"] = [variant]
 
         response = self._client.post("/admin/products", payload)
-        return response["product"]["id"]
+        try:
+            return response["product"]["id"]
+        except (KeyError, TypeError):
+            raise ECommerceConnectorError(f"Medusa returned an unexpected response when creating the product: {response}")
 
     def update_product(self, sku: str, product_details: ProductUpdateDetails) -> bool:
         product_details_before_update = self.get_product_by_sku(sku)
@@ -155,8 +162,7 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
         response = self._client.get("/admin/regions")
         regions = response.get("regions", [])
         if not regions:
-            logger.error("No regions configured in Medusa. Fix your Medusa configuration to allow placing orders.")
-
+            raise ECommerceConnectorError("No regions are configured in Medusa. At least one region must exist to place orders.")
         return regions[0]["id"]
 
     def _address_to_payload_dict(self, address: Address) -> dict[str, str]:
@@ -176,7 +182,11 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
         return { key: value for key, value in payload.items() if value is not None }
 
     def _get_default_variant_id_for_product_id(self, product_id: str) -> str:
-        return self._client.get(f"/admin/products/{product_id}")["product"]["variants"][0]["id"]
+        response = self._client.get(f"/admin/products/{product_id}")
+        variants = response.get("product", {}).get("variants", [])
+        if not variants:
+            raise ECommerceConnectorError(f"Product '{product_id}' has no variants and cannot be ordered.")
+        return variants[0]["id"]
 
     def _get_default_store_currency_code(self) -> str:
         store_data = self._get_default_store_data()
@@ -184,10 +194,16 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
             (currency for currency in store_data['supported_currencies'] if currency.get("is_default") is True),
             None
         )
+        if default_currency is None:
+            raise ECommerceConnectorError("No default currency is configured in Medusa. At least one default currency must exist.")
         return default_currency["currency_code"]
 
     def _get_default_store_data(self):
-        return self._client.get("/admin/stores")["stores"][0]
+        response = self._client.get("/admin/stores")
+        try:
+            return response["stores"][0]
+        except (KeyError, IndexError):
+            raise ECommerceConnectorError(f"Medusa returned an unexpected response when fetching store data: {response}")
 
     @staticmethod
     def _parse_properties_to_variant_options(properties: str):

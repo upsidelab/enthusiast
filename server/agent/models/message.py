@@ -23,6 +23,7 @@ class Message(models.Model):
 
     answer_failed = models.BooleanField(default=False)
     function_name = models.CharField(max_length=50, blank=True, null=True)
+    tool_call_id = models.CharField(max_length=255, blank=True, null=True)
     file_name = models.CharField(max_length=256, blank=True, null=True)
     file_type = models.CharField(max_length=50, blank=True, null=True)
 
@@ -33,7 +34,7 @@ class Message(models.Model):
     @property
     def langchain_type(self):
         langchain_type_mapping = {
-            self.MessageType.FUNCTION: "ai",
+            self.MessageType.FUNCTION: "tool",
             self.MessageType.FILE: "human",
             self.MessageType.INTERMEDIATE_STEP: "ai",
             self.MessageType.HUMAN: "human",

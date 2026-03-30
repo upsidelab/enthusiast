@@ -24,7 +24,6 @@ from ..repositories.base import (
 )
 from ..retrievers import BaseRetriever
 from ..tools import BaseAgentTool, BaseFileTool, BaseFunctionTool, BaseLLMTool
-from .prompts import ChatPromptTemplateConfig, PromptTemplateConfig
 
 InjectorT = TypeVar("InjectorT", bound=BaseInjector)
 
@@ -114,12 +113,13 @@ class AgentConfig(ArbitraryTypeBaseModel, Generic[InjectorT]):
     retrievers: RetrieversConfig
     injector: Type[InjectorT]
     registry: RegistryConfig
-    prompt_template: PromptTemplateConfig | ChatPromptTemplateConfig
+    system_prompt: str
     tools: Optional[list[FunctionToolConfig | LLMToolConfig | AgentToolConfig | FileToolConfig]] = None
     agent_callback_handler: Optional[AgentCallbackHandlerConfig] = None
 
 
 class AgentConfigWithDefaults(AgentConfig, Generic[InjectorT]):
+    system_prompt: Optional[str] = None
     repositories: Optional[RepositoriesConfig] = None
     retrievers: Optional[RetrieversConfig] = None
     injector: Optional[Type[InjectorT]] = None

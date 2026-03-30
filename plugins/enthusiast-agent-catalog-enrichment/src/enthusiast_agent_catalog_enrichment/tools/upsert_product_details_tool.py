@@ -15,14 +15,14 @@ logger = logging.getLogger(__name__)
 
 class UpsertProductDetailsInput(BaseModel):
     product_sku: str = Field(description="string with product sku")
-    name: Optional[str] = Field(description="string with product name")
-    slug: Optional[str] = Field(description="string with product slug")
-    description: Optional[str] = Field(description="string with product description")
-    price: Optional[str] = Field(description="string with product price as a decimal number")
-    categories: Optional[str] = Field(description="comma separated string with product category names")
-    property_values_by_property_name_as_json: Optional[str] = Field(description="""
+    name: Optional[str] = Field(default=None, description="string with product name")
+    slug: Optional[str] = Field(default=None, description="string with product slug")
+    description: Optional[str] = Field(default=None, description="string with product description")
+    price: Optional[str] = Field(default=None, description="string with product price as a decimal number")
+    categories: Optional[str] = Field(default=None, description="comma separated string with product category names")
+    property_values_by_property_name_as_json: Optional[str] = Field(default=None, description="""
     JSON string with product properties. It is to be decodable to a not nested, key-value dictionary,
-    with property values by its name. It is to contain all product properties that were not matched 
+    with property values by its name. It is to contain all product properties that were not matched
     to the remaining defined properties. Values are to be strings, even for numeric of boolean properties.""")
 
 

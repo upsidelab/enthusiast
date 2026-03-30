@@ -5,7 +5,6 @@ from langchain_core.chat_history import BaseChatMessageHistory
 from enthusiast_common.agents import BaseAgent
 from langchain.agents import create_agent
 from langchain_core.messages import AIMessage, HumanMessage, trim_messages, BaseMessage
-from langchain_core.prompts import SystemMessagePromptTemplate
 from langchain_core.tools import BaseTool
 
 MAX_HISTORY_TOKENS = 3000
@@ -43,20 +42,8 @@ class BaseToolCallingAgent(BaseAgent):
     def _build_tools(self) -> list[BaseTool]:
         return [tool.as_tool() for tool in self._tools]
 
-    def _get_system_prompt(self) -> str | None:
-        """Extract the static system prompt text from the configured ChatPromptTemplate."""
-        for msg_template in self._prompt.messages:
-            if isinstance(msg_template, SystemMessagePromptTemplate):
-                formatted = msg_template.format()
-                content = formatted.content
-                if isinstance(content, str):
-                    return content
-                elif isinstance(content, list):
-                    return " ".join(
-                        item["text"] if isinstance(item, dict) and "text" in item else str(item)
-                        for item in content
-                    )
-        return None
+    def _get_system_prompt(self) -> str:
+        return self._system_prompt.format(**self._get_system_prompt_variables())
 
     def _build_invoke_config(self) -> dict[str, Any]:
         if self._callback_handler:

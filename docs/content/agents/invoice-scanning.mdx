@@ -1,0 +1,23 @@
+import Agent from "@/components/agent";
+
+export const description = "The Invoice Scanning agent extracts attributes from invoices. It can be customized to pull different attribute sets and can flag unclear or missing information, triggering a human-in-the-loop step when clarification is required.";
+
+export const useCases = [
+  {
+    title: "TO DO",
+    description: "TO DO"
+  },
+  {
+    title: "TO DO",
+    description: "TO DO"
+  },
+];
+
+<Agent
+  name="Invoice Scanning"
+  integrationKey="enthusiast-agent-invoice-scanning"
+  pipName="enthusiast-agent-invoice-scanning"
+  registerAgentModule="enthusiast_agent_invoice_scanning"
+  agentDescription={description}
+  agentUseCases={useCases}
+/>

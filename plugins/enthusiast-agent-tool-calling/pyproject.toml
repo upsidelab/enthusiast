@@ -12,9 +12,6 @@ dependencies = [
     "langchain (>=1.2.0,<2.0.0)",
 ]
 
-[tool.poetry.dependencies]
-enthusiast-common = {path = "../enthusiast-common", develop = true}
-
 [tool.poetry]
 packages = [{include = "enthusiast_agent_tool_calling", from = "src"}]
 

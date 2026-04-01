@@ -48,7 +48,7 @@ After `invoke()`, new messages are written in one call via `history.add_messages
 
 ## Phase 4 — Callback / WebSocket Cleanup
 
-**Problem:** `on_chain_start` / `on_chain_end` were the original lifecycle hooks (0.3, `AgentExecutor`-era). They fired once per agent turn. In LangGraph they fire for every graph node, making them useless as turn-level signals. They never actually fired in production because the handler was registered on the LLM instance, not on the agent/graph.
+**Problem:** `on_chain_start` / `on_chain_end` were the original lifecycle hooks (0.3, `AgentExecutor`-era). They fired once per agent turn. In LangGraph they fire for every graph node, making them useless as turn-level signals. They never actually fired in production because the handler was registered on the LLM instance, not on the agent/graph (they actually fired only for ReAct Agents since they configured handler on agent, not on LLM, and since their deprecation those callbacks became dead code).
 
 **Decision:** `ConversationWebSocketCallbackHandler` now handles only `on_llm_new_token` (with a falsy-token guard). Start/end events are no longer sent over WebSocket.
 

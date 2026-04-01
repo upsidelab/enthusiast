@@ -35,11 +35,6 @@ class Message(BaseModel):
         return self.model_dump(mode="json")
 
 
-class PromptTemplateConfig(BaseModel):
-    prompt_template: str
-    input_variables: list[str]
-
-
 class ChatPromptTemplateConfig(BaseModel):
     messages: list[Message]
 

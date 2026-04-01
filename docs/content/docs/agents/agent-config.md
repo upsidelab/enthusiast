@@ -22,8 +22,7 @@ class AgentConfig(ArbitraryTypeBaseModel, Generic[InjectorT]):
     retrievers: RetrieversConfig
     injector: Type[InjectorT]
     registry: RegistryConfig
-    prompt_template: Optional[PromptTemplateConfig] = None
-    chat_prompt_template: Optional[ChatPromptTemplateConfig] = None
+    system_prompt: str
     tools: Optional[list[FunctionToolConfig | LLMToolConfig | AgentToolConfig]] = None
     agent_callback_handler: Optional[AgentCallbackHandlerConfig] = None
 ```
@@ -81,11 +80,10 @@ class AgentConfig(ArbitraryTypeBaseModel, Generic[InjectorT]):
   - `embeddings`: Embedding provider registry configuration
   - `model`: Database model registry configuration
 
-#### 7. **prompt_template** / **chat_prompt_template**
-- **Type**: `PromptTemplateConfig` or `ChatPromptTemplateConfig`
-- **Required**: Exactly one must be provided
-- **Description**: Prompt configuration for agent behavior and instructions
-- **Validation**: The system ensures exactly one prompt type is configured
+#### 7. **system_prompt**
+- **Type**: `str`
+- **Required**: Yes
+- **Description**: The system prompt passed to the agent. May contain `{variable}` placeholders resolved via the agent's `_get_system_prompt_variables()` hook.
 
 #### 8. **tools**
 - **Type**: `Optional[list[FunctionToolConfig | LLMToolConfig | AgentToolConfig]]`

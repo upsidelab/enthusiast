@@ -16,97 +16,47 @@ Prompts in Enthusiast serve several key purposes:
 - **Output Formatting**: Define the expected structure and format of responses
 - **Context Management**: Handle conversation history and current context
 
-## Supported Prompt Types
-
-Enthusiast supports two main prompt types, each designed for different use cases:
-
-### 1. PromptTemplate
-
-Single text template with variable placeholders
-
-### 2. ChatPromptTemplate
-
-Multi-message template with conversational interactions
-
 ## Configuration
 
-### Prompt Configuration Structure
-
-Prompts are configured through the `AgentConfig`:
+The agent system prompt is a plain string passed via `AgentConfig.system_prompt`:
 
 ```python
-class AgentConfig(ArbitraryTypeBaseModel, Generic[InjectorT]):
-    # ... other configuration fields ...
-    
-    prompt_template: Optional[PromptTemplateConfig] = None
-    chat_prompt_template: Optional[ChatPromptTemplateConfig] = None
-
+# prompt.py (conventional location)
+MY_AGENT_SYSTEM_PROMPT = """
+You are a helpful assistant...
+"""
 ```
 
-### PromptTemplate Configuration
-
 ```python
-class PromptTemplateConfig(ArbitraryTypeBaseModel):
-    input_variables: list[str]    # List of variable names used in the template
-    template: str                 # The prompt template string
-```
+# config.py
 
-**Example Configuration**:
-```python
-prompt_template=PromptTemplateConfig(
-    input_variables=["tools", "tool_names", "input", "agent_scratchpad"],
-    template=EXAMPLE_AGENT_PROMPT_TEMPLATE
-)
-```
-
-### ChatPromptTemplate Configuration
-
-```python
-class ChatPromptTemplateConfig(ArbitraryTypeBaseModel):
-    messages: Sequence[MessageLikeRepresentation]  # List of message components
-```
-
-**Example Configuration**:
-```python
-chat_prompt_template=ChatPromptTemplateConfig(
-    messages=[
-        ("system", "You are a sales support agent, and you know everything about a company and their products."),
-        ("placeholder", "{chat_history}"),
-        ("human", "{input}"),
-        ("placeholder", "{agent_scratchpad}"),
-    ]
-)
-```
-
-## Prompt Construction
-
-### Builder Integration
-
-The `AgentBuilder` automatically constructs the appropriate prompt type based on configuration:
-
-```python
-def _build_prompt_template(self) -> BasePromptTemplate:
-    """Build the prompt template for the agent"""
-    if self._config.prompt_template:
-        # Use text-based prompt template
-        return PromptTemplate(
-            input_variables=self._config.prompt_template.input_variables,
-            template=self._config.prompt_template.template,
-        )
-    else:
-        # Use chat-based prompt template
-        return ChatPromptTemplate.from_messages(
-            messages=self._config.chat_prompt_template.messages
+class ExampleConfig(BaseAgentConfigProvider):
+    def get_config(self, config_type: ConfigType = ConfigType.CONVERSATION) -> AgentConfigWithDefaults:
+        return AgentConfigWithDefaults(
+            system_prompt=MY_AGENT_SYSTEM_PROMPT,
+            agent_class=MyAgent,
+            tools=MyAgent.TOOLS,
         )
 ```
+
+## Template Variables
+
+If the system prompt contains `{variable}` placeholders, override `_get_system_prompt_variables()` in the agent class:
+
+```python
+class MyAgent(BaseToolCallingAgent):
+    def _get_system_prompt_variables(self) -> dict:
+        return {"output_format": self.PROMPT_INPUT.output_format}
+```
+
+The base implementation returns `{}`, so agents with static prompts require no override.
 
 ## Summary
 
 Prompts in Enthusiast provide a powerful and flexible foundation for agent behavior:
 
-- **Multiple Types**: Support for both text-based and chat-based prompts
-- **Context Management**: Rich context and conversation history support
-- **Configuration-Driven**: Flexible configuration through the agent config system
-- **Best Practices**: Established patterns for effective prompt design
+- **Plain string**: System prompt is a `str` passed directly to the LLM via LangGraph
+- **Context Management**: Conversation history and token limiting handled automatically by `BaseToolCallingAgent`
+- **Configuration-Driven**: Prompt passed through the agent config system
 
 By understanding and effectively using the prompt system, developers can create agents that exhibit sophisticated reasoning, clear communication, and effective tool usage while maintaining flexibility and extensibility.

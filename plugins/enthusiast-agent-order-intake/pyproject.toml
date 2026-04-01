@@ -14,11 +14,6 @@ dependencies = [
     "enthusiast-agent-product-search (>=1.3.0,<2.0.0)",
 ]
 
-[tool.poetry.dependencies]
-enthusiast-common = {path = "../enthusiast-common", develop = true}
-enthusiast-agent-tool-calling = {path = "../enthusiast-agent-tool-calling", develop = true}
-enthusiast-agent-product-search = {path = "../enthusiast-agent-product-search", develop = true}
-
 [project.urls]
 Homepage = "https://upsidelab.io/tools/enthusiast"
 Documentation = "https://upsidelab.io/tools/enthusiast/agents/order-intake"

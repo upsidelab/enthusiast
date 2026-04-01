@@ -84,15 +84,12 @@ class ExampleAgent(BaseAgent):
     ]
 ```
 
-Those arguments can be accessed by agent like this:
+Those arguments can be accessed inside the agent. For example, `_get_system_prompt_variables()` is called before each invocation to resolve `{variable}` placeholders in the system prompt:
 
 ```python
 
-    def get_answer(self, input_text: str) -> str:
-        agent_output = self._agent_executor.invoke(
-            {"input": input_text, "product_type": self.PROMPT_INPUT.product_type}
-        )
-        return agent_output["output"]
+    def _get_system_prompt_variables(self) -> dict:
+        return {"output_format": self.PROMPT_INPUT.output_format}
 
 ```
 
@@ -107,38 +104,57 @@ The `BaseToolCallingAgent` implements the standard tool calling pattern, leverag
 ```python
 class BaseToolCallingAgent(BaseAgent):
     def get_answer(self, input_text: str) -> str:
-        # Build and execute the agent
-        agent_executor = self._build_agent_executor()
-        response = agent_executor.invoke(
-            {"input": input_text}, 
-            config=self._build_invoke_config()
+        history = self._injector.chat_history
+
+        # Trim history to token budget and append current user message
+        agent = self._build_agent()
+        limited_history = self._build_limited_history(history)
+        input_messages = limited_history + [HumanMessage(content=input_text)]
+
+        # Execute the agent with the full message list
+        result = agent.invoke({"messages": input_messages}, config=self._build_invoke_config())
+
+        # Slice off only the new messages produced this turn, then persist them
+        new_messages = result["messages"][len(limited_history):]
+        final_message = next(
+            m for m in reversed(new_messages)
+            if isinstance(m, AIMessage) and not m.tool_calls
         )
-        return response["output"]
+        history.add_messages(new_messages)
+        return final_message.text
 
     def _build_tools(self) -> list[BaseTool]:
-        """Convert internal tools to LangChain tools"""
+        """Convert internal tools to LangChain BaseTool instances."""
         return [tool.as_tool() for tool in self._tools]
 
-    def _build_memory(self) -> BaseMemory:
-        """Use limited memory for ReAct reasoning"""
-        return self._injector.chat_limited_memory
-
     def _build_invoke_config(self) -> dict[str, Any]:
-        """Configure callback handlers"""
+        """Pass callback handler to the agent invocation if one is configured."""
         if self._callback_handler:
             return {"callbacks": [self._callback_handler]}
         return {}
 
-    def _build_agent_executor(self) -> AgentExecutor:
-        """Create the LangChain agent executor"""
-        tools = self._build_tools()
-        agent = create_tool_calling_agent(
-            tools=tools,
-            llm=self._llm,
-            prompt=self._prompt,
+    def _build_limited_history(self, history: BaseChatMessageHistory) -> list[BaseMessage]:
+        """Trim conversation history to MAX_HISTORY_TOKENS using the LLM as the token counter."""
+        return trim_messages(
+            history.messages,
+            strategy="last",
+            token_counter=self._llm,
+            max_tokens=MAX_HISTORY_TOKENS,
+            start_on=HumanMessage,
+            include_system=True,
+            allow_partial=False,
         )
-        return AgentExecutor(
-            agent=agent, tools=tools, verbose=True, memory=self._build_memory(), return_intermediate_steps=True
+
+    def _get_system_prompt(self) -> str:
+        """Resolve template variables in the system prompt string via _get_system_prompt_variables()."""
+        return self._system_prompt.format(**self._get_system_prompt_variables())
+
+    def _build_agent(self):
+        """Build a LangGraph agent with the configured LLM, tools, and system prompt."""
+        return create_agent(
+            model=self._llm,
+            tools=self._build_tools(),
+            system_prompt=self._get_system_prompt(),
         )
 ```
 

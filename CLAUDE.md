@@ -94,7 +94,7 @@ Plugins are standalone Python packages in `plugins/`:
 - **Tool system**: `BaseTool`, `BaseFunctionTool`, `BaseLLMTool`, `BaseAgentTool` — for building agent capabilities
 - **E-commerce connector**: `ECommercePlatformConnector` ABC for order/product management across platforms
 - **Data structures**: `ProductDetails`, `DocumentDetails`, `Address`, `LLMFile`, content types
-- **Configuration**: Pydantic config models (`AgentConfig`, `LLMConfig`, `RepositoriesConfig`) and prompt template system (`ChatPromptTemplateConfig`, `MessageRole`)
+- **Configuration**: Pydantic config models (`AgentConfig`, `LLMConfig`, `RepositoriesConfig`)
 - **Dependency injection**: `BaseInjector` provides retrievers, connectors, and memory to agents
 
 Each plugin has its own `pyproject.toml` and is installed via poetry.

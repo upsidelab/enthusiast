@@ -124,9 +124,6 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
     const eventType = data.event;
 
     const handlers: Record<string, () => void> = {
-      on_parser_start: () => {
-        setIsAgentLoading(true);
-      },
       on_parser_stream: () => {
         setIsLoading(false);
         setIsAgentLoading(false);

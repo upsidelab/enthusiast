@@ -1,6 +1,5 @@
 import json
 
-from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 
@@ -38,9 +37,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send(json.dumps({"event": "on_parser_stream", "data": {"chunk": event.get("token")}}))
 
     async def handle_end(self, event):
-        output = event.get("output")
-        await self.send(json.dumps({"event": "on_parser_end", "data": {"output": output}}))
-        await self.save_message(output)
+        await self.send(json.dumps({"event": "on_parser_end", "data": {"output": event.get("output")}}))
 
     async def handle_message_created(self, event):
         await self.send(json.dumps({"event": "message_id", "data": {"output": event.get("answer_id")}}))
@@ -51,9 +48,3 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def handle_error(self, event):
         await self.send(json.dumps({"event": "error", "data": {"output": event.get("output")}}))
 
-    async def save_message(self, output):
-        from .models import Conversation, Message
-
-        conversation = await database_sync_to_async(Conversation.objects.get)(id=self.conversation_id)
-        message = Message(conversation=conversation, content=output, sender="system")
-        await database_sync_to_async(message.save)()

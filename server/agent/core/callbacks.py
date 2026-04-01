@@ -16,27 +16,7 @@ class BaseWebSocketHandler(ConversationCallbackHandler):
 
 
 class ConversationWebSocketCallbackHandler(BaseWebSocketHandler):
-    def on_chain_start(self, serialized, inputs, run_id, **kwargs):
-        self.run_id = run_id
-        self.send_message(
-            {
-                "type": "chat_message",
-                "event": "start",
-                "run_id": run_id,
-            },
-        )
-
     def on_llm_new_token(self, token: str, **kwargs):
-        self.send_message(
-            {
-                "type": "chat_message",
-                "event": "stream",
-                "run_id": self.run_id,
-                "token": token,
-            },
-        )
-
-    def on_chain_end(self, outputs, **kwargs):
-        self.send_message(
-            {"type": "chat_message", "event": "end", "run_id": self.run_id, "output": outputs.get("output")},
-        )
+        if not token:
+            return
+        self.send_message({"type": "chat_message", "event": "stream", "token": token})

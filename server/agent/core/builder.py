@@ -11,7 +11,6 @@ from enthusiast_common.config import (
     LLMConfig,
     LLMToolConfig,
 )
-from enthusiast_common.config.prompts import PromptTemplateConfig
 from enthusiast_common.connectors import ECommercePlatformConnector
 from enthusiast_common.injectors import BaseInjector
 from enthusiast_common.registry import BaseDBModelsRegistry, BaseEmbeddingProviderRegistry, BaseLanguageModelRegistry
@@ -19,11 +18,9 @@ from enthusiast_common.retrievers import BaseRetriever
 from enthusiast_common.tools import BaseAgentTool, BaseFileTool, BaseFunctionTool, BaseLLMTool
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_core.tools import BaseTool
 
-from agent.core.memory import PersistentChatHistory, SummaryChatMemory
-from agent.core.memory.limited_chat_memory import LimitedChatMemory
+from agent.core.memory import PersistentChatHistory
 from catalog.models import ECommerceIntegration
 
 
@@ -37,7 +34,7 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         return self._config.agent_class(
             tools=tools,
             llm=llm,
-            prompt=self._prompt,
+            system_prompt=self._config.system_prompt,
             conversation_id=self.conversation_id,
             callback_handler=callback_handler,
             injector=self._injector,
@@ -155,16 +152,14 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
     def _build_injector(self) -> BaseInjector:
         document_retriever = self._build_document_retriever()
         product_retriever = self._build_product_retriever()
-        chat_summary_memory = self._build_chat_summary_memory()
-        chat_limited_memory = self._build_chat_limited_memory()
+        chat_history = self._build_chat_history()
         ecommerce_platform_connector = self._build_ecommerce_platform_connector()
         return self._config.injector(
             product_retriever=product_retriever,
             document_retriever=document_retriever,
             ecommerce_platform_connector=ecommerce_platform_connector,
             repositories=self._repositories,
-            chat_summary_memory=chat_summary_memory,
-            chat_limited_memory=chat_limited_memory,
+            chat_history=chat_history,
         )
 
     def _build_agent_callback_handler(self) -> Optional[BaseCallbackHandler]:
@@ -218,33 +213,6 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
 
         return ecommerce_integration_plugin.build_connector()
 
-    def _build_chat_summary_memory(self) -> SummaryChatMemory:
-        history = PersistentChatHistory(self._repositories.conversation, self.conversation_id)
-        return SummaryChatMemory(
-            llm=self._llm,
-            memory_key="chat_history",
-            return_messages=True,
-            max_token_limit=3000,
-            output_key="output",
-            chat_memory=history,
-        )
+    def _build_chat_history(self) -> PersistentChatHistory:
+        return PersistentChatHistory(self._repositories.conversation, self.conversation_id)
 
-    def _build_chat_limited_memory(self) -> LimitedChatMemory:
-        history = PersistentChatHistory(self._repositories.conversation, self.conversation_id)
-        return LimitedChatMemory(
-            llm=self._llm,
-            memory_key="chat_history",
-            return_messages=True,
-            max_token_limit=3000,
-            output_key="output",
-            chat_memory=history,
-        )
-
-    def _build_prompt_template(self) -> ChatPromptTemplate | PromptTemplate:
-        if isinstance(self._config.prompt_template, PromptTemplateConfig):
-            return PromptTemplate(
-                input_variables=self._config.prompt_template.input_variables,
-                template=self._config.prompt_template.prompt_template,
-            )
-        else:
-            return self._config.prompt_template.to_chat_prompt_template()

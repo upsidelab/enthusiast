@@ -3,7 +3,6 @@ from typing import Any
 
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel
 
@@ -51,14 +50,14 @@ class BaseAgent(ABC, ExtraArgsClassBase):
         self,
         tools: list[BaseTool],
         llm: BaseLanguageModel,
-        prompt: ChatPromptTemplate,
+        system_prompt: str,
         conversation_id: Any,
         injector: BaseInjector,
         callback_handler: BaseCallbackHandler | None = None,
     ):
         self._tools = tools
         self._llm = llm
-        self._prompt = prompt
+        self._system_prompt = system_prompt
         self._conversation_id = conversation_id
         self._callback_handler = callback_handler
         self._injector = injector
@@ -75,6 +74,10 @@ class BaseAgent(ABC, ExtraArgsClassBase):
     @abstractmethod
     def get_answer(self, input_text: str) -> str:
         pass
+
+    def _get_system_prompt_variables(self) -> dict:
+        """Return variables to format into the system prompt template."""
+        return {}
 
     def set_runtime_arguments(self, runtime_arguments: Any) -> None:
         tools_runtime_arguments = runtime_arguments.pop("tools")

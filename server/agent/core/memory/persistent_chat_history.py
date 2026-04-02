@@ -1,32 +1,77 @@
-from typing import Any
+from typing import Any, Dict
 
 from enthusiast_common.repositories import BaseConversationRepository
 from langchain_core.chat_history import BaseChatMessageHistory
-from langchain_core.messages import BaseMessage, messages_from_dict
+from langchain_core.messages import AIMessage, BaseMessage, ToolMessage, messages_from_dict
+
+from agent.models import Message
 
 
 class PersistentChatHistory(BaseChatMessageHistory):
     """
     A chat history implementation that persists messages in the database.
-    Inject it to agent's memory, to enable conversation persistence.
+    Inject it into the agent to enable conversation persistence.
     """
 
     def __init__(self, conversation_repo: BaseConversationRepository, conversation_id: Any):
         self._conversation = conversation_repo.get_by_id(conversation_id)
 
     def add_message(self, message: BaseMessage) -> None:
+        """Persist a message to the database.
+
+        AIMessages that contain tool calls are stored as INTERMEDIATE_STEP records.
+        ToolMessages (tool results) are stored as FUNCTION records.
+        All other standard message types are stored using their LangChain type string directly.
+        """
+        if isinstance(message, AIMessage) and message.tool_calls:
+            self._create_intermediate_step_message(message)
+        elif isinstance(message, ToolMessage):
+            self.create_tool_message(message)
+        else:
+            self._conversation.messages.create(
+                type=message.type,
+                text=message.content,
+                function_name=getattr(message, "name", None),
+            )
+
+    def _create_intermediate_step_message(self, message: AIMessage) -> None:
+        for tool_call in message.tool_calls:
+            text = f"Invoking `{tool_call['name']}` with `{tool_call['args']}`."
+            self._conversation.messages.create(
+                type=Message.MessageType.INTERMEDIATE_STEP,
+                text=text,
+                function_name=tool_call["name"],
+                tool_call_id=tool_call["id"],
+            )
+
+    def create_tool_message(self, message: ToolMessage) -> None:
         self._conversation.messages.create(
-            type=message.type, text=message.content, function_name=getattr(message, "name", None)
+            type=Message.MessageType.FUNCTION,
+            text=message.content,
+            function_name=message.name,
+            tool_call_id=message.tool_call_id,
         )
 
     @property
     def messages(self) -> list[BaseMessage]:
-        messages = self._conversation.messages.filter(answer_failed=False).order_by("created_at")
-        message_dicts = [
-            {"type": message.langchain_type, "data": {"content": message.text, "name": message.function_name}}
-            for message in messages
-        ]
+        messages = list(self._conversation.messages.filter(answer_failed=False).order_by("id"))
+        message_dicts = []
+        for msg in messages:
+            message_dicts.append(self._parse_message_to_dict(msg))
         return messages_from_dict(message_dicts)
+
+    @staticmethod
+    def _parse_message_to_dict(message: BaseMessage) -> Dict[str, Any]:
+        data: Dict[str, Any] = {"content": message.text, "name": message.function_name}
+        match message.type:
+            case Message.MessageType.INTERMEDIATE_STEP:
+                data = {
+                    "content": message.text,
+                    "tool_calls": [{"id": message.tool_call_id, "name": message.function_name or "", "args": {}}],
+                }
+            case Message.MessageType.FUNCTION:
+                data = {"content": message.text, "name": message.function_name, "tool_call_id": message.tool_call_id}
+        return {"type": message.langchain_type, "data": data}
 
     def clear(self) -> None:
         self._conversation.messages.all().delete()

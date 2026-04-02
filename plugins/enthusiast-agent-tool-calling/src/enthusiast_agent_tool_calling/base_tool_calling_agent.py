@@ -1,22 +1,50 @@
 from typing import Any
 
+from langchain_core.chat_history import BaseChatMessageHistory
+from langgraph.graph.state import CompiledStateGraph
+
 from enthusiast_common.agents import BaseAgent
-from langchain.agents import AgentExecutor, create_tool_calling_agent
-from langchain_core.memory import BaseMemory
+from langchain.agents import create_agent
+from langchain_core.messages import AIMessage, HumanMessage, trim_messages, BaseMessage
 from langchain_core.tools import BaseTool
+
+MAX_HISTORY_TOKENS = 3000
 
 
 class BaseToolCallingAgent(BaseAgent):
     def get_answer(self, input_text: str) -> str:
-        agent_executor = self._build_agent_executor()
-        response = agent_executor.invoke({"input": input_text}, config=self._build_invoke_config())
-        return response["output"]
+        history = self._injector.chat_history
+
+        agent = self._build_agent()
+        limited_history = self._build_limited_history(history)
+        input_messages = limited_history + [HumanMessage(content=input_text)]
+        result = agent.invoke({ "messages": input_messages }, config=self._build_invoke_config())
+
+        new_messages = result["messages"][len(limited_history):]
+        final_message = next(
+            m for m in reversed(new_messages)
+            if isinstance(m, AIMessage) and not m.tool_calls
+        )
+
+        history.add_messages(new_messages)
+        return final_message.text
+
+    def _build_limited_history(self, history: BaseChatMessageHistory) -> list[BaseMessage]:
+        return trim_messages(
+            history.messages,
+            strategy="last",
+            token_counter=self._llm,
+            max_tokens=MAX_HISTORY_TOKENS,
+            start_on=HumanMessage,
+            include_system=True,
+            allow_partial=False,
+        )
 
     def _build_tools(self) -> list[BaseTool]:
         return [tool.as_tool() for tool in self._tools]
 
-    def _build_memory(self) -> BaseMemory:
-        return self._injector.chat_limited_memory
+    def _get_system_prompt(self) -> str:
+        return self._system_prompt.format(**self._get_system_prompt_variables())
 
     def _build_invoke_config(self) -> dict[str, Any]:
         if self._callback_handler:
@@ -24,13 +52,9 @@ class BaseToolCallingAgent(BaseAgent):
 
         return {}
 
-    def _build_agent_executor(self) -> AgentExecutor:
-        tools = self._build_tools()
-        agent = create_tool_calling_agent(
-            tools=tools,
-            llm=self._llm,
-            prompt=self._prompt,
-        )
-        return AgentExecutor(
-            agent=agent, tools=tools, verbose=True, memory=self._build_memory(), return_intermediate_steps=True
+    def _build_agent(self) -> CompiledStateGraph:
+        return create_agent(
+            model=self._llm,
+            tools=self._build_tools(),
+            system_prompt=self._get_system_prompt(),
         )

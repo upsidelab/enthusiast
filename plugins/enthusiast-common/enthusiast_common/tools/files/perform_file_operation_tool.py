@@ -1,5 +1,7 @@
-from enthusiast_common.tools import BaseFileTool
+from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
+
+from enthusiast_common.tools import BaseFileTool
 
 
 class FileRetrievalToolInput(BaseModel):
@@ -18,22 +20,13 @@ class FileRetrievalTool(BaseFileTool):
         parsed_file_ids = file_ids.split(",")
         file_objects = self._injector.repositories.conversation.get_file_objects(self._conversation_id, parsed_file_ids)
 
-        from enthusiast_common.config.prompts import ChatPromptTemplateConfig, Message, MessageRole
-
-        chat_prompt_template_config = ChatPromptTemplateConfig(
-            messages=[
-                Message(
-                    role=MessageRole.SYSTEM,
-                    content=f"{action}",
-                ),
-                Message(role=MessageRole.USER, content=""),
-            ]
-        )
         llm_provider = self._llm_registry.provider_for_dataset(self._data_set_id)
         llm_file_objects = llm_provider.prepare_files_objects(file_objects)
-        chat_prompt_template_config.add_files_content(llm_file_objects)
-        chat_prompt_template = chat_prompt_template_config.to_chat_prompt_template()
-        messages = chat_prompt_template.format_messages()
+
+        messages = [
+            SystemMessage(content=action),
+            HumanMessage(content=[file_obj.model_dump(mode="json") for file_obj in llm_file_objects]),
+        ]
 
         response = self._llm.invoke(messages).content
         return f"{response}"

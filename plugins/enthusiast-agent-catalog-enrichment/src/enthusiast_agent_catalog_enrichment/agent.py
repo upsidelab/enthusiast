@@ -20,9 +20,5 @@ class CatalogEnrichmentAgent(BaseToolCallingAgent):
         LLMToolConfig(tool_class=UpsertProductDetailsTool),
     ]
 
-    def get_answer(self, input_text: str) -> str:
-        agent_executor = self._build_agent_executor()
-        agent_output = agent_executor.invoke(
-            {"input": input_text, "data_format": self.PROMPT_INPUT.output_format}, config=self._build_invoke_config()
-        )
-        return agent_output["output"]
+    def _get_system_prompt_variables(self) -> dict:
+        return {"data_format": self.PROMPT_INPUT.output_format}

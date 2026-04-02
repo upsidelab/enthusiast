@@ -4,9 +4,9 @@ from enthusiast_common.connectors import ECommercePlatformConnector
 from enthusiast_common.injectors import BaseInjector
 from enthusiast_common.retrievers import BaseProductRetriever, BaseVectorStoreRetriever
 from enthusiast_common.structures import RepositoriesInstances
+from langchain_core.chat_history import BaseChatMessageHistory
 
-from agent.core.memory import SummaryChatMemory
-from agent.core.memory.limited_chat_memory import LimitedChatMemory
+from agent.core.memory import PersistentChatHistory
 from catalog.models import DocumentChunk
 
 
@@ -17,15 +17,13 @@ class Injector(BaseInjector):
         product_retriever: BaseProductRetriever,
         ecommerce_platform_connector: Optional[ECommercePlatformConnector],
         repositories: RepositoriesInstances,
-        chat_summary_memory: SummaryChatMemory,
-        chat_limited_memory: LimitedChatMemory,
+        chat_history: PersistentChatHistory,
     ):
         super().__init__(repositories)
         self._document_retriever = document_retriever
         self._product_retriever = product_retriever
         self._ecommerce_platform_connector = ecommerce_platform_connector
-        self._chat_summary_memory = chat_summary_memory
-        self._chat_limited_memory = chat_limited_memory
+        self._chat_history = chat_history
 
     @property
     def document_retriever(self) -> BaseVectorStoreRetriever[DocumentChunk]:
@@ -40,9 +38,5 @@ class Injector(BaseInjector):
         return self._ecommerce_platform_connector
 
     @property
-    def chat_summary_memory(self) -> SummaryChatMemory:
-        return self._chat_summary_memory
-
-    @property
-    def chat_limited_memory(self) -> LimitedChatMemory:
-        return self._chat_limited_memory
+    def chat_history(self) -> BaseChatMessageHistory:
+        return self._chat_history

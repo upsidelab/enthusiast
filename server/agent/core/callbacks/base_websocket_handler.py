@@ -15,3 +15,11 @@ class BaseWebSocketHandler(ConversationCallbackHandler):
 
     def send_message(self, message_data: Any) -> None:
         async_to_sync(self.channel_layer.group_send)(self.group_name, message_data)
+
+# class ToolCallWebSocketCallbackHandler(BaseWebSocketHandler):
+#     def on_tool_start(self, serialized: dict, input_str: str, **kwargs) -> None:
+#         tool_name = serialized.get("name", "tool")
+#         self.send_message({"type": "chat_message", "event": "action", "output": f"Calling: {tool_name}"})
+#
+#     def on_tool_end(self, output: Any, **kwargs) -> None:
+#         self.send_message({"type": "chat_message", "event": "action", "output": "Thinking..."})

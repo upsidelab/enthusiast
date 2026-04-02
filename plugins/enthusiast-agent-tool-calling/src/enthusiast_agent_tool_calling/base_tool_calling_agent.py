@@ -33,7 +33,7 @@ class BaseToolCallingAgent(BaseAgent):
         return trim_messages(
             history.messages,
             strategy="last",
-            token_counter=self._llm,
+            token_counter='approximate',
             max_tokens=MAX_HISTORY_TOKENS,
             start_on=HumanMessage,
             include_system=True,

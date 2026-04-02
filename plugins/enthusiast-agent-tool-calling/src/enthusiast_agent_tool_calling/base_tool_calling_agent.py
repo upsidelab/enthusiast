@@ -1,6 +1,7 @@
 from typing import Any
 
 from langchain_core.chat_history import BaseChatMessageHistory
+from langgraph.graph.state import CompiledStateGraph
 
 from enthusiast_common.agents import BaseAgent
 from langchain.agents import create_agent
@@ -51,7 +52,7 @@ class BaseToolCallingAgent(BaseAgent):
 
         return {}
 
-    def _build_agent(self):
+    def _build_agent(self) -> CompiledStateGraph:
         return create_agent(
             model=self._llm,
             tools=self._build_tools(),

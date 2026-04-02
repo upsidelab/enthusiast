@@ -14,7 +14,7 @@ import { MessageError } from "@/components/conversation-view/message-error.tsx";
 import { MessageBubbleTyping } from "@/components/conversation-view/message-bubble-typing.tsx";
 import { ChatWindow } from "@/components/conversation-view/chat-window.tsx";
 
-import type { AgentDetails } from "@/lib/types";
+import type { AgentDetails, ToolStep } from "@/lib/types";
 import type { Conversation as ConversationSchema } from '@/lib/types.ts';
 import type { Message, MessageFile } from "@/components/conversation-view/message-composer.tsx";
 
@@ -29,6 +29,7 @@ export type MessageProps = {
   type: "human" | "ai" | "system";
   text: string;
   id: number | null;
+  steps?: ToolStep[];
 } | FileMessageProps;
 
 interface ChatSessionProps {
@@ -46,7 +47,7 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
   const [conversation, setConversation] = useState<ConversationSchema | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isAgentLoading, setIsAgentLoading] = useState(false);
-  const [agentAction, setAgentAction] = useState<string>("Thinking...");
+  const [toolSteps, setToolSteps] = useState<ToolStep[]>([]);
   const [messages, setMessages] = useState<MessageProps[]>([]);
   const [agentId, setAgentId] = useState<number | undefined>();
   const [agentDetails, setAgentDetails] = useState<AgentDetails>();
@@ -55,6 +56,7 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
   const usePolling = useRef(!streamingEnabled);
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
   const ws = useRef<WebSocket | null>(null);
+  const toolStepsRef = useRef<ToolStep[]>([]);
 
   const conversationId = Number(chatId);
   const isAgentDeleted = !!conversation?.agent.deleted_at;
@@ -65,6 +67,11 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
     setTimeout(() => {
       lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
     }, timeout);
+  };
+
+  const updateToolSteps = (steps: ToolStep[]) => {
+    toolStepsRef.current = steps;
+    setToolSteps(steps);
   };
 
   // Cleanup WebSocket on unmount
@@ -128,6 +135,12 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
         setIsLoading(false);
         setIsAgentLoading(false);
 
+        if (toolStepsRef.current.some(s => !s.done)) {
+          const frozen = toolStepsRef.current.map(s => ({ ...s, done: true }));
+          toolStepsRef.current = frozen;
+          setToolSteps(frozen);
+        }
+
         setMessages((prevMessages) => {
           const lastMessage = prevMessages[prevMessages.length - 1];
 
@@ -144,18 +157,42 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
         scrollToLastMessage();
       },
       message_id: () => {
+        const stepsSnapshot = toolStepsRef.current;
         setMessages((prevMessages) => {
           const lastMessage = prevMessages[prevMessages.length - 1];
-          lastMessage.id = data.data.output;
-          return [...prevMessages.slice(0, -1), lastMessage];
+          if (lastMessage.type === 'ai') {
+            return [
+              ...prevMessages.slice(0, -1),
+              {
+                ...lastMessage,
+                id: data.data.output,
+                ...(stepsSnapshot.length > 0 && { steps: stepsSnapshot }),
+              },
+            ];
+          }
+          return [...prevMessages.slice(0, -1), { ...lastMessage, id: data.data.output }];
         });
+        updateToolSteps([]);
+      },
+      tool_call: () => {
+        const rawInput = data.data.display_input;
+        const input = rawInput ? String(rawInput).slice(0, 50) : undefined;
+        const newSteps = [...toolStepsRef.current, { name: data.data.tool_name, input, done: false }];
+        updateToolSteps(newSteps);
+      },
+      tool_end: () => {
+        const newSteps = toolStepsRef.current.map((s, i) =>
+          i === toolStepsRef.current.length - 1 ? { ...s, done: true } : s
+        );
+        updateToolSteps(newSteps);
       },
       action: () => {
-        setAgentAction(data.data.output);
+        // kept for backwards compatibility
       },
       error: () => {
         setIsLoading(false);
         setIsAgentLoading(false);
+        updateToolSteps([]);
         setMessages((prevMessages) => [
           ...prevMessages,
           { type: "system", text: data.data.output, id: null },
@@ -264,6 +301,7 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
   const onMessageComposerSubmit = async (message: Message) => {
     setIsLoading(true);
     setIsAgentLoading(true);
+    updateToolSteps([]);
     addFileMessages(message.files);
     addUserMessage(message.text);
 
@@ -329,7 +367,7 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
                 }
 
                 if (message.type === 'ai' && message.text === '') {
-                  return (<MessageBubbleTyping key={index} text={agentAction} />);
+                  return (<MessageBubbleTyping key={index} steps={toolSteps} />);
                 }
 
                 return (
@@ -339,10 +377,11 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
                     variant={message.type === "human" ? "primary" : "secondary"}
                     questionId={message.id}
                     inMessageGroup={inMessageGroup}
+                    steps={message.type === 'ai' ? message.steps : undefined}
                   />
                 );
               })}
-              {isAgentLoading && <MessageBubbleTyping text={agentAction} />}
+              {isAgentLoading && <MessageBubbleTyping steps={toolSteps} />}
               <div className="mb-4" />
               <div ref={lastMessageRef} />
             </div>

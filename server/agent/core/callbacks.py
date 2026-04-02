@@ -19,17 +19,14 @@ class BaseWebSocketHandler(ConversationCallbackHandler):
 class ConversationWebSocketCallbackHandler(BaseWebSocketHandler):
     def __init__(self, conversation_id: int):
         super().__init__(conversation_id)
-        self._buffers: dict[UUID, list[str]] = {}  # Anthropic workaround — see below
-        self._buffering_runs: set[UUID] = set()
+        self._buffering_runs: set[UUID] = set()  # Anthropic workaround — see below
 
     def on_llm_new_token(self, token: str | list, *, run_id: UUID, **kwargs):
-        token = self._prepare_token(token)
-        if not token:
-            return
         if run_id in self._buffering_runs:
             # Anthropic emits text tokens before tool calls in the same run — defer sending until on_llm_end confirms no tool calls were made
-            self._buffers[run_id].append(token)
-        else:
+            return
+        token = self._prepare_token(token)
+        if token:
             self.send_message({"type": "chat_message", "event": "stream", "token": token})
 
     @staticmethod
@@ -41,21 +38,19 @@ class ConversationWebSocketCallbackHandler(BaseWebSocketHandler):
     # --- Anthropic workaround ---
     # Anthropic models emit text tokens before tool calls within the same LLM run,
     # making it impossible to filter them in on_llm_new_token without buffering.
-    # Tokens are held per run_id and flushed only if the run produced no tool calls.
+    # The full response text is streamed from on_llm_end only if no tool calls were made.
 
     def on_chat_model_start(self, serialized: dict, messages: list, *, run_id: UUID, **kwargs):
         ids = serialized.get("id", [])
         if any("anthropic" in part.lower() for part in ids):
             self._buffering_runs.add(run_id)
-            self._buffers[run_id] = []
 
     def on_llm_end(self, response: Any, *, run_id: UUID, **kwargs):
         if run_id not in self._buffering_runs:
             return
         self._buffering_runs.discard(run_id)
-        buffer = self._buffers.pop(run_id, [])
         generation = response.generations[0][0] if response.generations else None
-        if generation and hasattr(generation, "message") and generation.message.tool_calls:
+        if not generation or not hasattr(generation, "message") or generation.message.tool_calls:
             return
-        for token in buffer:
-            self.send_message({"type": "chat_message", "event": "stream", "token": token})
+        if text := generation.message.content:
+            self.send_message({"type": "chat_message", "event": "stream", "token": text})

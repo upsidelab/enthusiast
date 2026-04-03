@@ -159,6 +159,7 @@ export type ToolStep = {
   name: string;
   input?: string;
   done: boolean;
+  errored?: boolean;
 };
 
 export type AgentDetails = {

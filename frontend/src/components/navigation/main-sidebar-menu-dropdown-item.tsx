@@ -38,10 +38,10 @@ export function MainSidebarMenuDropdownItem({ item }: MainSidebarMenuDropdownIte
             {item.children.map((child) => {
               return (
                 <DropdownMenuItem asChild key={child.title}>
-                  <Link to={child.link}>
-                    {child.icon}
-                    {child.title}
-                  </Link>
+                  {child.external
+                    ? <a href={child.link} target="_blank" rel="noopener noreferrer">{child.icon}{child.title}</a>
+                    : <Link to={child.link}>{child.icon}{child.title}</Link>
+                  }
                 </DropdownMenuItem>
               )
             })}

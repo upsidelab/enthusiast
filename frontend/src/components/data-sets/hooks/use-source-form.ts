@@ -16,10 +16,12 @@ export function useSourceForm(
 ) {
   const [pluginName, setPluginName] = useState("");
   const [config, setConfig] = useState<Record<string, string | number | boolean>>({});
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [generalError, setGeneralError] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<'success' | 'error' | null>(null);
+  const [testError, setTestError] = useState<string>("");
 
   useEffect(() => {
     const loadSourceDetailsForEditing = async () => {
@@ -50,7 +52,6 @@ export function useSourceForm(
       if (!source) {
         setPluginName("");
         setConfig({});
-        setOpenSections({});
         setFieldErrors({});
         setGeneralError("");
       }
@@ -60,71 +61,26 @@ export function useSourceForm(
   }, [source]);
 
   useEffect(() => {
-    const clearFormWhenNoPlugin = () => {
-      if (!pluginName) {
-        if (source?.id) {
-          return false;
-        }
+    const selectedPlugin = availablePlugins.find((p) => p.name === pluginName);
+
+    if (!pluginName) {
+      if (!source?.id) {
         setConfig({});
-        setOpenSections({});
-        return true;
       }
-      return false;
-    };
+      return;
+    }
 
-    const getSelectedPlugin = () => {
-      return availablePlugins.find((p) => p.name === pluginName);
-    };
+    if (!selectedPlugin) return;
 
-    const initializeCollapsedSections = () => {
-      const selectedPlugin = getSelectedPlugin();
-      if (!selectedPlugin) return {};
-
-      const initialOpenSections: Record<string, boolean> = {};
-      if (Object.keys(selectedPlugin.configuration_args).length > 0) {
-        initialOpenSections['configuration'] = true;
-      }
-      return initialOpenSections;
-    };
-
-    const createDefaultConfigValues = () => {
-      const selectedPlugin = getSelectedPlugin();
-      if (!selectedPlugin) return {};
-
+    if (!source?.id && Object.keys(config).length === 0) {
       const defaults: Record<string, string | number | boolean> = {};
       Object.entries(selectedPlugin.configuration_args).forEach(([key, schema]) => {
         const configKey = `configuration_${key}`;
-        if (schema.type.inner_type === 'Json') {
-          defaults[configKey] = '{}';
-        } else {
-          defaults[configKey] = '';
-        }
+        defaults[configKey] = schema.type.inner_type === 'Json' ? '{}' : '';
       });
-      return defaults;
-    };
-
-    const updateFormForSelectedPlugin = () => {
-      const wasCleared = clearFormWhenNoPlugin();
-      if (wasCleared) {
-        return;
-      }
-
-      const selectedPlugin = getSelectedPlugin();
-      if (!selectedPlugin) {
-        return;
-      }
-
-      const initialOpenSections = initializeCollapsedSections();
-      setOpenSections(initialOpenSections);
-      
-      if (!source?.id && Object.keys(config).length === 0) {
-        const defaults = createDefaultConfigValues();
-        setConfig(defaults);
-      }
-    };
-
-    updateFormForSelectedPlugin();
-  }, [pluginName, availablePlugins, source, config, setConfig, setOpenSections]);
+      setConfig(defaults);
+    }
+  }, [pluginName, availablePlugins, source, config, setConfig]);
 
   const saveSourceToApi = async (configObj: Record<string, unknown>) => {
     if (source) {
@@ -197,12 +153,34 @@ export function useSourceForm(
     return availablePlugins.find((p) => p.name === pluginName);
   };
 
+  const testConnection = async () => {
+    setTesting(true);
+    setTestResult(null);
+    setTestError("");
+    try {
+      const configObj = buildConfigFromFlattened(config, { 'configuration': 'configuration_args' });
+      const result = await apiClient.dataSets().testSourceConnection(dataSetId!, sourceType, pluginName, configObj);
+      if (result.error) {
+        setTestResult('error');
+        setTestError(result.error);
+      } else {
+        setTestResult('success');
+      }
+    } catch {
+      setTestResult('error');
+      setTestError("Could not reach the server");
+    } finally {
+      setTesting(false);
+    }
+  };
+
   const resetForm = () => {
     setPluginName("");
     setConfig({});
-    setOpenSections({});
     setFieldErrors({});
     setGeneralError("");
+    setTestResult(null);
+    setTestError("");
   };
 
   return {
@@ -210,11 +188,13 @@ export function useSourceForm(
     setPluginName,
     config,
     setConfig,
-    openSections,
-    setOpenSections,
     fieldErrors,
     generalError,
     submitting,
+    testing,
+    testResult,
+    testError,
+    testConnection,
     handleSubmit,
     getSelectedPlugin,
     resetForm,

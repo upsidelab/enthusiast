@@ -164,14 +164,16 @@ export class DataSetsApiClient extends BaseApiClient {
     );
   }
 
-  async syncDataSetProductSource(dataSetId: number, pluginId: number): Promise<void> {
-    await fetch(
+  async syncDataSetProductSource(dataSetId: number, pluginId: number): Promise<string> {
+    const response = await fetch(
       `${this.apiBase}/api/data_sets/${dataSetId}/product_sources/${pluginId}/sync`,
       {
         ...this._requestConfiguration(),
         method: "POST"
       }
     );
+    const body = await response.json();
+    return body.task_id as string;
   }
 
   async removeDataSetProductSource(dataSetId: number, pluginId: number): Promise<void> {
@@ -245,14 +247,16 @@ export class DataSetsApiClient extends BaseApiClient {
     );
   }
 
-  async syncDataSetDocumentSource(dataSetId: number, pluginId: number): Promise<void> {
-    await fetch(
+  async syncDataSetDocumentSource(dataSetId: number, pluginId: number): Promise<string> {
+    const response = await fetch(
       `${this.apiBase}/api/data_sets/${dataSetId}/document_sources/${pluginId}/sync`,
       {
         ...this._requestConfiguration(),
         method: "POST"
       }
     );
+    const body = await response.json();
+    return body.task_id as string;
   }
 
   async removeDataSetDocumentSource(dataSetId: number, pluginId: number): Promise<void> {
@@ -355,14 +359,38 @@ export class DataSetsApiClient extends BaseApiClient {
     );
   }
 
-  async syncDataSetEcommerceIntegration(dataSetId: number): Promise<void> {
-    await fetch(
+  async syncDataSetEcommerceIntegration(dataSetId: number): Promise<string> {
+    const response = await fetch(
       `${this.apiBase}/api/data_sets/${dataSetId}/ecommerce_integration/sync`,
       {
         ...this._requestConfiguration(),
         method: "POST"
       }
     );
+    const body = await response.json();
+    return body.task_id as string;
+  }
+
+  async getTaskStatus(taskId: string): Promise<{ status: string; error?: string }> {
+    const response = await fetch(`${this.apiBase}/api/tasks/${taskId}`, this._requestConfiguration());
+    return await response.json();
+  }
+
+  async testSourceConnection(dataSetId: number, sourceType: 'product' | 'document' | 'ecommerce', pluginName: string, config: object): Promise<{ error?: string }> {
+    const path = sourceType === 'product'
+      ? `product_sources`
+      : sourceType === 'document'
+        ? `document_sources`
+        : `ecommerce_integration`;
+    const response = await fetch(
+      `${this.apiBase}/api/data_sets/${dataSetId}/${path}/test`,
+      {
+        ...this._requestConfiguration(),
+        method: "POST",
+        body: JSON.stringify({ plugin_name: pluginName, config }),
+      }
+    );
+    return await response.json();
   }
 
   async removeDataSetECommerceIntegration(dataSetId: number): Promise<void> {

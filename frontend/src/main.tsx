@@ -11,6 +11,7 @@ import { LoginPage } from "@/pages/login.tsx";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { ApiConnectionIndex } from "@/pages/service-accounts/index.tsx";
 import { NoDataSets } from "@/pages/no-data-sets.tsx";
+import { ErrorPage } from "@/pages/error.tsx";
 import { ApiClient } from "@/lib/api.ts";
 import { NewDataSet } from "@/pages/data-sets/new.tsx";
 import { DataSetsIndex } from "@/pages/data-sets";
@@ -54,6 +55,7 @@ const router = createBrowserRouter([
     path: "/",
     element: <App />,
     loader: protectedLoginLoader,
+    errorElement: <ErrorPage />,
     children: [
       {
         path: '/data-sets/:id/products',

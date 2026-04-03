@@ -113,7 +113,6 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
                 tools.append(self._build_file_tool(config=tool_config, injector=injector, default_llm=default_llm))
             else:
                 continue
-
         return tools
 
     def _build_function_tool(self, config: FunctionToolConfig) -> BaseFunctionTool:

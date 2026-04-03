@@ -127,6 +127,7 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
       on_parser_stream: () => {
         setIsLoading(false);
         setIsAgentLoading(false);
+
         setMessages((prevMessages) => {
           const lastMessage = prevMessages[prevMessages.length - 1];
 

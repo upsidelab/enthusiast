@@ -155,7 +155,6 @@ export type ExecutionType = {
   input_schema: Record<string, unknown>;
 };
 
-
 export type AgentDetails = {
   id: number;
   name: string;

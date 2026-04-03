@@ -1,5 +1,5 @@
-import { cn } from "@/lib/utils.ts";
 import styles from './message-bubble-typing.module.css';
+import { cn } from "@/lib/utils.ts";
 
 export interface MessageBubbleTypingProps {
   statusText: string;

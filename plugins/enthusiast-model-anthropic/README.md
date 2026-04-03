@@ -27,3 +27,7 @@ Set the required environment variable:
 ```
 ANTHROPIC_API_KEY=<your_anthropic_api_key>
 ```
+
+## Notes
+
+**Streaming**: Anthropic models emit text tokens before tool calls within the same response, making it impossible to distinguish mid-stream whether a text chunk precedes a tool call. As a result, text responses are delivered as a single block once the full response is received, rather than streamed token-by-token.

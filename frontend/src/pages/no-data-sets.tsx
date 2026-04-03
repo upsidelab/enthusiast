@@ -1,9 +1,12 @@
 import { Button } from "@/components/ui/button.tsx";
+import { ApiClient } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 
+const api = new ApiClient(authenticationProviderInstance);
+
 export function NoDataSets() {
-  const handleLogout = () => {
-    authenticationProviderInstance.logout();
+  const handleLogout = async () => {
+    await api.logout();
     window.location.href = "/login";
   };
 

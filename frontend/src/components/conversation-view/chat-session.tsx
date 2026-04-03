@@ -152,12 +152,8 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
       tool_call: () => {
         setStatusText(`Invoking ${data.data.tool_name}...`);
       },
-      tool_end: () => {},
       tool_error: () => {
         setStatusText("Thinking...");
-      },
-      action: () => {
-        // kept for backwards compatibility
       },
       error: () => {
         setIsLoading(false);

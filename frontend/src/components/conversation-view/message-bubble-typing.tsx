@@ -34,7 +34,7 @@ export function MessageBubbleTyping({ steps }: MessageBubbleTypingProps) {
               ) : (
                 <div className={styles.stepSpinner} />
               )}
-              <span>{step.name}{step.input ? <span className="font-normal opacity-60"> — {step.input}</span> : null}</span>
+              <span>{step.name}</span>
             </div>
           ))}
         </div>

@@ -58,7 +58,7 @@ export function MessageBubble({ text, variant, questionId, inMessageGroup, steps
                   ) : (
                     <CheckIcon className="w-3 h-3 shrink-0" />
                   )}
-                  <span>{step.name}{step.input ? <span className="opacity-50"> — {step.input}</span> : null}</span>
+                  <span>{step.name}</span>
                 </div>
               ))}
             </div>

@@ -99,7 +99,7 @@ class MessagesSerializer(serializers.ModelSerializer):
 
 class ConversationContentSerializer(serializers.ModelSerializer):
     # This serializer returns conversation details extended with history.
-    history = MessagesSerializer(many=True, source="messages")
+    history = serializers.SerializerMethodField()
 
     agent = AgentListSerializer()
     is_execution_conversation = serializers.SerializerMethodField()
@@ -107,6 +107,26 @@ class ConversationContentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Conversation
         fields = ["id", "started_at", "summary", "history", "agent", "is_execution_conversation"]
+
+    def get_history(self, obj: Conversation) -> list:
+        pending_steps = []
+        result = []
+
+        for msg in obj.messages.all():
+            if msg.type == Message.MessageType.FUNCTION:
+                if msg.function_name:
+                    pending_steps.append({"name": msg.function_name, "done": True})
+            elif msg.type == Message.MessageType.AI:
+                serialized = dict(MessagesSerializer(msg).data)
+                if pending_steps:
+                    serialized["steps"] = pending_steps
+                    pending_steps = []
+                result.append(serialized)
+            else:
+                pending_steps = []
+                result.append(MessagesSerializer(msg).data)
+
+        return result
 
     def get_is_execution_conversation(self, obj) -> bool:
         return hasattr(obj, "agent_execution")

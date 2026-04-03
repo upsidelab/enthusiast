@@ -155,11 +155,6 @@ export type ExecutionType = {
   input_schema: Record<string, unknown>;
 };
 
-export type ToolStep = {
-  name: string;
-  done: boolean;
-  errored?: boolean;
-};
 
 export type AgentDetails = {
   id: number;

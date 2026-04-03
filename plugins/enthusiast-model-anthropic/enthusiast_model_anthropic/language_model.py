@@ -33,6 +33,7 @@ class AnthropicDocumentContent(BaseContent):
 class AnthropicLanguageModelProvider(LanguageModelProvider):
 
     NAME = "Anthropic"
+    STREAMING_REQUIRES_MESSAGE_BUFFERING = True
 
     def provide_language_model(self, callbacks: list[BaseCallbackHandler] | None = None) -> BaseLanguageModel:
         return ChatAnthropic(model=self._model, callbacks=callbacks)

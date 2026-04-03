@@ -175,9 +175,7 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
         updateToolSteps([]);
       },
       tool_call: () => {
-        const rawInput = data.data.display_input;
-        const input = rawInput ? String(rawInput).slice(0, 50) : undefined;
-        const newSteps = [...toolStepsRef.current, { name: data.data.tool_name, input, done: false }];
+        const newSteps = [...toolStepsRef.current, { name: data.data.tool_name, done: false }];
         updateToolSteps(newSteps);
       },
       tool_end: () => {

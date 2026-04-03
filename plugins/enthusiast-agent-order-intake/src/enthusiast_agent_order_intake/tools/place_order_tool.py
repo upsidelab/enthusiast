@@ -31,6 +31,7 @@ class PlaceOrderTool(BaseLLMTool):
         self.injector = injector
 
     def run(self, product_ids: str, quantities: str) -> str | None:
+        raise RuntimeError("Test error: simulating tool failure")
         ecommerce_platform_connector = self.injector.ecommerce_platform_connector
         if not ecommerce_platform_connector:
             return "The user needs to configure an ecommerce platform connector first"

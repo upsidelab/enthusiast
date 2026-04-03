@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
-import { ChevronRightIcon, CheckIcon } from 'lucide-react';
+import { ChevronRightIcon, CheckIcon, XCircleIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MessageFeedbackForm } from "@/components/message-feedback/message-feedback-form.tsx";
 import { CopyToClipboardButton } from '@/components/conversation-view/copy-to-clipboard-button.tsx';
@@ -47,12 +47,17 @@ export function MessageBubble({ text, variant, questionId, inMessageGroup, steps
           <CollapsibleTrigger className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mb-2 cursor-pointer">
             <ChevronRightIcon className={cn("w-3 h-3 transition-transform duration-200", isStepsOpen && "rotate-90")} />
             {steps!.length} tool{steps!.length > 1 ? 's' : ''} used
+            {steps!.some(s => s.errored) && <XCircleIcon className="w-3 h-3 text-destructive ml-0.5" />}
           </CollapsibleTrigger>
           <CollapsibleContent>
             <div className="border-l-2 border-muted-foreground/20 pl-3 space-y-1.5 mb-3">
               {steps!.map((step, i) => (
-                <div key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <CheckIcon className="w-3 h-3 shrink-0" />
+                <div key={i} className={cn("flex items-center gap-2 text-xs", step.errored ? "text-destructive" : "text-muted-foreground")}>
+                  {step.errored ? (
+                    <XCircleIcon className="w-3 h-3 shrink-0" />
+                  ) : (
+                    <CheckIcon className="w-3 h-3 shrink-0" />
+                  )}
                   <span>{step.name}{step.input ? <span className="opacity-50"> — {step.input}</span> : null}</span>
                 </div>
               ))}

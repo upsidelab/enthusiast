@@ -29,3 +29,6 @@ class ToolCallWebSocketCallbackHandler(BaseWebSocketHandler):
 
     def on_tool_end(self, output: Any, **kwargs) -> None:
         self.send_message({"type": "chat_message", "event": "tool_end"})
+
+    def on_tool_error(self, error: BaseException, **kwargs) -> None:
+        self.send_message({"type": "chat_message", "event": "tool_error"})

@@ -1,4 +1,4 @@
-import { CheckIcon } from "lucide-react";
+import { CheckIcon, XCircleIcon } from "lucide-react";
 import { cn } from "@/lib/utils.ts";
 import styles from './message-bubble-typing.module.css';
 import type { ToolStep } from "@/lib/types";
@@ -24,10 +24,12 @@ export function MessageBubbleTyping({ steps }: MessageBubbleTypingProps) {
               key={i}
               className={cn(
                 "flex items-center gap-2 text-sm",
-                step.done ? "text-muted-foreground" : "text-foreground font-medium"
+                step.errored ? "text-destructive" : step.done ? "text-muted-foreground" : "text-foreground font-medium"
               )}
             >
-              {step.done ? (
+              {step.errored ? (
+                <XCircleIcon className="w-3 h-3 shrink-0" />
+              ) : step.done ? (
                 <CheckIcon className="w-3 h-3 shrink-0" />
               ) : (
                 <div className={styles.stepSpinner} />

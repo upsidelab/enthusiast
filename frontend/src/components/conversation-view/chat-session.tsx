@@ -186,6 +186,12 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
         );
         updateToolSteps(newSteps);
       },
+      tool_error: () => {
+        const newSteps = toolStepsRef.current.map((s, i) =>
+          i === toolStepsRef.current.length - 1 ? { ...s, done: true, errored: true } : s
+        );
+        updateToolSteps(newSteps);
+      },
       action: () => {
         // kept for backwards compatibility
       },

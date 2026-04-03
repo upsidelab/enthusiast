@@ -16,6 +16,7 @@ export function useSourceForm(
 ) {
   const [pluginName, setPluginName] = useState("");
   const [config, setConfig] = useState<Record<string, string | number | boolean>>({});
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [generalError, setGeneralError] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
@@ -52,6 +53,7 @@ export function useSourceForm(
       if (!source) {
         setPluginName("");
         setConfig({});
+        setOpenSections({});
         setFieldErrors({});
         setGeneralError("");
       }
@@ -61,26 +63,71 @@ export function useSourceForm(
   }, [source]);
 
   useEffect(() => {
-    const selectedPlugin = availablePlugins.find((p) => p.name === pluginName);
-
-    if (!pluginName) {
-      if (!source?.id) {
+    const clearFormWhenNoPlugin = () => {
+      if (!pluginName) {
+        if (source?.id) {
+          return false;
+        }
         setConfig({});
+        setOpenSections({});
+        return true;
       }
-      return;
-    }
+      return false;
+    };
 
-    if (!selectedPlugin) return;
+    const getSelectedPlugin = () => {
+      return availablePlugins.find((p) => p.name === pluginName);
+    };
 
-    if (!source?.id && Object.keys(config).length === 0) {
+    const initializeCollapsedSections = () => {
+      const selectedPlugin = getSelectedPlugin();
+      if (!selectedPlugin) return {};
+
+      const initialOpenSections: Record<string, boolean> = {};
+      if (Object.keys(selectedPlugin.configuration_args).length > 0) {
+        initialOpenSections['configuration'] = true;
+      }
+      return initialOpenSections;
+    };
+
+    const createDefaultConfigValues = () => {
+      const selectedPlugin = getSelectedPlugin();
+      if (!selectedPlugin) return {};
+
       const defaults: Record<string, string | number | boolean> = {};
       Object.entries(selectedPlugin.configuration_args).forEach(([key, schema]) => {
         const configKey = `configuration_${key}`;
-        defaults[configKey] = schema.type.inner_type === 'Json' ? '{}' : '';
+        if (schema.type.inner_type === 'Json') {
+          defaults[configKey] = '{}';
+        } else {
+          defaults[configKey] = '';
+        }
       });
-      setConfig(defaults);
-    }
-  }, [pluginName, availablePlugins, source, config, setConfig]);
+      return defaults;
+    };
+
+    const updateFormForSelectedPlugin = () => {
+      const wasCleared = clearFormWhenNoPlugin();
+      if (wasCleared) {
+        return;
+      }
+
+      const selectedPlugin = getSelectedPlugin();
+      if (!selectedPlugin) {
+        return;
+      }
+
+      const initialOpenSections = initializeCollapsedSections();
+      setOpenSections(initialOpenSections);
+
+      if (!source?.id && Object.keys(config).length === 0) {
+        const defaults = createDefaultConfigValues();
+        setConfig(defaults);
+      }
+    };
+
+    updateFormForSelectedPlugin();
+  }, [pluginName, availablePlugins, source, config, setConfig, setOpenSections]);
 
   const saveSourceToApi = async (configObj: Record<string, unknown>) => {
     if (source) {
@@ -177,6 +224,7 @@ export function useSourceForm(
   const resetForm = () => {
     setPluginName("");
     setConfig({});
+    setOpenSections({});
     setFieldErrors({});
     setGeneralError("");
     setTestResult(null);
@@ -188,6 +236,8 @@ export function useSourceForm(
     setPluginName,
     config,
     setConfig,
+    openSections,
+    setOpenSections,
     fieldErrors,
     generalError,
     submitting,

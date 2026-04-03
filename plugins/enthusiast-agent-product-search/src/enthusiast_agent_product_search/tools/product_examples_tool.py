@@ -14,18 +14,6 @@ class ProductExamplesTool(BaseLLMTool):
     RETURN_DIRECT = False
     ARGS_SCHEMA = ProductExamplesToolSchema
 
-    def format_display_output(self, output: str) -> str:
-        try:
-            start = output.index('[')
-            end = output.rindex(']') + 1
-            parsed = json.loads(output[start:end])
-            if isinstance(parsed, list):
-                n = len(parsed)
-                return f"Retrieved {n} example product{'s' if n != 1 else ''}"
-        except (ValueError, json.JSONDecodeError):
-            pass
-        return "Retrieved catalog examples"
-
     def run(self):
         product_retriever = self._injector.product_retriever
         sample_products = product_retriever.get_sample_products_json()

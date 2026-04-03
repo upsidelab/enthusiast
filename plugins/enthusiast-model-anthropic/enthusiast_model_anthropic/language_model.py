@@ -7,7 +7,7 @@ from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
 from pydantic import BaseModel
 
-PRIORITIZED_MODELS = ["claude-opus-4-6", "claude-sonnet-4-6"]
+PRIORITIZED_MODELS = ["claude-sonnet-4-6", "claude-opus-4-6"]
 
 
 class AnthropicImageSource(BaseModel):

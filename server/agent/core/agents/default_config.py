@@ -16,7 +16,7 @@ from enthusiast_common.config import (
 )
 from pydantic import BaseModel
 
-from agent.core.callbacks import ConversationWebSocketCallbackHandler
+from agent.core.callbacks import ConversationWebSocketCallbackHandler, ToolCallWebSocketCallbackHandler
 from agent.core.injector import Injector
 from agent.core.registries.embeddings import EmbeddingProviderRegistry
 from agent.core.registries.language_models import LanguageModelRegistry
@@ -78,7 +78,7 @@ def get_default_config() -> DefaultAgentConfig:
                 CallbackHandlerConfig(handler_class=ConversationWebSocketCallbackHandler),
             ],
         ),
-        agent_callback_handler=None,
+        agent_callback_handler=AgentCallbackHandlerConfig(handler_class=ToolCallWebSocketCallbackHandler),
     )
 
 

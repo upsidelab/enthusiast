@@ -46,7 +46,7 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
   const [conversation, setConversation] = useState<ConversationSchema | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isAgentLoading, setIsAgentLoading] = useState(false);
-  const [agentAction, setAgentAction] = useState<string>("Thinking...");
+  const [statusText, setStatusText] = useState("Thinking...");
   const [messages, setMessages] = useState<MessageProps[]>([]);
   const [agentId, setAgentId] = useState<number | undefined>();
   const [agentDetails, setAgentDetails] = useState<AgentDetails>();
@@ -146,16 +146,20 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
       message_id: () => {
         setMessages((prevMessages) => {
           const lastMessage = prevMessages[prevMessages.length - 1];
-          lastMessage.id = data.data.output;
-          return [...prevMessages.slice(0, -1), lastMessage];
+          return [...prevMessages.slice(0, -1), { ...lastMessage, id: data.data.output }];
         });
+        setStatusText("Thinking...");
       },
-      action: () => {
-        setAgentAction(data.data.output);
+      tool_call: () => {
+        setStatusText(`Invoking ${data.data.tool_name}...`);
+      },
+      tool_error: () => {
+        setStatusText("Thinking...");
       },
       error: () => {
         setIsLoading(false);
         setIsAgentLoading(false);
+        setStatusText("Thinking...");
         setMessages((prevMessages) => [
           ...prevMessages,
           { type: "system", text: data.data.output, id: null },
@@ -264,6 +268,7 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
   const onMessageComposerSubmit = async (message: Message) => {
     setIsLoading(true);
     setIsAgentLoading(true);
+    setStatusText("Thinking...");
     addFileMessages(message.files);
     addUserMessage(message.text);
 
@@ -329,7 +334,7 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
                 }
 
                 if (message.type === 'ai' && message.text === '') {
-                  return (<MessageBubbleTyping key={index} text={agentAction} />);
+                  return (<MessageBubbleTyping key={index} statusText={statusText} />);
                 }
 
                 return (
@@ -342,7 +347,7 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
                   />
                 );
               })}
-              {isAgentLoading && <MessageBubbleTyping text={agentAction} />}
+              {isAgentLoading && <MessageBubbleTyping statusText={statusText} />}
               <div className="mb-4" />
               <div ref={lastMessageRef} />
             </div>

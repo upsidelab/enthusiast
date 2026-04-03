@@ -11,9 +11,10 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu.tsx";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog.tsx";
-import { Plus, RefreshCw, Settings, Trash2, AlertTriangle } from "lucide-react";
+import { Plus, RefreshCw, Settings, Trash2, AlertTriangle, Loader2 } from "lucide-react";
 import { AddEditSourceModal } from "./add-edit-source-modal.tsx";
 import { ButtonWithTooltip } from "@/components/ui/button-with-tooltip.tsx";
+import { Alert, AlertDescription } from "@/components/ui/alert.tsx";
 
 
 const api = new ApiClient(authenticationProviderInstance);
@@ -36,6 +37,8 @@ export function DataSetIntegrationList({ dataSetId }: DataSetSourceListProps) {
   const [selectedSourceType, setSelectedSourceType] = useState<'product' | 'document' | 'ecommerce'>('product');
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [sourceToDelete, setSourceToDelete] = useState<SourceWithType | null>(null);
+  const [syncError, setSyncError] = useState<string | null>(null);
+  const [syncingKeys, setSyncingKeys] = useState<Set<string>>(new Set());
 
   const loadSources = useCallback(async () => {
     const [integration, productSources, documentSources] = await Promise.all([
@@ -96,13 +99,38 @@ export function DataSetIntegrationList({ dataSetId }: DataSetSourceListProps) {
   };
 
   const handleSyncSource = async (source: SourceWithType) => {
-    if (source.type === 'product') {
-      await api.dataSets().syncDataSetProductSource(dataSetId, source.id);
-    } else if (source.type === 'document') {
-      await api.dataSets().syncDataSetDocumentSource(dataSetId, source.id);
-    } else if (source.type === 'ecommerce') {
-      await api.dataSets().syncDataSetEcommerceIntegration(dataSetId);
+    const sourceKey = `${source.type}-${source.id}`;
+    setSyncError(null);
+    setSyncingKeys(prev => new Set(prev).add(sourceKey));
+
+    let taskId: string;
+    try {
+      if (source.type === 'product') {
+        taskId = await api.dataSets().syncDataSetProductSource(dataSetId, source.id);
+      } else if (source.type === 'document') {
+        taskId = await api.dataSets().syncDataSetDocumentSource(dataSetId, source.id);
+      } else {
+        taskId = await api.dataSets().syncDataSetEcommerceIntegration(dataSetId);
+      }
+    } catch {
+      setSyncError("Failed to start synchronization");
+      setSyncingKeys(prev => { const next = new Set(prev); next.delete(sourceKey); return next; });
+      return;
     }
+
+    const poll = async () => {
+      const result = await api.dataSets().getTaskStatus(taskId);
+      if (result.status === "SUCCESS") {
+        setSyncingKeys(prev => { const next = new Set(prev); next.delete(sourceKey); return next; });
+      } else if (result.status === "FAILURE") {
+        setSyncingKeys(prev => { const next = new Set(prev); next.delete(sourceKey); return next; });
+        setSyncError(result.error || "Synchronization failed");
+      } else {
+        setTimeout(poll, 2000);
+      }
+    };
+
+    setTimeout(poll, 2000);
   };
 
   const handleRemoveSource = (source: SourceWithType) => {
@@ -190,6 +218,12 @@ export function DataSetIntegrationList({ dataSetId }: DataSetSourceListProps) {
         </DropdownMenu>
       </div>
 
+      {syncError && (
+        <Alert variant="destructive">
+          <AlertDescription>{syncError}</AlertDescription>
+        </Alert>
+      )}
+
       {sources.length > 0 ? (
         <Table>
           <TableHeader>
@@ -238,9 +272,11 @@ export function DataSetIntegrationList({ dataSetId }: DataSetSourceListProps) {
                       size="sm"
                       onClick={() => handleSyncSource(source)}
                       tooltip={source.corrupted ? "Cannot sync corrupted source" : "Synchronize data from source"}
-                      disabled={source.corrupted}
+                      disabled={source.corrupted || syncingKeys.has(`${source.type}-${source.id}`)}
                     >
-                      <RefreshCw className="h-4 w-4"/>
+                      {syncingKeys.has(`${source.type}-${source.id}`)
+                        ? <Loader2 className="h-4 w-4 animate-spin" />
+                        : <RefreshCw className="h-4 w-4" />}
                     </ButtonWithTooltip>
                     <ButtonWithTooltip
                       variant="outline"

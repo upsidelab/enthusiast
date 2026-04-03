@@ -1,0 +1,5 @@
+import Integration from "@/components/integration";
+
+export const envVariables = ["ANTHROPIC_API_KEY"]
+
+<Integration name="Anthropic" integrationKey="anthropic" pipName="enthusiast-model-anthropic" registerLanguageModelModule="enthusiast_model_anthropic.AnthropicLanguageModelProvider" envVariables={envVariables} description="Use Anthropic's Claude models as the language model for your agents. Note: Anthropic does not provide an embeddings API, so this integration must be paired with another provider that supports embeddings (e.g. OpenAI)." />

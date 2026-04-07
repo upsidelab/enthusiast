@@ -16,6 +16,25 @@ class PersistentChatHistory(BaseChatMessageHistory):
     def __init__(self, conversation_repo: BaseConversationRepository, conversation_id: Any):
         self._conversation = conversation_repo.get_by_id(conversation_id)
 
+    def add_messages(self, messages: list[BaseMessage]) -> None:
+        """Persist messages, interleaving each tool call with its result.
+
+        LLMs can invoke tools in parallel, producing an AIMessage with multiple tool_calls
+        followed by multiple ToolMessages. This reorders them so each tool call is immediately
+        followed by its result, which allows straightforward one-to-one reconstruction.
+        """
+        tool_messages = {m.tool_call_id: m for m in messages if isinstance(m, ToolMessage)}
+        for message in messages:
+            if isinstance(message, AIMessage) and message.tool_calls:
+                for tool_call in message.tool_calls:
+                    self.add_message(AIMessage(content="", tool_calls=[tool_call]))
+                    if tool_call["id"] in tool_messages:
+                        self.add_message(tool_messages[tool_call["id"]])
+            elif isinstance(message, ToolMessage):
+                pass  # already persisted paired with its tool call above
+            else:
+                self.add_message(message)
+
     def add_message(self, message: BaseMessage) -> None:
         """Persist a message to the database.
 
@@ -30,7 +49,7 @@ class PersistentChatHistory(BaseChatMessageHistory):
         else:
             self._conversation.messages.create(
                 type=message.type,
-                text=message.content,
+                text=message.text,
                 function_name=getattr(message, "name", None),
             )
 
@@ -47,7 +66,7 @@ class PersistentChatHistory(BaseChatMessageHistory):
     def create_tool_message(self, message: ToolMessage) -> None:
         self._conversation.messages.create(
             type=Message.MessageType.FUNCTION,
-            text=message.content,
+            text=message.text,
             function_name=message.name,
             tool_call_id=message.tool_call_id,
         )

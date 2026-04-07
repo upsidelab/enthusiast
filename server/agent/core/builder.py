@@ -171,10 +171,15 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
             return self._config.agent_callback_handler.handler_class()
 
     def _build_llm_callback_handlers(self) -> Optional[list[BaseCallbackHandler]]:
-        if not self._config.llm.callbacks:
+        if resolver := self._config.llm.callback_resolver:
+            provider_class = self._llm_registry.provider_for_dataset(self._data_set_id)
+            callbacks_config = resolver(provider_class)
+        elif self._config.llm.callbacks:
+            callbacks_config = self._config.llm.callbacks
+        else:
             return None
         handlers = []
-        for config in self._config.llm.callbacks:
+        for config in callbacks_config:
             if issubclass(config.handler_class, ConversationCallbackHandler):
                 handler = config.handler_class(conversation_id=self.conversation_id)
             else:

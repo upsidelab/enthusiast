@@ -9,13 +9,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { ApiClient } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
-import { DataSet, ProvidersConfig } from "@/lib/types.ts";
+import { DataSet, EmbeddingModelsConfig, ProvidersConfig } from "@/lib/types.ts";
 import { Alert, AlertDescription } from "@/components/ui/alert.tsx";
 import { InfoIcon } from "lucide-react";
 import { formSchema, DataSetFormSchema } from "./data-set-form-schema.ts";
 import { Label } from "@/components/ui/label.tsx";
 
 const api = new ApiClient(authenticationProviderInstance);
+
+function formatList(items: (string | number)[]): string {
+  if (items.length <= 1) return String(items[0] ?? "");
+  return `${items.slice(0, -1).join(", ")} or ${items[items.length - 1]}`;
+}
 
 interface DataSetFormProps {
   initialData?: DataSet;
@@ -42,7 +47,7 @@ function DisabledFieldMessage() {
 export function DataSetForm({ initialData, onSubmit, submitButtonText, isOnboarding = false, disabledFields = [] }: DataSetFormProps) {
   const [providersConfig, setProvidersConfig] = useState<ProvidersConfig | undefined>(undefined);
   const [languageModelNames, setLanguageModelNames] = useState<string[] | undefined>(undefined);
-  const [embeddingModels, setEmbeddingModels] = useState<string[] | undefined>(undefined);
+  const [embeddingModelsConfig, setEmbeddingModelsConfig] = useState<EmbeddingModelsConfig | undefined>(undefined);
 
   const form = useForm<DataSetFormSchema>({
     resolver: zodResolver(formSchema),
@@ -99,19 +104,30 @@ export function DataSetForm({ initialData, onSubmit, submitButtonText, isOnboard
   useEffect(() => {
     const loadEmbeddingModels = async () => {
       if (embeddingProvider) {
-        setEmbeddingModels(undefined);
+        setEmbeddingModelsConfig(undefined);
         const result = await api.config().getEmbeddingModelsForProvider(embeddingProvider);
-        setEmbeddingModels(result);
-        
+        setEmbeddingModelsConfig(result);
+
         // Set default value if not already set
-        if (!form.getValues('embeddingModel') && result.length > 0) {
-          form.setValue("embeddingModel", result[0]);
+        if (!form.getValues('embeddingModel') && result.models.length > 0) {
+          form.setValue("embeddingModel", result.models[0]);
         }
       }
     }
     loadEmbeddingModels();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [embeddingProvider]);
+
+  const embeddingModel = form.watch('embeddingModel');
+
+  useEffect(() => {
+    if (!embeddingModelsConfig || !embeddingModel) return;
+    const allowedSizes = embeddingModelsConfig.vectorSizeConstraints[embeddingModel];
+    if (allowedSizes && allowedSizes.length > 0) {
+      form.setValue("embeddingVectorSize", allowedSizes[0]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [embeddingModel, embeddingModelsConfig]);
 
   const [advancedOpen, setAdvancedOpen] = useState<boolean>(false);
 
@@ -242,16 +258,16 @@ export function DataSetForm({ initialData, onSubmit, submitButtonText, isOnboard
                   <FormItem>
                     <FormLabel>Embedding Model</FormLabel>
                     <Select value={field.value} onValueChange={field.onChange} defaultValue={field.value}>
-                      <SelectTrigger disabled={!embeddingModels || disabledFields.includes('embeddingModel')}>
+                      <SelectTrigger disabled={!embeddingModelsConfig || disabledFields.includes('embeddingModel')}>
                         <FormControl>
                           <SelectValue placeholder="Select a model for embeddings"/>
                         </FormControl>
                       </SelectTrigger>
                       <SelectContent>
                         {
-                          embeddingModels &&
+                          embeddingModelsConfig &&
                           <>
-                            {embeddingModels.map((modelName) => (
+                            {embeddingModelsConfig.models.map((modelName) => (
                               <SelectItem key={modelName} value={modelName}>{modelName}</SelectItem>
                             ))}
                           </>
@@ -262,20 +278,47 @@ export function DataSetForm({ initialData, onSubmit, submitButtonText, isOnboard
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="embeddingVectorSize"
-                disabled={disabledFields.includes('embeddingVectorSize')}
-                render={({field}) => (
-                  <FormItem>
-                    <FormLabel>Vector Size</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormDescription>The size of the embedding vector to use</FormDescription>
-                  </FormItem>
-                )}
-              />
+              {(() => {
+                const allowedSizes = embeddingModelsConfig?.vectorSizeConstraints[embeddingModel ?? ""];
+                const isConstrained = allowedSizes && allowedSizes.length > 0;
+                const isDisabled = disabledFields.includes('embeddingVectorSize');
+                return (
+                  <FormField
+                    control={form.control}
+                    name="embeddingVectorSize"
+                    disabled={isDisabled || isConstrained}
+                    render={({field}) => (
+                      <FormItem>
+                        <FormLabel>Vector Size</FormLabel>
+                        <FormControl>
+                          {isConstrained && !isDisabled ? (
+                            <Select
+                              value={String(field.value)}
+                              onValueChange={(v) => field.onChange(Number(v))}
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {allowedSizes.map((size) => (
+                                  <SelectItem key={size} value={String(size)}>{size}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Input {...field} />
+                          )}
+                        </FormControl>
+                        <FormDescription>
+                          {isConstrained
+                            ? `This model only supports a fixed vector size of ${formatList(allowedSizes)}.`
+                            : "The size of the embedding vector to use"}
+                        </FormDescription>
+                      </FormItem>
+                    )}
+                  />
+                );
+              })()}
             </div>
           </CollapsibleContent>
         </Collapsible>

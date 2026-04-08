@@ -8,6 +8,8 @@ from langchain_ollama import ChatOllama
 from ollama import Client
 from pydantic import ConfigDict
 
+from .embedding import OllamaEmbeddingProvider
+
 
 class OllamaFileObject(BaseContent):
     model_config = ConfigDict(extra="allow")
@@ -106,8 +108,12 @@ class OllamaLanguageModelProvider(LanguageModelProvider):
 
     @staticmethod
     def available_models() -> list[str]:
-        ollama_client = Client()
-        return [model.model for model in ollama_client.list().models]
+        all_model_names = map(lambda m: m.model, Client().list().models)
+        llm_models = [
+            model_name for model_name in all_model_names
+                        if model_name and not OllamaEmbeddingProvider.is_embedding_model(model_name)
+        ]
+        return llm_models
 
     def prepare_image_object(self, file_object: LLMFile) -> OllamaFileObject:
         return self.MODEL_MAPPING_CLASS().get_prepare_file_function(model=self._model, file_type="image")(file_object)

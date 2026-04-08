@@ -15,6 +15,8 @@ class Conversation(models.Model):
     started_at = models.DateTimeField(auto_now_add=True)
     data_set = models.ForeignKey(DataSet, on_delete=models.PROTECT, null=False)
     summary = models.CharField(null=True)
+    conversation_summary = models.TextField(null=True, blank=True)
+    conversation_summary_human_message_count = models.IntegerField(default=0)
     agent = models.ForeignKey(Agent, on_delete=models.PROTECT, null=False)
 
     class Meta:

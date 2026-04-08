@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from langchain_core.chat_history import BaseChatMessageHistory
+from langchain_core.messages import BaseMessage
 
 
 class BaseMemoryCompactor(ABC):
@@ -19,13 +19,13 @@ class BaseMemoryCompactor(ABC):
         pass
 
     @abstractmethod
-    def compact_if_needed(self, history: BaseChatMessageHistory) -> None:
+    def compact_if_needed(self, messages: list[BaseMessage]) -> None:
         """
         Check whether a new summary should be generated and, if so, generate and persist it.
 
         Should be called after new messages have been added to history.
 
         Args:
-            history: The full conversation history.
+            messages: The full conversation message list, including newly added messages.
         """
         pass

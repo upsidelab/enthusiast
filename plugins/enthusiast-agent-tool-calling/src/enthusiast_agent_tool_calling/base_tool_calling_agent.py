@@ -1,13 +1,12 @@
 from typing import Any, Optional
 
-from langchain_core.chat_history import BaseChatMessageHistory
-from langgraph.graph.state import CompiledStateGraph
-
 from enthusiast_common.agents import BaseAgent
 from enthusiast_common.memory import BaseMemoryCompactor
 from langchain.agents import create_agent
-from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, trim_messages, BaseMessage
+from langchain_core.chat_history import BaseChatMessageHistory
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage, trim_messages
 from langchain_core.tools import BaseTool
+from langgraph.graph.state import CompiledStateGraph
 
 MAX_HISTORY_TOKENS = 3000
 
@@ -32,7 +31,7 @@ class BaseToolCallingAgent(BaseAgent):
         history.add_messages(new_messages)
 
         if compactor:
-            compactor.compact_if_needed(history)
+            compactor.compact_if_needed(history.messages)
 
         return final_message.text
 

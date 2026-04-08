@@ -2,7 +2,6 @@ from typing import Any, Optional
 
 from enthusiast_common.memory import BaseMemoryCompactor
 from enthusiast_common.repositories import BaseConversationRepository
-from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.messages import HumanMessage, SystemMessage
 
@@ -38,16 +37,13 @@ class LLMMemoryCompactor(BaseMemoryCompactor):
         """Return the current persisted summary, or None if one has not been generated yet."""
         return self._conversation.conversation_summary or None
 
-    def compact_if_needed(self, history: BaseChatMessageHistory) -> None:
+    def compact_if_needed(self, messages: list) -> None:
         """Generate a new summary if COMPACTION_INTERVAL human messages have been added since the last one."""
-        messages = history.messages
         human_count = sum(1 for m in messages if isinstance(m, HumanMessage))
 
-        messages_since_last = human_count - self._conversation.conversation_summary_human_message_count
-        if messages_since_last < COMPACTION_INTERVAL:
-            return
-
         last_count = self._conversation.conversation_summary_human_message_count
+        if human_count - last_count < COMPACTION_INTERVAL:
+            return
         existing_summary = self._conversation.conversation_summary
         new_messages = self._messages_since_last_compaction(messages, last_count)
 

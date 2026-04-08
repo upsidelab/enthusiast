@@ -17,16 +17,21 @@ class GoogleEmbeddingProvider(EmbeddingProvider):
             content (str): The input text for which the embedding vector is to be generated.
         """
         config = EmbedContentConfig(output_dimensionality=self._dimensions)
-        google_embedding = genai.Client().models.embed_content(
+        client = genai.Client()
+        google_embedding = client.models.embed_content(
             model=self._model,
             config=config,
             contents=content,
         )
+        client.close()
 
         return google_embedding.embeddings[0].values
 
     @staticmethod
     def available_models() -> list[str]:
-        all_models = genai.Client().models.list()
+        client = genai.Client()
+        all_models = client.models.list()
+        client.close()
+
         embedding_models = [model.name for model in all_models if "embedContent" in model.supported_actions]
         return prioritize_items(embedding_models, PRIORITIZED_MODELS)

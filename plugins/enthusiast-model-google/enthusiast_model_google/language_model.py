@@ -30,7 +30,10 @@ class GoogleLanguageModelProvider(LanguageModelProvider):
 
     @staticmethod
     def available_models() -> list[str]:
-        all_models = genai.Client().models.list()
+        client = genai.Client()
+        all_models = client.models.list()
+        client.close()
+
         gemini_models = [model.name for model in all_models if "generateContent" in model.supported_actions]
         return prioritize_items(gemini_models, PRIORITIZED_MODELS)
 
@@ -44,4 +47,4 @@ class GoogleLanguageModelProvider(LanguageModelProvider):
 
     @staticmethod
     def prepare_file_object(file_object: LLMFile) -> GoogleAIFileContent:
-        return GoogleAIFileContent(type="input_file", data=file_object.content, mime_type=file_object.content_type)
+        return GoogleAIFileContent(type="media", data=file_object.content, mime_type=file_object.content_type)

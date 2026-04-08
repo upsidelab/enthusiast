@@ -38,7 +38,7 @@ class LLMMemoryCompactor(BaseMemoryCompactor):
         """Return the current persisted summary, or None if one has not been generated yet."""
         return self._conversation.conversation_summary or None
 
-    def compact_if_needed(self, history: BaseChatMessageHistory, llm: BaseLanguageModel) -> None:
+    def compact_if_needed(self, history: BaseChatMessageHistory) -> None:
         """Generate a new summary if COMPACTION_INTERVAL human messages have been added since the last one."""
         messages = history.messages
         human_count = sum(1 for m in messages if isinstance(m, HumanMessage))

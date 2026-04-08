@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 from langchain_core.chat_history import BaseChatMessageHistory
-from langchain_core.language_models import BaseLanguageModel
 
 
 class BaseMemoryCompactor(ABC):
@@ -20,7 +19,7 @@ class BaseMemoryCompactor(ABC):
         pass
 
     @abstractmethod
-    def compact_if_needed(self, history: BaseChatMessageHistory, llm: BaseLanguageModel) -> None:
+    def compact_if_needed(self, history: BaseChatMessageHistory) -> None:
         """
         Check whether a new summary should be generated and, if so, generate and persist it.
 
@@ -28,6 +27,5 @@ class BaseMemoryCompactor(ABC):
 
         Args:
             history: The full conversation history.
-            llm: The language model used to generate the summary.
         """
         pass

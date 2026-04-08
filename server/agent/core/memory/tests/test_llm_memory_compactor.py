@@ -69,7 +69,7 @@ class TestLLMMemoryCompactorCompactIfNeeded:
     def test_does_not_compact_below_threshold(self, conversation, compactor, llm):
         history = self._make_history(human_count=COMPACTION_INTERVAL - 1)
 
-        compactor.compact_if_needed(history, llm)
+        compactor.compact_if_needed(history)
 
         conversation.refresh_from_db()
         assert conversation.conversation_summary is None
@@ -78,7 +78,7 @@ class TestLLMMemoryCompactorCompactIfNeeded:
     def test_compacts_at_threshold(self, conversation, compactor, llm):
         history = self._make_history(human_count=COMPACTION_INTERVAL)
 
-        compactor.compact_if_needed(history, llm)
+        compactor.compact_if_needed(history)
 
         conversation.refresh_from_db()
         assert conversation.conversation_summary == "This is a summary."
@@ -88,24 +88,24 @@ class TestLLMMemoryCompactorCompactIfNeeded:
     def test_does_not_compact_again_before_next_interval(self, conversation, compactor, llm):
         # First compaction
         history = self._make_history(human_count=COMPACTION_INTERVAL)
-        compactor.compact_if_needed(history, llm)
+        compactor.compact_if_needed(history)
         llm.invoke.reset_mock()
 
         # One more message added — not yet at next interval
         history = self._make_history(human_count=COMPACTION_INTERVAL + 1)
-        compactor.compact_if_needed(history, llm)
+        compactor.compact_if_needed(history)
 
         llm.invoke.assert_not_called()
 
     def test_compacts_again_at_next_interval(self, conversation, compactor, llm):
         # First compaction
         history = self._make_history(human_count=COMPACTION_INTERVAL)
-        compactor.compact_if_needed(history, llm)
+        compactor.compact_if_needed(history)
         llm.invoke.reset_mock()
 
         # Second interval reached
         history = self._make_history(human_count=COMPACTION_INTERVAL * 2)
-        compactor.compact_if_needed(history, llm)
+        compactor.compact_if_needed(history)
 
         conversation.refresh_from_db()
         assert conversation.conversation_summary_human_message_count == COMPACTION_INTERVAL * 2
@@ -117,7 +117,7 @@ class TestLLMMemoryCompactorCompactIfNeeded:
         history = MagicMock()
         history.messages = messages
 
-        compactor.compact_if_needed(history, llm)
+        compactor.compact_if_needed(history)
 
         call_args = llm.invoke.call_args[0][0]
         assert isinstance(call_args[0], SystemMessage)
@@ -128,12 +128,12 @@ class TestLLMMemoryCompactorCompactIfNeeded:
     def test_second_compaction_sends_only_new_messages_and_existing_summary(self, conversation, compactor, llm):
         # First compaction — messages 0..9
         first_history = self._make_history(human_count=COMPACTION_INTERVAL)
-        compactor.compact_if_needed(first_history, llm)
+        compactor.compact_if_needed(first_history)
         llm.invoke.reset_mock()
 
         # Second compaction — messages 0..19, but only 10..19 should be sent
         second_history = self._make_history(human_count=COMPACTION_INTERVAL * 2)
-        compactor.compact_if_needed(second_history, llm)
+        compactor.compact_if_needed(second_history)
 
         call_args = llm.invoke.call_args[0][0]
         assert isinstance(call_args[0], SystemMessage)

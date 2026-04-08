@@ -13,11 +13,6 @@ class OllamaImageContent(BaseContent):
     image_url: str
 
 
-class OllamaFileContent(BaseContent):
-    type: str = "document_url"
-    document_url: str
-
-
 class OllamaLanguageModelProvider(LanguageModelProvider):
     NAME = "Ollama"
     STREAMING_AVAILABLE = False
@@ -43,6 +38,5 @@ class OllamaLanguageModelProvider(LanguageModelProvider):
         return OllamaImageContent(image_url=image_url)
 
     @staticmethod
-    def prepare_file_object(file_object: LLMFile) -> OllamaFileContent:
-        document_url = f"data:{file_object.content_type};base64,{file_object.content}"
-        return OllamaFileContent(document_url=document_url)
+    def prepare_file_object(_):
+        raise NotImplementedError("Ollama does not support document file inputs.")

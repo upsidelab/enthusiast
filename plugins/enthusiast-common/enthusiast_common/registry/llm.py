@@ -55,7 +55,6 @@ class LanguageModelProvider(ABC):
 
     @classmethod
     def prepare_files_objects(cls, files_objects: list[LLMFile]):
-        pass
         objects = []
         for file in files_objects:
             if file.file_category == FileTypes.FILE.value:

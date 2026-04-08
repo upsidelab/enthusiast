@@ -1,11 +1,12 @@
-from typing import Any
+from typing import Any, Optional
 
 from langchain_core.chat_history import BaseChatMessageHistory
 from langgraph.graph.state import CompiledStateGraph
 
 from enthusiast_common.agents import BaseAgent
+from enthusiast_common.memory import BaseMemoryCompactor
 from langchain.agents import create_agent
-from langchain_core.messages import AIMessage, HumanMessage, trim_messages, BaseMessage
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, trim_messages, BaseMessage
 from langchain_core.tools import BaseTool
 
 MAX_HISTORY_TOKENS = 3000
@@ -14,20 +15,35 @@ MAX_HISTORY_TOKENS = 3000
 class BaseToolCallingAgent(BaseAgent):
     def get_answer(self, input_text: str) -> str:
         history = self._injector.chat_history
+        compactor = self._injector.memory_compactor
 
         agent = self._build_agent()
         limited_history = self._build_limited_history(history)
-        input_messages = limited_history + [HumanMessage(content=input_text)]
-        result = agent.invoke({ "messages": input_messages }, config=self._build_invoke_config())
+        summary_messages = self._build_summary_messages(compactor)
+        input_messages = summary_messages + limited_history + [HumanMessage(content=input_text)]
+        result = agent.invoke({"messages": input_messages}, config=self._build_invoke_config())
 
-        new_messages = result["messages"][len(limited_history):]
+        new_messages = result["messages"][len(summary_messages) + len(limited_history):]
         final_message = next(
             m for m in reversed(new_messages)
             if isinstance(m, AIMessage) and not m.tool_calls
         )
 
         history.add_messages(new_messages)
+
+        if compactor:
+            compactor.compact_if_needed(history, self._llm)
+
         return final_message.text
+
+    @staticmethod
+    def _build_summary_messages(compactor: Optional[BaseMemoryCompactor]) -> list[BaseMessage]:
+        if compactor is None:
+            return []
+        summary = compactor.get_summary()
+        if summary is None:
+            return []
+        return [SystemMessage(content=f"Summary of earlier conversation:\n{summary}")]
 
     def _build_limited_history(self, history: BaseChatMessageHistory) -> list[BaseMessage]:
         return trim_messages(

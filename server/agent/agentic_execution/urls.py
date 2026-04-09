@@ -1,6 +1,11 @@
 from django.urls import path
 
-from .views import AgenticExecutionDetailView, AgenticExecutionListView, AgenticExecutionDefinitionTypesView, StartAgenticExecutionView
+from .views import (
+    AgenticExecutionDefinitionTypesView,
+    AgenticExecutionDetailView,
+    AgenticExecutionListView,
+    StartAgenticExecutionView,
+)
 
 urlpatterns = [
     path("api/agents/<int:agent_id>/agentic-execution-definitions/", AgenticExecutionDefinitionTypesView.as_view(), name="agentic-execution-definitions"),

@@ -18,6 +18,8 @@ import type { AgentDetails } from "@/lib/types";
 import type { Conversation as ConversationSchema } from '@/lib/types.ts';
 import type { Message, MessageFile } from "@/components/conversation-view/message-composer.tsx";
 
+const DEFAULT_STATUS_TEXT = "Thinking...";
+
 export type FileMessageProps = {
   id: number | null;
   type: "file";
@@ -148,18 +150,18 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
           const lastMessage = prevMessages[prevMessages.length - 1];
           return [...prevMessages.slice(0, -1), { ...lastMessage, id: data.data.output }];
         });
-        setStatusText("Thinking...");
+        setStatusText(DEFAULT_STATUS_TEXT);
       },
       tool_call: () => {
         setStatusText(`Invoking ${data.data.tool_name}...`);
       },
       tool_error: () => {
-        setStatusText("Thinking...");
+        setStatusText(DEFAULT_STATUS_TEXT);
       },
       error: () => {
         setIsLoading(false);
         setIsAgentLoading(false);
-        setStatusText("Thinking...");
+        setStatusText(DEFAULT_STATUS_TEXT);
         setMessages((prevMessages) => [
           ...prevMessages,
           { type: "system", text: data.data.output, id: null },

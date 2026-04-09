@@ -10,8 +10,12 @@ from pydantic import BaseModel
 PRIORITIZED_MODELS = ["gpt-4.1", "gpt-4.1-mini", "gpt-5", "gpt-5.2"]
 
 
+class OpenAIImageUrl(BaseModel):
+    url: str
+
+
 class OpenAIImageContent(BaseContent):
-    image_url: str
+    image_url: OpenAIImageUrl
 
 
 class OpenAIFileObject(BaseModel):
@@ -43,11 +47,8 @@ class OpenAILanguageModelProvider(LanguageModelProvider):
 
     @staticmethod
     def prepare_image_object(file_object: LLMFile) -> OpenAIImageContent:
-        image_url = f'data:{file_object.content_type};base64,"{file_object.content}"'
-        return OpenAIImageContent(
-            type="input_image",
-            image_url=image_url,
-        )
+        url = f"data:{file_object.content_type};base64,{file_object.content}"
+        return OpenAIImageContent(type="image_url", image_url=OpenAIImageUrl(url=url))
 
     @staticmethod
     def prepare_file_object(file_object: LLMFile) -> OpenAIFileContent:

@@ -38,10 +38,7 @@ export function MainSidebarMenuDropdownItem({ item }: MainSidebarMenuDropdownIte
             {item.children.map((child) => {
               return (
                 <DropdownMenuItem asChild key={child.title}>
-                  {child.external
-                    ? <a href={child.link} target="_blank" rel="noopener noreferrer">{child.icon}{child.title}</a>
-                    : <Link to={child.link}>{child.icon}{child.title}</Link>
-                  }
+                  <Link to={child.link} target={child.external ? "_blank" : undefined} rel={child.external ? "noopener noreferrer" : undefined}>{child.icon}{child.title}</Link>
                 </DropdownMenuItem>
               )
             })}

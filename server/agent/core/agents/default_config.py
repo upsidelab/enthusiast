@@ -14,10 +14,9 @@ from enthusiast_common.config import (
     RetrieverConfig,
     RetrieversConfig,
 )
-from enthusiast_common.registry import LanguageModelProvider
 from pydantic import BaseModel
 
-from agent.core.callbacks import ConversationWebSocketCallbackHandler, MessageBufferingCallbackHandler
+from agent.core.callbacks import ConversationWebSocketCallbackHandler
 from agent.core.injector import Injector
 from agent.core.registries.embeddings import EmbeddingProviderRegistry
 from agent.core.registries.language_models import LanguageModelRegistry
@@ -34,15 +33,6 @@ from agent.core.repositories import (
 )
 from agent.core.retrievers import DocumentRetriever, ProductRetriever
 from agent.core.retrievers.product_retriever import QUERY_PROMPT_TEMPLATE
-
-
-def _resolve_callbacks(provider_class: Type[LanguageModelProvider]) -> list[CallbackHandlerConfig]:
-    handler = (
-        MessageBufferingCallbackHandler
-        if getattr(provider_class, "STREAMING_REQUIRES_MESSAGE_BUFFERING", False)
-        else ConversationWebSocketCallbackHandler
-    )
-    return [CallbackHandlerConfig(handler_class=handler)]
 
 
 class DefaultAgentConfig(BaseModel):
@@ -83,7 +73,11 @@ def get_default_config() -> DefaultAgentConfig:
             embeddings=EmbeddingsRegistryConfig(registry_class=EmbeddingProviderRegistry),
             model=ModelsRegistryConfig(registry_class=BaseDjangoSettingsDBModelRegistry),
         ),
-        llm=LLMConfig(callback_resolver=_resolve_callbacks),
+        llm=LLMConfig(
+            callbacks=[
+                CallbackHandlerConfig(handler_class=ConversationWebSocketCallbackHandler),
+            ],
+        ),
         agent_callback_handler=None,
     )
 

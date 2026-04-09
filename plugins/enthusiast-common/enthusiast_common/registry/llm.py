@@ -17,7 +17,6 @@ class LanguageModelProvider(ABC):
 
     NAME: str = None
     STREAMING_AVAILABLE = True
-    STREAMING_REQUIRES_MESSAGE_BUFFERING: bool = False
 
     def __init__(self, model: str):
         super(LanguageModelProvider, self).__init__()

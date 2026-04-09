@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Generic, Optional, Type, TypeVar
+from typing import Any, Generic, Optional, Type, TypeVar
 
 from langchain_core.callbacks import BaseCallbackHandler
 from pydantic import BaseModel, ConfigDict, Field
@@ -12,7 +12,6 @@ from ..registry import (
     BaseDBModelsRegistry,
     BaseEmbeddingProviderRegistry,
     BaseLanguageModelRegistry,
-    LanguageModelProvider,
 )
 from ..repositories.base import (
     BaseAgentRepository,
@@ -61,7 +60,6 @@ class CallbackHandlerConfig(ArbitraryTypeBaseModel):
 class LLMConfig(ArbitraryTypeBaseModel):
     llm_class: Type[BaseLLM] = BaseLLM
     callbacks: Optional[list[CallbackHandlerConfig]] = None
-    callback_resolver: Optional[Callable[[Type[LanguageModelProvider]], list[CallbackHandlerConfig]]] = None
 
 
 class RepositoriesConfig(ArbitraryTypeBaseModel):

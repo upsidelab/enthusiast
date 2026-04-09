@@ -25,7 +25,7 @@ class OllamaLanguageModelProvider(LanguageModelProvider):
 
     @staticmethod
     def available_models() -> list[str]:
-        all_model_names = map(lambda m: m.model, Client().list().models)
+        all_model_names = [m.model for m in Client().list().models]
         llm_models = [
             model_name for model_name in all_model_names
                         if model_name and not OllamaEmbeddingProvider.is_embedding_model(model_name)

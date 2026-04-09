@@ -30,9 +30,8 @@ class GoogleLanguageModelProvider(LanguageModelProvider):
 
     @staticmethod
     def available_models() -> list[str]:
-        client = genai.Client()
-        all_models = client.models.list()
-        client.close()
+        with genai.Client() as client:
+            all_models = client.models.list()
 
         gemini_models = [model.name for model in all_models if "generateContent" in model.supported_actions]
         return prioritize_items(gemini_models, PRIORITIZED_MODELS)

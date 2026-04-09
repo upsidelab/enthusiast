@@ -2,17 +2,17 @@ import io
 from unittest.mock import MagicMock, patch
 
 import pytest
-from enthusiast_common.agent_execution import BaseAgentExecution, ExecutionInputType, ExecutionResult
+from enthusiast_common.agentic_execution import BaseAgenticExecutionDefinition, ExecutionInputType, ExecutionResult
 from model_bakery import baker
 
 from account.models import User
-from agent.execution.services import (
-    AgentExecutionService,
+from agent.agentic_execution.services import (
+    AgenticExecutionService,
     FileUploadNotSupportedError,
     UnsupportedFileTypeError,
 )
 from agent.models.agent import Agent
-from agent.models.agent_execution import AgentExecution
+from agent.models.agentic_execution import AgenticExecution
 from agent.models.conversation import ConversationFile
 from catalog.models import DataSet
 
@@ -26,7 +26,7 @@ class DummyExecutionInput(ExecutionInputType):
     pass
 
 
-class DummyExecution(BaseAgentExecution):
+class DummyExecution(BaseAgenticExecutionDefinition):
     EXECUTION_KEY = "dummy"
     AGENT_KEY = DUMMY_AGENT_TYPE
     NAME = "Dummy"
@@ -52,7 +52,7 @@ def agent(dataset):
 
 @pytest.fixture
 def service():
-    return AgentExecutionService()
+    return AgenticExecutionService()
 
 
 def _make_file(name="doc.pdf", content=b"data", content_type="application/pdf"):
@@ -65,7 +65,7 @@ def _make_file(name="doc.pdf", content=b"data", content_type="application/pdf"):
 class TestStart:
     @pytest.fixture(autouse=True)
     def mock_task(self):
-        with patch("agent.execution.services.run_agent_execution_task.delay") as mock:
+        with patch("agent.execution.services.run_agentic_execution_task.delay") as mock:
             mock.return_value = MagicMock(id="fake-celery-id")
             yield mock
 
@@ -81,7 +81,7 @@ class TestStart:
 
         assert execution.input == {"foo": "bar"}
         assert execution.execution_key == "dummy"
-        assert execution.status == AgentExecution.Status.PENDING
+        assert execution.status == AgenticExecution.Status.PENDING
 
     def test_stores_celery_task_id(self, service, agent, user):
         execution = service.start(agent=agent, user=user, execution_key="dummy", validated_input={}, uploaded_files=[])

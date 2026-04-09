@@ -3,20 +3,20 @@ import { Link, useParams } from "react-router-dom";
 import { FileIcon } from "lucide-react";
 import { PageMain } from "@/components/util/page-main.tsx";
 import { PageHeading } from "@/components/util/page-heading.tsx";
-import { ExecutionStatusBadge } from "@/components/agent-executions/execution-status-badge.tsx";
+import { ExecutionStatusBadge } from "@/components/agentic-executions/execution-status-badge.tsx";
 import { ApiClient } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
-import { AgentExecutionDetail } from "@/lib/types.ts";
+import { AgenticExecutionDetail } from "@/lib/types.ts";
 
 const api = new ApiClient(authenticationProviderInstance);
 
-const TERMINAL_STATUSES: AgentExecutionDetail["status"][] = ["finished", "failed"];
+const TERMINAL_STATUSES: AgenticExecutionDetail["status"][] = ["finished", "failed"];
 
-export function AgentExecutionDetailPage() {
+export function AgenticExecutionDetailPage() {
   const { id: dataSetId, executionId } = useParams();
   const { availableAgents } = useApplicationContext()!;
-  const [execution, setExecution] = useState<AgentExecutionDetail | null>(null);
+  const [execution, setExecution] = useState<AgenticExecutionDetail | null>(null);
 
   const agentName = (id: number) => availableAgents.find(a => a.id === id)?.name ?? `Agent #${id}`;
 

@@ -127,7 +127,7 @@ export type ConversationFile = {
   content_type: string;
 };
 
-export type AgentExecution = {
+export type AgenticExecution = {
   id: number;
   agent: number;
   execution_key: string;
@@ -143,7 +143,7 @@ export type AgentExecution = {
   duration_seconds: number | null;
 };
 
-export type AgentExecutionDetail = AgentExecution & {
+export type AgenticExecutionDetail = AgenticExecution & {
   files: ConversationFile[];
 };
 

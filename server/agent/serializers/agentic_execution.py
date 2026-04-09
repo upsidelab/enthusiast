@@ -3,7 +3,7 @@ import json
 from pydantic import ValidationError as PydanticValidationError
 from rest_framework import serializers
 
-from agent.models.agent_execution import AgentExecution
+from agent.models.agentic_execution import AgenticExecution
 from agent.serializers.conversation import ConversationFileSerializer
 
 _BASE_FIELDS = [
@@ -23,33 +23,33 @@ _BASE_FIELDS = [
 ]
 
 
-class AgentExecutionSerializer(serializers.ModelSerializer):
+class AgenticExecutionSerializer(serializers.ModelSerializer):
     """Lightweight read serializer used for list responses."""
 
     duration_seconds = serializers.FloatField(read_only=True)
 
     class Meta:
-        model = AgentExecution
+        model = AgenticExecution
         fields = _BASE_FIELDS
         read_only_fields = _BASE_FIELDS
 
 
-class AgentExecutionDetailSerializer(AgentExecutionSerializer):
+class AgenticExecutionDetailSerializer(AgenticExecutionSerializer):
     """Extended read serializer used for the detail endpoint. Includes uploaded files."""
 
     files = serializers.SerializerMethodField()
 
-    class Meta(AgentExecutionSerializer.Meta):
+    class Meta(AgenticExecutionSerializer.Meta):
         fields = _BASE_FIELDS + ["files"]
         read_only_fields = fields
 
-    def get_files(self, obj: AgentExecution):
+    def get_files(self, obj: AgenticExecution):
         """Return non-hidden files attached to the execution's conversation."""
         return ConversationFileSerializer(obj.conversation.files.filter(is_hidden=False), many=True).data
 
 
-class AgentExecutionTypeSerializer(serializers.Serializer):
-    """Read serializer for an available execution type on an agent."""
+class AgenticExecutionDefinitionSerializer(serializers.Serializer):
+    """Read serializer for an available agentic execution definition type on an agent."""
 
     key = serializers.CharField()
     name = serializers.CharField()
@@ -57,12 +57,12 @@ class AgentExecutionTypeSerializer(serializers.Serializer):
     input_schema = serializers.DictField()
 
 
-class StartAgentExecutionSerializer(serializers.Serializer):
-    """Write serializer for starting a new execution.
+class StartAgenticExecutionSerializer(serializers.Serializer):
+    """Write serializer for starting a new agentic execution.
 
     The agent is resolved from the URL; this serializer validates the
     ``execution_key`` and the input payload against the matching ExecutionInputType.
-    Pass the resolved execution class as ``context["execution_cls"]``.
+    Pass the resolved execution definition class as ``context["execution_cls"]``.
     """
 
     execution_key = serializers.CharField()

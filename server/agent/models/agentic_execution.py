@@ -2,8 +2,8 @@ from django.db import models
 from django.utils import timezone
 
 
-class AgentExecution(models.Model):
-    """Persisted record of a programmatic, autonomous agent execution job.
+class AgenticExecution(models.Model):
+    """Persisted record of a programmatic, autonomous agentic execution job.
 
     Lifecycle: pending → in_progress → finished | failed.
     """
@@ -23,12 +23,12 @@ class AgentExecution(models.Model):
     execution_key = models.CharField(
         max_length=128,
         default="",
-        help_text="EXECUTION_KEY of the execution class used to run this record. Used to resolve the correct class at task time.",
+        help_text="EXECUTION_KEY of the execution definition class used to run this record. Used to resolve the correct class at task time.",
     )
     conversation = models.OneToOneField(
         "agent.Conversation",
         on_delete=models.PROTECT,
-        related_name="agent_execution",
+        related_name="agentic_execution",
         help_text="Conversation created by the view before the execution task is enqueued.",
     )
     status = models.CharField(
@@ -37,7 +37,7 @@ class AgentExecution(models.Model):
         default=Status.PENDING,
     )
     input = models.JSONField(
-        help_text="Validated input payload matching the execution type's ExecutionInputType schema.",
+        help_text="Validated input payload matching the execution definition type's ExecutionInputType schema.",
     )
     result = models.JSONField(
         null=True,
@@ -68,7 +68,7 @@ class AgentExecution(models.Model):
         ordering = ["-started_at"]
         db_table_comment = (
             "Autonomous, programmatic LLM-driven batch jobs. Each record tracks the full "
-            "lifecycle of an agent execution: input, status, result, and timing."
+            "lifecycle of an agentic execution: input, status, result, and timing."
         )
 
     @property

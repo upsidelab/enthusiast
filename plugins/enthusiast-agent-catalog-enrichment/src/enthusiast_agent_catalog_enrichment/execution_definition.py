@@ -1,25 +1,25 @@
 from typing import Optional
 
-from enthusiast_common.agent_execution import (
-    BaseAgentExecution,
+from enthusiast_common.agentic_execution import (
+    BaseAgenticExecutionDefinition,
     ExecutionConversationInterface,
     ExecutionInputType,
 )
 
-class CatalogEnrichmentExecutionInput(ExecutionInputType):
-    """Input for the catalog enrichment batch execution."""
+class CatalogEnrichmentAgenticExecutionInput(ExecutionInputType):
+    """Input for the catalog enrichment agentic execution."""
     additional_instructions: Optional[str] = None
 
 
-class CatalogEnrichmentExecution(BaseAgentExecution):
+class CatalogEnrichmentAgenticExecutionDefinition(BaseAgenticExecutionDefinition):
     EXECUTION_KEY = "catalog-enrichment"
     AGENT_KEY = "enthusiast-agent-catalog-enrichment"
     NAME = "Catalog Enrichment"
-    INPUT_TYPE = CatalogEnrichmentExecutionInput
+    INPUT_TYPE = CatalogEnrichmentAgenticExecutionInput
 
     def execute(
         self,
-        input_data: CatalogEnrichmentExecutionInput,
+        input_data: CatalogEnrichmentAgenticExecutionInput,
         conversation: ExecutionConversationInterface,
     ) -> str:
         return conversation.ask(input_data.additional_instructions or 'Upsert products from given files.')

@@ -6,9 +6,9 @@ from .errors import ExecutionFailureCode
 
 @dataclass
 class ExecutionResult:
-    """The outcome of a completed agent execution.
+    """The outcome of a completed agentic execution.
 
-    Returned by ``BaseAgentExecution.run()``. On success, ``output`` holds the
+    Returned by ``BaseAgenticExecutionDefinition.run()``. On success, ``output`` holds the
     structured result (parsed from the LLM's JSON response). On failure,
     ``failure_code`` identifies the cause and ``failure_summary`` contains an
     LLM-generated plain-language explanation.

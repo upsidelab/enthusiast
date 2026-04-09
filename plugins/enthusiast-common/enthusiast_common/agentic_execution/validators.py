@@ -6,7 +6,7 @@ from typing import Optional
 class BaseExecutionValidator(ABC):
     """Pluggable validator that inspects a single LLM response string.
 
-    Attach validators to an execution class via ``VALIDATORS``. After each
+    Attach validators to an agentic execution definition class via ``VALIDATORS``. After each
     ``execute()`` call the retry loop runs every validator in order. The first
     non-``None`` return value is sent back to the LLM as a correction prompt and
     the attempt is retried. If all validators return ``None`` the response is

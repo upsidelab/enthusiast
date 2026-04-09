@@ -4,11 +4,11 @@ from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import UploadedFile
 
-from agent.execution.registry import AgentExecutionRegistry
-from agent.execution.tasks import run_agent_execution_task
+from agent.agentic_execution.registry import AgenticExecutionDefinitionRegistry
+from agent.agentic_execution.tasks import run_agentic_execution_task
 from agent.file_service import FileService
 from agent.models.agent import Agent
-from agent.models.agent_execution import AgentExecution
+from agent.models.agentic_execution import AgenticExecution
 from agent.models.conversation import Conversation, ConversationFile
 from pecl import settings
 
@@ -28,8 +28,8 @@ class FileUploadNotSupportedError(Exception):
     """Raised when files are submitted to an agent that does not support file uploads."""
 
 
-class AgentExecutionService:
-    """Orchestrates the creation of an AgentExecution and its associated resources."""
+class AgenticExecutionService:
+    """Orchestrates the creation of an AgenticExecution and its associated resources."""
 
     def start(
         self,
@@ -38,7 +38,7 @@ class AgentExecutionService:
         execution_key: str,
         validated_input: dict,
         uploaded_files: list[UploadedFile],
-    ) -> AgentExecution:
+    ) -> AgenticExecution:
         if uploaded_files and not agent.file_upload:
             raise FileUploadNotSupportedError()
 
@@ -54,21 +54,21 @@ class AgentExecutionService:
         for f in uploaded_files:
             self._attach_file(conversation, f)
 
-        execution = AgentExecution.objects.create(
+        execution = AgenticExecution.objects.create(
             agent=agent,
             execution_key=execution_key,
             conversation=conversation,
             input=validated_input,
         )
-        task = run_agent_execution_task.delay(execution.pk)
+        task = run_agentic_execution_task.delay(execution.pk)
         execution.celery_task_id = task.id
         execution.save(update_fields=["celery_task_id"])
 
         return execution
 
     def get_execution_types(self, agent: Agent) -> list:
-        """Return all registered execution classes for the given agent type."""
-        return AgentExecutionRegistry().get_by_agent_type(agent.agent_type)
+        """Return all registered agentic execution definition classes for the given agent type."""
+        return AgenticExecutionDefinitionRegistry().get_by_agent_type(agent.agent_type)
 
     def _validate_file_extensions(self, uploaded_files: list[UploadedFile]) -> None:
         supported = []

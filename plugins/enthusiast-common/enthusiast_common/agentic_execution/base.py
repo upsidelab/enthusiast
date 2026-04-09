@@ -28,16 +28,16 @@ class ExecutionConversationInterface(Protocol):
         ...
 
 
-class BaseAgentExecution(ABC):
-    """Abstract base class for all agentic execution types.
+class BaseAgenticExecutionDefinition(ABC):
+    """Abstract base class for all agentic execution definition types.
 
     Subclass this in an agent plugin to implement a specific autonomous task.
-    Register the subclass in ``settings.AVAILABLE_AGENT_EXECUTIONS`` so the
+    Register the subclass in ``settings.AVAILABLE_AGENTIC_EXECUTION_DEFINITIONS`` so the
     server can discover it.
 
     Minimal implementation::
 
-        class MyExecution(BaseAgentExecution):
+        class MyExecution(BaseAgenticExecutionDefinition):
             EXECUTION_KEY = "my-execution"
             AGENT_KEY = "my-agent-plugin-key"
             NAME = "My Execution"

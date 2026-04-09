@@ -7,7 +7,7 @@ import { ServiceAccountsApiClient } from "@/lib/api/service-accounts.ts";
 import { Account, SourcePlugin, User } from "@/lib/types.ts";
 import { ConfigApiClient } from "@/lib/api/config.ts";
 import {AgentsApiClient} from "@/lib/api/agents.ts";
-import { AgentExecutionsApiClient } from "@/lib/api/agent-executions.ts";
+import { AgenticExecutionsApiClient } from "@/lib/api/agentic-executions.ts";
 
 export type Token = {
   token: string;
@@ -108,8 +108,8 @@ export class ApiClient {
     return new AgentsApiClient(this.apiBase, this.authenticationProvider);
   }
 
-  agentExecutions(): AgentExecutionsApiClient {
-    return new AgentExecutionsApiClient(this.apiBase, this.authenticationProvider);
+  agentExecutions(): AgenticExecutionsApiClient {
+    return new AgenticExecutionsApiClient(this.apiBase, this.authenticationProvider);
   }
 
   _requestConfiguration(): RequestInit {

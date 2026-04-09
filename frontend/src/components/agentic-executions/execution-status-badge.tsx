@@ -1,14 +1,14 @@
-import { AgentExecution } from "@/lib/types.ts";
+import { AgenticExecution } from "@/lib/types.ts";
 import { cn } from "@/lib/utils.ts";
 
-const STATUS_STYLES: Record<AgentExecution["status"], string> = {
+const STATUS_STYLES: Record<AgenticExecution["status"], string> = {
   pending: "bg-muted text-muted-foreground",
   in_progress: "bg-blue-100 text-blue-700",
   finished: "bg-green-100 text-green-700",
   failed: "bg-red-100 text-red-700",
 };
 
-const STATUS_LABELS: Record<AgentExecution["status"], string> = {
+const STATUS_LABELS: Record<AgenticExecution["status"], string> = {
   pending: "Pending",
   in_progress: "In progress",
   finished: "Finished",
@@ -16,7 +16,7 @@ const STATUS_LABELS: Record<AgentExecution["status"], string> = {
 };
 
 interface ExecutionStatusBadgeProps {
-  status: AgentExecution["status"];
+  status: AgenticExecution["status"];
 }
 
 export function ExecutionStatusBadge({ status }: ExecutionStatusBadgeProps) {

@@ -1,10 +1,10 @@
 from celery import Task, shared_task
-from enthusiast_common.agent_execution import ExecutionConversationInterface, ExecutionFailureCode
+from enthusiast_common.agentic_execution import ExecutionConversationInterface, ExecutionFailureCode
 from enthusiast_common.agents import ConfigType
 
 from agent.conversation import ConversationManager
-from agent.execution.registry import AgentExecutionRegistry
-from agent.models.agent_execution import AgentExecution
+from agent.agentic_execution.registry import AgenticExecutionDefinitionRegistry
+from agent.models.agentic_execution import AgenticExecution
 from agent.models.conversation import Conversation
 
 
@@ -14,7 +14,7 @@ class ExecutionConversation(ExecutionConversationInterface):
 
     def ask(self, message: str) -> str:
         return ConversationManager().get_answer(
-            self._conversation, message, streaming=False, config_type=ConfigType.AGENT_EXECUTION
+            self._conversation, message, streaming=False, config_type=ConfigType.AGENTIC_EXECUTION_DEFINITION
         )
 
 
@@ -24,20 +24,20 @@ class MarkExecutionFailedOnErrorTask(Task):
         if execution_id is None:
             return
         try:
-            AgentExecution.objects.get(pk=execution_id).mark_failed(
+            AgenticExecution.objects.get(pk=execution_id).mark_failed(
                 failure_code=ExecutionFailureCode.RUNTIME_ERROR,
                 failure_explanation=f"{type(exc).__name__}: {exc}",
             )
-        except AgentExecution.DoesNotExist:
+        except AgenticExecution.DoesNotExist:
             pass
 
 
 @shared_task(base=MarkExecutionFailedOnErrorTask, max_retries=0)
-def run_agent_execution_task(execution_id: int):
-    execution = AgentExecution.objects.select_related("agent", "conversation").get(pk=execution_id)
+def run_agentic_execution_task(execution_id: int):
+    execution = AgenticExecution.objects.select_related("agent", "conversation").get(pk=execution_id)
     execution.mark_in_progress()
 
-    registry = AgentExecutionRegistry()
+    registry = AgenticExecutionDefinitionRegistry()
     execution_cls = registry.get_by_key(execution.execution_key)
     input_data = execution_cls.INPUT_TYPE(**execution.input)
 

@@ -2,15 +2,15 @@ from enum import StrEnum
 
 
 class ExecutionFailureCode(StrEnum):
-    """Standardised failure codes stored on ``AgentExecution.failure_code``.
+    """Standardised failure codes stored on ``AgenticExecution.failure_code``.
 
     Plugins may subclass this to add domain-specific codes and point
-    ``BaseAgentExecution.FAILURE_CODES`` at the subclass::
+    ``BaseAgenticExecutionDefinition.FAILURE_CODES`` at the subclass::
 
         class MyFailureCode(ExecutionFailureCode):
             CUSTOM_REASON = "custom_reason"
 
-        class MyExecution(BaseAgentExecution):
+        class MyExecution(BaseAgenticExecutionDefinition):
             FAILURE_CODES = MyFailureCode
     """
 

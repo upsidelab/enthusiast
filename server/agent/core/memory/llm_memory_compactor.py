@@ -5,7 +5,7 @@ from enthusiast_common.repositories import BaseConversationRepository
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.messages import HumanMessage, SystemMessage
 
-COMPACTION_INTERVAL = 10
+COMPACTION_INTERVAL = 10  # number of human messages between summary generations
 
 _INITIAL_SUMMARIZATION_PROMPT = SystemMessage(
     "You are a helpful assistant. Summarize the conversation below concisely (500 tokens or fewer). "
@@ -44,6 +44,7 @@ class LLMMemoryCompactor(BaseMemoryCompactor):
         last_count = self._conversation.conversation_summary_human_message_count
         if human_count - last_count < COMPACTION_INTERVAL:
             return
+
         existing_summary = self._conversation.conversation_summary
         new_messages = self._messages_since_last_compaction(messages, last_count)
 
@@ -54,7 +55,12 @@ class LLMMemoryCompactor(BaseMemoryCompactor):
 
     @staticmethod
     def _messages_since_last_compaction(messages: list, last_human_count: int) -> list:
-        """Return only the messages added after the previous compaction point."""
+        """Return only the messages added after the previous compaction point.
+
+        Iterates through the full message list and returns a slice starting at the first
+        message after the last_human_count-th HumanMessage. Always called after the
+        compaction threshold is confirmed, so a matching slice is guaranteed to exist.
+        """
         seen_humans = 0
         for i, m in enumerate(messages):
             if isinstance(m, HumanMessage):

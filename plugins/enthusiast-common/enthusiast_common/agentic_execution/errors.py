@@ -1,10 +1,9 @@
-from enum import StrEnum
-
-
-class ExecutionFailureCode(StrEnum):
+class ExecutionFailureCode:
     """Standardised failure codes stored on ``AgenticExecution.failure_code``.
 
-    Plugins may subclass this to add domain-specific codes and point
+    Each constant is a plain string, so they can be compared directly against
+    the database value. The class is intentionally not an enum so that plugins
+    can subclass it to add domain-specific codes and point
     ``BaseAgenticExecutionDefinition.FAILURE_CODES`` at the subclass::
 
         class MyFailureCode(ExecutionFailureCode):

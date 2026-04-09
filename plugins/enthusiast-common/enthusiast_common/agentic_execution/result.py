@@ -1,8 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Any
 
-from .errors import ExecutionFailureCode
-
 
 @dataclass
 class ExecutionResult:
@@ -16,5 +14,5 @@ class ExecutionResult:
 
     success: bool
     output: dict[str, Any] = field(default_factory=dict)
-    failure_code: ExecutionFailureCode | None = None
+    failure_code: str | None = None
     failure_summary: str | None = None

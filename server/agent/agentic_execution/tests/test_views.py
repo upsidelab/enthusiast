@@ -160,7 +160,7 @@ class TestAgenticExecutionDefinitionTypesView:
     @pytest.fixture(autouse=True)
     def mock_registry(self):
         with patch(
-            "agent.execution.services.AgenticExecutionDefinitionRegistry.get_by_agent_type",
+            "agent.agentic_execution.services.AgenticExecutionDefinitionRegistry.get_by_agent_type",
             return_value=[DummyExecution, AllDefaultsExecution],
         ) as mock:
             yield mock
@@ -266,7 +266,7 @@ class TestStartAgenticExecutionView:
         assert "unknown_field" in response.data["input"]
 
     def test_returns_400_when_service_raises_file_upload_not_supported(self, api_client, url):
-        with patch("agent.execution.views.AgenticExecutionService.start", side_effect=FileUploadNotSupportedError()):
+        with patch("agent.agentic_execution.views.AgenticExecutionService.start", side_effect=FileUploadNotSupportedError()):
             response = api_client.post(
                 url, {"execution_key": "dummy", "input": {"required_field": "hello"}}, format="json"
             )
@@ -275,7 +275,7 @@ class TestStartAgenticExecutionView:
         assert "file upload" in response.data["detail"].lower()
 
     def test_returns_400_when_service_raises_unsupported_file_type(self, api_client, url):
-        with patch("agent.execution.views.AgenticExecutionService.start", side_effect=UnsupportedFileTypeError(".xyz", [".pdf"])):
+        with patch("agent.agentic_execution.views.AgenticExecutionService.start", side_effect=UnsupportedFileTypeError(".xyz", [".pdf"])):
             response = api_client.post(
                 url, {"execution_key": "dummy", "input": {"required_field": "hello"}}, format="json"
             )
@@ -292,8 +292,8 @@ class TestStartAgenticExecutionView:
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_happy_path_returns_202_with_execution_data(self, api_client, url):
-        with patch("agent.execution.views.AgenticExecutionService.start") as mock_start, \
-             patch("agent.execution.services.run_agentic_execution_task.delay"):
+        with patch("agent.agentic_execution.views.AgenticExecutionService.start") as mock_start, \
+             patch("agent.agentic_execution.services.run_agentic_execution_task.delay"):
             mock_execution = baker.prepare(AgenticExecution)
             mock_execution.pk = 1
             mock_start.return_value = mock_execution
@@ -304,8 +304,8 @@ class TestStartAgenticExecutionView:
         assert response.status_code == status.HTTP_202_ACCEPTED
 
     def test_happy_path_passes_correct_args_to_service(self, api_client, url, agent, user):
-        with patch("agent.execution.views.AgenticExecutionService.start") as mock_start, \
-             patch("agent.execution.services.run_agentic_execution_task.delay"):
+        with patch("agent.agentic_execution.views.AgenticExecutionService.start") as mock_start, \
+             patch("agent.agentic_execution.services.run_agentic_execution_task.delay"):
             mock_start.return_value = baker.make(AgenticExecution, agent=agent, execution_key="dummy")
             api_client.post(
                 url, {"execution_key": "dummy", "input": {"required_field": "hello"}}, format="json"

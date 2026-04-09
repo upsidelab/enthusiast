@@ -65,7 +65,7 @@ def _make_file(name="doc.pdf", content=b"data", content_type="application/pdf"):
 class TestStart:
     @pytest.fixture(autouse=True)
     def mock_task(self):
-        with patch("agent.execution.services.run_agentic_execution_task.delay") as mock:
+        with patch("agent.agentic_execution.services.run_agentic_execution_task.delay") as mock:
             mock.return_value = MagicMock(id="fake-celery-id")
             yield mock
 
@@ -100,15 +100,15 @@ class TestStart:
             service.start(agent=non_upload_agent, user=user, execution_key="dummy", validated_input={}, uploaded_files=[_make_file()])
 
     def test_raises_for_unsupported_file_extension(self, service, agent, user):
-        with patch("agent.execution.services.settings.FILE_PARSER_CLASSES", SUPPORTED_EXTENSIONS):
+        with patch("agent.agentic_execution.services.settings.FILE_PARSER_CLASSES", SUPPORTED_EXTENSIONS):
             with pytest.raises(UnsupportedFileTypeError) as exc_info:
                 service.start(agent=agent, user=user, execution_key="dummy", validated_input={}, uploaded_files=[_make_file("photo.jpg")])
 
         assert exc_info.value.ext == ".jpg"
 
     def test_attaches_files_as_conversation_files(self, service, agent, user):
-        with patch("agent.execution.services.settings.FILE_PARSER_CLASSES", SUPPORTED_EXTENSIONS), \
-             patch("agent.execution.services.FileService.process", return_value="extracted"):
+        with patch("agent.agentic_execution.services.settings.FILE_PARSER_CLASSES", SUPPORTED_EXTENSIONS), \
+             patch("agent.agentic_execution.services.FileService.process", return_value="extracted"):
             execution = service.start(
                 agent=agent, user=user, execution_key="dummy", validated_input={}, uploaded_files=[_make_file()]
             )
@@ -121,8 +121,8 @@ class TestStart:
         assert cf.file_category == ConversationFile.FileCategory.FILE
 
     def test_detects_image_file_category(self, service, agent, user):
-        with patch("agent.execution.services.settings.FILE_PARSER_CLASSES", {(".jpg",): "some.Class"}), \
-             patch("agent.execution.services.FileService.process", return_value=""):
+        with patch("agent.agentic_execution.services.settings.FILE_PARSER_CLASSES", {(".jpg",): "some.Class"}), \
+             patch("agent.agentic_execution.services.FileService.process", return_value=""):
             execution = service.start(
                 agent=agent, user=user, execution_key="dummy", validated_input={}, uploaded_files=[_make_file("photo.jpg", content_type="image/jpeg")]
             )

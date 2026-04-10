@@ -3,7 +3,6 @@ from typing import Any, Optional
 from enthusiast_common.agents import BaseAgent
 from enthusiast_common.memory import BaseMemoryCompactor
 from langchain.agents import create_agent
-from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage, trim_messages
 from langchain_core.tools import BaseTool
 from langgraph.graph.state import CompiledStateGraph
@@ -17,7 +16,7 @@ class BaseToolCallingAgent(BaseAgent):
         compactor = self._injector.memory_compactor
 
         agent = self._build_agent()
-        context_messages = self._build_context_messages(history, compactor)
+        context_messages = self._build_context_messages()
         input_messages = context_messages + [HumanMessage(content=input_text)]
         result = agent.invoke({"messages": input_messages}, config=self._build_invoke_config())
 
@@ -34,9 +33,9 @@ class BaseToolCallingAgent(BaseAgent):
 
         return final_message.text
 
-    def _build_context_messages(self, history: BaseChatMessageHistory, compactor: Optional[BaseMemoryCompactor]) -> list[BaseMessage]:
+    def _build_context_messages(self) -> list[BaseMessage]:
         limited = trim_messages(
-            history.messages,
+            self._injector.chat_history.messages,
             strategy="last",
             token_counter='approximate',
             max_tokens=MAX_HISTORY_TOKENS,
@@ -44,13 +43,13 @@ class BaseToolCallingAgent(BaseAgent):
             include_system=True,
             allow_partial=False,
         )
-        summary_message = self._build_summary_message(compactor)
+        summary_message = self._build_summary_message()
         if summary_message is not None:
             return [summary_message] + limited
         return limited
 
-    @staticmethod
-    def _build_summary_message(compactor: Optional[BaseMemoryCompactor]) -> Optional[SystemMessage]:
+    def _build_summary_message(self) -> Optional[SystemMessage]:
+        compactor = self._injector.memory_compactor
         if compactor is None:
             return None
         summary = compactor.get_summary()

@@ -21,6 +21,7 @@ export type Product = {
   description: string;
   categories: string;
   properties: string;
+  price: number;
 }
 
 export type CatalogSource = {

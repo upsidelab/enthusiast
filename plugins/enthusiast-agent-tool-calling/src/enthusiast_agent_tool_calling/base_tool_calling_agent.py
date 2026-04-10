@@ -18,11 +18,13 @@ class BaseToolCallingAgent(BaseAgent):
 
         agent = self._build_agent()
         limited_history = self._build_limited_history(history)
-        summary_messages = self._build_summary_messages(compactor)
-        input_messages = summary_messages + limited_history + [HumanMessage(content=input_text)]
+        summary_message = self._build_summary_message(compactor)
+        if summary_message is not None:
+            limited_history = [summary_message] + limited_history
+        input_messages = limited_history + [HumanMessage(content=input_text)]
         result = agent.invoke({"messages": input_messages}, config=self._build_invoke_config())
 
-        new_messages = result["messages"][len(summary_messages) + len(limited_history):]
+        new_messages = result["messages"][len(limited_history):]
         final_message = next(
             m for m in reversed(new_messages)
             if isinstance(m, AIMessage) and not m.tool_calls
@@ -36,13 +38,13 @@ class BaseToolCallingAgent(BaseAgent):
         return final_message.text
 
     @staticmethod
-    def _build_summary_messages(compactor: Optional[BaseMemoryCompactor]) -> list[BaseMessage]:
+    def _build_summary_message(compactor: Optional[BaseMemoryCompactor]) -> Optional[SystemMessage]:
         if compactor is None:
-            return []
+            return None
         summary = compactor.get_summary()
         if summary is None:
-            return []
-        return [SystemMessage(content=f"Summary of earlier conversation:\n{summary}")]
+            return None
+        return SystemMessage(content=f"Summary of earlier conversation:\n{summary}")
 
     def _build_limited_history(self, history: BaseChatMessageHistory) -> list[BaseMessage]:
         return trim_messages(

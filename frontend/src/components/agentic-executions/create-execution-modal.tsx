@@ -46,6 +46,9 @@ export function CreateExecutionModal({ open, onOpenChange }: CreateExecutionModa
       setExecutionKey("");
       return;
     }
+    setFieldErrors({});
+    setInputValidationErrors([]);
+    setGeneralError(null);
     setLoadingDefinitions(true);
     setExecutionKey("");
     Promise.all([
@@ -155,6 +158,13 @@ export function CreateExecutionModal({ open, onOpenChange }: CreateExecutionModa
     }
   };
 
+  const handleExecutionKeyChange = (key: string) => {
+    setExecutionKey(key);
+    setFieldErrors({});
+    setInputValidationErrors([]);
+    setGeneralError(null);
+  };
+
   const canSubmit = !!agentId && !!executionKey && !loadingDefinitions;
   const supportsFiles = agentDetails?.file_upload === true && executionDefinitions.length > 0;
   const selectedDefinition = executionDefinitions.find(d => d.key === executionKey);
@@ -196,7 +206,7 @@ export function CreateExecutionModal({ open, onOpenChange }: CreateExecutionModa
         <Label htmlFor="exec-definition">Execution definition</Label>
         <Select
           value={executionKey}
-          onValueChange={setExecutionKey}
+          onValueChange={handleExecutionKeyChange}
           disabled={!agentId || loadingDefinitions || executionDefinitions.length === 0}
         >
           <SelectTrigger id="exec-definition" className={fieldErrors.execution_key ? "border-destructive" : ""}>

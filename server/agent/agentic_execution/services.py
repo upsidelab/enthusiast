@@ -96,4 +96,4 @@ class AgenticExecutionService:
             llm_content=llm_content,
             is_hidden=False,
         )
-        ConversationFileMessageService().create_for_file(conversation_file)
+        ConversationFileMessageService.create_for_file(conversation_file)

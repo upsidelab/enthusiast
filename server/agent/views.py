@@ -121,9 +121,8 @@ class ConversationView(APIView):
 
         if file_ids := serializer.validated_data.get("file_ids"):
             files = ConversationFile.objects.filter(conversation_id=conversation_id, pk__in=file_ids, is_hidden=True)
-            file_message_service = ConversationFileMessageService()
             for file in files:
-                file_message_service.create_for_file(file)
+                ConversationFileMessageService.create_for_file(file)
                 file.is_hidden = False
                 file.save()
 

@@ -11,10 +11,10 @@ from catalog.models import DataSet
 logger = logging.getLogger("AgentService")
 
 
-class AgentService:
+class AgentPreconfigurationService:
     @staticmethod
     def preconfigure_available_agents(data_set: DataSet):
-        registry = AgentService._get_registry()
+        registry = AgentPreconfigurationService._get_registry()
 
         for agent_class in registry.get_plugin_classes():
             if Agent.all_objects.filter(dataset=data_set, agent_type=agent_class.AGENT_KEY).exists():
@@ -23,7 +23,7 @@ class AgentService:
             data = {
                 "name": agent_class.NAME,
                 "description": '',
-                "config": AgentService._build_default_agent_configuration(agent_class),
+                "config": AgentPreconfigurationService._build_default_agent_configuration(agent_class),
                 "dataset": data_set.pk,
                 "agent_type": agent_class.AGENT_KEY,
             }

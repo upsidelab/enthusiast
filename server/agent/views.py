@@ -16,7 +16,6 @@ from rest_framework.views import APIView
 from utils.functions import get_model_descriptor_from_class_field
 
 from agent.conversation import ConversationManager
-from agent.conversation_file_message_service import ConversationFileMessageService
 from agent.core.registries.agents.agent_registry import AgentRegistry
 from agent.core.registries.language_models import LanguageModelRegistry
 from agent.core.repositories import DjangoDataSetRepository
@@ -39,6 +38,7 @@ from agent.serializers.conversation import (
     MessageFeedbackSerializer,
     SupportedFileTypesSerializer,
 )
+from agent.services import ConversationFileMessageService
 from agent.tasks import process_file_upload_task, respond_to_user_message_task
 from catalog.models import DataSet
 

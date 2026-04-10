@@ -6,11 +6,10 @@ from django.core.files.uploadedfile import UploadedFile
 
 from agent.agentic_execution.registry import AgenticExecutionDefinitionRegistry
 from agent.agentic_execution.tasks import run_agentic_execution_task
-from agent.conversation_file_message_service import ConversationFileMessageService
-from agent.file_service import FileService
 from agent.models.agent import Agent
 from agent.models.agentic_execution import AgenticExecution
 from agent.models.conversation import Conversation, ConversationFile
+from agent.services import ConversationFileMessageService, FileParsingService
 from pecl import settings
 
 User = get_user_model()
@@ -88,7 +87,7 @@ class AgenticExecutionService:
             else ConversationFile.FileCategory.FILE
         )
         django_file = ContentFile(f.read(), name=f.name)
-        llm_content = FileService(django_file, content_type).process() or ""
+        llm_content = FileParsingService(django_file, content_type).process() or ""
         conversation_file = ConversationFile.objects.create(
             conversation=conversation,
             file=django_file,

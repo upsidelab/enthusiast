@@ -3,7 +3,7 @@ from typing import Any, Optional
 from enthusiast_common.memory import BaseMemoryCompactor
 from enthusiast_common.repositories import BaseConversationRepository
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 
 COMPACTION_INTERVAL = 10  # number of human messages between summary generations
 
@@ -37,7 +37,7 @@ class LLMMemoryCompactor(BaseMemoryCompactor):
         """Return the current persisted summary, or None if one has not been generated yet."""
         return self._conversation.conversation_summary or None
 
-    def compact_if_needed(self, messages: list) -> None:
+    def compact_if_needed(self, messages: list[BaseMessage]) -> None:
         """Generate a new summary if COMPACTION_INTERVAL human messages have been added since the last one."""
         human_messages_count = sum(1 for m in messages if isinstance(m, HumanMessage))
 
@@ -54,7 +54,7 @@ class LLMMemoryCompactor(BaseMemoryCompactor):
         self._conversation.save(update_fields=["conversation_summary", "conversation_summary_human_message_count"])
 
     @staticmethod
-    def _messages_since_last_compaction(messages: list, last_compaction_human_messages_count: int) -> list:
+    def _messages_since_last_compaction(messages: list[BaseMessage], last_compaction_human_messages_count: int) -> list[BaseMessage]:
         """Return only the messages added after the previous compaction point.
 
         Iterates through the full message list and returns a slice starting at the first
@@ -69,18 +69,14 @@ class LLMMemoryCompactor(BaseMemoryCompactor):
                 return messages[i:]
         return messages
 
-    def _generate_summary(self, new_messages: list, existing_summary: Optional[str]) -> str:
-        new_text = "\n".join(
-            f"{m.type.upper()}: {m.content}"
-            for m in new_messages
-            if isinstance(m.content, str)
-        )
+    def _generate_summary(self, new_messages: list[BaseMessage], existing_summary: Optional[str]) -> str:
         if existing_summary:
-            content = f"Existing summary:\n{existing_summary}\n\nNew messages:\n{new_text}"
-            prompt = _INCREMENTAL_SUMMARIZATION_PROMPT
+            prompt_messages = [
+                _INCREMENTAL_SUMMARIZATION_PROMPT,
+                HumanMessage(content=f"Existing summary:\n{existing_summary}"),
+            ] + new_messages
         else:
-            content = new_text
-            prompt = _INITIAL_SUMMARIZATION_PROMPT
+            prompt_messages = [_INITIAL_SUMMARIZATION_PROMPT] + new_messages
 
-        response = self._llm.invoke([prompt, HumanMessage(content=content)])
+        response = self._llm.invoke(prompt_messages)
         return response.content

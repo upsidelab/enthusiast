@@ -6,6 +6,7 @@ from django.core.files.uploadedfile import UploadedFile
 
 from agent.agentic_execution.registry import AgenticExecutionDefinitionRegistry
 from agent.agentic_execution.tasks import run_agentic_execution_task
+from agent.conversation_file_message_service import ConversationFileMessageService
 from agent.file_service import FileService
 from agent.models.agent import Agent
 from agent.models.agentic_execution import AgenticExecution
@@ -88,7 +89,7 @@ class AgenticExecutionService:
         )
         django_file = ContentFile(f.read(), name=f.name)
         llm_content = FileService(django_file, content_type).process() or ""
-        ConversationFile.objects.create(
+        conversation_file = ConversationFile.objects.create(
             conversation=conversation,
             file=django_file,
             file_category=file_category,
@@ -96,3 +97,4 @@ class AgenticExecutionService:
             llm_content=llm_content,
             is_hidden=False,
         )
+        ConversationFileMessageService().create_for_file(conversation_file)

@@ -1,5 +1,4 @@
 import os
-from datetime import datetime
 
 from celery.result import AsyncResult
 from django.conf import settings
@@ -17,6 +16,7 @@ from rest_framework.views import APIView
 from utils.functions import get_model_descriptor_from_class_field
 
 from agent.conversation import ConversationManager
+from agent.conversation_file_message_service import ConversationFileMessageService
 from agent.core.registries.agents.agent_registry import AgentRegistry
 from agent.core.registries.language_models import LanguageModelRegistry
 from agent.core.repositories import DjangoDataSetRepository
@@ -121,15 +121,9 @@ class ConversationView(APIView):
 
         if file_ids := serializer.validated_data.get("file_ids"):
             files = ConversationFile.objects.filter(conversation_id=conversation_id, pk__in=file_ids, is_hidden=True)
+            file_message_service = ConversationFileMessageService()
             for file in files:
-                Message.objects.create(
-                    conversation_id=conversation.id,
-                    created_at=datetime.now(),
-                    type=Message.MessageType.FILE,
-                    file_name=os.path.basename(file.file.name),
-                    file_type=file.file.name.split(".")[-1],
-                    text=f"Uploaded {file.file.name} with id: {file.pk}",
-                )
+                file_message_service.create_for_file(file)
                 file.is_hidden = False
                 file.save()
 

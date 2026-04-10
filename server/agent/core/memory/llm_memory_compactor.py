@@ -54,18 +54,18 @@ class LLMMemoryCompactor(BaseMemoryCompactor):
         self._conversation.save(update_fields=["conversation_summary", "conversation_summary_human_message_count"])
 
     @staticmethod
-    def _messages_since_last_compaction(messages: list, last_human_count: int) -> list:
+    def _messages_since_last_compaction(messages: list, last_compaction_human_messages_count: int) -> list:
         """Return only the messages added after the previous compaction point.
 
         Iterates through the full message list and returns a slice starting at the first
-        message after the last_human_count-th HumanMessage. Always called after the
+        message after the last_compaction_human_messages_count-th HumanMessage. Always called after the
         compaction threshold is confirmed, so a matching slice is guaranteed to exist.
         """
-        seen_humans = 0
+        seen_human_messages_count = 0
         for i, m in enumerate(messages):
             if isinstance(m, HumanMessage):
-                seen_humans += 1
-            if seen_humans > last_human_count:
+                seen_human_messages_count += 1
+            if seen_human_messages_count > last_compaction_human_messages_count:
                 return messages[i:]
         return messages
 

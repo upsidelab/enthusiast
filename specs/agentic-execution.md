@@ -76,6 +76,7 @@ Enum: `PENDING`, `IN_PROGRESS`, `FINISHED`, `FAILED`.
 |------|--------|---------|
 | `runtime_error` | `MarkExecutionFailedOnErrorTask.on_failure` | Unexpected exception escaped the execution |
 | `max_retries_exceeded` | `BaseAgenticExecutionDefinition.run()` | LLM failed to pass validators after `MAX_RETRIES` correction cycles |
+| `validation_failed` | `BaseAgenticExecutionDefinition.run()` | A validator rejected the response and set `retry_needed=False` — retrying is not useful |
 | `unknown` | Celery task | Execution reported failure but returned no failure code |
 
 Plugins extend this enum to add domain-specific codes and point `FAILURE_CODES` at the subclass::
@@ -101,20 +102,31 @@ Dataclass returned by `BaseAgenticExecutionDefinition.run()`. Fields:
 ### `ExecutionInputType`
 Pydantic `BaseModel` subclassed per plugin to declare and validate structured execution input. The server derives the JSON Schema from it for API responses and request validation.
 
+### `ValidatorResponse`
+Structured return value from `BaseExecutionValidator.validate()`. Fields:
+- `validation_successful: bool` — whether the response passed this validator.
+- `retry_needed: bool` — whether the run loop should retry after a failure (default `True`). Set to `False` when retrying is pointless — e.g. an external system is unreachable and the LLM cannot fix that by producing a different response. Ignored when `validation_successful` is `True`.
+- `feedback: str | None` — plain-language message sent back to the LLM when `retry_needed=True`; used directly as `failure_summary` when `retry_needed=False`.
+
 ### `BaseExecutionValidator`
-ABC for response validators. A validator inspects the raw string response produced by a single `execute()` call and either approves it or returns a natural-language feedback message that gets forwarded to the LLM for correction.
+ABC for response validators. A validator inspects the raw string response produced by a single `execute()` call and returns a `ValidatorResponse` that tells the run loop what to do next.
 
 ```python
 class BaseExecutionValidator(ABC):
-    def validate(self, response: str) -> str | None:
-        """Return None if the response is valid, or a feedback string to send back to the LLM."""
+    def validate(self, response: str) -> ValidatorResponse:
+        """Inspect the LLM response and return a structured result."""
 ```
+
+The run loop processes the first failing `ValidatorResponse` it encounters:
+- All validators return `validation_successful=True` → execution succeeds.
+- `validation_successful=False, retry_needed=True` → `feedback` is sent back to the LLM and the attempt is retried (up to `MAX_RETRIES` times).
+- `validation_successful=False, retry_needed=False` → the loop stops immediately without retrying; `failure_code` is set to `VALIDATION_FAILED` and `feedback` is used as the `failure_summary`.
 
 A concrete validator is provided in `enthusiast-common` out of the box:
 
-**`IsValidJsonValidator`** — attempts `json.loads(response)`; if it raises, returns `"The response is not valid JSON. Please return the same data in valid JSON format."`.
+**`IsValidJsonValidator`** — attempts `json.loads(response)`; if it raises, returns a `ValidatorResponse` with `validation_successful=False`, `retry_needed=True`, and feedback `"The response is not valid JSON. Please return the same data as a valid JSON object."`.
 
-Plugins can define their own validators (e.g. schema-specific checks, business rule assertions) and attach them via `VALIDATORS`.
+Plugins can define their own validators (e.g. schema-specific checks, business rule assertions, external system reachability) and attach them via `VALIDATORS`.
 
 ### `ConfigType` and `BaseAgentConfigProvider`
 
@@ -166,9 +178,11 @@ The base class carries a concrete `run()` that implements the **validator retry 
 
 **`run(input_data, conversation) -> ExecutionResult` (concrete):** orchestrates the retry loop:
 1. Calls `execute(input_data, conversation)` to get the LLM response string
-2. Runs each validator in `VALIDATORS` in order; if any returns a feedback string, sends it to the conversation and calls `execute()` again (up to `MAX_RETRIES` times)
-3. If all validators pass → returns `ExecutionResult(success=True, output=...)`
-4. If `MAX_RETRIES` is exhausted → sends a final prompt asking the LLM for a succinct failure summary, then returns `ExecutionResult(success=False, failure_code=FAILURE_CODES.MAX_RETRIES_EXCEEDED, failure_summary=<LLM response>)`
+2. Runs each validator in `VALIDATORS` in order; the first failing `ValidatorResponse` drives the next step:
+   - All pass → returns `ExecutionResult(success=True, output=...)`
+   - `retry_needed=False` → returns immediately with `failure_code=VALIDATION_FAILED` and the validator's `feedback` as `failure_summary` (no additional LLM call)
+   - `retry_needed=True` and retries remain → sends `feedback` to the conversation and calls `execute()` again
+3. If `MAX_RETRIES` is exhausted → sends a final prompt asking the LLM for a succinct failure summary, then returns `ExecutionResult(success=False, failure_code=FAILURE_CODES.MAX_RETRIES_EXCEEDED, failure_summary=<LLM response>)`
 
 No exceptions are raised for expected execution failures — all outcomes (including validator exhaustion) are expressed through `ExecutionResult`. Unexpected errors (programming errors, network failures) are not caught and propagate naturally; the server task's `on_failure` hook catches them and sets `failure_code=ExecutionFailureCode.RUNTIME_ERROR` on the record.
 

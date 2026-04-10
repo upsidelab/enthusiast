@@ -17,5 +17,7 @@ class ExecutionFailureCode:
     """An unexpected exception escaped the execution — set by the Celery task's ``on_failure`` hook."""
     MAX_RETRIES_EXCEEDED = "max_retries_exceeded"
     """The LLM failed to produce a valid response after ``MAX_RETRIES`` correction cycles."""
+    VALIDATION_FAILED = "validation_failed"
+    """A validator rejected the response and explicitly indicated that retrying is not useful."""
     UNKNOWN = "unknown"
     """The execution reported failure but did not provide a failure code."""

@@ -5,7 +5,7 @@ from typing import ClassVar, Optional, Protocol, Type
 from .errors import ExecutionFailureCode
 from .input import ExecutionInputType
 from .result import ExecutionResult
-from .validators import BaseExecutionValidator, IsValidJsonValidator
+from .validators import BaseExecutionValidator, IsValidJsonValidator, ValidatorResponse
 
 
 class ExecutionConversationInterface(Protocol):
@@ -78,13 +78,20 @@ class BaseAgenticExecutionDefinition(ABC):
         response = self.execute(input_data, conversation)
 
         for attempt in range(self.MAX_RETRIES + 1):
-            feedback = self._first_validator_feedback(response)
+            validator_response = self._first_failed_validator_response(response)
 
-            if feedback is None:
+            if validator_response is None:
                 return ExecutionResult(success=True, output=self._build_output(response))
 
+            if not validator_response.retry_needed:
+                return ExecutionResult(
+                    success=False,
+                    failure_code=self.FAILURE_CODES.VALIDATION_FAILED,
+                    failure_summary=validator_response.feedback,
+                )
+
             if attempt < self.MAX_RETRIES:
-                response = conversation.ask(feedback)
+                response = conversation.ask(validator_response.feedback or "")
             else:
                 failure_summary = conversation.ask(self.FAILURE_SUMMARY_PROMPT)
                 return ExecutionResult(
@@ -116,13 +123,13 @@ class BaseAgenticExecutionDefinition(ABC):
             The agent's raw response string (typically JSON).
         """
 
-    def _first_validator_feedback(self, response: str) -> str | None:
-        """Run all validators and return the first feedback message, or None."""
+    def _first_failed_validator_response(self, response: str) -> Optional[ValidatorResponse]:
+        """Run all validators and return the first failing response, or ``None`` if all pass."""
 
         for validator_cls in self.VALIDATORS:
-            feedback = validator_cls().validate(response)
-            if feedback is not None:
-                return feedback
+            result = validator_cls().validate(response)
+            if not result.validation_successful:
+                return result
         return None
 
     def _build_output(self, response: str) -> dict:

@@ -108,7 +108,7 @@ export class ApiClient {
     return new AgentsApiClient(this.apiBase, this.authenticationProvider);
   }
 
-  agentExecutions(): AgenticExecutionsApiClient {
+  agenticExecutions(): AgenticExecutionsApiClient {
     return new AgenticExecutionsApiClient(this.apiBase, this.authenticationProvider);
   }
 

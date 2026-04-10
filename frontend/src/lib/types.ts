@@ -147,7 +147,7 @@ export type AgenticExecutionDetail = AgenticExecution & {
   files: ConversationFile[];
 };
 
-export type ExecutionType = {
+export type ExecutionDefinition = {
   key: string;
   name: string;
   description: string | null;

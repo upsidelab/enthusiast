@@ -48,7 +48,7 @@ export function ExecutionsList() {
 
   const loadItems = useCallback(
     async (page: number) => {
-      const result = await api.agentExecutions().list({ datasetId: dataSetId ?? undefined, agentId, status }, page);
+      const result = await api.agenticExecutions().list({ datasetId: dataSetId ?? undefined, agentId, status }, page);
       setHasItems(result.count > 0);
       return result;
     },
@@ -100,7 +100,7 @@ export function ExecutionsList() {
       <PaginatedTable
         loadItems={loadItems}
         noItemsMessage={hasActiveFilters ? "No agentic executions match your criteria" : "No agentic executions created yet"}
-        tableHeaders={["Status", "Agent", "Execution type", "Started", "Duration"]}
+        tableHeaders={["Status", "Agent", "Execution definition", "Started", "Duration"]}
         tableHeaderWidths={["11%", "26%", "26%", "26%", "11%"]}
         tableRow={(item: AgenticExecution, index) => (
           <TableRow

@@ -1,5 +1,5 @@
 import { BaseApiClient } from "@/lib/api/base.ts";
-import { AgenticExecution, AgenticExecutionDetail, ExecutionType, PaginatedResult } from "@/lib/types.ts";
+import { AgenticExecution, AgenticExecutionDetail, ExecutionDefinition, PaginatedResult } from "@/lib/types.ts";
 import { ApiError } from "@/lib/api-error.ts";
 
 export class AgenticExecutionsApiClient extends BaseApiClient {
@@ -17,9 +17,9 @@ export class AgenticExecutionsApiClient extends BaseApiClient {
     return await response.json() as AgenticExecutionDetail;
   }
 
-  async getTypes(agentId: number): Promise<ExecutionType[]> {
+  async getDefinitions(agentId: number): Promise<ExecutionDefinition[]> {
     const response = await fetch(`${this.apiBase}/api/agents/${agentId}/agentic-execution-definitions/`, this._requestConfiguration());
-    return await response.json() as ExecutionType[];
+    return await response.json() as ExecutionDefinition[];
   }
 
   async create(agentId: number, data: { execution_key: string; input: Record<string, unknown>; files?: File[] }): Promise<AgenticExecution> {

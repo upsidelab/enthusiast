@@ -7,7 +7,7 @@ import { JSONEditor } from "@/components/agents-table/json-editor";
 import { ApiClient } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
-import { AgentDetails, ExecutionType } from "@/lib/types.ts";
+import { AgentDetails, ExecutionDefinition } from "@/lib/types.ts";
 import { ApiError } from "@/lib/api-error.ts";
 
 const api = new ApiClient(authenticationProviderInstance);
@@ -26,9 +26,9 @@ export function CreateExecutionModal({ open, onOpenChange }: CreateExecutionModa
   const [inputJson, setInputJson] = useState<string>("{}");
   const [files, setFiles] = useState<File[]>([]);
 
-  const [executionTypes, setExecutionTypes] = useState<ExecutionType[]>([]);
+  const [executionDefinitions, setExecutionDefinitions] = useState<ExecutionDefinition[]>([]);
   const [agentDetails, setAgentDetails] = useState<AgentDetails | null>(null);
-  const [loadingTypes, setLoadingTypes] = useState(false);
+  const [loadingDefinitions, setLoadingDefinitions] = useState(false);
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [inputValidationErrors, setInputValidationErrors] = useState<{ field: string; message: string }[]>([]);
@@ -41,26 +41,26 @@ export function CreateExecutionModal({ open, onOpenChange }: CreateExecutionModa
     setFiles([]);
     if (fileInputRef.current) fileInputRef.current.value = "";
     if (!agentId) {
-      setExecutionTypes([]);
+      setExecutionDefinitions([]);
       setAgentDetails(null);
       setExecutionKey("");
       return;
     }
-    setLoadingTypes(true);
+    setLoadingDefinitions(true);
     setExecutionKey("");
     Promise.all([
-      api.agentExecutions().getTypes(Number(agentId)),
+      api.agenticExecutions().getDefinitions(Number(agentId)),
       api.agents().getAgentById(Number(agentId)),
     ])
-      .then(([types, details]) => {
-        setExecutionTypes(types);
+      .then(([definitions, details]) => {
+        setExecutionDefinitions(definitions);
         setAgentDetails(details);
       })
       .catch(() => {
-        setExecutionTypes([]);
+        setExecutionDefinitions([]);
         setAgentDetails(null);
       })
-      .finally(() => setLoadingTypes(false));
+      .finally(() => setLoadingDefinitions(false));
   }, [agentId]);
 
   const resetForm = () => {
@@ -68,7 +68,7 @@ export function CreateExecutionModal({ open, onOpenChange }: CreateExecutionModa
     setExecutionKey("");
     setInputJson("{}");
     setFiles([]);
-    setExecutionTypes([]);
+    setExecutionDefinitions([]);
     setAgentDetails(null);
     setFieldErrors({});
     setInputValidationErrors([]);
@@ -107,7 +107,7 @@ export function CreateExecutionModal({ open, onOpenChange }: CreateExecutionModa
     setSubmitting(true);
 
     try {
-      const execution = await api.agentExecutions().create(Number(agentId), {
+      const execution = await api.agenticExecutions().create(Number(agentId), {
         execution_key: executionKey,
         input: parsedInput,
         files: files.length > 0 ? files : undefined,
@@ -155,9 +155,9 @@ export function CreateExecutionModal({ open, onOpenChange }: CreateExecutionModa
     }
   };
 
-  const canSubmit = !!agentId && !!executionKey && !loadingTypes;
-  const supportsFiles = agentDetails?.file_upload === true && executionTypes.length > 0;
-  const selectedType = executionTypes.find(t => t.key === executionKey);
+  const canSubmit = !!agentId && !!executionKey && !loadingDefinitions;
+  const supportsFiles = agentDetails?.file_upload === true && executionDefinitions.length > 0;
+  const selectedDefinition = executionDefinitions.find(d => d.key === executionKey);
 
   return (
     <FormModal
@@ -169,7 +169,7 @@ export function CreateExecutionModal({ open, onOpenChange }: CreateExecutionModa
       submitLabel="Start"
       submitting={submitting}
       disabled={!canSubmit}
-      dependencies={[agentId, executionKey, executionTypes, agentDetails, generalError, fieldErrors]}
+      dependencies={[agentId, executionKey, executionDefinitions, agentDetails, generalError, fieldErrors]}
     >
       {generalError && (
         <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
@@ -193,26 +193,26 @@ export function CreateExecutionModal({ open, onOpenChange }: CreateExecutionModa
       </div>
 
       <div className="flex flex-col gap-1">
-        <Label htmlFor="exec-type">Execution definition</Label>
+        <Label htmlFor="exec-definition">Execution definition</Label>
         <Select
           value={executionKey}
           onValueChange={setExecutionKey}
-          disabled={!agentId || loadingTypes || executionTypes.length === 0}
+          disabled={!agentId || loadingDefinitions || executionDefinitions.length === 0}
         >
-          <SelectTrigger id="exec-type" className={fieldErrors.execution_key ? "border-destructive" : ""}>
-            <SelectValue placeholder={loadingTypes ? "Loading..." : "Select execution definition"} />
+          <SelectTrigger id="exec-definition" className={fieldErrors.execution_key ? "border-destructive" : ""}>
+            <SelectValue placeholder={loadingDefinitions ? "Loading..." : "Select execution definition"} />
           </SelectTrigger>
           <SelectContent>
-            {executionTypes.map(t => (
-              <SelectItem key={t.key} value={t.key}>{t.name}</SelectItem>
+            {executionDefinitions.map(d => (
+              <SelectItem key={d.key} value={d.key}>{d.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
-        {agentId && !loadingTypes && executionTypes.length === 0 && (
-          <p className="text-xs text-muted-foreground">No execution types available for this agent.</p>
+        {agentId && !loadingDefinitions && executionDefinitions.length === 0 && (
+          <p className="text-xs text-muted-foreground">No execution definitions available for this agent.</p>
         )}
-        {selectedType?.description && (
-          <p className="text-xs text-muted-foreground">{selectedType.description}</p>
+        {selectedDefinition?.description && (
+          <p className="text-xs text-muted-foreground">{selectedDefinition.description}</p>
         )}
         {fieldErrors.execution_key && <p className="text-xs text-destructive">{fieldErrors.execution_key}</p>}
       </div>

@@ -15,8 +15,13 @@ class ValidatorResponse:
         feedback: Plain-language message to send back to the LLM when
             ``validation_successful`` is ``False`` and ``retry_needed`` is ``True``.
             Also used as the ``failure_summary`` when ``retry_needed`` is ``False``.
+        failure_code: Optional failure code to attach to the execution when
+            ``retry_needed`` is ``False``. Falls back to ``VALIDATION_FAILED`` if
+            not provided. Use a value from a subclass of ``ExecutionFailureCode``
+            to surface domain-specific codes through validators.
     """
 
     validation_successful: bool
     retry_needed: bool
     feedback: Optional[str] = field(default=None)
+    failure_code: Optional[str] = field(default=None)

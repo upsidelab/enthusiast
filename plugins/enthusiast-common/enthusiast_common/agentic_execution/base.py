@@ -86,7 +86,7 @@ class BaseAgenticExecutionDefinition(ABC):
             if not validator_response.retry_needed:
                 return ExecutionResult(
                     success=False,
-                    failure_code=self.FAILURE_CODES.VALIDATION_FAILED,
+                    failure_code=validator_response.failure_code or self.FAILURE_CODES.VALIDATION_FAILED,
                     failure_summary=validator_response.feedback,
                 )
 

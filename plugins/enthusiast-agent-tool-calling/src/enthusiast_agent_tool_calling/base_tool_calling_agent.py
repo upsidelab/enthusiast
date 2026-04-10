@@ -17,14 +17,11 @@ class BaseToolCallingAgent(BaseAgent):
         compactor = self._injector.memory_compactor
 
         agent = self._build_agent()
-        limited_history = self._build_limited_history(history)
-        summary_message = self._build_summary_message(compactor)
-        if summary_message is not None:
-            limited_history = [summary_message] + limited_history
-        input_messages = limited_history + [HumanMessage(content=input_text)]
+        context_messages = self._build_context_messages(history, compactor)
+        input_messages = context_messages + [HumanMessage(content=input_text)]
         result = agent.invoke({"messages": input_messages}, config=self._build_invoke_config())
 
-        new_messages = result["messages"][len(limited_history):]
+        new_messages = result["messages"][len(context_messages):]
         final_message = next(
             m for m in reversed(new_messages)
             if isinstance(m, AIMessage) and not m.tool_calls
@@ -37,17 +34,8 @@ class BaseToolCallingAgent(BaseAgent):
 
         return final_message.text
 
-    @staticmethod
-    def _build_summary_message(compactor: Optional[BaseMemoryCompactor]) -> Optional[SystemMessage]:
-        if compactor is None:
-            return None
-        summary = compactor.get_summary()
-        if summary is None:
-            return None
-        return SystemMessage(content=f"Summary of earlier conversation:\n{summary}")
-
-    def _build_limited_history(self, history: BaseChatMessageHistory) -> list[BaseMessage]:
-        return trim_messages(
+    def _build_context_messages(self, history: BaseChatMessageHistory, compactor: Optional[BaseMemoryCompactor]) -> list[BaseMessage]:
+        limited = trim_messages(
             history.messages,
             strategy="last",
             token_counter='approximate',
@@ -56,6 +44,19 @@ class BaseToolCallingAgent(BaseAgent):
             include_system=True,
             allow_partial=False,
         )
+        summary_message = self._build_summary_message(compactor)
+        if summary_message is not None:
+            return [summary_message] + limited
+        return limited
+
+    @staticmethod
+    def _build_summary_message(compactor: Optional[BaseMemoryCompactor]) -> Optional[SystemMessage]:
+        if compactor is None:
+            return None
+        summary = compactor.get_summary()
+        if summary is None:
+            return None
+        return SystemMessage(content=f"Summary of earlier conversation:\n{summary}")
 
     def _build_tools(self) -> list[BaseTool]:
         return [tool.as_tool() for tool in self._tools]

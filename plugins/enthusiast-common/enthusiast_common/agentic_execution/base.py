@@ -99,7 +99,11 @@ class BaseAgenticExecutionDefinition(ABC):
         response = self.execute(input_data, conversation)
 
         for attempt in range(self.MAX_RETRIES + 1):
-            validator_response = self._first_failed_validator_response(response, conversation.tool_result_memory)
+            validator_response = self._first_failed_validator_response(
+                response=response,
+                execution_input=input_data,
+                tool_result_memory=conversation.tool_result_memory
+            )
 
             if validator_response is None:
                 return ExecutionResult(success=True, output=self._build_output(response))
@@ -147,12 +151,12 @@ class BaseAgenticExecutionDefinition(ABC):
         """
 
     def _first_failed_validator_response(
-        self, response: str, tool_result_memory: Optional[ToolResultMemory] = None
+        self, response: str, execution_input: ExecutionInputType,  tool_result_memory: Optional[ToolResultMemory] = None
     ) -> Optional[ValidatorResponse]:
         """Run all validators and return the first failing response, or ``None`` if all pass."""
 
         for validator_cls in self.VALIDATORS:
-            result = validator_cls().validate(response, tool_result_memory)
+            result = validator_cls().validate(response, execution_input, tool_result_memory)
             if not result.validation_successful:
                 return result
         return None

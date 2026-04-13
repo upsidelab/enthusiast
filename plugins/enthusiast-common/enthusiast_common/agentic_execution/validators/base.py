@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
+from ..input import ExecutionInputType
 from ..memory import ToolResultMemory
 from .response import ValidatorResponse
 
@@ -25,11 +26,15 @@ class BaseExecutionValidator(ABC):
     """
 
     @abstractmethod
-    def validate(self, response: str, tool_result_memory: Optional[ToolResultMemory] = None) -> ValidatorResponse:
+    def validate(self,
+                 response: str,
+                 execution_input: ExecutionInputType,
+                 tool_result_memory: Optional[ToolResultMemory] = None) -> ValidatorResponse:
         """Inspect the LLM response and return a structured result.
 
         Args:
             response: Raw string returned by ``execute()``.
+            execution_input: Execution input received at execution creation.
             tool_result_memory: Entries recorded by tools during this attempt via
                 ``self._injector.tool_result_memory.record()``. ``None`` when
                 called outside an agentic execution context (e.g. in unit tests).

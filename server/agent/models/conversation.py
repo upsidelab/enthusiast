@@ -16,7 +16,13 @@ class Conversation(models.Model):
     data_set = models.ForeignKey(DataSet, on_delete=models.PROTECT, null=False)
     summary = models.CharField(null=True)
     conversation_summary = models.TextField(null=True, blank=True)
-    conversation_summary_human_message_count = models.IntegerField(default=0)
+    last_summarized_message = models.ForeignKey(
+        "agent.Message",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
     agent = models.ForeignKey(Agent, on_delete=models.PROTECT, null=False)
 
     class Meta:

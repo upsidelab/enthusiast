@@ -1,6 +1,8 @@
 from datetime import datetime
+from typing import Optional
 
 from enthusiast_common.agents import ConfigType
+from enthusiast_common.agentic_execution.memory import ToolResultMemory
 
 from account.models import User
 from agent.core.registries.agents.agent_registry import AgentRegistry
@@ -18,13 +20,19 @@ class ConversationManager:
         question_message: str,
         streaming: bool,
         config_type: ConfigType = ConfigType.CONVERSATION,
+        tool_result_memory: Optional[ToolResultMemory] = None,
     ) -> str:
         """Formulate an answer to a given question and store the decision-making process.
 
         Engine calculates embedding for a question and using similarity search collects documents that may contain
         relevant content.
         """
-        agent = AgentRegistry().get_conversation_agent(conversation, streaming, config_type=config_type)
+        agent = AgentRegistry().get_conversation_agent(
+            conversation,
+            streaming,
+            config_type=config_type,
+            tool_result_memory=tool_result_memory,
+        )
         response = agent.get_answer(question_message)
 
         return response

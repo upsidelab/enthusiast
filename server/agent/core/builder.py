@@ -160,6 +160,7 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
             ecommerce_platform_connector=ecommerce_platform_connector,
             repositories=self._repositories,
             chat_history=chat_history,
+            tool_result_memory=self._tool_result_memory,
         )
 
     def _build_agent_callback_handler(self) -> Optional[BaseCallbackHandler]:

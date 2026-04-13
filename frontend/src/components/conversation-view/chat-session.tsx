@@ -155,7 +155,7 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
       tool_call: () => {
         setStatusText(`Invoking ${data.data.tool_name}...`);
       },
-      tool_error: () => {
+      tool_done: () => {
         setStatusText(DEFAULT_STATUS_TEXT);
       },
       error: () => {

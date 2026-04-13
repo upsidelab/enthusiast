@@ -15,5 +15,8 @@ class ConversationWebSocketCallbackHandler(BaseWebSocketHandler):
         tool_name = serialized.get("name", "tool")
         self.send_message({"type": "chat_message", "event": "tool_call", "tool_name": tool_name})
 
+    def on_tool_end(self, output: Any, **kwargs) -> None:
+        self.send_message({"type": "chat_message", "event": "tool_done"})
+
     def on_tool_error(self, error: Any, **kwargs) -> None:
-        self.send_message({"type": "chat_message", "event": "tool_error"})
+        self.send_message({"type": "chat_message", "event": "tool_done"})

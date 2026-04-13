@@ -1,10 +1,15 @@
-from typing import Any, Dict
+from typing import Any, Dict, NamedTuple, Optional
 
 from enthusiast_common.repositories import BaseConversationRepository
 from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_core.messages import AIMessage, BaseMessage, ToolMessage, messages_from_dict
 
 from agent.models import Message
+
+
+class MessagesAfterResult(NamedTuple):
+    messages: list[BaseMessage]
+    last_message_id: Optional[int]
 
 
 class PersistentChatHistory(BaseChatMessageHistory):
@@ -78,6 +83,21 @@ class PersistentChatHistory(BaseChatMessageHistory):
         for msg in messages:
             message_dicts.append(self._parse_message_to_dict(msg))
         return messages_from_dict(message_dicts)
+
+    def messages_after(self, message_id: Optional[int]) -> MessagesAfterResult:
+        """Return messages after the given message ID, along with the last message's DB ID.
+
+        If message_id is None, returns all messages. Used by the memory compactor to fetch
+        only messages that have not yet been included in the conversation summary.
+        """
+        queryset = self._conversation.messages.filter(answer_failed=False).order_by("id")
+        if message_id is not None:
+            queryset = queryset.filter(id__gt=message_id)
+        db_messages = list(queryset)
+        if not db_messages:
+            return MessagesAfterResult(messages=[], last_message_id=None)
+        langchain_messages = messages_from_dict([self._parse_message_to_dict(m) for m in db_messages])
+        return MessagesAfterResult(messages=langchain_messages, last_message_id=db_messages[-1].id)
 
     @staticmethod
     def _parse_message_to_dict(message: BaseMessage) -> Dict[str, Any]:

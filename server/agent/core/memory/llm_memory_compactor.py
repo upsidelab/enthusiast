@@ -5,6 +5,8 @@ from enthusiast_common.repositories import BaseConversationRepository
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 
+from agent.core.memory.persistent_chat_history import PersistentChatHistory
+
 COMPACTION_INTERVAL = 10  # number of human messages between summary generations
 
 _INITIAL_SUMMARIZATION_PROMPT = SystemMessage(
@@ -24,50 +26,42 @@ class LLMMemoryCompactor(BaseMemoryCompactor):
     """
     Generates and persists an LLM-based summary of the conversation history.
 
-    A new summary is built every COMPACTION_INTERVAL human messages. The summary is
-    stored on the Conversation record and injected into subsequent agent calls so that
-    context beyond the token-trimming window is not lost.
+    A new summary is built every COMPACTION_INTERVAL human messages since the last compaction.
+    The summary is stored on the Conversation record and injected into subsequent agent calls
+    so that context beyond the token-trimming window is not lost.
     """
 
-    def __init__(self, conversation_repo: BaseConversationRepository, conversation_id: Any, llm: BaseLanguageModel):
+    def __init__(
+        self,
+        conversation_repo: BaseConversationRepository,
+        conversation_id: Any,
+        llm: BaseLanguageModel,
+        chat_history: PersistentChatHistory,
+    ):
         self._conversation = conversation_repo.get_by_id(conversation_id)
         self._llm = llm
+        self._chat_history = chat_history
 
     def get_summary(self) -> Optional[str]:
         """Return the current persisted summary, or None if one has not been generated yet."""
         return self._conversation.conversation_summary or None
 
-    def compact_if_needed(self, messages: list[BaseMessage]) -> None:
+    def compact_if_needed(self) -> None:
         """Generate a new summary if COMPACTION_INTERVAL human messages have been added since the last one."""
-        human_messages_count = sum(1 for m in messages if isinstance(m, HumanMessage))
+        last_summarized_message_id = self._conversation.last_summarized_message_id
+        result = self._chat_history.messages_after(last_summarized_message_id)
 
-        last_count = self._conversation.conversation_summary_human_message_count
-        if human_messages_count - last_count < COMPACTION_INTERVAL:
+        if not result.messages:
             return
 
-        existing_summary = self._conversation.conversation_summary
-        new_messages = self._messages_since_last_compaction(messages, last_count)
+        human_messages_count = sum(1 for m in result.messages if isinstance(m, HumanMessage))
+        if human_messages_count < COMPACTION_INTERVAL:
+            return
 
-        summary = self._generate_summary(new_messages, existing_summary)
+        summary = self._generate_summary(result.messages, self._conversation.conversation_summary)
         self._conversation.conversation_summary = summary
-        self._conversation.conversation_summary_human_message_count = human_messages_count
-        self._conversation.save(update_fields=["conversation_summary", "conversation_summary_human_message_count"])
-
-    @staticmethod
-    def _messages_since_last_compaction(messages: list[BaseMessage], last_compaction_human_messages_count: int) -> list[BaseMessage]:
-        """Return only the messages added after the previous compaction point.
-
-        Iterates through the full message list and returns a slice starting at the first
-        message after the last_compaction_human_messages_count-th HumanMessage. Always called after the
-        compaction threshold is confirmed, so a matching slice is guaranteed to exist.
-        """
-        seen_human_messages_count = 0
-        for i, m in enumerate(messages):
-            if isinstance(m, HumanMessage):
-                seen_human_messages_count += 1
-            if seen_human_messages_count > last_compaction_human_messages_count:
-                return messages[i:]
-        return messages
+        self._conversation.last_summarized_message_id = result.last_message_id
+        self._conversation.save(update_fields=["conversation_summary", "last_summarized_message_id"])
 
     def _generate_summary(self, new_messages: list[BaseMessage], existing_summary: Optional[str]) -> str:
         if existing_summary:

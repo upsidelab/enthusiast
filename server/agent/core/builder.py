@@ -153,7 +153,7 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         document_retriever = self._build_document_retriever()
         product_retriever = self._build_product_retriever()
         chat_history = self._build_chat_history()
-        memory_compactor = self._build_memory_compactor()
+        memory_compactor = self._build_memory_compactor(chat_history)
         ecommerce_platform_connector = self._build_ecommerce_platform_connector()
         return self._config.injector(
             product_retriever=product_retriever,
@@ -223,7 +223,7 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
     def _build_chat_history(self) -> PersistentChatHistory:
         return PersistentChatHistory(self._repositories.conversation, self.conversation_id)
 
-    def _build_memory_compactor(self) -> LLMMemoryCompactor:
+    def _build_memory_compactor(self, chat_history: PersistentChatHistory) -> LLMMemoryCompactor:
         llm = self._build_default_llm()
-        return LLMMemoryCompactor(self._repositories.conversation, self.conversation_id, llm)
+        return LLMMemoryCompactor(self._repositories.conversation, self.conversation_id, llm, chat_history)
 

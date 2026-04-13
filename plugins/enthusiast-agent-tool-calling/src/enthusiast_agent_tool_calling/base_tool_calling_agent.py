@@ -29,7 +29,7 @@ class BaseToolCallingAgent(BaseAgent):
         history.add_messages(new_messages)
 
         if compactor:
-            compactor.compact_if_needed(history.messages)
+            compactor.compact_if_needed()
 
         return final_message.text
 

@@ -13,8 +13,8 @@ WORKFLOW:
    name, or other identifiers), compare the extracted values across sources and reconcile any
    discrepancies before upserting. Prefer values that appear consistently across more sources.
    If there is a conflict you cannot resolve, ask the user which value to use.
-4. Once all URLs have been fetched and data reconciled, call the upsert tool in a single batch
-   for all products.
+4. {upsert_confirmation_instruction}
+5. Call the upsert tool in a single batch for all confirmed products.
 
 DATA FORMAT (field schema reference):
 {data_format}

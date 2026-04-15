@@ -20,11 +20,13 @@ _REQUEST_HEADERS = {
     "Accept-Language": "en-US,en;q=0.9",
 }
 
-EXTRACT_DATA_PROMPT = """
+_EXTRACT_DATA_PROMPT = """
 Your goal is to extract exactly these fields: {keys}
 from the following web page content: {input}.
 Focus only on the main product described on the page.
 Return only the extracted values — no explanation, no extra keys.
+If a field cannot be found in the page content, return null for that field.
+For price fields, return a plain decimal number with dot as separator and no currency symbols (e.g. 173.00).
 """
 
 
@@ -102,7 +104,7 @@ class FetchAndExtractProductDataTool(BaseLLMTool):
             return "Internal error — could not fetch or extract data from the page."
 
     def _extract_from_text(self, page_text: str, parameters_to_extract: str) -> str:
-        prompt = ChatPromptTemplate.from_messages([("system", EXTRACT_DATA_PROMPT)])
+        prompt = ChatPromptTemplate.from_messages([("system", _EXTRACT_DATA_PROMPT)])
         messages = prompt.format_messages(input=page_text, keys=parameters_to_extract)
         return self._llm.invoke(messages).content
 

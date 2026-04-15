@@ -1,6 +1,5 @@
 import json
 import logging
-import re
 from typing import List, Optional
 
 from enthusiast_common import ProductDetails
@@ -12,31 +11,6 @@ from langchain_core.language_models import BaseLanguageModel
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
-
-
-def _parse_price(price_str: str) -> float | None:
-    """Parse a price string into a float, handling locale formats and currency symbols.
-
-    Handles formats like '173,00 PLN', '$19.99', '1.299,00 EUR', '1,299.00'.
-    """
-    if not price_str:
-        return None
-    # Strip everything except digits, commas, and dots
-    cleaned = re.sub(r"[^\d,.]", "", price_str.strip())
-    if not cleaned:
-        return None
-    # Detect European format: comma as decimal separator (e.g. '173,00' or '1.299,00')
-    # Heuristic: if comma appears after dot, or comma is the last separator with 2 digits after
-    if re.search(r",\d{2}$", cleaned):
-        # European: remove thousand-separator dots, replace decimal comma with dot
-        cleaned = cleaned.replace(".", "").replace(",", ".")
-    else:
-        # Assume standard: remove thousand-separator commas
-        cleaned = cleaned.replace(",", "")
-    try:
-        return float(cleaned)
-    except ValueError:
-        return None
 
 
 class UpsertProductDetailsInput(BaseModel):
@@ -108,7 +82,7 @@ class UpsertProductDetailsTool(BaseLLMTool):
                 name=product.name,
                 slug=product.slug,
                 description=product.description,
-                price=_parse_price(product.price) if product.price else None,
+                price=float(product.price) if product.price else None,
                 categories=product.categories,
                 properties=product.property_values_by_property_name_as_json,
             )

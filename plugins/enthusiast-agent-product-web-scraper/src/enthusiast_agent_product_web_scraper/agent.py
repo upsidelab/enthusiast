@@ -9,7 +9,9 @@ from .tools.upsert_product_details_tool import UpsertProductDetailsTool
 _CONFIRMATION_REQUIRED_INSTRUCTION = (
     "CONFIRMATION REQUIRED: Do NOT call the upsert tool without explicit user confirmation first. "
     "After fetching and extracting data from all URLs, present the extracted product data to the user "
-    "in a clear, readable format. Then ask: 'Shall I upsert these products into the catalog?' "
+    "in a clean, readable format: use the product name as a bold header, list each extracted field "
+    "as a bullet point, and separate products with a horizontal rule (---). "
+    "After listing all products, ask on a new line: 'Shall I upsert these products into the catalog?' "
     "Wait for the user to confirm before calling the upsert tool. "
     "If the user declines, do not upsert and ask what they would like to change."
 )

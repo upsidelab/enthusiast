@@ -4,7 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 from enthusiast_common.tools import BaseLLMTool
 from enthusiast_common.utils import RequiredFieldsModel
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
 from requests import HTTPError
 
@@ -20,22 +20,17 @@ _REQUEST_HEADERS = {
     "Accept-Language": "en-US,en;q=0.9",
 }
 
-_EXTRACT_DATA_PROMPT = """
-Your goal is to extract exactly these fields: {keys}
-from the following web page content: {input}.
-Focus only on the main product described on the page.
-Return only the extracted values — no explanation, no extra keys.
-If a field cannot be found in the page content, return null for that field.
-For price fields, return a plain decimal number with dot as separator and no currency symbols (e.g. 173.00).
-"""
-
 
 class FetchAndExtractProductDataToolInput(BaseModel):
     """Input schema for FetchAndExtractProductDataTool."""
 
     url: str = Field(description="URL of the product web page to fetch and extract data from")
-    parameters_to_extract: str = Field(
-        description="Comma-separated list of field names to extract from the page (e.g. 'sku, name, description, price')"
+    action: str = Field(
+        description=(
+            "Describe what data to extract from the page and any additional context "
+            "(e.g. which fields to look for, hints about where data is located on the page, "
+            "or format requirements such as returning price as a plain decimal number)."
+        )
     )
 
 
@@ -67,12 +62,12 @@ class FetchAndExtractProductDataTool(BaseLLMTool):
     RETURN_DIRECT = False
     CONFIGURATION_ARGS = FetchAndExtractProductDataToolConfigurationArgs
 
-    def run(self, url: str, parameters_to_extract: str) -> str:
+    def run(self, url: str, action: str) -> str:
         """Fetch the page at `url` and extract the requested fields via LLM.
 
         Args:
             url: The product page URL to scrape.
-            parameters_to_extract: Comma-separated field names to extract.
+            action: Free-form extraction instruction passed as context to the LLM sub-call.
 
         Returns:
             Extracted field values as a string, or an informative error/warning message.
@@ -91,7 +86,7 @@ class FetchAndExtractProductDataTool(BaseLLMTool):
                     f"Extracted content: {page_text!r}"
                 )
 
-            return self._extract_from_text(page_text, parameters_to_extract)
+            return self._extract_from_text(page_text, action)
 
         except HTTPError as e:
             return f"Could not reach the provided URL (HTTP {e.response.status_code}): {url}"
@@ -103,9 +98,11 @@ class FetchAndExtractProductDataTool(BaseLLMTool):
             logger.error("Unexpected error fetching %s: %s", url, e)
             return "Internal error — could not fetch or extract data from the page."
 
-    def _extract_from_text(self, page_text: str, parameters_to_extract: str) -> str:
-        prompt = ChatPromptTemplate.from_messages([("system", _EXTRACT_DATA_PROMPT)])
-        messages = prompt.format_messages(input=page_text, keys=parameters_to_extract)
+    def _extract_from_text(self, page_text: str, action: str) -> str:
+        messages = [
+            SystemMessage(content=action),
+            HumanMessage(content=page_text),
+        ]
         return self._llm.invoke(messages).content
 
     def _get_proxies(self) -> dict | None:

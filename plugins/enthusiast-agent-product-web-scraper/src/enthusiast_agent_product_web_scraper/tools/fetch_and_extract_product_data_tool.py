@@ -1,24 +1,17 @@
 import logging
 
-import requests
 from bs4 import BeautifulSoup
+from curl_cffi import requests as curl_requests
+from curl_cffi.requests import RequestsError
 from enthusiast_common.tools import BaseLLMTool
 from enthusiast_common.utils import RequiredFieldsModel
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
-from requests import HTTPError
 
 logger = logging.getLogger(__name__)
 
 _MINIMAL_CONTENT_THRESHOLD = 300
-_REQUEST_HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/124.0.0.0 Safari/537.36"
-    ),
-    "Accept-Language": "en-US,en;q=0.9",
-}
+_CHROME_IMPERSONATION = "chrome124"
 
 
 class FetchAndExtractProductDataToolInput(BaseModel):
@@ -47,15 +40,17 @@ class FetchAndExtractProductDataToolConfigurationArgs(RequiredFieldsModel):
 class FetchAndExtractProductDataTool(BaseLLMTool):
     """Fetches a product web page and extracts structured product data from it using an LLM.
 
-    Uses plain HTTP requests and BeautifulSoup for content extraction. JavaScript-rendered
-    pages (SPAs) may return minimal content — in that case the tool returns a warning so the
-    agent can relay it to the user.
+    Uses curl_cffi to impersonate a Chrome browser at the TLS level, bypassing basic
+    bot-detection systems. BeautifulSoup strips HTML to plain text which is then passed
+    to an LLM sub-call for field extraction. JavaScript-rendered pages (SPAs) may still
+    return minimal content — in that case the tool returns a warning so the agent can
+    relay it to the user.
     """
 
     NAME = "fetch_and_extract_product_data"
     DESCRIPTION = (
         "Fetches a product web page from the given URL and extracts specified product fields "
-        "from its content. Provide the URL and a comma-separated list of field names to extract. "
+        "from its content. Uses Chrome TLS impersonation to bypass basic bot detection. "
         "Does not support JavaScript-rendered pages — static HTML only."
     )
     ARGS_SCHEMA = FetchAndExtractProductDataToolInput
@@ -73,7 +68,12 @@ class FetchAndExtractProductDataTool(BaseLLMTool):
             Extracted field values as a string, or an informative error/warning message.
         """
         try:
-            response = requests.get(url, headers=_REQUEST_HEADERS, proxies=self._get_proxies(), timeout=15)
+            response = curl_requests.get(
+                url,
+                proxies=self._get_proxies(),
+                timeout=15,
+                impersonate=_CHROME_IMPERSONATION,
+            )
             response.raise_for_status()
 
             soup = BeautifulSoup(response.text, "html.parser")
@@ -88,12 +88,10 @@ class FetchAndExtractProductDataTool(BaseLLMTool):
 
             return self._extract_from_text(page_text, action)
 
-        except HTTPError as e:
-            return f"Could not reach the provided URL (HTTP {e.response.status_code}): {url}"
-        except requests.exceptions.ConnectionError:
-            return f"Connection error — could not reach: {url}"
-        except requests.exceptions.Timeout:
-            return f"Request timed out after 15 seconds: {url}"
+        except RequestsError as e:
+            if e.response is not None:
+                return f"Could not reach the provided URL (HTTP {e.response.status_code}): {url}"
+            return f"Could not reach the provided URL: {url}"
         except Exception as e:
             logger.error("Unexpected error fetching %s: %s", url, e)
             return "Internal error — could not fetch or extract data from the page."

@@ -1,23 +1,18 @@
-# enthusiast-agent-product-web-scraper
+# Enthusiast Product Web Scraper Agent
 
-Product Web Scraper Agent for [Enthusiast](https://github.com/upsidelab/enthusiast).
+The Product Web Scraper agent accepts one or more product page URLs, fetches and extracts structured product data using an LLM, and upserts the results directly into the configured ecommerce platform. When confirmation mode is enabled (default), the agent presents extracted data to the user and waits for approval before writing to the catalog.
 
-Fetches product data from web page URLs, extracts structured product fields using an LLM,
-and upserts the results into the configured ecommerce platform.
+## Installing the Product Web Scraper Agent
 
-## Installation
-
-```bash
-pip install enthusiast-agent-product-web-scraper
+Run the following command inside your application directory:
+```commandline
+poetry add enthusiast-agent-product-web-scraper
 ```
 
-## Registration
-
-Add to your Django settings:
+Then, register the agent in your config/settings_override.py.
 
 ```python
 AVAILABLE_AGENTS = [
-    ...
-    "enthusiast_agent_product_web_scraper.ProductWebScraperAgent",
+    'enthusiast_agent_product_web_scraper.ProductWebScraperAgent',
 ]
 ```

@@ -12,7 +12,7 @@ dependencies = [
     "langchain (>=1.2.0,<2.0.0)",
     "enthusiast-agent-tool-calling (>=1.1.0)",
     "beautifulsoup4 (>=4.14.2,<5.0.0)",
-    "requests (>=2.32.0,<3.0.0)",
+    "curl_cffi (>=0.7.0,<1.0.0)",
 ]
 
 [project.urls]

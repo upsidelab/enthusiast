@@ -20,11 +20,6 @@ Homepage = "https://upsidelab.io/tools/enthusiast"
 Repository = "https://github.com/upsidelab/enthusiast.git"
 Issues = "https://github.com/upsidelab/enthusiast/issues"
 
-#TODO change this
-[tool.poetry.dependencies]
-enthusiast-common = {path = "../enthusiast-common", develop = true}
-enthusiast-agent-tool-calling = {path = "../enthusiast-agent-tool-calling", develop = true}
-
 [tool.poetry]
 packages = [{include = "enthusiast_agent_product_web_scraper", from = "src"}]
 

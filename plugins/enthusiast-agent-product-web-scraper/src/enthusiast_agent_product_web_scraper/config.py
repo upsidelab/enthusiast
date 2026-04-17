@@ -9,9 +9,8 @@ class ProductWebScraperConfigProvider(BaseAgentConfigProvider):
     """Config provider for the Product Web Scraper agent.
 
     Returns agent configuration appropriate for the requested context type.
-    Currently only conversation mode is supported — the execution mode config
-    will be added in the executor branch.
     """
+
 
     def get_config(self, config_type: ConfigType = ConfigType.CONVERSATION) -> AgentConfigWithDefaults:
         return AgentConfigWithDefaults(

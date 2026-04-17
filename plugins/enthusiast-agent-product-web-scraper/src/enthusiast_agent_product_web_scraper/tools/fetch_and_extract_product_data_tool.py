@@ -54,8 +54,8 @@ class FetchAndExtractProductDataTool(BaseLLMTool):
 
     NAME = "fetch_and_extract_product_data"
     DESCRIPTION = (
-        "Fetches a product web page from the given URL and extracts specified product fields "
-        "from its content. Provide the URL and a comma-separated list of field names to extract. "
+        "Fetches a product web page from the given URL and extracts product data from its content. "
+        "Provide the URL and a description of what data to extract and any format requirements. "
         "Does not support JavaScript-rendered pages — static HTML only."
     )
     ARGS_SCHEMA = FetchAndExtractProductDataToolInput

@@ -38,7 +38,7 @@ export function MessageBubble({ text, variant, questionId, inMessageGroup }: Mes
       {text && (
         <div className={variant} dangerouslySetInnerHTML={{ __html: sanitizedHtml }}/>
       )}
-      
+
       {shouldShowActionButtons && (
         <div className="mt-4 flex items-center">
           <FeedbackButton isOpen={isFeedbackOpen} onClick={handleFeedbackClick} />

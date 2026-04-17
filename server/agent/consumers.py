@@ -22,7 +22,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             "stream": self.handle_stream,
             "end": self.handle_end,
             "message_created": self.handle_message_created,
-            "action": self.handle_action,
+            "tool_call": self.handle_tool_call,
+            "tool_done": self.handle_tool_done,
             "error": self.handle_error,
         }
 
@@ -42,8 +43,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def handle_message_created(self, event):
         await self.send(json.dumps({"event": "message_id", "data": {"output": event.get("answer_id")}}))
 
-    async def handle_action(self, event):
-        await self.send(json.dumps({"event": "action", "data": {"output": event.get("output")}}))
+    async def handle_tool_call(self, event):
+        await self.send(json.dumps({"event": "tool_call", "data": {"tool_name": event.get("tool_name")}}))
+
+    async def handle_tool_done(self, event):
+        await self.send(json.dumps({"event": "tool_done", "data": {}}))
 
     async def handle_error(self, event):
         await self.send(json.dumps({"event": "error", "data": {"output": event.get("output")}}))

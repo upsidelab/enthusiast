@@ -33,6 +33,9 @@ class UpsertProductBatchInput(BaseModel):
     )
 
 
+UpsertMemoryEntry = dict[str, bool]
+
+
 class UpsertOutcome(StrEnum):
     UPDATED = "Product updated successfully"
     CREATED = "Product created successfully"
@@ -96,16 +99,18 @@ class UpsertProductDetailsTool(BaseLLMTool):
         self._handle_upsert_results_as_tool_memory(response)
         return json.dumps(response)
 
-    def _handle_no_connector_as_tool_memory(self, skus):
-        self.injector.tool_result_memory.record(self.NAME, json.dumps({sku: False for sku in skus}))
+    def _handle_no_connector_as_tool_memory(self, skus: list[str]):
+        if not self.injector.tool_result_memory:
+            return
+        self.injector.tool_result_memory.record(self.NAME, {sku: False for sku in skus})
 
     _SUCCESS_OUTCOMES = frozenset({UpsertOutcome.UPDATED, UpsertOutcome.CREATED})
 
     def _handle_upsert_results_as_tool_memory(self, result: dict[str, str]):
         if not self.injector.tool_result_memory:
             return
-        tool_result = {sku: message in self._SUCCESS_OUTCOMES for sku, message in result.items()}
-        self.injector.tool_result_memory.record(self.NAME, json.dumps(tool_result))
+        entry: UpsertMemoryEntry = {sku: message in self._SUCCESS_OUTCOMES for sku, message in result.items()}
+        self.injector.tool_result_memory.record(self.NAME, entry)
 
 
     @staticmethod

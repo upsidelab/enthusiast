@@ -1,4 +1,3 @@
-import json
 from typing import Optional
 
 from enthusiast_common.agentic_execution import (
@@ -10,7 +9,10 @@ from enthusiast_common.agentic_execution import (
 from enthusiast_common.agentic_execution.memory import ToolResultMemory
 
 from enthusiast_agent_catalog_enrichment.execution_input import CatalogEnrichmentAgenticExecutionInput
-from enthusiast_agent_catalog_enrichment.tools.upsert_product_details_tool import UpsertProductDetailsTool
+from enthusiast_agent_catalog_enrichment.tools.upsert_product_details_tool import (
+    UpsertMemoryEntry,
+    UpsertProductDetailsTool,
+)
 
 
 class AllSkusUpsertedValidator(BaseExecutionValidator):
@@ -27,12 +29,9 @@ class AllSkusUpsertedValidator(BaseExecutionValidator):
 
         attempted_skus: set[str] = set()
         if tool_result_memory:
-            for tool_result in tool_result_memory.get_results(self._TOOL_NAME):
-                try:
-                    outcomes: dict[str, bool] = json.loads(tool_result.result)
-                    attempted_skus.update(outcomes.keys())
-                except (json.JSONDecodeError, TypeError):
-                    continue
+            entry: UpsertMemoryEntry | None = tool_result_memory.get_tool_result(self._TOOL_NAME)
+            if entry:
+                attempted_skus.update(entry.keys())
 
         missing_skus = [sku for sku in execution_input.skus if sku not in attempted_skus]
         if not missing_skus:

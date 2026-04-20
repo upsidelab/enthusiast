@@ -27,8 +27,8 @@ class StopExecutionValidator(BaseExecutionValidator):
         if tool_result_memory is None:
             return ValidatorSuccessResponse()
 
-        results = tool_result_memory.get_results(self.TOOL_NAME)
-        if not results:
+        result = tool_result_memory.get_tool_result(self.TOOL_NAME)
+        if result is None:
             return ValidatorSuccessResponse()
 
-        return ValidatorFailureResponse(feedback=results[0].result, retry_needed=False)
+        return ValidatorFailureResponse(feedback=result, retry_needed=False)

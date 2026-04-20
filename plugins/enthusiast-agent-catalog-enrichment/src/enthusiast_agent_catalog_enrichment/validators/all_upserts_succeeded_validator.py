@@ -1,4 +1,3 @@
-import json
 from typing import Optional
 
 from enthusiast_common.agentic_execution import (
@@ -10,7 +9,10 @@ from enthusiast_common.agentic_execution import (
 )
 from enthusiast_common.agentic_execution.memory import ToolResultMemory
 
-from enthusiast_agent_catalog_enrichment.tools.upsert_product_details_tool import UpsertProductDetailsTool
+from enthusiast_agent_catalog_enrichment.tools.upsert_product_details_tool import (
+    UpsertMemoryEntry,
+    UpsertProductDetailsTool,
+)
 
 
 class AllUpsertsSucceededValidator(BaseExecutionValidator):
@@ -25,26 +27,17 @@ class AllUpsertsSucceededValidator(BaseExecutionValidator):
         if tool_result_memory is None:
             return ValidatorSuccessResponse()
 
-        tool_results = tool_result_memory.get_results(self._TOOL_NAME)
-        if not tool_results:
+        entry: UpsertMemoryEntry | None = tool_result_memory.get_tool_result(self._TOOL_NAME)
+        if entry is None:
             return ValidatorSuccessResponse()
 
-        failed_skus: list[str] = []
-
-        for tool_result in tool_results:
-            try:
-                outcomes: dict[str, bool] = json.loads(tool_result.result)
-            except (json.JSONDecodeError, TypeError):
-                continue
-            failed_skus.extend(sku for sku, success in outcomes.items() if not success)
-
+        failed_skus = [sku for sku, success in entry.items() if not success]
         if not failed_skus:
             return ValidatorSuccessResponse()
 
-        skus_list = ", ".join(failed_skus)
         return ValidatorFailureResponse(
             feedback=(
-                f"The following products failed to upsert: {skus_list}. "
+                f"The following products failed to upsert: {', '.join(failed_skus)}. "
                 f"Please review the product data and retry the upsert."
             ),
             retry_needed=True,

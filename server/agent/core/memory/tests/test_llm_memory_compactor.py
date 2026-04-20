@@ -6,7 +6,7 @@ from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, System
 from model_bakery import baker
 
 from agent.core.memory.llm_memory_compactor import COMPACTION_INTERVAL, LLMMemoryCompactor
-from agent.core.memory.persistent_chat_history import MessagesAfterResult, PersistentChatHistory
+from agent.core.memory.persistent_chat_history import PersistentChatHistory
 from agent.core.repositories import DjangoConversationRepository
 from agent.models import Agent, Conversation, Message
 from catalog.models import DataSet
@@ -76,10 +76,7 @@ class TestLLMMemoryCompactorGetSummary:
 @pytest.mark.django_db
 class TestLLMMemoryCompactorCompactIfNeeded:
     def test_does_not_compact_below_threshold(self, conversation, compactor, llm, chat_history):
-        chat_history.messages_after.return_value = MessagesAfterResult(
-            messages=_make_langchain_messages(human_count=COMPACTION_INTERVAL - 1),
-            last_message_id=None,
-        )
+        chat_history.messages_after.return_value = _make_langchain_messages(human_count=COMPACTION_INTERVAL - 1)
 
         compactor.compact_if_needed()
 
@@ -89,10 +86,8 @@ class TestLLMMemoryCompactorCompactIfNeeded:
 
     def test_compacts_at_threshold(self, conversation, compactor, llm, chat_history):
         db_message = baker.make(Message, conversation=conversation, type=Message.MessageType.HUMAN, text="Hello")
-        chat_history.messages_after.return_value = MessagesAfterResult(
-            messages=_make_langchain_messages(human_count=COMPACTION_INTERVAL),
-            last_message_id=db_message.id,
-        )
+        chat_history.messages_after.return_value = _make_langchain_messages(human_count=COMPACTION_INTERVAL)
+        chat_history.last_message_database_id = db_message.id
 
         compactor.compact_if_needed()
 
@@ -106,16 +101,11 @@ class TestLLMMemoryCompactorCompactIfNeeded:
 
         def messages_after_side_effect(message_id):
             if message_id is None:
-                return MessagesAfterResult(
-                    messages=_make_langchain_messages(human_count=COMPACTION_INTERVAL),
-                    last_message_id=db_message.id,
-                )
-            return MessagesAfterResult(
-                messages=_make_langchain_messages(human_count=COMPACTION_INTERVAL - 1),
-                last_message_id=None,
-            )
+                return _make_langchain_messages(human_count=COMPACTION_INTERVAL)
+            return _make_langchain_messages(human_count=COMPACTION_INTERVAL - 1)
 
         chat_history.messages_after.side_effect = messages_after_side_effect
+        chat_history.last_message_database_id = db_message.id
 
         compactor.compact_if_needed()
         conversation.refresh_from_db()
@@ -130,21 +120,13 @@ class TestLLMMemoryCompactorCompactIfNeeded:
         db_message_1 = baker.make(Message, conversation=conversation, type=Message.MessageType.HUMAN, text="Hello")
         db_message_2 = baker.make(Message, conversation=conversation, type=Message.MessageType.HUMAN, text="Hello")
 
-        def messages_after_side_effect(message_id):
-            if message_id is None:
-                return MessagesAfterResult(
-                    messages=_make_langchain_messages(human_count=COMPACTION_INTERVAL),
-                    last_message_id=db_message_1.id,
-                )
-            return MessagesAfterResult(
-                messages=_make_langchain_messages(human_count=COMPACTION_INTERVAL),
-                last_message_id=db_message_2.id,
-            )
-
-        chat_history.messages_after.side_effect = messages_after_side_effect
+        chat_history.messages_after.return_value = _make_langchain_messages(human_count=COMPACTION_INTERVAL)
+        chat_history.last_message_database_id = db_message_1.id
 
         compactor.compact_if_needed()
         llm.invoke.reset_mock()
+
+        chat_history.last_message_database_id = db_message_2.id
         compactor.compact_if_needed()
 
         conversation.refresh_from_db()
@@ -155,10 +137,8 @@ class TestLLMMemoryCompactorCompactIfNeeded:
         db_message = baker.make(Message, conversation=conversation, type=Message.MessageType.HUMAN, text="Hello")
         messages = [HumanMessage(content=f"msg {i}") for i in range(COMPACTION_INTERVAL)]
         messages += [AIMessage(content="response") for _ in range(COMPACTION_INTERVAL)]
-        chat_history.messages_after.return_value = MessagesAfterResult(
-            messages=messages,
-            last_message_id=db_message.id,
-        )
+        chat_history.messages_after.return_value = messages
+        chat_history.last_message_database_id = db_message.id
 
         compactor.compact_if_needed()
 
@@ -179,21 +159,13 @@ class TestLLMMemoryCompactorCompactIfNeeded:
         db_message_1 = baker.make(Message, conversation=conversation, type=Message.MessageType.HUMAN, text="Hello")
         db_message_2 = baker.make(Message, conversation=conversation, type=Message.MessageType.HUMAN, text="Hello")
 
-        def messages_after_side_effect(message_id):
-            if message_id is None:
-                return MessagesAfterResult(
-                    messages=_make_langchain_messages(human_count=COMPACTION_INTERVAL),
-                    last_message_id=db_message_1.id,
-                )
-            return MessagesAfterResult(
-                messages=_make_langchain_messages(human_count=COMPACTION_INTERVAL),
-                last_message_id=db_message_2.id,
-            )
-
-        chat_history.messages_after.side_effect = messages_after_side_effect
+        chat_history.messages_after.return_value = _make_langchain_messages(human_count=COMPACTION_INTERVAL)
+        chat_history.last_message_database_id = db_message_1.id
 
         compactor.compact_if_needed()
         llm.invoke.reset_mock()
+
+        chat_history.last_message_database_id = db_message_2.id
         compactor.compact_if_needed()
 
         call_args = llm.invoke.call_args[0][0]

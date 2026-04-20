@@ -49,18 +49,18 @@ class LLMMemoryCompactor(BaseMemoryCompactor):
     def compact_if_needed(self) -> None:
         """Generate a new summary if COMPACTION_INTERVAL human messages have been added since the last one."""
         last_summarized_message_id = self._conversation.last_summarized_message_id
-        result = self._chat_history.messages_after(last_summarized_message_id)
+        new_messages = self._chat_history.messages_after(last_summarized_message_id)
 
-        if not result.messages:
+        if not new_messages:
             return
 
-        human_messages_count = sum(1 for m in result.messages if isinstance(m, HumanMessage))
+        human_messages_count = sum(1 for m in new_messages if isinstance(m, HumanMessage))
         if human_messages_count < COMPACTION_INTERVAL:
             return
 
-        summary = self._generate_summary(result.messages, self._conversation.conversation_summary)
+        summary = self._generate_summary(new_messages, self._conversation.conversation_summary)
         self._conversation.conversation_summary = summary
-        self._conversation.last_summarized_message_id = result.last_message_id
+        self._conversation.last_summarized_message_id = self._chat_history.last_message_database_id
         self._conversation.save(update_fields=["conversation_summary", "last_summarized_message_id"])
 
     def _generate_summary(self, new_messages: list[BaseMessage], existing_summary: Optional[str]) -> str:

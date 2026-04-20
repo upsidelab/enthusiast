@@ -21,8 +21,8 @@ _REQUEST_HEADERS = {
 }
 
 
-class FetchAndExtractProductDataToolInput(BaseModel):
-    """Input schema for FetchAndExtractProductDataTool."""
+class ScrapeProductInput(BaseModel):
+    """Input schema for ScrapeProductTool."""
 
     url: str = Field(description="URL of the product web page to fetch and extract data from")
     action: str = Field(
@@ -34,8 +34,8 @@ class FetchAndExtractProductDataToolInput(BaseModel):
     )
 
 
-class FetchAndExtractProductDataToolConfigurationArgs(RequiredFieldsModel):
-    """Runtime configuration for FetchAndExtractProductDataTool."""
+class ScrapeProductConfig(RequiredFieldsModel):
+    """Runtime configuration for ScrapeProductTool."""
 
     proxy: str = Field(
         title="Proxy",
@@ -44,7 +44,7 @@ class FetchAndExtractProductDataToolConfigurationArgs(RequiredFieldsModel):
     )
 
 
-class FetchAndExtractProductDataTool(BaseLLMTool):
+class ScrapeProductTool(BaseLLMTool):
     """Fetches a product web page and extracts structured product data from it using an LLM.
 
     Uses plain HTTP requests and BeautifulSoup for content extraction. JavaScript-rendered
@@ -52,15 +52,15 @@ class FetchAndExtractProductDataTool(BaseLLMTool):
     agent can relay it to the user.
     """
 
-    NAME = "fetch_and_extract_product_data"
+    NAME = "scrape_product_data"
     DESCRIPTION = (
         "Fetches a product web page from the given URL and extracts product data from its content. "
         "Provide the URL and a description of what data to extract and any format requirements. "
         "Does not support JavaScript-rendered pages — static HTML only."
     )
-    ARGS_SCHEMA = FetchAndExtractProductDataToolInput
+    ARGS_SCHEMA = ScrapeProductInput
     RETURN_DIRECT = False
-    CONFIGURATION_ARGS = FetchAndExtractProductDataToolConfigurationArgs
+    CONFIGURATION_ARGS = ScrapeProductConfig
 
     def run(self, url: str, action: str) -> str:
         """Fetch the page at `url` and extract the requested fields via LLM.

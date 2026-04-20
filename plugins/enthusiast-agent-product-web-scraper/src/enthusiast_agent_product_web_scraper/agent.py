@@ -3,7 +3,7 @@ from enthusiast_common.config.base import LLMToolConfig
 from enthusiast_common.utils import RequiredFieldsModel
 from pydantic import Field, Json
 
-from .tools.fetch_and_extract_product_data_tool import FetchAndExtractProductDataTool
+from .tools.scrape_product_tool import ScrapeProductTool
 from .tools.upsert_product_details_tool import UpsertProductDetailsTool
 
 _CONFIRMATION_REQUIRED_INSTRUCTION = (
@@ -58,7 +58,7 @@ class ProductWebScraperAgent(BaseToolCallingAgent):
     PROMPT_INPUT = ProductWebScraperPromptInput
     FILE_UPLOAD = False
     TOOLS = [
-        LLMToolConfig(tool_class=FetchAndExtractProductDataTool),
+        LLMToolConfig(tool_class=ScrapeProductTool),
         LLMToolConfig(tool_class=UpsertProductDetailsTool),
     ]
 

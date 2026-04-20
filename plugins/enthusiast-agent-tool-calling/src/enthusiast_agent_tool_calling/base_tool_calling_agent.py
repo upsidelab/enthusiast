@@ -34,7 +34,7 @@ class BaseToolCallingAgent(BaseAgent):
         return final_message.text
 
     def _build_context_messages(self) -> list[BaseMessage]:
-        limited = trim_messages(
+        limited_history = trim_messages(
             self._injector.chat_history.messages,
             strategy="last",
             token_counter='approximate',
@@ -45,8 +45,8 @@ class BaseToolCallingAgent(BaseAgent):
         )
         summary_message = self._build_summary_message()
         if summary_message is not None:
-            return [summary_message] + limited
-        return limited
+            return [summary_message] + limited_history
+        return limited_history
 
     def _build_summary_message(self) -> Optional[SystemMessage]:
         compactor = self._injector.memory_compactor

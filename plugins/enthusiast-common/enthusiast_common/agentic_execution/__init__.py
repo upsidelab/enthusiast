@@ -4,7 +4,7 @@ from .input import ExecutionInputType
 from .memory import ToolCallResult, ToolResultMemory
 from .result import ExecutionResult
 from .status import ExecutionStatus
-from .validators import BaseExecutionValidator, IsValidJsonValidator, ValidatorFailureResponse, ValidatorResponse, ValidatorSuccessResponse
+from .validators import BaseExecutionValidator, IsValidJsonValidator, StopExecutionValidator, ValidatorFailureResponse, ValidatorResponse, ValidatorSuccessResponse
 
 __all__ = [
     "BaseAgenticExecutionDefinition",
@@ -17,6 +17,7 @@ __all__ = [
     "ToolResultMemory",
     "BaseExecutionValidator",
     "IsValidJsonValidator",
+    "StopExecutionValidator",
     "ValidatorFailureResponse",
     "ValidatorResponse",
     "ValidatorSuccessResponse",

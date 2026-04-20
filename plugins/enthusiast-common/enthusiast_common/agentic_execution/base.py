@@ -73,7 +73,7 @@ class BaseAgenticExecutionDefinition(ABC):
     FAILURE_CODES: ClassVar[Type[ExecutionFailureCode]] = ExecutionFailureCode
     FAILURE_SUMMARY_PROMPT: ClassVar[str] = (
         "You were unable to produce a valid response after multiple attempts. "
-        "Please provide a brief (max 100 words), plain-language summary of what went wrong."
+        "Please provide a brief (max 100 words), impersonal, plain-language summary of what went wrong."
     )
 
     def run(

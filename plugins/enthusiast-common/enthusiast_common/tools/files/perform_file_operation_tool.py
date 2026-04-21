@@ -1,7 +1,6 @@
+from enthusiast_common.tools import BaseFileTool
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
-
-from enthusiast_common.tools import BaseFileTool
 
 
 class FileRetrievalToolInput(BaseModel):

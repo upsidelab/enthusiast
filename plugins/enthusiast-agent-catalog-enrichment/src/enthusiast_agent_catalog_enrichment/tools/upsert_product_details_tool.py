@@ -1,6 +1,6 @@
-import logging
 import json
-from typing import Optional, List
+import logging
+from typing import List, Optional
 
 from enthusiast_common import ProductDetails
 from enthusiast_common.connectors import ECommercePlatformConnector

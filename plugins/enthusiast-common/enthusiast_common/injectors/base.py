@@ -3,7 +3,7 @@ from typing import Optional
 
 from enthusiast_common.connectors import ECommercePlatformConnector
 from enthusiast_common.retrievers import BaseProductRetriever, BaseVectorStoreRetriever
-from enthusiast_common.structures import RepositoriesInstances, DocumentChunkDetails
+from enthusiast_common.structures import DocumentChunkDetails, RepositoriesInstances
 from langchain_core.chat_history import BaseChatMessageHistory
 
 

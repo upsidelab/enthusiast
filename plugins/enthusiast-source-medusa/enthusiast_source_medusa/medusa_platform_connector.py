@@ -1,5 +1,5 @@
-import logging
 import json
+import logging
 from typing import Optional
 
 from enthusiast_common.connectors import ECommercePlatformConnector

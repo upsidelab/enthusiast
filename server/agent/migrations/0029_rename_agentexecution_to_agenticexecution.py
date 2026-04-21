@@ -5,7 +5,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("agent", "0027_add_tool_call_id_to_message"),
+        ("agent", "0028_fix_unique_agent_name_constraint_exclude_deleted"),
     ]
 
     operations = [

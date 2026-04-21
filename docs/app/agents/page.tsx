@@ -28,6 +28,7 @@ export default async function Page() {
         <AgentCard name="Catalog Enrichment" imageSrc="/tools/enthusiast/img/agents/catalog-enrichment.png" href="/agents/catalog-enrichment" />
         <AgentCard name="Order Intake" imageSrc="/tools/enthusiast/img/agents/order-intake.png" href="/agents/order-intake" />
         <AgentCard name="User Manual Search" imageSrc="/tools/enthusiast/img/agents/user-manual-search.png" href="/agents/user-manual-search" />
+        <AgentCard name="Product Web Scraper" imageSrc="/tools/enthusiast/img/agents/product-web-scraper.png" href="/agents/product-web-scraper" />
       </Cards>
       <H2>Build a Custom Agent</H2>
       <P>These pre-built agents are just a starting point. Enthusiast lets you build custom agents from the ground up, tailored to your specific workflows.</P>

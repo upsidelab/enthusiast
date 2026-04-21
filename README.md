@@ -36,6 +36,8 @@ Get started with Enthusiast by either:
 
 - [**Product Catalog Enrichment**](https://upsidelab.io/tools/enthusiast/agents/catalog-enrichment) Extract product descriptions, attributes, or translations from unstructured product sheets.
 
+- [**Product Web Scraper**](https://upsidelab.io/tools/enthusiast/agents/product-web-scraper) Scrape product pages from any URL and import extracted product data directly into your catalog.
+
 ## Main Features
 
 - Pre-built integrations with popular e-commerce platforms

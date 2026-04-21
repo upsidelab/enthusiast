@@ -17,7 +17,6 @@ class LanguageModelProvider(ABC):
 
     NAME: str = None
     STREAMING_AVAILABLE = True
-    STREAMING_REQUIRES_MESSAGE_BUFFERING: bool = False
 
     def __init__(self, model: str):
         super(LanguageModelProvider, self).__init__()
@@ -55,7 +54,6 @@ class LanguageModelProvider(ABC):
 
     @classmethod
     def prepare_files_objects(cls, files_objects: list[LLMFile]):
-        pass
         objects = []
         for file in files_objects:
             if file.file_category == FileTypes.FILE.value:

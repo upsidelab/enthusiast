@@ -21,6 +21,7 @@ export type Product = {
   description: string;
   categories: string;
   properties: string;
+  price: number;
 }
 
 export type CatalogSource = {
@@ -97,6 +98,11 @@ export type ServiceAccount = {
 export type ProvidersConfig = {
   languageModelProviders: string[];
   embeddingProviders: string[];
+}
+
+export type EmbeddingModelsConfig = {
+  models: string[];
+  vectorSizeConstraints: Record<string, number[]>;
 }
 
 export type TypeInfo = {

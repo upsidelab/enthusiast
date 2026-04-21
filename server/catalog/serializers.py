@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from utils.serializers import ParentDataContextSerializerMixin
 
+from agent.core.registries.embeddings.embedding_provider_registry import EmbeddingProviderRegistry
 from sync.document.registry import DocumentSourcePluginRegistry
 from sync.product.registry import ProductSourcePluginRegistry
 
@@ -27,11 +28,38 @@ class DataSetCreateSerializer(DataSetSerializer):
     class Meta(DataSetSerializer.Meta):
         fields = DataSetSerializer.Meta.fields + ["preconfigure_agents"]
 
+    def validate(self, data):
+        """Validate that embedding_vector_dimensions satisfies provider constraints."""
+        embedding_provider = data.get("embedding_provider")
+        embedding_model = data.get("embedding_model")
+        embedding_vector_dimensions = data.get("embedding_vector_dimensions")
+
+        if embedding_provider and embedding_model and embedding_vector_dimensions is not None:
+            try:
+                provider_class = EmbeddingProviderRegistry().provider_class_by_name(embedding_provider)
+            except Exception:
+                provider_class = None
+
+            if provider_class is not None:
+                constraints = provider_class.vector_size_constraints()
+                allowed_sizes = constraints.get(embedding_model)
+                if allowed_sizes and embedding_vector_dimensions not in allowed_sizes:
+                    raise serializers.ValidationError(
+                        {
+                            "embedding_vector_dimensions": (
+                                f"Model '{embedding_model}' only supports vector sizes: "
+                                f"{allowed_sizes}. Got {embedding_vector_dimensions}."
+                            )
+                        }
+                    )
+
+        return data
+
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ["name", "slug", "sku", "description", "categories", "properties"]
+        fields = ["name", "slug", "sku", "description", "categories", "properties", "price"]
 
 
 class DocumentSerializer(serializers.ModelSerializer):

@@ -11,6 +11,7 @@ export interface SidebarSectionItemProps {
   icon: ReactNode,
   children?: SidebarSectionItemProps[];
   disabled?: boolean;
+  external?: boolean;
 }
 
 export interface SidebarSectionProps {

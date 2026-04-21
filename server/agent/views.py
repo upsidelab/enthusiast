@@ -126,7 +126,7 @@ class ConversationView(APIView):
                     conversation_id=conversation.id,
                     created_at=datetime.now(),
                     type=Message.MessageType.FILE,
-                    file_name=file.file.name.split(".")[0],
+                    file_name=os.path.basename(file.file.name),
                     file_type=file.file.name.split(".")[-1],
                     text=f"Uploaded {file.file.name} with id: {file.pk}",
                 )

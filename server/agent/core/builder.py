@@ -20,7 +20,7 @@ from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.tools import BaseTool
 
-from agent.core.memory import PersistentChatHistory
+from agent.core.memory import LLMMemoryCompactor, PersistentChatHistory
 from catalog.models import ECommerceIntegration
 
 
@@ -153,6 +153,7 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
         document_retriever = self._build_document_retriever()
         product_retriever = self._build_product_retriever()
         chat_history = self._build_chat_history()
+        memory_compactor = self._build_memory_compactor(chat_history)
         ecommerce_platform_connector = self._build_ecommerce_platform_connector()
         return self._config.injector(
             product_retriever=product_retriever,
@@ -160,6 +161,7 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
             ecommerce_platform_connector=ecommerce_platform_connector,
             repositories=self._repositories,
             chat_history=chat_history,
+            memory_compactor=memory_compactor,
         )
 
     def _build_agent_callback_handler(self) -> Optional[BaseCallbackHandler]:
@@ -216,4 +218,8 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
 
     def _build_chat_history(self) -> PersistentChatHistory:
         return PersistentChatHistory(self._repositories.conversation, self.conversation_id)
+
+    def _build_memory_compactor(self, chat_history: PersistentChatHistory) -> LLMMemoryCompactor:
+        llm = self._build_default_llm()
+        return LLMMemoryCompactor(self._repositories.conversation, self.conversation_id, llm, chat_history)
 

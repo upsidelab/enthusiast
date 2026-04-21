@@ -1,0 +1,31 @@
+import Agent from "@/components/agent";
+
+export const description = "The Product Web Scraper agent takes product page URLs and extracts structured product data from them using an LLM. It can scrape one or more pages, present the extracted data for review, and — with user confirmation or in fully automated mode — upsert the products directly into your e-commerce catalog.";
+
+export const useCases = [
+  {
+    title: "Competitor or Supplier Page Import",
+    description: "Paste product page URLs and let the agent pull name, description, price, and other attributes directly into your catalog — no copy-pasting required."
+  },
+  {
+    title: "Rapid Catalog Seeding",
+    description: "When launching a new store or category, quickly import products from external sources by providing their URLs and letting the agent handle extraction and upsert."
+  },
+  {
+    title: "Price and Attribute Monitoring",
+    description: "Periodically scrape known product URLs to capture updated pricing or descriptions and reflect them in your catalog."
+  },
+];
+
+<Agent
+  name="Product Web Scraper"
+  agentClassName="ProductWebScraperAgent"
+  pipName="enthusiast-agent-product-web-scraper"
+  registerAgentModule="enthusiast_agent_product_web_scraper"
+  agentDescription={description}
+  agentUseCases={useCases}
+/>
+
+## Agent Execution
+
+Documentation for automated agent execution (e.g. triggering scraping jobs via API or on a schedule) is coming soon.

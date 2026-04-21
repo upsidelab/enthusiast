@@ -8,4 +8,4 @@ class ValidatorSuccessResponse(ValidatorResponse):
     """
 
     def __init__(self) -> None:
-        super().__init__(validation_successful=True, retry_needed=False, feedback=None)
+        super().__init__(validation_successful=True, retry_needed=False, feedback=None, failure_code=None)

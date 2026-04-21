@@ -91,7 +91,8 @@ class BaseAgenticExecutionDefinition(ABC):
                 )
 
             if attempt < self.MAX_RETRIES:
-                response = conversation.ask(validator_response.feedback or "")
+                feedback = validator_response.feedback or "The previous response was invalid. Please try again."
+                response = conversation.ask(feedback)
             else:
                 failure_summary = conversation.ask(self.FAILURE_SUMMARY_PROMPT)
                 return ExecutionResult(

@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from enthusiast_common.agentic_execution import (
     BaseAgenticExecutionDefinition,
     ExecutionConversationInterface,
@@ -10,8 +8,8 @@ from enthusiast_common.agentic_execution import (
 class ProductWebScraperExecutionInput(ExecutionInputType):
     """Input for the product web scraper agentic execution."""
 
-    urls: List[str]
-    additional_instructions: Optional[str] = None
+    urls: list[str]
+    additional_instructions: str | None = None
 
 
 class ProductWebScraperExecutionDefinition(BaseAgenticExecutionDefinition):

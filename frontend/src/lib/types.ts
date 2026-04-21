@@ -100,6 +100,11 @@ export type ProvidersConfig = {
   embeddingProviders: string[];
 }
 
+export type EmbeddingModelsConfig = {
+  models: string[];
+  vectorSizeConstraints: Record<string, number[]>;
+}
+
 export type TypeInfo = {
   container: string | null;
   inner_type?: string;

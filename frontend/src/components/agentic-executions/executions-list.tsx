@@ -2,8 +2,11 @@ import { useCallback, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { TableCell, TableRow } from "@/components/ui/table.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select.tsx";
+import { Button } from "@/components/ui/button.tsx";
+import { Plus } from "lucide-react";
 import { DEFAULT_PAGE_PARAM, PaginatedTable } from "@/components/util/paginated-table.tsx";
 import { ExecutionStatusBadge } from "@/components/agentic-executions/execution-status-badge.tsx";
+import { CreateExecutionModal } from "@/components/agentic-executions/create-execution-modal.tsx";
 import { ApiClient } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
@@ -29,6 +32,7 @@ export function ExecutionsList() {
   const hasActiveFilters = !!(agentId || status);
 
   const [hasItems, setHasItems] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const agentName = (id: number) => availableAgents.find(a => a.id === id)?.name ?? `Agent #${id}`;
 
@@ -44,7 +48,7 @@ export function ExecutionsList() {
 
   const loadItems = useCallback(
     async (page: number) => {
-      const result = await api.agentExecutions().list({ datasetId: dataSetId ?? undefined, agentId, status }, page);
+      const result = await api.agenticExecutions().list({ datasetId: dataSetId ?? undefined, agentId, status }, page);
       setHasItems(result.count > 0);
       return result;
     },
@@ -53,43 +57,50 @@ export function ExecutionsList() {
 
   return (
     <div>
+      <div className="flex flex-wrap-reverse items-center gap-3 gap-y-10 mb-6">
+        {(hasItems || hasActiveFilters) && (
+          <>
+            <Select
+              value={agentId?.toString() ?? "all"}
+              onValueChange={v => setFilter("agent_id", v === "all" ? undefined : v)}
+            >
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="All agents" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All agents</SelectItem>
+                {availableAgents.map(a => (
+                  <SelectItem key={a.id} value={a.id.toString()}>{a.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-      {(hasItems || hasActiveFilters) && <div className="flex gap-3 mb-6">
-        <Select
-          value={agentId?.toString() ?? "all"}
-          onValueChange={v => setFilter("agent_id", v === "all" ? undefined : v)}
-        >
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="All agents" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All agents</SelectItem>
-            {availableAgents.map(a => (
-              <SelectItem key={a.id} value={a.id.toString()}>{a.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+            <Select
+              value={status ?? "all"}
+              onValueChange={v => setFilter("status", v === "all" ? undefined : v)}
+            >
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="All statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                {STATUSES.map(s => (
+                  <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </>
+        )}
 
-        <Select
-          value={status ?? "all"}
-          onValueChange={v => setFilter("status", v === "all" ? undefined : v)}
-        >
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="All statuses" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All statuses</SelectItem>
-            {STATUSES.map(s => (
-              <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>}
+        <Button className="ml-auto shrink-0" onClick={() => setModalOpen(true)}>
+          <Plus className="h-4 w-4" />New execution
+        </Button>
+      </div>
 
       <PaginatedTable
         loadItems={loadItems}
         noItemsMessage={hasActiveFilters ? "No agentic executions match your criteria" : "No agentic executions created yet"}
-        tableHeaders={["Status", "Agent", "Execution type", "Started", "Duration"]}
+        tableHeaders={["Status", "Agent", "Execution definition", "Started", "Duration"]}
         tableHeaderWidths={["11%", "26%", "26%", "26%", "11%"]}
         tableRow={(item: AgenticExecution, index) => (
           <TableRow
@@ -107,6 +118,8 @@ export function ExecutionsList() {
           </TableRow>
         )}
       />
+
+      <CreateExecutionModal open={modalOpen} onOpenChange={setModalOpen} />
     </div>
   );
 }

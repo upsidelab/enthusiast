@@ -305,14 +305,16 @@ The catalog enrichment plugin is the reference implementation. The existing `Cat
 
 ## 6. Frontend
 
-Two views are added, all dataset-scoped following the `/data-sets/:dataSetId/...` convention. An **Agentic Executions** link is added to the **Configure** section of the sidebar, visible to all authenticated users. Executions are started programmatically via the REST API — there is no launch form in the UI.
+Two views are added, all dataset-scoped following the `/data-sets/:dataSetId/...` convention. An **Agentic Executions** link is added to the **Configure** section of the sidebar, visible to all authenticated users.
 
 | Path | Purpose |
 |------|---------|
 | `/data-sets/:dataSetId/agentic-executions` | History dashboard — paginated table filterable by agent and status |
 | `/data-sets/:dataSetId/agentic-executions/:executionId` | Detail view — live status polling, result or failure display, link to the execution's conversation |
 
-**History dashboard** lists past agentic executions for the current dataset with agent and status filters. Filter state is kept in URL search params so it survives refresh.
+**History dashboard** lists past agentic executions for the current dataset with agent and status filters. Filter state is kept in URL search params so it survives refresh. A **New Execution** button opens the launch form.
+
+**Launch form** is a modal dialog accessible from the history dashboard. The user selects an agent, then an execution type (populated dynamically based on the chosen agent), provides a JSON input payload, and optionally attaches files (shown only when the selected agent supports file upload). Field-level and general API errors are surfaced inline. On success the user is redirected to the new execution's detail view.
 
 **Detail view** polls the execution status every 3 seconds while the job is running and stops once a terminal state is reached. Finished executions show the structured result; failed executions show the failure code and the LLM-generated explanation. A link to the underlying conversation is always shown, giving visibility into the agent's internal message loop.
 

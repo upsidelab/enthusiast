@@ -27,12 +27,12 @@ export function AgenticExecutionDetailPage() {
     let interval: ReturnType<typeof setInterval> | null = null;
 
     const fetchExecution = async () => {
-      const data = await api.agentExecutions().get(Number(executionId));
+      const data = await api.agenticExecutions().get(Number(executionId));
       if (!active) return;
       setExecution(data);
       if (!TERMINAL_STATUSES.includes(data.status)) {
         interval = setInterval(async () => {
-          const updated = await api.agentExecutions().get(Number(executionId));
+          const updated = await api.agenticExecutions().get(Number(executionId));
           if (!active) return;
           setExecution(updated);
           if (TERMINAL_STATUSES.includes(updated.status)) {

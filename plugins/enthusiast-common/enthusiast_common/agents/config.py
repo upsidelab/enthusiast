@@ -8,7 +8,7 @@ class ConfigType(StrEnum):
     """Registry of valid agent configuration context types."""
 
     CONVERSATION = "conversation"
-    AGENT_EXECUTION = "agent_execution"
+    AGENTIC_EXECUTION_DEFINITION = "agentic_execution_definition"
 
 
 class BaseAgentConfigProvider(ABC):
@@ -17,7 +17,7 @@ class BaseAgentConfigProvider(ABC):
     Agent plugins export a subclass of this from their ``__init__.py``. The
     agent registry discovers it at runtime and calls :meth:`get_config` with
     the appropriate ``config_type`` so the plugin can return a context-specific
-    configuration (e.g. a different system prompt for batch execution runs).
+    configuration (e.g. a different system prompt for agentic execution runs).
 
     Plugins that do not need context-specific configs can ignore the
     ``config_type`` argument and always return the same configuration.
@@ -29,8 +29,8 @@ class BaseAgentConfigProvider(ABC):
 
         Args:
             config_type: :attr:`ConfigType.CONVERSATION` for interactive user
-                conversations, :attr:`ConfigType.AGENT_EXECUTION` for
-                autonomous batch execution runs.
+                conversations, :attr:`ConfigType.AGENTIC_EXECUTION_DEFINITION` for
+                autonomous agentic execution runs.
 
         Returns:
             AgentConfig: fully populated configuration ready for the builder.

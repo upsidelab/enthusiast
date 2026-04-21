@@ -120,9 +120,9 @@ export function MainSidebar() {
         icon: <BotMessageSquareIcon />
       },
       {
-        title: "Agent Executions",
-        link: `/data-sets/${dataSetId}/agent-executions`,
-        key: "agent-executions",
+        title: "Agentic Executions",
+        link: `/data-sets/${dataSetId}/agentic-executions`,
+        key: "agentic-executions",
         icon: <PlayIcon />
       },
       {

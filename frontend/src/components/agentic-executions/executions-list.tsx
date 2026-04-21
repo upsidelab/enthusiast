@@ -3,16 +3,16 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { TableCell, TableRow } from "@/components/ui/table.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select.tsx";
 import { DEFAULT_PAGE_PARAM, PaginatedTable } from "@/components/util/paginated-table.tsx";
-import { ExecutionStatusBadge } from "@/components/agent-executions/execution-status-badge.tsx";
+import { ExecutionStatusBadge } from "@/components/agentic-executions/execution-status-badge.tsx";
 import { ApiClient } from "@/lib/api.ts";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { useApplicationContext } from "@/lib/use-application-context.ts";
-import { AgentExecution } from "@/lib/types.ts";
+import { AgenticExecution } from "@/lib/types.ts";
 
 const api = new ApiClient(authenticationProviderInstance);
 
-const STATUSES: AgentExecution["status"][] = ["pending", "in_progress", "finished", "failed"];
-const STATUS_LABELS: Record<AgentExecution["status"], string> = {
+const STATUSES: AgenticExecution["status"][] = ["pending", "in_progress", "finished", "failed"];
+const STATUS_LABELS: Record<AgenticExecution["status"], string> = {
   pending: "Pending",
   in_progress: "In progress",
   finished: "Finished",
@@ -25,7 +25,7 @@ export function ExecutionsList() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const agentId = searchParams.get("agent_id") ? Number(searchParams.get("agent_id")) : undefined;
-  const status = searchParams.get("status") as AgentExecution["status"] | undefined ?? undefined;
+  const status = searchParams.get("status") as AgenticExecution["status"] | undefined ?? undefined;
   const hasActiveFilters = !!(agentId || status);
 
   const [hasItems, setHasItems] = useState(false);
@@ -88,13 +88,13 @@ export function ExecutionsList() {
 
       <PaginatedTable
         loadItems={loadItems}
-        noItemsMessage={hasActiveFilters ? "No agent executions match your criteria" : "No agent executions created yet"}
+        noItemsMessage={hasActiveFilters ? "No agentic executions match your criteria" : "No agentic executions created yet"}
         tableHeaders={["Status", "Agent", "Execution type", "Started", "Duration"]}
         tableHeaderWidths={["11%", "26%", "26%", "26%", "11%"]}
-        tableRow={(item: AgentExecution, index) => (
+        tableRow={(item: AgenticExecution, index) => (
           <TableRow
             key={index}
-            onClick={() => navigate(`/data-sets/${dataSetId}/agent-executions/${item.id}`)}
+            onClick={() => navigate(`/data-sets/${dataSetId}/agentic-executions/${item.id}`)}
             className="cursor-pointer"
           >
             <TableCell><ExecutionStatusBadge status={item.status} /></TableCell>

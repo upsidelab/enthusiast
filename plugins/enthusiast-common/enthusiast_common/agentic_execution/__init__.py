@@ -1,12 +1,12 @@
-from .base import BaseAgentExecution, ExecutionConversationInterface
+from .base import BaseAgenticExecutionDefinition, ExecutionConversationInterface
 from .errors import ExecutionFailureCode
+from .input import ExecutionInputType
 from .result import ExecutionResult
 from .status import ExecutionStatus
-from .input import ExecutionInputType
 from .validators import BaseExecutionValidator, IsValidJsonValidator
 
 __all__ = [
-    "BaseAgentExecution",
+    "BaseAgenticExecutionDefinition",
     "ExecutionConversationInterface",
     "ExecutionFailureCode",
     "ExecutionResult",

@@ -14,11 +14,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up uv
-        uses: astral-sh/setup-uv@v6
-
-      - name: Run Ruff (server)
-        run: uvx ruff check server
+      - name: Run Ruff
+        uses: astral-sh/ruff-action@v3
+        with:
+          args: check
+          src: ./server
 
   lint-plugins:
     runs-on: ubuntu-latest
@@ -27,11 +27,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up uv
-        uses: astral-sh/setup-uv@v6
-
-      - name: Run Ruff (plugins)
-        run: uvx ruff check plugins
+      - name: Run Ruff
+        uses: astral-sh/ruff-action@v3
+        with:
+          args: check
+          src: ./plugins
 
   lint-frontend:
       runs-on: ubuntu-latest

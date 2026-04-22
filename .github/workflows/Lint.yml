@@ -19,14 +19,17 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install Ruff
-        run: pip install ruff
-
       - name: Run Ruff on server
-        run: ruff check server
+        uses: astral-sh/ruff-action@v3
+        with:
+          version: "0.15.9"
+          args: "check server"
 
       - name: Run Ruff on plugins
-        run: for dir in plugins/*/; do echo "Checking $dir" && ruff check "$dir"; done
+        uses: astral-sh/ruff-action@v3
+        with:
+          version: "0.15.9"
+          args: "check plugins"
 
   lint-frontend:
       runs-on: ubuntu-latest

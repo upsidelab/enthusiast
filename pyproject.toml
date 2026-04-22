@@ -1,5 +1,4 @@
 [tool.ruff]
-required-version = "0.15.9"
 line-length = 120
 target-version = "py312"
 [tool.ruff.lint]

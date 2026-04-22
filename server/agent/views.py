@@ -13,7 +13,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework.views import APIView, DefaultSchema
 from utils.functions import get_model_descriptor_from_class_field
 
 from agent.conversation import ConversationManager
@@ -44,6 +44,9 @@ from catalog.models import DataSet
 
 
 class GetTaskStatus(APIView):
+
+
+
     permission_classes = [IsAuthenticated]
     """
     View to check status of an enqueued task that's running in the background.
@@ -155,6 +158,13 @@ class ConversationView(APIView):
         )
 
 
+
+
+
+
+
+
+
 class ConversationListView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ConversationSerializer
@@ -229,8 +239,14 @@ class MessageFeedbackView(APIView):
             openapi.Parameter("id", openapi.IN_PATH, description="ID of the message", type=openapi.TYPE_INTEGER)
         ],
     )
+
+
+
     def patch(self, request, id):
         try:
+
+
+
             message = Message.objects.get(id=id)
         except Message.DoesNotExist:
             return Response({"error": "Message not found."}, status=status.HTTP_404_NOT_FOUND)

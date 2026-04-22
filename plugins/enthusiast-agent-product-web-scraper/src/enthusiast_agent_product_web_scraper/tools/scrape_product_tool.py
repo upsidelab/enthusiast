@@ -1,4 +1,6 @@
+import json
 import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from bs4 import BeautifulSoup
 from curl_cffi import requests as curl_requests
@@ -12,15 +14,16 @@ logger = logging.getLogger(__name__)
 
 _MINIMAL_CONTENT_THRESHOLD = 300
 _CHROME_IMPERSONATION = "chrome124"
+_MAX_WORKERS = 5
 
 
 class ScrapeProductInput(BaseModel):
     """Input schema for ScrapeProductTool."""
 
-    url: str = Field(description="URL of the product web page to fetch and extract data from")
+    urls: list[str] = Field(description="List of product web page URLs to fetch and extract data from")
     action: str = Field(
         description=(
-            "Describe what data to extract from the page and any additional context "
+            "Describe what data to extract from the pages and any additional context "
             "(e.g. which fields to look for, hints about where data is located on the page, "
             "or format requirements such as returning price as a plain decimal number)."
         )
@@ -38,27 +41,45 @@ class ScrapeProductConfig(RequiredFieldsModel):
 
 
 class ScrapeProductTool(BaseLLMTool):
-    """Fetches a product web page and extracts structured product data from it using an LLM.
+    """Fetches product web pages and extracts structured product data from them using an LLM.
 
     Uses curl_cffi to impersonate a Chrome browser at the TLS level, bypassing basic
-    bot-detection systems. BeautifulSoup strips HTML to plain text which is then passed
-    to an LLM sub-call for field extraction. JavaScript-rendered pages (SPAs) may still
-    return minimal content — in that case the tool returns a warning so the agent can
-    relay it to the user.
+    bot-detection systems. Multiple URLs are fetched in parallel using a thread pool.
+    BeautifulSoup strips HTML to plain text which is then passed to an LLM sub-call for
+    field extraction. JavaScript-rendered pages (SPAs) may still return minimal content —
+    in that case the tool returns a warning for that URL.
     """
 
     NAME = "scrape_product_data"
     DESCRIPTION = (
-        "Fetches a product web page from the given URL and extracts product data from its content. "
-        "Provide the URL and a description of what data to extract and any format requirements. "
-        "Uses Chrome TLS impersonation to bypass basic bot detection."
+        "Fetches one or more product web pages and extracts product data from their content. "
+        "Provide a list of URLs and a description of what data to extract and any format requirements. "
+        "URLs are fetched in parallel. Uses Chrome TLS impersonation to bypass basic bot detection."
     )
     ARGS_SCHEMA = ScrapeProductInput
     RETURN_DIRECT = False
     CONFIGURATION_ARGS = ScrapeProductConfig
 
-    def run(self, url: str, action: str) -> str:
-        """Fetch the page at `url` and extract the requested fields via LLM.
+    def run(self, urls: list[str], action: str) -> str:
+        """Fetch each URL in parallel and extract the requested fields via LLM.
+
+        Args:
+            urls: Product page URLs to scrape.
+            action: Free-form extraction instruction passed as context to the LLM sub-call.
+
+        Returns:
+            JSON object mapping each URL to its extracted data or error message.
+        """
+        with ThreadPoolExecutor(max_workers=_MAX_WORKERS) as executor:
+            futures = {executor.submit(self._scrape_url, url, action): url for url in urls}
+            results = {}
+            for future in as_completed(futures):
+                url = futures[future]
+                results[url] = future.result()
+        return json.dumps(results, ensure_ascii=False)
+
+    def _scrape_url(self, url: str, action: str) -> str:
+        """Fetch a single URL and extract product data from it.
 
         Args:
             url: The product page URL to scrape.

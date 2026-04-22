@@ -22,13 +22,11 @@ jobs:
       - name: Run Ruff on server
         uses: astral-sh/ruff-action@v3
         with:
-          version: "0.15.9"
           args: "check server"
 
       - name: Run Ruff on plugins
         uses: astral-sh/ruff-action@v3
         with:
-          version: "0.15.9"
           args: "check plugins"
 
   lint-frontend:

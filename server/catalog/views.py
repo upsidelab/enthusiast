@@ -1,3 +1,4 @@
+from celery.result import AsyncResult
 from django.db import transaction
 from django.db.models import Count
 from drf_yasg import openapi
@@ -14,6 +15,9 @@ from account.serializers import UserSerializer
 from agent.core.registries.embeddings import EmbeddingProviderRegistry
 from agent.core.registries.language_models import LanguageModelRegistry
 from agent.services import AgentService
+from sync.document.registry import DocumentSourcePluginRegistry
+from sync.ecommerce.registry import ECommerceIntegrationPluginRegistry
+from sync.product.registry import ProductSourcePluginRegistry
 from sync.tasks import (
     sync_all_document_sources,
     sync_all_product_sources,
@@ -592,6 +596,67 @@ class DataSetECommerceIntegrationSyncView(GenericAPIView):
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         except ECommerceIntegration.DoesNotExist:
             return Response({}, status=status.HTTP_404_NOT_FOUND)
+
+
+class TestSourceConnectionView(APIView):
+    permission_classes = [IsAdminUser]
+    registry_class = None
+
+    def post(self, request, data_set_id):
+        plugin_name = request.data.get("plugin_name")
+        config = request.data.get("config", {})
+
+        try:
+            registry = self.registry_class()
+            plugin_class = registry.get_plugin_class_by_name(plugin_name)
+            plugin = plugin_class(data_set_id=data_set_id)
+            plugin.set_runtime_arguments(config)
+            for _ in plugin.fetch():
+                break
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"status": "ok"})
+
+
+class TestProductSourceConnectionView(TestSourceConnectionView):
+    registry_class = ProductSourcePluginRegistry
+
+
+class TestDocumentSourceConnectionView(TestSourceConnectionView):
+    registry_class = DocumentSourcePluginRegistry
+
+
+class TestECommerceConnectionView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def post(self, request, data_set_id):
+        plugin_name = request.data.get("plugin_name")
+        config = request.data.get("config", {})
+
+        try:
+            registry = ECommerceIntegrationPluginRegistry()
+            plugin_class = registry.get_plugin_class_by_name(plugin_name)
+            plugin = plugin_class(data_set_id=data_set_id)
+            plugin.set_runtime_arguments(config)
+            product_source = plugin.build_product_source()
+            for _ in product_source.fetch():
+                break
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"status": "ok"})
+
+
+class TaskStatusView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, task_id):
+        result = AsyncResult(task_id)
+        data = {"status": result.state}
+        if result.state == "FAILURE":
+            data["error"] = str(result.result)
+        return Response(data)
 
 
 class ConfigView(GenericAPIView):

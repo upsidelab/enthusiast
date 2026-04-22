@@ -71,6 +71,22 @@ urlpatterns = [
         views.DataSetECommerceIntegrationSyncView.as_view(),
         name="data_set_ecommerce_integration_sync",
     ),
+    path("api/tasks/<str:task_id>", views.TaskStatusView.as_view(), name="task_status"),
+    path(
+        "api/data_sets/<int:data_set_id>/product_sources/test",
+        views.TestProductSourceConnectionView.as_view(),
+        name="test_product_source_connection",
+    ),
+    path(
+        "api/data_sets/<int:data_set_id>/document_sources/test",
+        views.TestDocumentSourceConnectionView.as_view(),
+        name="test_document_source_connection",
+    ),
+    path(
+        "api/data_sets/<int:data_set_id>/ecommerce_integration/test",
+        views.TestECommerceConnectionView.as_view(),
+        name="test_ecommerce_connection",
+    ),
     path("api/config", views.ConfigView.as_view(), name="config"),
     path(
         "api/config/language_model_providers/<str:provider_name>",

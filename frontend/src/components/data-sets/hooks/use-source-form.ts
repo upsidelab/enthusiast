@@ -20,6 +20,9 @@ export function useSourceForm(
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [generalError, setGeneralError] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<'success' | 'error' | null>(null);
+  const [testError, setTestError] = useState<string>("");
 
   useEffect(() => {
     const loadSourceDetailsForEditing = async () => {
@@ -116,7 +119,7 @@ export function useSourceForm(
 
       const initialOpenSections = initializeCollapsedSections();
       setOpenSections(initialOpenSections);
-      
+
       if (!source?.id && Object.keys(config).length === 0) {
         const defaults = createDefaultConfigValues();
         setConfig(defaults);
@@ -197,12 +200,35 @@ export function useSourceForm(
     return availablePlugins.find((p) => p.name === pluginName);
   };
 
+  const testConnection = async () => {
+    setTesting(true);
+    setTestResult(null);
+    setTestError("");
+    try {
+      const configObj = buildConfigFromFlattened(config, { 'configuration': 'configuration_args' });
+      const result = await apiClient.dataSets().testSourceConnection(dataSetId!, sourceType, pluginName, configObj);
+      if (result.error) {
+        setTestResult('error');
+        setTestError(result.error);
+      } else {
+        setTestResult('success');
+      }
+    } catch {
+      setTestResult('error');
+      setTestError("Could not reach the server");
+    } finally {
+      setTesting(false);
+    }
+  };
+
   const resetForm = () => {
     setPluginName("");
     setConfig({});
     setOpenSections({});
     setFieldErrors({});
     setGeneralError("");
+    setTestResult(null);
+    setTestError("");
   };
 
   return {
@@ -215,6 +241,10 @@ export function useSourceForm(
     fieldErrors,
     generalError,
     submitting,
+    testing,
+    testResult,
+    testError,
+    testConnection,
     handleSubmit,
     getSelectedPlugin,
     resetForm,

@@ -8,6 +8,8 @@ import { useSourceForm } from "./hooks/use-source-form.ts";
 import { ConfigurationForm } from "@/components/ui/configuration-form.tsx";
 import { FormModal } from "@/components/ui/form-modal";
 import { useEffect } from "react";
+import { Button } from "@/components/ui/button.tsx";
+import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 
 const formSchema = z.object({
   pluginName: z.string().min(1, "Plugin is required"),
@@ -49,6 +51,10 @@ export function AddEditSourceModal({
     fieldErrors,
     generalError,
     submitting,
+    testing,
+    testResult,
+    testError,
+    testConnection,
     handleSubmit,
     getSelectedPlugin,
     resetForm
@@ -141,6 +147,31 @@ export function AddEditSourceModal({
               setConfig={setConfig}
               fieldErrors={fieldErrors}
             />
+          )}
+
+          {selectedPlugin && (
+            <div className="space-y-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={testing || submitting}
+                onClick={testConnection}
+              >
+                {testing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Test Connection
+              </Button>
+              {testResult === 'success' && (
+                <p className="flex items-center gap-1.5 text-sm text-green-600">
+                  <CheckCircle2 className="h-4 w-4" /> Connection successful
+                </p>
+              )}
+              {testResult === 'error' && (
+                <p className="flex items-center gap-1.5 text-sm text-destructive">
+                  <XCircle className="h-4 w-4" /> {testError}
+                </p>
+              )}
+            </div>
           )}
         </form>
       </Form>

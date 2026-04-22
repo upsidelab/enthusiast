@@ -14,16 +14,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.12'
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
 
-      - name: Install Ruff
-        run: pip install ruff
+      - name: Run Ruff (server)
+        run: uvx ruff check server
 
-      - name: Run Ruff
-        run: ruff check server
+  lint-plugins:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Run Ruff (plugins)
+        run: uvx ruff check plugins
 
   lint-frontend:
       runs-on: ubuntu-latest

@@ -1,7 +1,7 @@
 [project]
-name = "enthusiast-agent-product-web-scraper"
+name = "enthusiast-agent-catalog-web-import"
 version = "1.0.0"
-description = "Product Web Scraper Agent for Enthusiast"
+description = "Catalog Web Import Agent for Enthusiast"
 authors = [
     {name = "Dawid Mularczyk", email = "dawid.mularczyk@upsidelab.io"}
 ]
@@ -22,7 +22,7 @@ Repository = "https://github.com/upsidelab/enthusiast.git"
 Issues = "https://github.com/upsidelab/enthusiast/issues"
 
 [tool.poetry]
-packages = [{include = "enthusiast_agent_product_web_scraper", from = "src"}]
+packages = [{include = "enthusiast_agent_catalog_web_import", from = "src"}]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

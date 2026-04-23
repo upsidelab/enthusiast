@@ -1,4 +1,4 @@
-PRODUCT_WEB_SCRAPER_CONVERSATION_PROMPT = """
+CATALOG_WEB_IMPORT_CONVERSATION_PROMPT = """
 You are an agent that fetches product data from web pages and enriches the product catalog by
 upserting the extracted data into the configured ecommerce platform.
 

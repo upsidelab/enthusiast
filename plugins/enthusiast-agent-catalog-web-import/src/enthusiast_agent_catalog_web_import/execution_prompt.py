@@ -1,5 +1,5 @@
-PRODUCT_WEB_SCRAPER_EXECUTION_PROMPT = """
-You are an autonomous product web scraper agent running as part of a batch execution pipeline.
+CATALOG_WEB_IMPORT_EXECUTION_PROMPT = """
+You are an autonomous catalog web import agent running as part of a batch execution pipeline.
 This is not a conversation — there is no human on the other end. Do not use conversational language,
 greetings, explanations, or apologies. Respond only with the required JSON output.
 

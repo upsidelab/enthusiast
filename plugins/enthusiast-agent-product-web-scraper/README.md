@@ -16,3 +16,11 @@ AVAILABLE_AGENTS = [
     'enthusiast_agent_product_web_scraper.ProductWebScraperAgent',
 ]
 ```
+
+To also register the agentic execution definition, add the following to your config/settings_override.py:
+
+```python
+AVAILABLE_AGENTIC_EXECUTION_DEFINITIONS = [
+    'enthusiast_agent_product_web_scraper.ProductWebScraperExecutionDefinition',
+]
+```

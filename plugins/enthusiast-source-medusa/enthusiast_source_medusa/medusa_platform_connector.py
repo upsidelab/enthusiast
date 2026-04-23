@@ -149,6 +149,49 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
         return True
 
 
+    def update_stock(self, sku: str, quantity: int) -> bool:
+        """Update the stocked quantity for a product variant identified by SKU.
+
+        Looks up the product, resolves its variant and inventory item, then posts
+        the new stocked_quantity to the Medusa inventory API.
+
+        Returns True if updated, False if the SKU was not found.
+        """
+        product = self.get_product_by_sku(sku)
+        if not product:
+            return False
+
+        variant_id = self._get_default_variant_id_for_product_id(product.entry_id)
+        inventory_item_id = self._get_inventory_item_id_for_variant(variant_id)
+        location_id = self._get_default_stock_location_id()
+
+        self._client.post(
+            f"/admin/inventory-items/{inventory_item_id}/stock-locations/{location_id}",
+            {"stocked_quantity": quantity},
+        )
+        return True
+
+    def _get_inventory_item_id_for_variant(self, variant_id: str) -> str:
+        response = self._client.get(
+            f"/admin/product-variants/{variant_id}",
+            params={"fields": "+inventory_items"},
+        )
+        inventory_items = response.get("variant", {}).get("inventory_items", [])
+        if not inventory_items:
+            raise ECommerceConnectorError(
+                f"Variant '{variant_id}' has no inventory items configured in Medusa."
+            )
+        return inventory_items[0]["inventory_item_id"]
+
+    def _get_default_stock_location_id(self) -> str:
+        response = self._client.get("/admin/stock-locations")
+        locations = response.get("stock_locations", [])
+        if not locations:
+            raise ECommerceConnectorError(
+                "No stock locations configured in Medusa. At least one stock location must exist to update inventory."
+            )
+        return locations[0]["id"]
+
     def get_admin_url_for_order_id(self, order_id: str) -> str:
         return f"{self._admin_base_url}/app/draft-orders/{order_id}"
 

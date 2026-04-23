@@ -32,10 +32,9 @@ class UpdateStockLevelsTool(BaseLLMTool):
 
     def __init__(self, data_set_id: int, llm: BaseLanguageModel, injector: BaseInjector | None):
         super().__init__(data_set_id=data_set_id, llm=llm, injector=injector)
-        self.injector = injector
 
     def run(self, items: List[StockUpdateItem]) -> str:
-        connector = self.injector.ecommerce_platform_connector
+        connector = self._injector.ecommerce_platform_connector
 
         if not connector:
             return "No eCommerce connector is configured. Cannot update stock levels."
@@ -46,7 +45,7 @@ class UpdateStockLevelsTool(BaseLLMTool):
             try:
                 product = connector.get_product_by_sku(item.sku)
                 if not product:
-                    response[item.sku] = f"SKU not found in catalog"
+                    response[item.sku] = "SKU not found in catalog"
                     continue
 
                 success = connector.update_stock(item.sku, item.quantity)

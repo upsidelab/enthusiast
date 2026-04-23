@@ -1,5 +1,6 @@
 import json
 import logging
+from enum import StrEnum
 from typing import List, Optional
 
 from enthusiast_common import ProductDetails
@@ -31,6 +32,16 @@ class UpsertProductBatchInput(BaseModel):
         description="List of products to upsert"
     )
 
+
+UpsertMemoryEntry = dict[str, bool]
+
+
+class UpsertOutcome(StrEnum):
+    UPDATED = "Product updated successfully"
+    CREATED = "Product created successfully"
+    UPDATE_FAILED = "Failed to update product properties"
+
+
 class UpsertProductDetailsTool(BaseLLMTool):
     NAME = "upsert_product_properties"
     DESCRIPTION = "Tool for creating or updating products based on product SKUs and their properties."
@@ -52,6 +63,9 @@ class UpsertProductDetailsTool(BaseLLMTool):
         ecommerce_platform_connector = self.injector.ecommerce_platform_connector
 
         if not ecommerce_platform_connector:
+            skus = [product.product_sku for product in products]
+            self._handle_no_connector_as_tool_memory(skus)
+
             return "The user needs to configure an ecommerce platform connector first"
 
         response = {}
@@ -78,26 +92,38 @@ class UpsertProductDetailsTool(BaseLLMTool):
 
             except Exception as e:
                 logger.error(e)
-                product_upsert_result =  f"Error: {str(e)}"
+                product_upsert_result = f"Error: {str(e)}"
 
             response[product_sku] = product_upsert_result
+
+        self._handle_upsert_results_as_tool_memory(response)
         return json.dumps(response)
+
+    def _handle_no_connector_as_tool_memory(self, skus: list[str]):
+        if not self.injector.tool_result_memory:
+            return
+        self.injector.tool_result_memory.record(self.NAME, {sku: False for sku in skus})
+
+    _SUCCESS_OUTCOMES = frozenset({UpsertOutcome.UPDATED, UpsertOutcome.CREATED})
+
+    def _handle_upsert_results_as_tool_memory(self, result: dict[str, str]):
+        if not self.injector.tool_result_memory:
+            return
+        entry: UpsertMemoryEntry = {sku: message in self._SUCCESS_OUTCOMES for sku, message in result.items()}
+        self.injector.tool_result_memory.record(self.NAME, entry)
+
 
     @staticmethod
     def _update_product_details(connector: ECommercePlatformConnector,
                                 product_sku: str,
-                                product_details: ProductUpdateDetails) -> str:
+                                product_details: ProductUpdateDetails) -> UpsertOutcome:
         product_updated = connector.update_product(product_sku, product_details)
-        if product_updated:
-            return "Product updated successfully"
-        else:
-            return "Failed to update product properties"
+        return UpsertOutcome.UPDATED if product_updated else UpsertOutcome.UPDATE_FAILED
 
     @staticmethod
     def _create_product(connector: ECommercePlatformConnector,
                         product_sku: str,
-                        product_details: ProductUpdateDetails) -> str:
-
+                        product_details: ProductUpdateDetails) -> UpsertOutcome:
         product_create_details = ProductDetails(
             entry_id='',
             sku=product_sku,
@@ -110,5 +136,4 @@ class UpsertProductDetailsTool(BaseLLMTool):
         )
 
         connector.create_product(product_create_details)
-
-        return "Product created successfully"
+        return UpsertOutcome.CREATED

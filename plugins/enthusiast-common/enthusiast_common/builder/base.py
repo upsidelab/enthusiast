@@ -6,6 +6,7 @@ from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.tools import BaseTool
 
+from ..agentic_execution.memory import ToolResultMemory
 from ..agents import BaseAgent
 from ..config.base import AgentConfig, AgentToolConfig, FunctionToolConfig, LLMConfig, LLMToolConfig
 from ..injectors import BaseInjector
@@ -19,7 +20,13 @@ ConfigT = TypeVar("ConfigT", bound=AgentConfig)
 class BaseAgentBuilder(ABC, Generic[ConfigT]):
     _repositories: RepositoriesInstances
 
-    def __init__(self, config: ConfigT, conversation_id: Any, streaming: bool = False):
+    def __init__(
+        self,
+        config: ConfigT,
+        conversation_id: Any,
+        streaming: bool = False,
+        tool_result_memory: Optional[ToolResultMemory] = None,
+    ):
         self._llm_registry = None
         self._llm = None
         self._default_llm = None
@@ -29,6 +36,7 @@ class BaseAgentBuilder(ABC, Generic[ConfigT]):
         self._config = config
         self.conversation_id = conversation_id
         self.streaming = streaming
+        self._tool_result_memory = tool_result_memory
 
     def build(self) -> BaseAgent:
         model_registry = self._build_db_models_registry()

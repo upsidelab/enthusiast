@@ -1,9 +1,17 @@
 from .base import BaseAgenticExecutionDefinition, ExecutionConversationInterface
 from .errors import ExecutionFailureCode
 from .input import ExecutionInputType
+from .memory import ToolResultMemory
 from .result import ExecutionResult
 from .status import ExecutionStatus
-from .validators import BaseExecutionValidator, IsValidJsonValidator, ValidatorFailureResponse, ValidatorResponse, ValidatorSuccessResponse
+from .validators import (
+    BaseExecutionValidator,
+    IsValidJsonValidator,
+    StopExecutionValidator,
+    ValidatorFailureResponse,
+    ValidatorResponse,
+    ValidatorSuccessResponse,
+)
 
 __all__ = [
     "BaseAgenticExecutionDefinition",
@@ -12,8 +20,10 @@ __all__ = [
     "ExecutionResult",
     "ExecutionStatus",
     "ExecutionInputType",
+    "ToolResultMemory",
     "BaseExecutionValidator",
     "IsValidJsonValidator",
+    "StopExecutionValidator",
     "ValidatorFailureResponse",
     "ValidatorResponse",
     "ValidatorSuccessResponse",

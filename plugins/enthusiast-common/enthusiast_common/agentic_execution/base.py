@@ -4,6 +4,7 @@ from typing import ClassVar, Optional, Protocol, Type
 
 from .errors import ExecutionFailureCode
 from .input import ExecutionInputType
+from .memory import ToolResultMemory
 from .result import ExecutionResult
 from .validators import BaseExecutionValidator, IsValidJsonValidator, ValidatorResponse
 
@@ -14,6 +15,10 @@ class ExecutionConversationInterface(Protocol):
     The server provides a concrete implementation backed by a real ``Conversation``
     record. Each ``ask()`` call appends a user message, runs the full agent turn
     (including tool calls), and returns the agent's final text response.
+
+    The ``tool_result_memory`` property exposes the shared :class:`ToolResultMemory`
+    instance that tools write to during ``ask()``. Validators can read from it after
+    each ``execute()`` call to inspect what the tools actually did.
     """
 
     def ask(self, message: str) -> str:
@@ -24,6 +29,17 @@ class ExecutionConversationInterface(Protocol):
 
         Returns:
             The agent's text response after completing its tool-call loop.
+        """
+        ...
+
+    @property
+    def tool_result_memory(self) -> ToolResultMemory:
+        """Shared store that tools write to and validators read from during the current attempt.
+
+        Tools must explicitly call ``self._injector.tool_result_memory.record()``
+        inside their ``run()`` method to contribute data here. Cleared by
+        ``BaseAgenticExecutionDefinition.run()`` before each retry so that validators
+        always see entries from the most recent attempt only.
         """
         ...
 
@@ -57,7 +73,7 @@ class BaseAgenticExecutionDefinition(ABC):
     FAILURE_CODES: ClassVar[Type[ExecutionFailureCode]] = ExecutionFailureCode
     FAILURE_SUMMARY_PROMPT: ClassVar[str] = (
         "You were unable to produce a valid response after multiple attempts. "
-        "Please provide a brief (max 100 words), plain-language summary of what went wrong."
+        "Please provide a brief (max 100 words), impersonal, plain-language summary of what went wrong."
     )
 
     def run(
@@ -73,12 +89,21 @@ class BaseAgenticExecutionDefinition(ABC):
         ``ExecutionResult(success=True)`` as soon as all validators pass, or
         ``ExecutionResult(success=False, failure_code=MAX_RETRIES_EXCEEDED)``
         once retries are exhausted.
+
+        Validators receive the ``ToolResultMemory`` accumulated during the current
+        attempt so they can inspect what tools did, not just what the LLM said.
+        The memory is cleared before each retry so validators always see results
+        from the most recent attempt only.
         """
 
         response = self.execute(input_data, conversation)
 
         for attempt in range(self.MAX_RETRIES + 1):
-            validator_response = self._first_failed_validator_response(response)
+            validator_response = self._first_failed_validator_response(
+                response=response,
+                execution_input=input_data,
+                tool_result_memory=conversation.tool_result_memory
+            )
 
             if validator_response is None:
                 return ExecutionResult(success=True, output=self._build_output(response))
@@ -91,6 +116,7 @@ class BaseAgenticExecutionDefinition(ABC):
                 )
 
             if attempt < self.MAX_RETRIES:
+                conversation.tool_result_memory.clear()
                 feedback = validator_response.feedback or "The previous response was invalid. Please try again."
                 response = conversation.ask(feedback)
             else:
@@ -124,11 +150,13 @@ class BaseAgenticExecutionDefinition(ABC):
             The agent's raw response string (typically JSON).
         """
 
-    def _first_failed_validator_response(self, response: str) -> Optional[ValidatorResponse]:
+    def _first_failed_validator_response(
+        self, response: str, execution_input: ExecutionInputType,  tool_result_memory: Optional[ToolResultMemory] = None
+    ) -> Optional[ValidatorResponse]:
         """Run all validators and return the first failing response, or ``None`` if all pass."""
 
         for validator_cls in self.VALIDATORS:
-            result = validator_cls().validate(response)
+            result = validator_cls().validate(response, execution_input, tool_result_memory)
             if not result.validation_successful:
                 return result
         return None

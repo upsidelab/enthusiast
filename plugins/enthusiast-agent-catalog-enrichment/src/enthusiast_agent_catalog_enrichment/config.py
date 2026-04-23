@@ -2,7 +2,7 @@ from enthusiast_common.agents import BaseAgentConfigProvider, ConfigType
 from enthusiast_common.config import AgentConfigWithDefaults
 
 from .agent import CatalogEnrichmentAgent
-from .prompt import CATALOG_ENRICHMENT_TOOL_CALLING_AGENT_PROMPT, CATALOG_ENRICHMENT_EXECUTION_SYSTEM_PROMPT
+from .prompt import CATALOG_ENRICHMENT_EXECUTION_SYSTEM_PROMPT, CATALOG_ENRICHMENT_TOOL_CALLING_AGENT_PROMPT
 
 
 class CatalogEnrichmentConfigProvider(BaseAgentConfigProvider):

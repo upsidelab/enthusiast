@@ -1,9 +1,9 @@
-from abc import ABC, abstractmethod, ABCMeta
+from abc import ABC, ABCMeta, abstractmethod
 from typing import Any
 
 from enthusiast_common.connectors import ECommercePlatformConnector
 from enthusiast_common.structures import DocumentDetails, ProductDetails
-from enthusiast_common.utils import validate_required_vars, RequiredFieldsModel
+from enthusiast_common.utils import RequiredFieldsModel, validate_required_vars
 
 
 class ExtraArgsClassBaseMeta(ABCMeta):

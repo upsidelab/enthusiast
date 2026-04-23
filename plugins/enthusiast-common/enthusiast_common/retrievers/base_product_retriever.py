@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
 from enthusiast_common import ProductDetails
+
 from .base import BaseRetriever
 
 

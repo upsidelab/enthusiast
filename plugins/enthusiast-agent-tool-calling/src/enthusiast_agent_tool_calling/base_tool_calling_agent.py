@@ -1,12 +1,11 @@
 from typing import Any
 
-from langchain_core.chat_history import BaseChatMessageHistory
-from langgraph.graph.state import CompiledStateGraph
-
 from enthusiast_common.agents import BaseAgent
 from langchain.agents import create_agent
-from langchain_core.messages import AIMessage, HumanMessage, trim_messages, BaseMessage
+from langchain_core.chat_history import BaseChatMessageHistory
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, trim_messages
 from langchain_core.tools import BaseTool
+from langgraph.graph.state import CompiledStateGraph
 
 MAX_HISTORY_TOKENS = 3000
 

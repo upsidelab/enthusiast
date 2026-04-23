@@ -1,7 +1,7 @@
 import json
 
-from enthusiast_common.tools import BaseLLMTool
 from enthusiast_common.errors import RetrieverError
+from enthusiast_common.tools import BaseLLMTool
 from pydantic import BaseModel, Field
 
 

@@ -1,0 +1,29 @@
+[project]
+name = "enthusiast-agent-product-web-scraper"
+version = "1.0.0"
+description = "Product Web Scraper Agent for Enthusiast"
+authors = [
+    {name = "Dawid Mularczyk", email = "dawid.mularczyk@upsidelab.io"}
+]
+readme = "README.md"
+requires-python = ">=3.10,<4"
+dependencies = [
+    "enthusiast-common (>=1.7.0,<2.0.0)",
+    "langchain (>=1.2.0,<2.0.0)",
+    "enthusiast-agent-tool-calling (>=1.1.0)",
+    "enthusiast-agent-catalog-enrichment (>=1.3.0,<2.0.0)",
+    "beautifulsoup4 (>=4.14.2,<5.0.0)",
+    "requests (>=2.32.0,<3.0.0)",
+]
+
+[project.urls]
+Homepage = "https://upsidelab.io/tools/enthusiast"
+Repository = "https://github.com/upsidelab/enthusiast.git"
+Issues = "https://github.com/upsidelab/enthusiast/issues"
+
+[tool.poetry]
+packages = [{include = "enthusiast_agent_product_web_scraper", from = "src"}]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

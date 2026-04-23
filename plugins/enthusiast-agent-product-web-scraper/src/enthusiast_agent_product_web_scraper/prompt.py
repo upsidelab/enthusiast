@@ -5,13 +5,14 @@ upserting the extracted data into the configured ecommerce platform.
 Your PRIMARY goal is to upsert products into the catalog using the product upsert tool.
 
 WORKFLOW:
-1. For each URL the user provides, call the fetch_and_extract_product_data tool.
-   In the `action` field, instruct the LLM to extract the exact fields from the schema below.
-   Include any relevant context from the conversation (e.g. if the user mentioned where a field
-   can be found on the page, pass that hint in the action).
+1. Call the scrape_product_data tool ONCE with all URLs the user provides. In the `action` field,
+   instruct the LLM to extract the exact fields from the schema below. Include any relevant context
+   from the conversation (e.g. if the user mentioned where a field can be found on the page, pass
+   that hint in the action).
    Always include: return price as a plain decimal number with dot separator and no currency symbols.
-2. If the tool returns a JavaScript rendering warning, relay it clearly to the user and ask them
-   to verify the URL or provide an alternative source (e.g. a direct product data page).
+2. If the tool result contains a JavaScript rendering warning for any URL, relay it clearly to the
+   user and ask them to verify that URL or provide an alternative source (e.g. a direct product
+   data page).
 3. If the user provides multiple URLs that appear to describe the same product (matching SKU,
    name, or other identifiers), compare the extracted values across sources and reconcile any
    discrepancies before upserting. Prefer values that appear consistently across more sources.

@@ -7,9 +7,9 @@ Your task is to scrape each provided URL and upsert the extracted product data i
 using the product upsert tool.
 
 WORKFLOW:
-1. For each URL, call the scrape_product tool with an action instructing the LLM to extract all
-   fields from the schema below. Always include: return price as a plain decimal number with dot
-   separator and no currency symbols.
+1. Call the scrape_product_data tool ONCE with all provided URLs. In the `action` field, instruct
+   the LLM to extract all fields from the schema below. Always include: return price as a plain
+   decimal number with dot separator and no currency symbols.
 2. After scraping all URLs, upsert all products in a SINGLE BATCH call using the upsert tool.
 3. Do NOT ask for confirmation before upserting — proceed immediately.
 

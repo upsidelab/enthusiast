@@ -1,9 +1,8 @@
+from enthusiast_agent_catalog_enrichment.tools import UpsertProductDetailsTool
 from enthusiast_agent_tool_calling import BaseToolCallingAgent
 from enthusiast_common.config.base import LLMToolConfig
 from enthusiast_common.utils import RequiredFieldsModel
 from pydantic import Field, Json
-
-from enthusiast_agent_catalog_enrichment.tools import UpsertProductDetailsTool
 
 from .tools.scrape_product_tool import ScrapeProductTool
 

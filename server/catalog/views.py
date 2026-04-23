@@ -13,7 +13,7 @@ from account.models import User
 from account.serializers import UserSerializer
 from agent.core.registries.embeddings import EmbeddingProviderRegistry
 from agent.core.registries.language_models import LanguageModelRegistry
-from agent.services import AgentService
+from agent.services import AgentPreconfigurationService
 from sync.tasks import (
     sync_all_document_sources,
     sync_all_product_sources,
@@ -83,7 +83,7 @@ class DataSetListView(ListCreateAPIView):
             data_set = serializer.save()
             data_set.users.add(self.request.user)
             if preconfigure_agents:
-                AgentService.preconfigure_available_agents(data_set)
+                AgentPreconfigurationService.preconfigure_available_agents(data_set)
 
 
 class DataSetDetailView(RetrieveAPIView):

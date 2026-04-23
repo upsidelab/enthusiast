@@ -5,7 +5,7 @@ from enthusiast_common.services.file import BaseFileParser, BaseFileService, Not
 from pecl import settings
 
 
-class FileService(BaseFileService):
+class FileParsingService(BaseFileService):
     def process(self) -> str:
         parser = self._get_parser()
         return parser.parse_content(self.file)

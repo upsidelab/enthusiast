@@ -14,6 +14,7 @@ from agent.agentic_execution.services import (
 from agent.models.agent import Agent
 from agent.models.agentic_execution import AgenticExecution
 from agent.models.conversation import ConversationFile
+from agent.models.message import Message
 from catalog.models import DataSet
 
 pytestmark = pytest.mark.django_db
@@ -108,7 +109,7 @@ class TestStart:
 
     def test_attaches_files_as_conversation_files(self, service, agent, user):
         with patch("agent.agentic_execution.services.settings.FILE_PARSER_CLASSES", SUPPORTED_EXTENSIONS), \
-             patch("agent.agentic_execution.services.FileService.process", return_value="extracted"):
+             patch("agent.agentic_execution.services.FileParsingService.process", return_value="extracted"):
             execution = service.start(
                 agent=agent, user=user, execution_key="dummy", validated_input={}, uploaded_files=[_make_file()]
             )
@@ -122,7 +123,7 @@ class TestStart:
 
     def test_detects_image_file_category(self, service, agent, user):
         with patch("agent.agentic_execution.services.settings.FILE_PARSER_CLASSES", {(".jpg",): "some.Class"}), \
-             patch("agent.agentic_execution.services.FileService.process", return_value=""):
+             patch("agent.agentic_execution.services.FileParsingService.process", return_value=""):
             execution = service.start(
                 agent=agent, user=user, execution_key="dummy", validated_input={}, uploaded_files=[_make_file("photo.jpg", content_type="image/jpeg")]
             )
@@ -134,3 +135,32 @@ class TestStart:
         execution = service.start(agent=agent, user=user, execution_key="dummy", validated_input={}, uploaded_files=[])
 
         assert ConversationFile.objects.filter(conversation=execution.conversation).count() == 0
+
+    def test_creates_file_message_for_each_uploaded_file(self, service, agent, user):
+        files = [_make_file("doc.pdf"), _make_file("sheet.txt")]
+        with patch("agent.agentic_execution.services.settings.FILE_PARSER_CLASSES", SUPPORTED_EXTENSIONS), \
+             patch("agent.agentic_execution.services.FileParsingService.process", return_value=""):
+            execution = service.start(
+                agent=agent, user=user, execution_key="dummy", validated_input={}, uploaded_files=files
+            )
+
+        messages = Message.objects.filter(
+            conversation=execution.conversation, type=Message.MessageType.FILE
+        )
+        assert messages.count() == 2
+
+    def test_file_message_has_correct_name_and_type(self, service, agent, user):
+        with patch("agent.agentic_execution.services.settings.FILE_PARSER_CLASSES", SUPPORTED_EXTENSIONS), \
+             patch("agent.agentic_execution.services.FileParsingService.process", return_value=""):
+            execution = service.start(
+                agent=agent, user=user, execution_key="dummy", validated_input={}, uploaded_files=[_make_file("report.pdf")]
+            )
+
+        message = Message.objects.get(conversation=execution.conversation, type=Message.MessageType.FILE)
+        assert message.file_type == "pdf"
+        assert "report" in message.file_name
+
+    def test_no_file_messages_created_when_no_files(self, service, agent, user):
+        execution = service.start(agent=agent, user=user, execution_key="dummy", validated_input={}, uploaded_files=[])
+
+        assert Message.objects.filter(conversation=execution.conversation, type=Message.MessageType.FILE).count() == 0

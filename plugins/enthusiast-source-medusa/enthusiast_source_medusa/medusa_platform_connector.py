@@ -148,7 +148,6 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
         self._client.post(f"/admin/products/{product_details_before_update.entry_id}", payload)
         return True
 
-
     def update_stock(self, sku: str, quantity: int) -> bool:
         """Update the stocked quantity for a product variant identified by SKU.
 

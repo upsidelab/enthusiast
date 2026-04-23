@@ -1,6 +1,6 @@
 [project]
 name = "enthusiast-agent-invoice-scanning"
-version = "1.0.0"
+version = "1.1.0"
 description = "Invoice Scanning Agent for Enthusiast"
 authors = [
     {name = "Dawid Mularczyk",email = "dawid.mularczyk@upsidelab.io"}

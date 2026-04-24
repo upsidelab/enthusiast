@@ -31,11 +31,7 @@ class InvoiceScanningPromptInput(RequiredFieldsModel):
     )
     auto_confirm: bool = Field(
         title="Auto confirm stock update",
-        description=(
-            "When enabled, the agent updates stock levels immediately after extraction without asking "
-            "for confirmation. When disabled (default), the agent shows extracted line items first "
-            "and waits for explicit user approval before writing to the catalog."
-        ),
+        description="Skip confirmation and update stock immediately after extraction.",
         default=False,
     )
 

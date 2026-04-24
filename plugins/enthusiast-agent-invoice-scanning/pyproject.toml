@@ -15,6 +15,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://upsidelab.io/tools/enthusiast"
+Documentation = "https://upsidelab.io/tools/enthusiast/agents/invoice-scanning"
 Repository = "https://github.com/upsidelab/enthusiast.git"
 Issues = "https://github.com/upsidelab/enthusiast/issues"
 

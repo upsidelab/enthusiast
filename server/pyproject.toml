@@ -11,7 +11,7 @@ dependencies = [
     "django-environ (==0.12.0)",
     "djangorestframework (==3.16.0)",
     "drf-yasg (==1.21.10)",
-    "enthusiast-common (==1.7.0)",
+    "enthusiast-common (==1.6.2)",
     "enthusiast-source-sample (==1.3.0)",
     "enthusiast-model-openai (==1.4.0)",
     "langchain (>=1.2.0,<2.0.0)",
@@ -31,6 +31,11 @@ dependencies = [
 
 [tool.poetry]
 package-mode = false
+
+[tool.poetry.dependencies]
+enthusiast-common = {path = "../plugins/enthusiast-common", develop = true}
+enthusiast-source-sample = {path = "../plugins/enthusiast-source-sample", develop = true}
+enthusiast-model-openai = {path = "../plugins/enthusiast-model-openai", develop = true}
 
 [tool.poetry.group.dev.dependencies]
 ruff = "0.15.9"

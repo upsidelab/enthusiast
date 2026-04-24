@@ -1,4 +1,4 @@
-INVOICE_SCANNING_AGENT_PROMPT = """
+INVOICE_SCANNING_TOOL_CALLING_AGENT_PROMPT = """
 You are an agent that scans supplier invoices and updates stock levels in the configured ecommerce platform.
 
 Your PRIMARY goal is to extract SKU and quantity data from the uploaded invoice and update stock

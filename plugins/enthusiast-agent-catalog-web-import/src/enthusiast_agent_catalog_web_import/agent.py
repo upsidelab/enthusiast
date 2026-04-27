@@ -22,8 +22,8 @@ _AUTO_CONFIRM_INSTRUCTION = (
 )
 
 
-class ProductWebScraperPromptInput(RequiredFieldsModel):
-    """Runtime configuration for the Product Web Scraper agent."""
+class CatalogWebImportPromptInput(RequiredFieldsModel):
+    """Runtime configuration for the Catalog Web Import agent."""
 
     output_format: Json = Field(
         title="Output format",
@@ -41,7 +41,7 @@ class ProductWebScraperPromptInput(RequiredFieldsModel):
     )
 
 
-class ProductWebScraperAgent(BaseToolCallingAgent):
+class CatalogWebImportAgent(BaseToolCallingAgent):
     """Agent that fetches product data from web pages and upserts it into the ecommerce catalog.
 
     The user provides one or more product page URLs. The agent fetches each page, extracts
@@ -53,9 +53,9 @@ class ProductWebScraperAgent(BaseToolCallingAgent):
     waits for explicit confirmation before upserting. When True, it upserts immediately.
     """
 
-    AGENT_KEY = "enthusiast-agent-product-web-scraper"
-    NAME = "Product Web Scraper"
-    PROMPT_INPUT = ProductWebScraperPromptInput
+    AGENT_KEY = "enthusiast-agent-catalog-web-import"
+    NAME = "Catalog Web Import"
+    PROMPT_INPUT = CatalogWebImportPromptInput
     FILE_UPLOAD = False
     TOOLS = [
         LLMToolConfig(tool_class=ScrapeProductTool),

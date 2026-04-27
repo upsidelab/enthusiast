@@ -89,6 +89,8 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
             "options": variant_options,
             # SKU persisted as EAN on Medusa side. See the comment in get_product_by_sku for details.
             "ean": product_details.sku,
+            # Also set as sku so the auto-created inventory item inherits it. See _get_inventory_item_id_by_sku.
+            "sku": product_details.sku,
             "prices": (
                 [{
                     "currency_code": self._get_default_store_currency_code(),
@@ -149,10 +151,10 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
         return True
 
     def update_stock(self, sku: str, quantity: int) -> bool:
-        """Update the stocked quantity for a product variant identified by SKU.
+        """Add quantity to the stocked quantity for a product variant identified by SKU.
 
-        Looks up the product, resolves its variant and inventory item, then posts
-        the new stocked_quantity to the Medusa inventory API.
+        Fetches the current stocked_quantity and adds the given quantity to it,
+        so that invoices accumulate stock rather than overwrite it.
 
         Returns True if updated, False if the SKU was not found.
         """
@@ -160,27 +162,39 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
         if not product:
             return False
 
-        variant_id = self._get_default_variant_id_for_product_id(product.entry_id)
-        inventory_item_id = self._get_inventory_item_id_for_variant(variant_id)
+        inventory_item_id = self._get_inventory_item_id_by_sku(sku)
         location_id = self._get_default_stock_location_id()
 
+        current_quantity = self._get_stocked_quantity(inventory_item_id, location_id)
+        new_quantity = current_quantity + quantity
+
         self._client.post(
-            f"/admin/inventory-items/{inventory_item_id}/stock-locations/{location_id}",
-            {"stocked_quantity": quantity},
+            f"/admin/inventory-items/{inventory_item_id}/location-levels/{location_id}",
+            {"stocked_quantity": new_quantity},
         )
         return True
 
-    def _get_inventory_item_id_for_variant(self, variant_id: str) -> str:
+    def _get_stocked_quantity(self, inventory_item_id: str, location_id: str) -> int:
         response = self._client.get(
-            f"/admin/product-variants/{variant_id}",
-            params={"fields": "+inventory_items"},
+            f"/admin/inventory-items/{inventory_item_id}/location-levels",
+            params={"location_id": location_id},
         )
-        inventory_items = response.get("variant", {}).get("inventory_items", [])
+        levels = response.get("inventory_levels", [])
+        if not levels:
+            return 0
+        return levels[0].get("stocked_quantity", 0)
+
+    def _get_inventory_item_id_by_sku(self, sku: str) -> str:
+        # Inventory items can't be queried by variant_id. They inherit the variant's sku
+        # field, which we set explicitly at creation time alongside ean for this purpose.
+        response = self._client.get("/admin/inventory-items", params={"sku": sku})
+        inventory_items = response.get("inventory_items", [])
         if not inventory_items:
             raise ECommerceConnectorError(
-                f"Variant '{variant_id}' has no inventory items configured in Medusa."
+                f"No inventory item found for SKU '{sku}'. "
+                "Ensure the product variant was created with manage_inventory enabled."
             )
-        return inventory_items[0]["inventory_item_id"]
+        return inventory_items[0]["id"]
 
     def _get_default_stock_location_id(self) -> str:
         response = self._client.get("/admin/stock-locations")

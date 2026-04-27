@@ -41,6 +41,7 @@ export default async function Page() {
         <IntegrationCard name="OpenAI" imageSrc="/tools/enthusiast/img/integrations/openai.png" href="/integrations/openai/" />
         <IntegrationCard name="Ollama" imageSrc="/tools/enthusiast/img/integrations/ollama.png" href="/integrations/ollama/" />
         <IntegrationCard name="Azure OpenAI" imageSrc="/tools/enthusiast/img/integrations/azure-openai.png" href="/integrations/azure-openai/" />
+        <IntegrationCard name="Anthropic" imageSrc="/tools/enthusiast/img/integrations/anthropic.png" href="/integrations/anthropic/" />
         <IntegrationCard name="Google Gemini" imageSrc="/tools/enthusiast/img/integrations/gemini.png" href="/integrations/gemini/" />
         <IntegrationCard name="Mistral" imageSrc="/tools/enthusiast/img/integrations/mistral.png" href="/integrations/mistral/" />
       </Cards>

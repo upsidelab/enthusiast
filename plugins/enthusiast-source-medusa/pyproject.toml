@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-enthusiast-common = ">=1.7.0,<2"
+enthusiast-common = ">=1.6.1,<2"
 requests = "^2.32.3"
 
 [build-system]

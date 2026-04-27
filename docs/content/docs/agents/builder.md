@@ -56,10 +56,9 @@ def build(self) -> BaseAgent:
     # 3. Build tools and handlers
     tools = self._build_tools(default_llm=self._llm, injector=self._injector)
     agent_callback_handler = self._build_agent_callback_handler()
-    prompt_template = self._build_prompt_template()
     
     # 4. Create and configure agent
-    agent_instance = self._build_agent(tools, self._llm, prompt_template, agent_callback_handler)
+    agent_instance = self._build_agent(tools, self._llm, agent_callback_handler)
     self._inject_additional_arguments(agent_instance)
     
     return agent_instance
@@ -77,7 +76,6 @@ def _build_agent(
     self,
     tools: list[BaseTool],
     llm: BaseLanguageModel,
-    prompt: PromptTemplate | ChatMessagePromptTemplate,
     callback_handler: BaseCallbackHandler,
 ) -> BaseAgent:
     """Build the final agent instance"""
@@ -86,11 +84,6 @@ def _build_agent(
 @abstractmethod
 def _build_injector(self) -> BaseInjector:
     """Build the dependency injection container"""
-    pass
-
-@abstractmethod
-def _build_prompt_template(self) -> BasePromptTemplate:
-    """Build the prompt template for the agent"""
     pass
 ```
 
@@ -152,7 +145,7 @@ def _build_agent_tool(self, config: AgentToolConfig) -> BaseAgentTool:
     pass
 ```
 
-#### Memory and Callback Methods
+#### Callback Methods
 
 ```python
 @abstractmethod
@@ -163,16 +156,6 @@ def _build_agent_callback_handler(self) -> Optional[BaseCallbackHandler]:
 @abstractmethod
 def _build_llm_callback_handlers(self) -> Optional[BaseCallbackHandler]:
     """Build LLM callback handlers"""
-    pass
-
-@abstractmethod
-def _build_chat_summary_memory(self) -> BaseMemory:
-    """Build summary-based chat memory"""
-    pass
-
-@abstractmethod
-def _build_chat_limited_memory(self) -> BaseMemory:
-    """Build limited chat memory"""
     pass
 ```
 

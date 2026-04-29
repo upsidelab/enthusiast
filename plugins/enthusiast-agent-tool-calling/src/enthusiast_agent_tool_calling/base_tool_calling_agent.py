@@ -1,9 +1,9 @@
-from typing import Any, Optional
+from typing import Any
 
 from enthusiast_common.agents import BaseAgent
-from enthusiast_common.memory import BaseMemoryCompactor
+from enthusiast_agent_tool_calling.context_window_builder import ContextWindowBuilder
 from langchain.agents import create_agent
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage, trim_messages
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langchain_core.tools import BaseTool
 from langgraph.graph.state import CompiledStateGraph
 
@@ -34,28 +34,10 @@ class BaseToolCallingAgent(BaseAgent):
         return final_message.text
 
     def _build_context_messages(self) -> list[BaseMessage]:
-        limited_history = trim_messages(
-            self._injector.chat_history.messages,
-            strategy="last",
-            token_counter='approximate',
-            max_tokens=MAX_HISTORY_TOKENS,
-            start_on=HumanMessage,
-            include_system=True,
-            allow_partial=False,
-        )
-        summary_message = self._build_summary_message()
-        if summary_message is not None:
-            return [summary_message] + limited_history
-        return limited_history
-
-    def _build_summary_message(self) -> Optional[SystemMessage]:
-        compactor = self._injector.memory_compactor
-        if compactor is None:
-            return None
-        summary = compactor.get_summary()
-        if summary is None:
-            return None
-        return SystemMessage(content=f"Summary of earlier conversation:\n{summary}")
+        return ContextWindowBuilder(
+            chat_history=self._injector.chat_history,
+            memory_compactor=self._injector.memory_compactor,
+        ).build(max_tokens=MAX_HISTORY_TOKENS)
 
     def _build_tools(self) -> list[BaseTool]:
         return [tool.as_tool() for tool in self._tools]

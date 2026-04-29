@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from enthusiast_common.agentic_execution.memory import ToolResultMemory
+from enthusiast_common.agentic_execution.memory import ToolScratchpad
 from enthusiast_common.agents import ConfigType
 
 from account.models import User
@@ -20,7 +20,7 @@ class ConversationManager:
         question_message: str,
         streaming: bool,
         config_type: ConfigType = ConfigType.CONVERSATION,
-        tool_result_memory: Optional[ToolResultMemory] = None,
+        tool_scratchpad: Optional[ToolScratchpad] = None,
     ) -> str:
         """Formulate an answer to a given question and store the decision-making process.
 
@@ -31,7 +31,7 @@ class ConversationManager:
             conversation,
             streaming,
             config_type=config_type,
-            tool_result_memory=tool_result_memory,
+            tool_scratchpad=tool_scratchpad,
         )
         response = agent.get_answer(question_message)
 

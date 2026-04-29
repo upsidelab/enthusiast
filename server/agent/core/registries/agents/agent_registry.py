@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from typing import List, Optional, Type
 
 from django.conf import settings
-from enthusiast_common.agentic_execution.memory import ToolResultMemory
+from enthusiast_common.agentic_execution.memory import ToolScratchpad
 from enthusiast_common.agents import BaseAgent, BaseAgentConfigProvider, ConfigType
 from enthusiast_common.builder import BaseAgentBuilder
 from enthusiast_common.config import AgentConfig
@@ -51,7 +51,7 @@ class AgentRegistry(BaseAgentRegistry):
         conversation: Conversation,
         streaming: bool,
         config_type: ConfigType = ConfigType.CONVERSATION,
-        tool_result_memory: Optional[ToolResultMemory] = None,
+        tool_scratchpad: Optional[ToolScratchpad] = None,
     ) -> BaseAgent:
         try:
             builder = self._get_builder_class_by_name(agent_type=conversation.agent.agent_type)
@@ -61,7 +61,7 @@ class AgentRegistry(BaseAgentRegistry):
                 config=config,
                 conversation_id=conversation.id,
                 streaming=streaming,
-                tool_result_memory=tool_result_memory,
+                tool_scratchpad=tool_scratchpad,
             ).build()
         except Exception as e:
             raise AgentRegistryError(f"Failed to build agent for conversation {conversation.id}") from e

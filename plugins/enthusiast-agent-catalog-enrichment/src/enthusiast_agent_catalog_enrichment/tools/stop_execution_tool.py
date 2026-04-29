@@ -34,6 +34,6 @@ class StopExecutionTool(BaseLLMTool):
     RETURN_DIRECT = False
 
     def run(self, stop_reason: str) -> str:
-        if self._injector and self._injector.tool_result_memory:
-            self._injector.tool_result_memory.record(self.NAME, stop_reason)
+        if self._injector:
+            self._injector.tool_scratchpad.record(self.NAME, stop_reason)
         return "Execution stop registered."

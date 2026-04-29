@@ -1,5 +1,3 @@
-from typing import Optional
-
 from enthusiast_common.agentic_execution import (
     BaseExecutionValidator,
     ExecutionInputType,
@@ -7,7 +5,7 @@ from enthusiast_common.agentic_execution import (
     ValidatorResponse,
     ValidatorSuccessResponse,
 )
-from enthusiast_common.agentic_execution.memory import ToolResultMemory
+from enthusiast_common.agentic_execution.memory import ToolScratchpad
 
 from enthusiast_agent_catalog_enrichment.tools.upsert_product_details_tool import (
     UpsertMemoryEntry,
@@ -22,12 +20,9 @@ class AllUpsertsSucceededValidator(BaseExecutionValidator):
         self,
         response: str,
         _execution_input: ExecutionInputType,
-        tool_result_memory: Optional[ToolResultMemory] = None,
+        tool_scratchpad: ToolScratchpad,
     ) -> ValidatorResponse:
-        if tool_result_memory is None:
-            return ValidatorSuccessResponse()
-
-        entry: UpsertMemoryEntry | None = tool_result_memory.get_tool_result(self._TOOL_NAME)
+        entry: UpsertMemoryEntry | None = tool_scratchpad.read(self._TOOL_NAME)
         if entry is None:
             return ValidatorSuccessResponse()
 

@@ -1,7 +1,5 @@
-from typing import Optional
-
 from enthusiast_common.agentic_execution.input import ExecutionInputType
-from enthusiast_common.agentic_execution.memory import ToolResultMemory
+from enthusiast_common.agentic_execution.memory import ToolScratchpad
 
 from .base import BaseExecutionValidator
 from .failure_response import ValidatorFailureResponse
@@ -23,12 +21,9 @@ class StopExecutionValidator(BaseExecutionValidator):
         self,
         response: str,
         _execution_input: ExecutionInputType,
-        tool_result_memory: Optional[ToolResultMemory] = None,
+        tool_scratchpad: ToolScratchpad,
     ) -> ValidatorResponse:
-        if tool_result_memory is None:
-            return ValidatorSuccessResponse()
-
-        result = tool_result_memory.get_tool_result(self.TOOL_NAME)
+        result = tool_scratchpad.read(self.TOOL_NAME)
         if result is None:
             return ValidatorSuccessResponse()
 

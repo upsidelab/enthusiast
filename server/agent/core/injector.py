@@ -1,6 +1,6 @@
 from typing import Optional
 
-from enthusiast_common.agentic_execution.memory import ToolResultMemory
+from enthusiast_common.agentic_execution.memory import ToolScratchpad
 from enthusiast_common.connectors import ECommercePlatformConnector
 from enthusiast_common.injectors import BaseInjector
 from enthusiast_common.retrievers import BaseProductRetriever, BaseVectorStoreRetriever
@@ -19,14 +19,14 @@ class Injector(BaseInjector):
         ecommerce_platform_connector: Optional[ECommercePlatformConnector],
         repositories: RepositoriesInstances,
         chat_history: PersistentChatHistory,
-        tool_result_memory: Optional[ToolResultMemory],
+        tool_scratchpad: Optional[ToolScratchpad],
     ):
         super().__init__(repositories)
         self._document_retriever = document_retriever
         self._product_retriever = product_retriever
         self._ecommerce_platform_connector = ecommerce_platform_connector
         self._chat_history = chat_history
-        self._tool_result_memory = tool_result_memory
+        self._tool_scratchpad = tool_scratchpad or ToolScratchpad()
 
     @property
     def document_retriever(self) -> BaseVectorStoreRetriever[DocumentChunk]:
@@ -45,5 +45,5 @@ class Injector(BaseInjector):
         return self._chat_history
 
     @property
-    def tool_result_memory(self) -> Optional[ToolResultMemory]:
-        return self._tool_result_memory
+    def tool_scratchpad(self) -> ToolScratchpad:
+        return self._tool_scratchpad

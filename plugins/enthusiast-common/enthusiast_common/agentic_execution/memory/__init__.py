@@ -1,3 +1,3 @@
-from .tool_result_memory import ToolResultMemory
+from .tool_scratchpad import ToolScratchpad
 
-__all__ = ["ToolResultMemory"]
+__all__ = ["ToolScratchpad"]

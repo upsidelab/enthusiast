@@ -30,6 +30,7 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
         self._base_url = base_url.rstrip("/")
         self._admin_base_url = admin_base_url.rstrip("/")
         self._region_id = region_id
+        self._stock_location_id: Optional[str] = None
 
     def create_empty_order(self, email: Optional[str] = None, address: Optional[Address] = None) -> str:
         raise NotImplementedError
@@ -151,13 +152,7 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
         return True
 
     def update_stock(self, sku: str, quantity: int) -> bool:
-        """Add quantity to the stocked quantity for a product variant identified by SKU.
-
-        Fetches the current stocked_quantity and adds the given quantity to it,
-        so that invoices accumulate stock rather than overwrite it.
-
-        Returns True if updated, False if the SKU was not found.
-        """
+        """Returns True if updated, False if the SKU was not found."""
         product = self.get_product_by_sku(sku)
         if not product:
             return False
@@ -167,6 +162,9 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
 
         current_quantity = self._get_stocked_quantity(inventory_item_id, location_id)
         new_quantity = current_quantity + quantity
+
+        if new_quantity < 0:
+            raise ValueError(f"Insufficient stock: {current_quantity} available, {abs(quantity)} requested")
 
         self._client.post(
             f"/admin/inventory-items/{inventory_item_id}/location-levels/{location_id}",
@@ -197,13 +195,15 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
         return inventory_items[0]["id"]
 
     def _get_default_stock_location_id(self) -> str:
-        response = self._client.get("/admin/stock-locations")
-        locations = response.get("stock_locations", [])
-        if not locations:
-            raise ECommerceConnectorError(
-                "No stock locations configured in Medusa. At least one stock location must exist to update inventory."
-            )
-        return locations[0]["id"]
+        if self._stock_location_id is None:
+            response = self._client.get("/admin/stock-locations")
+            locations = response.get("stock_locations", [])
+            if not locations:
+                raise ECommerceConnectorError(
+                    "No stock locations configured in Medusa. At least one stock location must exist to update inventory."
+                )
+            self._stock_location_id = locations[0]["id"]
+        return self._stock_location_id
 
     def get_admin_url_for_order_id(self, order_id: str) -> str:
         return f"{self._admin_base_url}/app/draft-orders/{order_id}"

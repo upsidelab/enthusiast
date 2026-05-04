@@ -40,7 +40,7 @@ class ECommercePlatformConnector(ABC):
 
         Args:
             sku: The product's SKU identifier.
-            quantity: The new stocked quantity.
+            quantity: Quantity delta to add to current stock. Use negative values to decrease.
 
         Returns:
             True if the stock was updated, False if the product was not found.

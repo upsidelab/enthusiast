@@ -25,13 +25,14 @@ class UpdateStockLevelsTool(BaseLLMTool):
     NAME = "update_stock_levels"
     DESCRIPTION = (
         "Tool for updating stock levels for products based on SKUs and quantities extracted from an invoice. "
-        "Validates each SKU against the catalog and reports any unrecognized SKUs without failing the batch."
+        "Reports success or failure per SKU without failing the entire batch."
     )
     ARGS_SCHEMA = StockUpdateBatchInput
     RETURN_DIRECT = False
 
     def __init__(self, data_set_id: int, llm: BaseLanguageModel, injector: BaseInjector | None):
         super().__init__(data_set_id=data_set_id, llm=llm, injector=injector)
+        self.decrease_stock = False
 
     def run(self, items: List[StockUpdateItem]) -> str:
         connector = self._injector.ecommerce_platform_connector
@@ -43,12 +44,9 @@ class UpdateStockLevelsTool(BaseLLMTool):
 
         for item in items:
             try:
-                product = connector.get_product_by_sku(item.sku)
-                if not product:
-                    response[item.sku] = "SKU not found in catalog"
-                    continue
+                quantity = -item.quantity if self.decrease_stock else item.quantity
 
-                success = connector.update_stock(item.sku, item.quantity)
+                success = connector.update_stock(item.sku, quantity)
                 response[item.sku] = "Stock updated successfully" if success else "Failed to update stock"
             except Exception as e:
                 logger.error("Failed to update stock for SKU %s: %s", item.sku, e)

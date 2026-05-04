@@ -1,3 +1,5 @@
+from typing import Any
+
 from enthusiast_agent_tool_calling import BaseToolCallingAgent
 from enthusiast_common.config.base import LLMToolConfig
 from enthusiast_common.utils import RequiredFieldsModel
@@ -34,6 +36,14 @@ class InvoiceScanningPromptInput(RequiredFieldsModel):
         description="Skip confirmation and update stock immediately after extraction.",
         default=False,
     )
+    decrease_stock: bool = Field(
+        title="Decrease stock",
+        description=(
+            "When enabled, stock levels are decreased based on the invoice quantities. "
+            "Use for outgoing sales invoices. When disabled, stock is increased (default, for incoming supplier invoices)."
+        ),
+        default=False,
+    )
 
 
 class InvoiceScanningAgent(BaseToolCallingAgent):
@@ -54,13 +64,30 @@ class InvoiceScanningAgent(BaseToolCallingAgent):
         LLMToolConfig(tool_class=UpdateStockLevelsTool),
     ]
 
+    def set_runtime_arguments(self, runtime_arguments: Any) -> None:
+        super().set_runtime_arguments(runtime_arguments)
+        for tool in self._tools:
+            if isinstance(tool, UpdateStockLevelsTool):
+                tool.decrease_stock = self.PROMPT_INPUT.decrease_stock
+
     def _get_system_prompt_variables(self) -> dict:
         stock_update_instruction = (
             _AUTO_CONFIRM_INSTRUCTION
             if self.PROMPT_INPUT.auto_confirm
             else _CONFIRMATION_REQUIRED_INSTRUCTION
         )
+        if self.PROMPT_INPUT.decrease_stock:
+            stock_operation_instruction = (
+                "You are DECREASING stock levels. Each quantity from the invoice will be SUBTRACTED "
+                "from current stock. This is typically used when processing outgoing sales invoices."
+            )
+        else:
+            stock_operation_instruction = (
+                "You are INCREASING stock levels. Each quantity from the invoice will be ADDED "
+                "to current stock. This is typically used when processing incoming supplier invoices."
+            )
         return {
             "data_format": self.PROMPT_INPUT.output_format,
             "stock_update_confirmation_instruction": stock_update_instruction,
+            "stock_operation_instruction": stock_operation_instruction,
         }

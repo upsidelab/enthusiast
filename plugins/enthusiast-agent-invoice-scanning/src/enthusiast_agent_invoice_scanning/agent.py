@@ -1,5 +1,3 @@
-from typing import Any
-
 from enthusiast_agent_tool_calling import BaseToolCallingAgent
 from enthusiast_common.config.base import LLMToolConfig
 from enthusiast_common.utils import RequiredFieldsModel
@@ -64,12 +62,6 @@ class InvoiceScanningAgent(BaseToolCallingAgent):
         LLMToolConfig(tool_class=UpdateStockLevelsTool),
     ]
 
-    def set_runtime_arguments(self, runtime_arguments: Any) -> None:
-        super().set_runtime_arguments(runtime_arguments)
-        for tool in self._tools:
-            if isinstance(tool, UpdateStockLevelsTool):
-                tool.decrease_stock = self.PROMPT_INPUT.decrease_stock
-
     def _get_system_prompt_variables(self) -> dict:
         stock_update_instruction = (
             _AUTO_CONFIRM_INSTRUCTION
@@ -78,13 +70,13 @@ class InvoiceScanningAgent(BaseToolCallingAgent):
         )
         if self.PROMPT_INPUT.decrease_stock:
             stock_operation_instruction = (
-                "You are DECREASING stock levels. Each quantity from the invoice will be SUBTRACTED "
-                "from current stock. This is typically used when processing outgoing sales invoices."
+                "You are processing an OUTGOING sales invoice — stock levels must be DECREASED. "
+                "Pass NEGATIVE quantities to the stock update tool (e.g. -5 to subtract 5 units)."
             )
         else:
             stock_operation_instruction = (
-                "You are INCREASING stock levels. Each quantity from the invoice will be ADDED "
-                "to current stock. This is typically used when processing incoming supplier invoices."
+                "You are processing an INCOMING supplier invoice — stock levels must be INCREASED. "
+                "Pass POSITIVE quantities to the stock update tool (e.g. 5 to add 5 units)."
             )
         return {
             "data_format": self.PROMPT_INPUT.output_format,

@@ -3,7 +3,7 @@ from enthusiast_common.config.base import LLMToolConfig
 from enthusiast_common.utils import RequiredFieldsModel
 from pydantic import Field, Json
 
-from .tools.upsert_product_details_tool import UpsertProductDetailsTool
+from .tools import UpsertProductDetailsTool
 
 
 class ExtractDataPromptInput(RequiredFieldsModel):

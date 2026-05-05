@@ -1,5 +1,6 @@
 from celery import Task, shared_task
 from enthusiast_common.agentic_execution import ExecutionConversationInterface, ExecutionFailureCode
+from enthusiast_common.agentic_execution.memory import ToolScratchpad
 from enthusiast_common.agents import ConfigType
 
 from agent.agentic_execution.registry import AgenticExecutionDefinitionRegistry
@@ -11,11 +12,21 @@ from agent.models.conversation import Conversation
 class ExecutionConversation(ExecutionConversationInterface):
     def __init__(self, conversation: Conversation) -> None:
         self._conversation = conversation
+        self._tool_scratchpad = ToolScratchpad()
 
     def ask(self, message: str) -> str:
         return ConversationManager().get_answer(
-            self._conversation, message, streaming=False, config_type=ConfigType.AGENTIC_EXECUTION_DEFINITION
+            self._conversation,
+            message,
+            streaming=False,
+            config_type=ConfigType.AGENTIC_EXECUTION_DEFINITION,
+            tool_scratchpad=self._tool_scratchpad,
         )
+
+    @property
+    def tool_scratchpad(self) -> ToolScratchpad:
+        """The shared memory that tools write to and validators read from."""
+        return self._tool_scratchpad
 
 
 class MarkExecutionFailedOnErrorTask(Task):

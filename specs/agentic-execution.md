@@ -102,6 +102,15 @@ Dataclass returned by `BaseAgenticExecutionDefinition.run()`. Fields:
 ### `ExecutionInputType`
 Pydantic `BaseModel` subclassed per plugin to declare and validate structured execution input. The server derives the JSON Schema from it for API responses and request validation.
 
+### `ToolScratchpad`
+A dict-based store that tools write to and validators read from during a single execution attempt. One instance is created per `ExecutionConversation` and flows through the injector to tools and through `BaseAgenticExecutionDefinition.run()` to validators.
+
+- `record(tool_name, result)` — stores `result` under `tool_name`, overwriting any previous entry.
+- `read(tool_name) -> Any | None` — returns the stored value, or `None` if the tool never recorded anything.
+- `clear()` — discards all entries; called by `run()` before each retry so validators always see results from the current attempt only.
+
+Each tool–validator pair shares a typed contract via a type alias exported from the tool module (e.g. `UpsertMemoryEntry = dict[str, bool]`). The framework records nothing automatically — tools opt in by calling `record()` in their `run()` method.
+
 ### `ValidatorResponse`
 Structured return value from `BaseExecutionValidator.validate()`. Fields:
 - `validation_successful: bool` — whether the response passed this validator.
@@ -113,18 +122,27 @@ ABC for response validators. A validator inspects the raw string response produc
 
 ```python
 class BaseExecutionValidator(ABC):
-    def validate(self, response: str) -> ValidatorResponse:
+    def validate(
+        self,
+        response: str,
+        execution_input: ExecutionInputType,
+        tool_scratchpad: Optional[ToolScratchpad] = None,
+    ) -> ValidatorResponse:
         """Inspect the LLM response and return a structured result."""
 ```
+
+`tool_scratchpad` gives validators access to what tools explicitly recorded during the attempt — not just the final LLM text. Validators that only inspect the response text can ignore it.
 
 The run loop processes the first failing `ValidatorResponse` it encounters:
 - All validators return `validation_successful=True` → execution succeeds.
 - `validation_successful=False, retry_needed=True` → `feedback` is sent back to the LLM and the attempt is retried (up to `MAX_RETRIES` times).
 - `validation_successful=False, retry_needed=False` → the loop stops immediately without retrying; `failure_code` is set to `VALIDATION_FAILED` and `feedback` is used as the `failure_summary`.
 
-A concrete validator is provided in `enthusiast-common` out of the box:
+Two concrete validators are provided in `enthusiast-common` out of the box:
 
-**`IsValidJsonValidator`** — attempts `json.loads(response)`; if it raises, returns a `ValidatorResponse` with `validation_successful=False`, `retry_needed=True`, and feedback `"The response is not valid JSON. Please return the same data as a valid JSON object."`.
+**`IsValidJsonValidator`** — attempts `json.loads(response)`; if it raises, returns `validation_successful=False`, `retry_needed=True`, feedback `"The response is not valid JSON. Please return the same data as a valid JSON object."`.
+
+**`StopExecutionValidator`** — reads `ToolScratchpad` for the `"stop_execution"` tool name. If the agent called the stop execution tool during the attempt, returns `validation_successful=False`, `retry_needed=False`, with the recorded stop reason as `feedback`. Designed to be placed first in the `VALIDATORS` list so it short-circuits before any other checks.
 
 Plugins can define their own validators (e.g. schema-specific checks, business rule assertions, external system reachability) and attach them via `VALIDATORS`.
 
@@ -174,14 +192,18 @@ The base class carries a concrete `run()` that implements the **validator retry 
 - `MAX_RETRIES: ClassVar[int] = 3` — maximum number of validator-feedback correction cycles before giving up
 - `FAILURE_CODES: ClassVar[type[ExecutionFailureCode]]` — the failure code enum for this execution definition class; defaults to `ExecutionFailureCode`. Override with a subclass to expose domain-specific codes alongside the base ones.
 
+**`ExecutionConversationInterface`** is a `Protocol` that the server implements. It exposes two members:
+- `ask(message) -> str` — appends a user message, runs the full agent turn, and returns the agent's final text response.
+- `tool_scratchpad: ToolScratchpad` — the shared memory instance that tools write to during `ask()`. `run()` passes this to validators after each `execute()` call and clears it before each retry.
+
 **`execute(input_data, conversation) -> str` (abstract):** performs one attempt at the execution task and returns the raw LLM response string. The base `run()` loop calls this repeatedly until all validators pass or retries are exhausted.
 
 **`run(input_data, conversation) -> ExecutionResult` (concrete):** orchestrates the retry loop:
 1. Calls `execute(input_data, conversation)` to get the LLM response string
-2. Runs each validator in `VALIDATORS` in order; the first failing `ValidatorResponse` drives the next step:
+2. Runs each validator in `VALIDATORS` in order, passing `execution_input` and `conversation.tool_scratchpad`; the first failing `ValidatorResponse` drives the next step:
    - All pass → returns `ExecutionResult(success=True, output=...)`
    - `retry_needed=False` → returns immediately with `failure_code=VALIDATION_FAILED` and the validator's `feedback` as `failure_summary` (no additional LLM call)
-   - `retry_needed=True` and retries remain → sends `feedback` to the conversation and calls `execute()` again
+   - `retry_needed=True` and retries remain → clears `tool_scratchpad`, sends `feedback` to the conversation, and calls `execute()` again
 3. If `MAX_RETRIES` is exhausted → sends a final prompt asking the LLM for a succinct failure summary, then returns `ExecutionResult(success=False, failure_code=FAILURE_CODES.MAX_RETRIES_EXCEEDED, failure_summary=<LLM response>)`
 
 No exceptions are raised for expected execution failures — all outcomes (including validator exhaustion) are expressed through `ExecutionResult`. Unexpected errors (programming errors, network failures) are not caught and propagate naturally; the server task's `on_failure` hook catches them and sets `failure_code=ExecutionFailureCode.RUNTIME_ERROR` on the record.
@@ -308,12 +330,22 @@ The catalog enrichment plugin is the reference implementation. The existing `Cat
 - `ConfigType.CONVERSATION` — the standard conversational prompt (`CATALOG_ENRICHMENT_TOOL_CALLING_AGENT_PROMPT`) that includes user-interaction guidance
 - `ConfigType.AGENTIC_EXECUTION_DEFINITION` — a stripped-down execution prompt (`CATALOG_ENRICHMENT_EXECUTION_SYSTEM_PROMPT`) that drops conversational tone, states the LLM is in a batch pipeline, and mandates a JSON-only response of the form `{"<product identifier>": "<upsert success or failure reason>", ...}`
 
-**`CatalogEnrichmentAgenticExecutionInput`** (`ExecutionInputType` subclass): field `additional_instructions: Optional[str]` (default `None`) — free-text instructions appended to the default prompt. The dataset is not part of the input; it is derived from `agent.data_set` at runtime.
+**`CatalogEnrichmentAgenticExecutionInput`** (`ExecutionInputType` subclass):
+- `additional_instructions: Optional[str]` (default `None`) — free-text instructions appended to the default prompt.
+- `skus: Optional[list[str]]` (default `None`) — when provided, `AllSkusUpsertedValidator` verifies that every SKU in this list was attempted by the agent. When absent, no SKU coverage check is performed.
+
+The dataset is not part of the input; it is derived from `agent.data_set` at runtime.
 
 **`CatalogEnrichmentAgenticExecutionDefinition`** (`BaseAgenticExecutionDefinition`):
 - `EXECUTION_KEY = "catalog-enrichment"`, `AGENT_KEY = "enthusiast-agent-catalog-enrichment"`
-- Uses the default `VALIDATORS = [IsValidJsonValidator]`
-- `execute(input_data, conversation)` — sends a single message to the agent (the `additional_instructions` value, or a default prompt when absent) and returns its raw response string. The agent's tool stack (including the product upsert tool) handles the actual product enrichment within that turn.
+- `VALIDATORS = [StopExecutionValidator, IsValidJsonValidator, AllUpsertsSucceededValidator, AllSkusUpsertedValidator]`
+- `execute(input_data, conversation)` — sends a single message to the agent (the `additional_instructions` value, or a default prompt when absent) and returns its raw response string. The agent's tool stack handles the actual product enrichment within that turn.
+
+**`StopExecutionTool`** — an `LLMTool` that lives in the catalog enrichment plugin and is attached to the agent only during agentic execution conversations (via `CatalogEnrichmentConfigProvider`). The agent calls it with a `stop_reason` string when further progress is impossible (e.g. required data absent from all sources, no eCommerce connector configured). Records the reason to `ToolScratchpad`; `StopExecutionValidator` reads it and halts the run without retry.
+
+**`AllUpsertsSucceededValidator`** — reads the `UpsertMemoryEntry` (`dict[str, bool]`) recorded by `UpsertProductDetailsTool`. Any `False` value triggers a retry with the list of failed SKUs as feedback.
+
+**`AllSkusUpsertedValidator`** — active only when `execution_input.skus` is provided. Reads the same `UpsertMemoryEntry` to determine which SKUs were attempted; reports any missing SKUs and asks the agent to locate their data and retry the full upsert. If the data cannot be found, instructs the agent to stop the execution.
 
 ---
 

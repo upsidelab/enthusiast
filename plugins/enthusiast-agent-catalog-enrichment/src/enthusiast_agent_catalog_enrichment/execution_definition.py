@@ -1,15 +1,12 @@
-from typing import Optional
-
 from enthusiast_common.agentic_execution import (
     BaseAgenticExecutionDefinition,
     ExecutionConversationInterface,
-    ExecutionInputType,
+    IsValidJsonValidator,
+    StopExecutionValidator,
 )
 
-
-class CatalogEnrichmentAgenticExecutionInput(ExecutionInputType):
-    """Input for the catalog enrichment agentic execution."""
-    additional_instructions: Optional[str] = None
+from .execution_input import CatalogEnrichmentAgenticExecutionInput
+from .validators import AllSkusUpsertedValidator, AllUpsertsSucceededValidator
 
 
 class CatalogEnrichmentAgenticExecutionDefinition(BaseAgenticExecutionDefinition):
@@ -17,6 +14,7 @@ class CatalogEnrichmentAgenticExecutionDefinition(BaseAgenticExecutionDefinition
     AGENT_KEY = "enthusiast-agent-catalog-enrichment"
     NAME = "Catalog Enrichment"
     INPUT_TYPE = CatalogEnrichmentAgenticExecutionInput
+    VALIDATORS = [StopExecutionValidator, IsValidJsonValidator, AllUpsertsSucceededValidator, AllSkusUpsertedValidator]
 
     def execute(
         self,

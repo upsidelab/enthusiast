@@ -1,5 +1,7 @@
 import json
 
+from ..input import ExecutionInputType
+from ..memory import ToolScratchpad
 from .base import BaseExecutionValidator
 from .failure_response import ValidatorFailureResponse
 from .response import ValidatorResponse
@@ -14,7 +16,10 @@ class IsValidJsonValidator(BaseExecutionValidator):
         "Please return the same data as a valid JSON object."
     )
 
-    def validate(self, response: str) -> ValidatorResponse:
+    def validate(self,
+                 response: str,
+                 _execution_input: ExecutionInputType,
+                 _tool_scratchpad: ToolScratchpad) -> ValidatorResponse:
         try:
             json.loads(response)
             return ValidatorSuccessResponse()

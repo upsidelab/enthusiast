@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
+from enthusiast_common.agentic_execution import ToolScratchpad
 from enthusiast_common.connectors import ECommercePlatformConnector
 from enthusiast_common.retrievers import BaseProductRetriever, BaseVectorStoreRetriever
 from enthusiast_common.structures import DocumentChunkDetails, RepositoriesInstances
@@ -29,4 +30,9 @@ class BaseInjector(ABC):
     @property
     @abstractmethod
     def chat_history(self) -> BaseChatMessageHistory:
+        pass
+
+    @property
+    @abstractmethod
+    def tool_scratchpad(self) -> ToolScratchpad:
         pass

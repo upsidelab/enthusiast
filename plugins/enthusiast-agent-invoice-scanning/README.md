@@ -16,3 +16,10 @@ AVAILABLE_AGENTS = [
     'enthusiast_agent_invoice_scanning.InvoiceScanningAgent',
 ]
 ```
+To also register the agentic execution definition, add the following to your config/settings_override.py:
+
+```python
+AVAILABLE_AGENTIC_EXECUTION_DEFINITIONS = [
+    'enthusiast_agent_invoice_scanning.InvoiceScanningAgenticExecutionDefinition',
+]
+```

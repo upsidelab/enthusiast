@@ -10,12 +10,7 @@ logger = logging.getLogger(__name__)
 
 class StockUpdateItem(BaseModel):
     sku: str = Field(description="Product SKU from the invoice line item")
-    quantity: int = Field(
-        description=(
-            "Quantity to adjust. Use a positive value to add stock (incoming supplier invoice), "
-            "or a negative value to subtract stock (outgoing sales invoice)."
-        )
-    )
+    quantity: int = Field(description="Quantity to add to current stock.")
 
 
 class StockUpdateBatchInput(BaseModel):
@@ -28,7 +23,6 @@ class UpdateStockLevelsTool(BaseLLMTool):
     NAME = "update_stock_levels"
     DESCRIPTION = (
         "Tool for updating stock levels for products based on SKUs and quantities extracted from an invoice. "
-        "Accepts positive quantities to add stock and negative quantities to subtract stock. "
         "Reports success or failure per SKU without failing the entire batch."
     )
     ARGS_SCHEMA = StockUpdateBatchInput

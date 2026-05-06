@@ -87,5 +87,5 @@ class BaseAgent(ABC, ExtraArgsClassBase):
             if field is None:
                 continue
             setattr(self, key.upper(), field(**value))
-        for index, tool in enumerate(self._tools):
-            tool.set_runtime_arguments(tools_runtime_arguments[index])
+        for index, tool_runtime_args in enumerate(tools_runtime_arguments):
+            self._tools[index].set_runtime_arguments(tool_runtime_args)

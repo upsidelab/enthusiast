@@ -30,6 +30,7 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
         self._base_url = base_url.rstrip("/")
         self._admin_base_url = admin_base_url.rstrip("/")
         self._region_id = region_id
+        self._stock_location_id: Optional[str] = None
 
     def create_empty_order(self, email: Optional[str] = None, address: Optional[Address] = None) -> str:
         raise NotImplementedError
@@ -89,6 +90,8 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
             "options": variant_options,
             # SKU persisted as EAN on Medusa side. See the comment in get_product_by_sku for details.
             "ean": product_details.sku,
+            # Also set as sku so the auto-created inventory item inherits it. See _get_inventory_item_id_by_sku.
+            "sku": product_details.sku,
             "prices": (
                 [{
                     "currency_code": self._get_default_store_currency_code(),
@@ -148,6 +151,59 @@ class MedusaPlatformConnector(ECommercePlatformConnector):
         self._client.post(f"/admin/products/{product_details_before_update.entry_id}", payload)
         return True
 
+    def update_stock(self, sku: str, quantity: int) -> bool:
+        """Returns True if updated, False if the SKU was not found."""
+        product = self.get_product_by_sku(sku)
+        if not product:
+            return False
+
+        inventory_item_id = self._get_inventory_item_id_by_sku(sku)
+        location_id = self._get_default_stock_location_id()
+
+        current_quantity = self._get_stocked_quantity(inventory_item_id, location_id)
+        new_quantity = current_quantity + quantity
+
+        if new_quantity < 0:
+            raise ValueError(f"Insufficient stock: {current_quantity} available, {abs(quantity)} requested")
+
+        self._client.post(
+            f"/admin/inventory-items/{inventory_item_id}/location-levels/{location_id}",
+            {"stocked_quantity": new_quantity},
+        )
+        return True
+
+    def _get_stocked_quantity(self, inventory_item_id: str, location_id: str) -> int:
+        response = self._client.get(
+            f"/admin/inventory-items/{inventory_item_id}/location-levels",
+            params={"location_id": location_id},
+        )
+        levels = response.get("inventory_levels", [])
+        if not levels:
+            return 0
+        return levels[0].get("stocked_quantity", 0)
+
+    def _get_inventory_item_id_by_sku(self, sku: str) -> str:
+        # Inventory items can't be queried by variant_id. They inherit the variant's sku
+        # field, which we set explicitly at creation time alongside ean for this purpose.
+        response = self._client.get("/admin/inventory-items", params={"sku": sku})
+        inventory_items = response.get("inventory_items", [])
+        if not inventory_items:
+            raise ECommerceConnectorError(
+                f"No inventory item found for SKU '{sku}'. "
+                "Ensure the product variant was created with manage_inventory enabled."
+            )
+        return inventory_items[0]["id"]
+
+    def _get_default_stock_location_id(self) -> str:
+        if self._stock_location_id is None:
+            response = self._client.get("/admin/stock-locations")
+            locations = response.get("stock_locations", [])
+            if not locations:
+                raise ECommerceConnectorError(
+                    "No stock locations configured in Medusa. At least one stock location must exist to update inventory."
+                )
+            self._stock_location_id = locations[0]["id"]
+        return self._stock_location_id
 
     def get_admin_url_for_order_id(self, order_id: str) -> str:
         return f"{self._admin_base_url}/app/draft-orders/{order_id}"

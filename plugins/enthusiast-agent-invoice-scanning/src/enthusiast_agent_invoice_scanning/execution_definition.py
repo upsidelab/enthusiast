@@ -20,7 +20,12 @@ class InvoiceScanningAgenticExecutionDefinition(BaseAgenticExecutionDefinition):
     AGENT_KEY = "enthusiast-agent-invoice-scanning"
     NAME = "Invoice Scanning"
     INPUT_TYPE = InvoiceScanningAgenticExecutionInput
-    VALIDATORS = [StopExecutionValidator, IsValidJsonValidator, StockUpdateToolCalledValidator, AllStockUpdatesSucceededValidator]
+    VALIDATORS = [
+        StopExecutionValidator,
+        IsValidJsonValidator,
+        StockUpdateToolCalledValidator,
+        AllStockUpdatesSucceededValidator,
+    ]
 
     def execute(
         self,

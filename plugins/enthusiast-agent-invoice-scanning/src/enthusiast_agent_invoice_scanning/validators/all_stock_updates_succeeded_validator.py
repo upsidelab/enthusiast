@@ -41,7 +41,7 @@ class AllStockUpdatesSucceededValidator(BaseExecutionValidator):
         return ValidatorFailureResponse(
             feedback=(
                 f"Stock update failed for the following SKUs: {', '.join(failed_skus)}. "
-                f"These items could not be updated in the eCommerce platform."
+                "These items could not be updated in the eCommerce platform."
             ),
             retry_needed=False,
         )

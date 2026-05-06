@@ -35,6 +35,19 @@ class ECommercePlatformConnector(ABC):
         pass
 
     @abstractmethod
+    def update_stock(self, sku: str, quantity: int) -> bool:
+        """Update the stock level for a product identified by SKU.
+
+        Args:
+            sku: The product's SKU identifier.
+            quantity: Quantity delta to add to current stock. Use negative values to decrease.
+
+        Returns:
+            True if the stock was updated, False if the product was not found.
+        """
+        pass
+
+    @abstractmethod
     def get_admin_url_for_order_id(self, order_id: str) -> str:
         pass
 

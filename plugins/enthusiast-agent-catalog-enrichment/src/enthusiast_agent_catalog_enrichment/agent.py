@@ -1,9 +1,8 @@
 from enthusiast_agent_tool_calling import BaseToolCallingAgent
+from enthusiast_agent_tools import UpsertProductDetailsTool
 from enthusiast_common.config.base import LLMToolConfig
 from enthusiast_common.utils import RequiredFieldsModel
 from pydantic import Field, Json
-
-from .tools import UpsertProductDetailsTool
 
 
 class ExtractDataPromptInput(RequiredFieldsModel):

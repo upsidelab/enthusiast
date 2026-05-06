@@ -1,9 +1,9 @@
+from enthusiast_agent_tools import StopExecutionTool
 from enthusiast_common.agents import BaseAgentConfigProvider, ConfigType
 from enthusiast_common.config import AgentConfigWithDefaults, LLMToolConfig
 
 from .agent import CatalogEnrichmentAgent
 from .prompt import CATALOG_ENRICHMENT_EXECUTION_SYSTEM_PROMPT, CATALOG_ENRICHMENT_TOOL_CALLING_AGENT_PROMPT
-from .tools import StopExecutionTool
 
 
 class CatalogEnrichmentConfigProvider(BaseAgentConfigProvider):

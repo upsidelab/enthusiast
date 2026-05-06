@@ -1,4 +1,3 @@
-from .stop_execution_tool import StopExecutionTool
-from .upsert_product_details_tool import UpsertProductDetailsTool
+from enthusiast_agent_tools import StopExecutionTool, UpsertProductDetailsTool
 
 __all__ = ["StopExecutionTool", "UpsertProductDetailsTool"]

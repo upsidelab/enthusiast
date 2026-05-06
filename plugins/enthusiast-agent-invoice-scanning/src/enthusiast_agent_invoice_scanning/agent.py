@@ -34,14 +34,6 @@ class InvoiceScanningPromptInput(RequiredFieldsModel):
         description="Skip confirmation and update stock immediately after extraction.",
         default=False,
     )
-    decrease_stock: bool = Field(
-        title="Decrease stock",
-        description=(
-            "When enabled, stock levels are decreased based on the invoice quantities. "
-            "Use for outgoing sales invoices. When disabled, stock is increased (default, for incoming supplier invoices)."
-        ),
-        default=False,
-    )
 
 
 class InvoiceScanningAgent(BaseToolCallingAgent):
@@ -68,18 +60,7 @@ class InvoiceScanningAgent(BaseToolCallingAgent):
             if self.PROMPT_INPUT.auto_confirm
             else _CONFIRMATION_REQUIRED_INSTRUCTION
         )
-        if self.PROMPT_INPUT.decrease_stock:
-            stock_operation_instruction = (
-                "You are processing an OUTGOING sales invoice — stock levels must be DECREASED. "
-                "Pass NEGATIVE quantities to the stock update tool (e.g. -5 to subtract 5 units)."
-            )
-        else:
-            stock_operation_instruction = (
-                "You are processing an INCOMING supplier invoice — stock levels must be INCREASED. "
-                "Pass POSITIVE quantities to the stock update tool (e.g. 5 to add 5 units)."
-            )
         return {
             "data_format": self.PROMPT_INPUT.output_format,
             "stock_update_confirmation_instruction": stock_update_instruction,
-            "stock_operation_instruction": stock_operation_instruction,
         }

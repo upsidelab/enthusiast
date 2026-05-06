@@ -1,6 +1,8 @@
-from .tools import ProductExamplesTool, ProductSQLSearchTool, StopExecutionTool, UpsertMemoryEntry, UpsertProductDetailsTool
+from .tools import FileListTool, FileRetrievalTool, ProductExamplesTool, ProductSQLSearchTool, StopExecutionTool, UpsertMemoryEntry, UpsertProductDetailsTool
 
 __all__ = [
+    "FileListTool",
+    "FileRetrievalTool",
     "ProductExamplesTool",
     "ProductSQLSearchTool",
     "StopExecutionTool",

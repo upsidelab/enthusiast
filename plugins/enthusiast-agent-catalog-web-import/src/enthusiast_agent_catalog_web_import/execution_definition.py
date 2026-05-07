@@ -10,7 +10,7 @@ from .execution_input import CatalogWebImportExecutionInput
 from .validators import AllUrlsCoveredValidator, UpsertToolCalledValidator
 
 
-class CatalogWebImportExecutionDefinition(BaseAgenticExecutionDefinition):
+class CatalogWebImportAgenticExecutionDefinition(BaseAgenticExecutionDefinition):
     """Agentic execution definition for the catalog web import agent.
 
     Scrapes product data from the provided URLs and upserts it into the catalog.

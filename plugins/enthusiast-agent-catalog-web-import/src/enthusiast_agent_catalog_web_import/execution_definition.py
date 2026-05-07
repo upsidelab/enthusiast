@@ -1,15 +1,13 @@
+from enthusiast_agent_catalog_enrichment.validators import AllUpsertsSucceededValidator
 from enthusiast_common.agentic_execution import (
     BaseAgenticExecutionDefinition,
     ExecutionConversationInterface,
-    ExecutionInputType,
+    IsValidJsonValidator,
+    StopExecutionValidator,
 )
 
-
-class CatalogWebImportExecutionInput(ExecutionInputType):
-    """Input for the catalog web import agentic execution."""
-
-    urls: list[str]
-    additional_instructions: str | None = None
+from .execution_input import CatalogWebImportExecutionInput
+from .validators import AllUrlsCoveredValidator, UpsertToolCalledValidator
 
 
 class CatalogWebImportExecutionDefinition(BaseAgenticExecutionDefinition):
@@ -22,6 +20,13 @@ class CatalogWebImportExecutionDefinition(BaseAgenticExecutionDefinition):
     AGENT_KEY = "enthusiast-agent-catalog-web-import"
     NAME = "Catalog Web Import"
     INPUT_TYPE = CatalogWebImportExecutionInput
+    VALIDATORS = [
+        StopExecutionValidator,
+        IsValidJsonValidator,
+        UpsertToolCalledValidator,
+        AllUrlsCoveredValidator,
+        AllUpsertsSucceededValidator,
+    ]
 
     def execute(
         self,

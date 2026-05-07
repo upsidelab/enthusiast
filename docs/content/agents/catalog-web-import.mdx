@@ -1,0 +1,28 @@
+import Agent from "@/components/agent";
+
+export const description = "The Catalog Web Import agent accepts one or more product page URLs and extracts structured product data directly from those pages. It uses browser-level TLS impersonation to fetch pages reliably, passes the content through an LLM to pull out the fields defined in your schema, and upserts all products in a single batch. When confirmation mode is enabled, it presents the extracted data for review before writing anything to the catalog.";
+
+export const useCases = [
+  {
+    title: "Supplier Website Onboarding",
+    description: "When a supplier shares their product catalog as a website rather than a document, the agent can scrape and import all relevant product pages directly, eliminating manual copy-paste."
+  },
+  {
+    title: "Catalog Expansion from Distributor Pages",
+    description: "Sales teams can drop in a list of distributor or manufacturer product URLs and have all products extracted and added to the catalog in one go, without leaving the chat interface."
+  },
+  {
+    title: "Bulk Multi-URL Import",
+    description: "Provide dozens of product page URLs in a single request and the agent fetches them in parallel, reconciles any overlapping data, and upserts everything in one batch call."
+  },
+];
+
+<Agent
+  name="Catalog Web Import"
+  agentClassName="CatalogWebImportAgent"
+  pipName="enthusiast-agent-catalog-web-import"
+  registerAgentModule="enthusiast_agent_catalog_web_import"
+  agentDescription={description}
+  agentUseCases={useCases}
+  videoUrl="https://content.upsidelab.io/enthusiast/catalog-web-import.mp4"
+/>

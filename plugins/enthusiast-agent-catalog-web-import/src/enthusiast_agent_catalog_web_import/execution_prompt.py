@@ -37,8 +37,11 @@ UPSERT TOOL RULES:
 - Do NOT return JSON, text, or simulated responses instead of calling the tool.
 - The upsert tool will explicitly report success or failure for each product in the batch.
 
-If the upsert tool explicitly reports that no eCommerce connector is configured, return the
-extracted product data as JSON in the shape defined by the schema above.
+STOP EXECUTION RULES:
+- If further progress is impossible, call the stop_execution tool with a clear reason.
+- Examples of when to stop: no eCommerce connector is configured; none of the provided URLs
+  returned any extractable product data.
+- Do NOT stop for individual upsert failures — these are captured in the output.
 
 OUTPUT RULES:
 - Return ONLY a valid JSON object. No prose, no explanation.

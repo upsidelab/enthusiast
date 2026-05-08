@@ -481,6 +481,26 @@ class TestConversationView:
         assert response.data["streaming"] is True
         mock_task.assert_called_once()
 
+    def test_non_streaming_provider_disables_streaming_in_task(self, api_client, url, conversation):
+        payload = {
+            "data_set_id": conversation.data_set.id,
+            "question_message": "Hello?",
+            "streaming": True,
+        }
+        with (
+            patch(
+                "agent.views.respond_to_user_message_task.apply_async",
+                return_value=type("obj", (), {"id": "fake-task-id"}),
+            ) as mock_task,
+            patch("agent.views.LanguageModelRegistry.provider_for_dataset") as mock_provider,
+        ):
+            mock_provider.return_value = type("obj", (), {"STREAMING_AVAILABLE": False})
+            response = api_client.post(url, payload, format="json")
+
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert response.data["streaming"] is False
+        assert mock_task.call_args.kwargs["kwargs"]["streaming"] is False
+
     def test_invalid_payload_returns_400(self, api_client, url):
         payload = {"data_set_id": None}
         response = api_client.post(url, payload, format="json")

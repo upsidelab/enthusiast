@@ -132,18 +132,19 @@ class ConversationView(APIView):
         data_set = Conversation.objects.get(id=conversation_id).data_set
         data_set_repo = DjangoDataSetRepository(DataSet)
         language_model_provider_class = LanguageModelRegistry(data_set_repo).provider_for_dataset(data_set.id)
+        effective_streaming = language_model_provider_class.STREAMING_AVAILABLE and streaming
         task = respond_to_user_message_task.apply_async(
             kwargs={
                 "conversation_id": conversation_id,
                 "data_set_id": data_set_id,
                 "user_id": request.user.id,
                 "message": question_message,
-                "streaming": streaming,
+                "streaming": effective_streaming,
             }
         )
 
         return Response(
-            {"task_id": task.id, "streaming": language_model_provider_class.STREAMING_AVAILABLE and streaming},
+            {"task_id": task.id, "streaming": effective_streaming},
             status=status.HTTP_202_ACCEPTED,
         )
 

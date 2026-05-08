@@ -1,4 +1,4 @@
-from enthusiast_agent_catalog_enrichment.tools import StopExecutionTool
+from enthusiast_agent_tools.tools.stop_execution_tool import StopExecutionTool
 from enthusiast_common.agents import BaseAgentConfigProvider, ConfigType
 from enthusiast_common.config import AgentConfigWithDefaults, LLMToolConfig
 

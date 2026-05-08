@@ -1,4 +1,3 @@
-from enthusiast_agent_catalog_enrichment.validators import AllUpsertsSucceededValidator
 from enthusiast_common.agentic_execution import (
     BaseAgenticExecutionDefinition,
     ExecutionConversationInterface,
@@ -7,7 +6,7 @@ from enthusiast_common.agentic_execution import (
 )
 
 from .execution_input import CatalogWebImportExecutionInput
-from .validators import AllUrlsCoveredValidator, UpsertToolCalledValidator
+from .validators import AllUpsertsSucceededValidator, AllUrlsFetchSuccessfulValidator
 
 
 class CatalogWebImportAgenticExecutionDefinition(BaseAgenticExecutionDefinition):
@@ -23,8 +22,7 @@ class CatalogWebImportAgenticExecutionDefinition(BaseAgenticExecutionDefinition)
     VALIDATORS = [
         StopExecutionValidator,
         IsValidJsonValidator,
-        UpsertToolCalledValidator,
-        AllUrlsCoveredValidator,
+        AllUrlsFetchSuccessfulValidator,
         AllUpsertsSucceededValidator,
     ]
 

@@ -40,6 +40,9 @@ class ScrapeProductConfig(RequiredFieldsModel):
     )
 
 
+ScrapeMemoryEntry = dict[str, bool]
+
+
 class ScrapeProductTool(BaseLLMTool):
     """Fetches product web pages and extracts structured product data from them using an LLM.
 
@@ -60,6 +63,8 @@ class ScrapeProductTool(BaseLLMTool):
     RETURN_DIRECT = False
     CONFIGURATION_ARGS = ScrapeProductConfig
 
+    _FETCH_ERROR_PREFIXES = ("Could not reach the provided URL", "Internal error")
+
     def run(self, urls: list[str], action: str) -> str:
         """Fetch each URL in parallel and extract the requested fields via LLM.
 
@@ -76,6 +81,14 @@ class ScrapeProductTool(BaseLLMTool):
             for future in as_completed(futures):
                 url = futures[future]
                 results[url] = future.result()
+
+        if self._injector:
+            entry: ScrapeMemoryEntry = {
+                url: not any(result.startswith(prefix) for prefix in self._FETCH_ERROR_PREFIXES)
+                for url, result in results.items()
+            }
+            self._injector.tool_scratchpad.record(self.NAME, entry)
+
         return json.dumps(results, ensure_ascii=False)
 
     def _scrape_url(self, url: str, action: str) -> str:

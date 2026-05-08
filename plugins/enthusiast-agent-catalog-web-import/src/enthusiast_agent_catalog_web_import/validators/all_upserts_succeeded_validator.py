@@ -1,4 +1,4 @@
-from enthusiast_agent_catalog_enrichment.tools.upsert_product_details_tool import (
+from enthusiast_agent_tools.tools.upsert_product_details_tool import (
     UpsertMemoryEntry,
     UpsertProductDetailsTool,
 )

@@ -50,7 +50,7 @@ export type ECommerceIntegrationResponse = {
 export class DataSetsApiClient extends BaseApiClient {
   async getDataSets(): Promise<DataSet[]> {
     const response = await fetch(`${this.apiBase}/api/data_sets`, this._requestConfiguration());
-    return (await response.json()).results as DataSet[];
+    return await response.json() as DataSet[];
   }
 
   async createDataSet(dataSet: DataSet, preconfigureAgents: boolean): Promise<number> {

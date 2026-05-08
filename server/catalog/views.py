@@ -54,6 +54,7 @@ class SyncAllSourcesView(APIView):
 
 class DataSetListView(ListCreateAPIView):
     permission_classes = [IsAuthenticated]
+    pagination_class = None
 
     def get_serializer_class(self):
         if self.request.method == "POST":

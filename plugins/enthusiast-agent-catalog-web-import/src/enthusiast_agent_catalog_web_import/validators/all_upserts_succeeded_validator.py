@@ -1,3 +1,7 @@
+from enthusiast_agent_catalog_enrichment.tools.upsert_product_details_tool import (
+    UpsertMemoryEntry,
+    UpsertProductDetailsTool,
+)
 from enthusiast_common.agentic_execution import (
     BaseExecutionValidator,
     ExecutionInputType,
@@ -6,11 +10,6 @@ from enthusiast_common.agentic_execution import (
     ValidatorSuccessResponse,
 )
 from enthusiast_common.agentic_execution.memory import ToolScratchpad
-
-from enthusiast_agent_catalog_enrichment.tools.upsert_product_details_tool import (
-    UpsertMemoryEntry,
-    UpsertProductDetailsTool,
-)
 
 
 class AllUpsertsSucceededValidator(BaseExecutionValidator):

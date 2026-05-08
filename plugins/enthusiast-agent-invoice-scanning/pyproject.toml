@@ -8,9 +8,9 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.10,<4"
 dependencies = [
-    "enthusiast-common (>=1.7.0,<2.0.0)",
+    "enthusiast-common (>=1.6.2,<2.0.0)",
     "langchain (>=1.2.0,<2.0.0)",
-    "enthusiast-agent-tool-calling (>=1.2.0)",
+    "enthusiast-agent-tool-calling (>=1.1.0)",
     "enthusiast-agent-tools (>=1.0.0,<2.0.0)",
 ]
 
@@ -19,13 +19,6 @@ Homepage = "https://upsidelab.io/tools/enthusiast"
 Documentation = "https://upsidelab.io/tools/enthusiast/agents/invoice-scanning"
 Repository = "https://github.com/upsidelab/enthusiast.git"
 Issues = "https://github.com/upsidelab/enthusiast/issues"
-
-[tool.poetry.dependencies]
-enthusiast-common = {path = "../enthusiast-common", develop = true}
-enthusiast-agent-tool-calling = {path = "../enthusiast-agent-tool-calling", develop = true}
-enthusiast-agent-tools = {path = "../enthusiast-agent-tools", develop = true}
-enthusiast-source-medusa = {path = "../enthusiast-source-medusa", develop = true}
-
 
 [tool.poetry]
 packages = [{include = "enthusiast_agent_invoice_scanning", from = "src"}]

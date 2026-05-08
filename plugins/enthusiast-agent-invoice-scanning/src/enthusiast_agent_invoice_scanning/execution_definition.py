@@ -6,7 +6,7 @@ from enthusiast_common.agentic_execution import (
 )
 
 from .execution_input import InvoiceScanningAgenticExecutionInput
-from .validators import AllStockUpdatesSucceededValidator, StockUpdateToolCalledValidator
+from .validators import AllSkusUpdatedValidator, AllStockUpdatesSucceededValidator
 
 
 class InvoiceScanningAgenticExecutionDefinition(BaseAgenticExecutionDefinition):
@@ -23,8 +23,8 @@ class InvoiceScanningAgenticExecutionDefinition(BaseAgenticExecutionDefinition):
     VALIDATORS = [
         StopExecutionValidator,
         IsValidJsonValidator,
-        StockUpdateToolCalledValidator,
         AllStockUpdatesSucceededValidator,
+        AllSkusUpdatedValidator,
     ]
 
     def execute(

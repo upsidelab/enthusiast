@@ -1,4 +1,4 @@
+from .all_skus_updated_validator import AllSkusUpdatedValidator
 from .all_stock_updates_succeeded_validator import AllStockUpdatesSucceededValidator
-from .stock_update_tool_called_validator import StockUpdateToolCalledValidator
 
-__all__ = ["AllStockUpdatesSucceededValidator", "StockUpdateToolCalledValidator"]
+__all__ = ["AllSkusUpdatedValidator", "AllStockUpdatesSucceededValidator"]

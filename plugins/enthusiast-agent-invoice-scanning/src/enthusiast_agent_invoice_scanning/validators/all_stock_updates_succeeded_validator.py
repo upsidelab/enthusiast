@@ -14,12 +14,12 @@ from enthusiast_agent_invoice_scanning.tools.update_stock_levels_tool import (
 
 
 class AllStockUpdatesSucceededValidator(BaseExecutionValidator):
-    """Fails the execution immediately when any SKU stock update was unsuccessful.
+    """Validates that the stock update tool was called and all SKU updates succeeded.
 
-    Reads the ToolScratchpad entry recorded by UpdateStockLevelsTool. If any SKU
-    mapped to False (update failed or errored), the execution is stopped without retry
-    — individual SKU failures in the eCommerce platform cannot be fixed by the LLM
-    retrying the same data.
+    If the tool was never called, the agent is asked to retry — it may have returned
+    a response without ever invoking the tool. If the tool was called but some SKUs
+    failed, the execution is stopped immediately without retry, since individual SKU
+    failures in the eCommerce platform cannot be resolved by repeating the same data.
     """
 
     _TOOL_NAME = UpdateStockLevelsTool.NAME
@@ -32,7 +32,14 @@ class AllStockUpdatesSucceededValidator(BaseExecutionValidator):
     ) -> ValidatorResponse:
         entry: StockUpdateMemoryEntry | None = tool_scratchpad.read(self._TOOL_NAME)
         if entry is None:
-            return ValidatorSuccessResponse()
+            return ValidatorFailureResponse(
+                feedback=(
+                    "You returned a response but did not call the stock update tool. "
+                    "Read the invoice, extract all SKU/quantity line items, and call "
+                    "the stock update tool before responding."
+                ),
+                retry_needed=True,
+            )
 
         failed_skus = [sku for sku, success in entry.items() if not success]
         if not failed_skus:

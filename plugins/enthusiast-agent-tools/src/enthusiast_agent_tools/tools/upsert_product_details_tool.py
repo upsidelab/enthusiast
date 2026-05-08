@@ -108,7 +108,6 @@ class UpsertProductDetailsTool(BaseLLMTool):
         entry: UpsertMemoryEntry = {sku: message in self._SUCCESS_OUTCOMES for sku, message in result.items()}
         self.injector.tool_scratchpad.record(self.NAME, entry)
 
-
     @staticmethod
     def _update_product_details(connector: ECommercePlatformConnector,
                                 product_sku: str,

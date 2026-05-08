@@ -11,6 +11,7 @@ dependencies = [
     "enthusiast-common (>=1.6.0,<2.0.0)",
     "langchain (>=1.2.0,<2.0.0)",
     "enthusiast-agent-tool-calling (>=1.1.0)",
+    "enthusiast-agent-tools (>=1.0.0,<2.0.0)",
 ]
 
 [project.urls]

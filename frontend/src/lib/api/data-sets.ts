@@ -53,8 +53,8 @@ export class DataSetsApiClient extends BaseApiClient {
     let url: string | null = `${this.apiBase}/api/data_sets`;
 
     while (url) {
-      const response = await fetch(url, this._requestConfiguration());
-      const data = await response.json();
+      const response: Response = await fetch(url, this._requestConfiguration());
+      const data: { results: DataSet[]; next: string | null } = await response.json();
       results.push(...data.results);
       url = data.next;
     }

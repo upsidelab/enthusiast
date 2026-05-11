@@ -1,18 +1,15 @@
 from enthusiast_common.agentic_execution import (
     BaseAgenticExecutionDefinition,
     ExecutionConversationInterface,
-    ExecutionInputType,
+    IsValidJsonValidator,
+    StopExecutionValidator,
 )
 
-
-class CatalogWebImportExecutionInput(ExecutionInputType):
-    """Input for the catalog web import agentic execution."""
-
-    urls: list[str]
-    additional_instructions: str | None = None
+from .execution_input import CatalogWebImportExecutionInput
+from .validators import AllUpsertsSucceededValidator, AllUrlsFetchSuccessfulValidator
 
 
-class CatalogWebImportExecutionDefinition(BaseAgenticExecutionDefinition):
+class CatalogWebImportAgenticExecutionDefinition(BaseAgenticExecutionDefinition):
     """Agentic execution definition for the catalog web import agent.
 
     Scrapes product data from the provided URLs and upserts it into the catalog.
@@ -22,6 +19,12 @@ class CatalogWebImportExecutionDefinition(BaseAgenticExecutionDefinition):
     AGENT_KEY = "enthusiast-agent-catalog-web-import"
     NAME = "Catalog Web Import"
     INPUT_TYPE = CatalogWebImportExecutionInput
+    VALIDATORS = [
+        StopExecutionValidator,
+        IsValidJsonValidator,
+        AllUrlsFetchSuccessfulValidator,
+        AllUpsertsSucceededValidator,
+    ]
 
     def execute(
         self,

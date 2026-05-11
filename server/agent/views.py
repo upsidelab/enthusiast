@@ -128,10 +128,10 @@ class ConversationView(APIView):
 
         data_set_id = serializer.validated_data.get("data_set_id")
         question_message = serializer.validated_data.get("question_message")
-        streaming = language_model_provider_class.STREAMING_AVAILABLE and serializer.validated_data.get("streaming")
         data_set = Conversation.objects.get(id=conversation_id).data_set
         data_set_repo = DjangoDataSetRepository(DataSet)
         language_model_provider_class = LanguageModelRegistry(data_set_repo).provider_for_dataset(data_set.id)
+        streaming = language_model_provider_class.STREAMING_AVAILABLE and serializer.validated_data.get("streaming")
         task = respond_to_user_message_task.apply_async(
             kwargs={
                 "conversation_id": conversation_id,

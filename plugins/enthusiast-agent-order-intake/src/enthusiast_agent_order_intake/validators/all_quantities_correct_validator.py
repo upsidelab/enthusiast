@@ -24,7 +24,7 @@ class AllQuantitiesCorrectValidator(BaseExecutionValidator):
         mismatched = [
             f"{item.sku} (expected {item.quantity}, got {ordered_items[item.sku]})"
             for item in execution_input.items
-            if item.sku in ordered_items and ordered_items[item.sku] != item.quantity
+            if item.sku in ordered_items and int(ordered_items[item.sku]) != item.quantity
         ]
 
         if not mismatched:

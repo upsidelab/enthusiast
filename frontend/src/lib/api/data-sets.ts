@@ -300,6 +300,20 @@ export class DataSetsApiClient extends BaseApiClient {
     } as DataSet;
   }
 
+  async deleteDataSet(dataSetId: number): Promise<void> {
+    const response = await fetch(
+      `${this.apiBase}/api/data_sets/${dataSetId}`,
+      {
+        ...this._requestConfiguration(),
+        method: "DELETE",
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to delete data set");
+    }
+  }
+
   async updateDataSet(dataSetId: number, dataSet: DataSet): Promise<void> {
     const body: UpdateDataSetPayload = {
       id: dataSet.id,

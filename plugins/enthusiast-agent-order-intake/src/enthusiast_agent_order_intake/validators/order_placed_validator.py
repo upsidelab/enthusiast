@@ -1,8 +1,11 @@
-from enthusiast_common.agentic_execution import ExecutionInputType
+from enthusiast_common.agentic_execution import (
+    BaseExecutionValidator,
+    ExecutionInputType,
+    ValidatorFailureResponse,
+    ValidatorResponse,
+    ValidatorSuccessResponse,
+)
 from enthusiast_common.agentic_execution.memory import ToolScratchpad
-from enthusiast_common.agentic_execution.validators import BaseExecutionValidator
-from enthusiast_common.agentic_execution.validators.failure_response import ValidatorFailureResponse
-from enthusiast_common.agentic_execution.validators.success_response import ValidatorSuccessResponse
 
 from enthusiast_agent_order_intake.tools.place_order_tool import PlaceOrderTool
 
@@ -12,7 +15,7 @@ class OrderPlacedValidator(BaseExecutionValidator):
 
     _TOOL_NAME = PlaceOrderTool.NAME
 
-    def validate(self, response: str, _execution_input: ExecutionInputType, tool_scratchpad: ToolScratchpad):
+    def validate(self, response: str, _execution_input: ExecutionInputType, tool_scratchpad: ToolScratchpad) -> ValidatorResponse:
         entry = tool_scratchpad.read(self._TOOL_NAME)
 
         if entry is None:

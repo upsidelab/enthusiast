@@ -1,9 +1,12 @@
-from enthusiast_common.agentic_execution import BaseAgenticExecutionDefinition, ExecutionConversationInterface
-from enthusiast_common.agentic_execution.validators.is_valid_json_validator import IsValidJsonValidator
-from enthusiast_common.agentic_execution.validators.stop_execution_validator import StopExecutionValidator
+from enthusiast_common.agentic_execution import (
+    BaseAgenticExecutionDefinition,
+    ExecutionConversationInterface,
+    IsValidJsonValidator,
+    StopExecutionValidator,
+)
 
 from .execution_input import OrderIntakeAgenticExecutionInput
-from .validators import AllSkusOrderedValidator, OrderPlacedValidator
+from .validators import AllQuantitiesCorrectValidator, AllSkusOrderedValidator, OrderPlacedValidator
 
 
 class OrderIntakeAgenticExecutionDefinition(BaseAgenticExecutionDefinition):
@@ -21,6 +24,7 @@ class OrderIntakeAgenticExecutionDefinition(BaseAgenticExecutionDefinition):
         IsValidJsonValidator,
         OrderPlacedValidator,
         AllSkusOrderedValidator,
+        AllQuantitiesCorrectValidator,
     ]
 
     def execute(

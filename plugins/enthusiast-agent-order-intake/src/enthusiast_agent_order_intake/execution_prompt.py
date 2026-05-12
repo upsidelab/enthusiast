@@ -13,7 +13,6 @@ WORKFLOW:
 PLACE ORDER TOOL RULES:
 - Call the tool ONCE with ALL items in a single batch.
 - Do NOT call the tool separately for individual items.
-
 STOP EXECUTION RULES:
 - If further progress is impossible, call the stop_execution tool with a clear reason.
 - Examples of when to stop: no eCommerce connector is configured; a requested SKU does not
@@ -21,6 +20,6 @@ STOP EXECUTION RULES:
 
 OUTPUT RULES:
 - Return ONLY a valid JSON object. No prose, no explanation.
-- Format: {{"order_id": "<order_id>", "order_url": "<order_url>", "ordered_skus": ["<sku>", ...]}}
-- Include every SKU that was successfully included in the order in "ordered_skus".
+- Format: {{"order_id": "<order_id>", "order_url": "<order_url>", "ordered_items": {{"<sku>": <quantity>, ...}}}}
+- Include every SKU that was successfully ordered with its quantity in "ordered_items".
 """

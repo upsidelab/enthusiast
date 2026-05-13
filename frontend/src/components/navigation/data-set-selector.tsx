@@ -59,6 +59,7 @@ export function DataSetSelector() {
         <DropdownMenuLabel className="text-xs text-muted-foreground">
           Data Sets
         </DropdownMenuLabel>
+        <div className="max-h-64 overflow-y-auto">
         {dataSets.length === 0 ? (
           <DropdownMenuItem disabled className="text-muted-foreground">
             No data sets available
@@ -76,6 +77,7 @@ export function DataSetSelector() {
             </DropdownMenuItem>
           ))
         )}
+        </div>
         {account && account.isStaff &&
           <>
             <Separator className="my-2"/>

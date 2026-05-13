@@ -1,12 +1,7 @@
 from enthusiast_common.agentic_execution import ExecutionInputType
-from pydantic import BaseModel
-
-
-class OrderItem(BaseModel):
-    sku: str
-    quantity: int
 
 
 class OrderIntakeAgenticExecutionInput(ExecutionInputType):
-    items: list[OrderItem]
+    """Input for the order intake agentic execution."""
+
     additional_instructions: str | None = None

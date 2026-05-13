@@ -6,13 +6,14 @@ from enthusiast_common.agentic_execution import (
 )
 
 from .execution_input import OrderIntakeAgenticExecutionInput
-from .validators import AllQuantitiesCorrectValidator, AllSkusOrderedValidator, OrderPlacedValidator
+from .validators import OrderPlacedValidator
 
 
 class OrderIntakeAgenticExecutionDefinition(BaseAgenticExecutionDefinition):
     """Agentic execution definition for the order intake agent.
 
-    Searches for products by SKU and places a single order for all requested items.
+    Reads an attached purchase order document, extracts line items, and places
+    a single order for all items in the configured eCommerce platform.
     """
 
     EXECUTION_KEY = "order-intake"
@@ -23,8 +24,6 @@ class OrderIntakeAgenticExecutionDefinition(BaseAgenticExecutionDefinition):
         StopExecutionValidator,
         IsValidJsonValidator,
         OrderPlacedValidator,
-        AllSkusOrderedValidator,
-        AllQuantitiesCorrectValidator,
     ]
 
     def execute(
@@ -32,8 +31,6 @@ class OrderIntakeAgenticExecutionDefinition(BaseAgenticExecutionDefinition):
         input_data: OrderIntakeAgenticExecutionInput,
         conversation: ExecutionConversationInterface,
     ) -> str:
-        items_list = "\n".join(f"- SKU: {item.sku}, quantity: {item.quantity}" for item in input_data.items)
-        message = f"Place an order for the following items:\n{items_list}"
-        if input_data.additional_instructions:
-            message += f"\n\n{input_data.additional_instructions}"
-        return conversation.ask(message)
+        return conversation.ask(
+            input_data.additional_instructions or "Process the attached purchase order and create an order."
+        )

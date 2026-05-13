@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('agent', '0028_fix_unique_agent_name_constraint_exclude_deleted'),
+        ('agent', '0029_rename_agentexecution_to_agenticexecution'),
     ]
 
     operations = [

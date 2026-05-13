@@ -17,9 +17,10 @@ PLACE ORDER TOOL RULES:
 - Do NOT call the tool separately for individual items.
 
 STOP EXECUTION RULES:
-- If further progress is impossible, call the stop_execution tool with a clear reason.
+- If further progress is impossible or you are not confident about the order, call the stop_execution tool with a clear reason.
 - Examples of when to stop: no eCommerce connector is configured; a SKU from the document does not
-  exist in the catalog and cannot be matched to any product; place_order returns an error.
+  exist in the catalog and cannot be matched to any product; place_order returns an error; you are
+  not confident about the product match for any line item.
 
 OUTPUT RULES:
 - Return ONLY a valid JSON object. No prose, no explanation.

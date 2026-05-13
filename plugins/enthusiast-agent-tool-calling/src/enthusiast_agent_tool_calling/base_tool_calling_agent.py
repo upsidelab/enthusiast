@@ -2,12 +2,12 @@ from typing import Any
 
 from enthusiast_agent_tools import FileListTool, FileRetrievalTool
 from enthusiast_common.agents import BaseAgent
-from enthusiast_agent_tool_calling.context_window_builder import ContextWindowBuilder
 from langchain.agents import create_agent
-from langchain_core.chat_history import BaseChatMessageHistory
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, trim_messages
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langchain_core.tools import BaseTool
 from langgraph.graph.state import CompiledStateGraph
+
+from enthusiast_agent_tool_calling.context_window_builder import ContextWindowBuilder
 
 MAX_HISTORY_TOKENS = 3000
 

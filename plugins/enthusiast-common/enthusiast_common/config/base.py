@@ -118,6 +118,7 @@ class AgentConfig(ArbitraryTypeBaseModel, Generic[InjectorT]):
     system_prompt: str
     tools: Optional[list[FunctionToolConfig | LLMToolConfig | AgentToolConfig | FileToolConfig]] = None
     agent_callback_handler: Optional[AgentCallbackHandlerConfig] = None
+    memory_compactor_enabled: bool = False
 
 
 class AgentConfigWithDefaults(AgentConfig, Generic[InjectorT]):

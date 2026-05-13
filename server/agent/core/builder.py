@@ -223,7 +223,9 @@ class AgentBuilder(BaseAgentBuilder[AgentConfig]):
     def _build_chat_history(self) -> PersistentChatHistory:
         return PersistentChatHistory(self._repositories.conversation, self.conversation_id)
 
-    def _build_memory_compactor(self, chat_history: PersistentChatHistory) -> LLMMemoryCompactor:
+    def _build_memory_compactor(self, chat_history: PersistentChatHistory) -> Optional[LLMMemoryCompactor]:
+        if not self._config.memory_compactor_enabled:
+            return None
         llm = self._build_default_llm()
         return LLMMemoryCompactor(self._repositories.conversation, self.conversation_id, llm, chat_history)
 

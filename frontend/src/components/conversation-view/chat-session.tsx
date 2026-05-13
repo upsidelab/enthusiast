@@ -235,7 +235,7 @@ export function ChatSession({ pendingMessage }: ChatSessionProps) {
         setIsAgentLoading(false);
         setMessages((prev) => [
           ...prev,
-          { type: "ai", text: response.text, id: response.id }
+          { type: response.type === "system" ? "system" : "ai", text: response.text, id: response.id }
         ]);
         setIsLoading(false);
         scrollToLastMessage();

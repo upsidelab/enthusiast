@@ -15,11 +15,8 @@ class AllSkusOrderedValidator(BaseExecutionValidator):
     """Verifies that all SKUs from the input were included in the placed order."""
 
     def validate(self, response: str, execution_input: OrderIntakeAgenticExecutionInput, tool_scratchpad: ToolScratchpad) -> ValidatorResponse:
-        try:
-            data = json.loads(response)
-            ordered_items: dict = data.get("ordered_items", {})
-        except (json.JSONDecodeError, AttributeError):
-            return ValidatorSuccessResponse()
+        data = json.loads(response)
+        ordered_items: dict = data.get("ordered_items", {})
 
         expected_skus = [item.sku for item in execution_input.items]
         missing_skus = [sku for sku in expected_skus if sku not in ordered_items]

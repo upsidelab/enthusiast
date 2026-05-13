@@ -15,11 +15,8 @@ class AllQuantitiesCorrectValidator(BaseExecutionValidator):
     """Verifies that ordered quantities match the requested amounts for each SKU."""
 
     def validate(self, response: str, execution_input: OrderIntakeAgenticExecutionInput, tool_scratchpad: ToolScratchpad) -> ValidatorResponse:
-        try:
-            data = json.loads(response)
-            ordered_items: dict = data.get("ordered_items", {})
-        except (json.JSONDecodeError, AttributeError):
-            return ValidatorSuccessResponse()
+        data = json.loads(response)
+        ordered_items: dict = data.get("ordered_items", {})
 
         mismatched = [
             f"{item.sku} (expected {item.quantity}, got {ordered_items[item.sku]})"

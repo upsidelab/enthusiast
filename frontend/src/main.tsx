@@ -11,6 +11,7 @@ import { LoginPage } from "@/pages/login.tsx";
 import { authenticationProviderInstance } from "@/lib/authentication-provider.ts";
 import { ApiConnectionIndex } from "@/pages/service-accounts/index.tsx";
 import { NoDataSets } from "@/pages/no-data-sets.tsx";
+import { ErrorPage } from "@/pages/error.tsx";
 import { ApiClient } from "@/lib/api.ts";
 import { NewDataSet } from "@/pages/data-sets/new.tsx";
 import { DataSetsIndex } from "@/pages/data-sets";
@@ -22,8 +23,8 @@ import { ConfigureDataSetDocumentSource } from "@/pages/data-sets/(id)/document-
 import { UsersIndex } from "@/pages/users";
 import { OnboardingIndex } from "@/pages/onboarding";
 import AgentsPage from "@/pages/data-sets/(id)/agents";
-import { AgentExecutionsPage } from "@/pages/data-sets/(id)/agent-executions/index.tsx";
-import { AgentExecutionDetailPage } from "@/pages/data-sets/(id)/agent-executions/(id)/index.tsx";
+import { AgenticExecutionsPage } from "@/pages/data-sets/(id)/agentic-executions/index.tsx";
+import { AgenticExecutionDetailPage } from "@/pages/data-sets/(id)/agentic-executions/(id)/index.tsx";
 
 const api = new ApiClient(authenticationProviderInstance);
 
@@ -54,6 +55,7 @@ const router = createBrowserRouter([
     path: "/",
     element: <App />,
     loader: protectedLoginLoader,
+    errorElement: <ErrorPage />,
     children: [
       {
         path: '/data-sets/:id/products',
@@ -121,12 +123,12 @@ const router = createBrowserRouter([
         element: <AgentsPage />
       },
       {
-        path: '/data-sets/:id/agent-executions',
-        element: <AgentExecutionsPage />
+        path: '/data-sets/:id/agentic-executions',
+        element: <AgenticExecutionsPage />
       },
       {
-        path: '/data-sets/:id/agent-executions/:executionId',
-        element: <AgentExecutionDetailPage />
+        path: '/data-sets/:id/agentic-executions/:executionId',
+        element: <AgenticExecutionDetailPage />
       }
     ]
   },

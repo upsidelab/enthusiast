@@ -1,5 +1,4 @@
 import os
-from datetime import datetime
 
 from celery.result import AsyncResult
 from django.conf import settings
@@ -39,6 +38,7 @@ from agent.serializers.conversation import (
     MessageFeedbackSerializer,
     SupportedFileTypesSerializer,
 )
+from agent.services import ConversationFileMessageService
 from agent.tasks import process_file_upload_task, respond_to_user_message_task
 from catalog.models import DataSet
 
@@ -116,29 +116,22 @@ class ConversationView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         if not request.user.has_dataset_access(conversation.data_set):
             return Response({"detail": "No dataset access."}, status=status.HTTP_403_FORBIDDEN)
-        if conversation.agent.deleted_at is not None or hasattr(conversation, "agent_execution"):
+        if conversation.agent.deleted_at is not None or hasattr(conversation, "agentic_execution"):
             return Response({"detail": "Conversation locked."}, status=status.HTTP_400_BAD_REQUEST)
 
         if file_ids := serializer.validated_data.get("file_ids"):
             files = ConversationFile.objects.filter(conversation_id=conversation_id, pk__in=file_ids, is_hidden=True)
             for file in files:
-                Message.objects.create(
-                    conversation_id=conversation.id,
-                    created_at=datetime.now(),
-                    type=Message.MessageType.FILE,
-                    file_name=file.file.name.split(".")[0],
-                    file_type=file.file.name.split(".")[-1],
-                    text=f"Uploaded {file.file.name} with id: {file.pk}",
-                )
+                ConversationFileMessageService.create_for_file(file)
                 file.is_hidden = False
                 file.save()
 
         data_set_id = serializer.validated_data.get("data_set_id")
         question_message = serializer.validated_data.get("question_message")
-        streaming = serializer.validated_data.get("streaming")
         data_set = Conversation.objects.get(id=conversation_id).data_set
         data_set_repo = DjangoDataSetRepository(DataSet)
         language_model_provider_class = LanguageModelRegistry(data_set_repo).provider_for_dataset(data_set.id)
+        streaming = language_model_provider_class.STREAMING_AVAILABLE and serializer.validated_data.get("streaming")
         task = respond_to_user_message_task.apply_async(
             kwargs={
                 "conversation_id": conversation_id,
@@ -150,7 +143,7 @@ class ConversationView(APIView):
         )
 
         return Response(
-            {"task_id": task.id, "streaming": language_model_provider_class.STREAMING_AVAILABLE and streaming},
+            {"task_id": task.id, "streaming": streaming},
             status=status.HTTP_202_ACCEPTED,
         )
 
@@ -176,7 +169,7 @@ class ConversationListView(ListAPIView):
         data_set_id = self.request.query_params.get("data_set_id")
         agent_id = self.request.query_params.get("agent_id")
 
-        qs = Conversation.objects.filter(user=user).exclude(agent_execution__isnull=False)
+        qs = Conversation.objects.filter(user=user).exclude(agentic_execution__isnull=False)
 
         if data_set_id:
             qs = qs.filter(data_set_id=data_set_id)

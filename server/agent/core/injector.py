@@ -1,5 +1,6 @@
 from typing import Optional
 
+from enthusiast_common.agentic_execution.memory import ToolScratchpad
 from enthusiast_common.connectors import ECommercePlatformConnector
 from enthusiast_common.injectors import BaseInjector
 from enthusiast_common.memory import BaseMemoryCompactor
@@ -19,6 +20,7 @@ class Injector(BaseInjector):
         ecommerce_platform_connector: Optional[ECommercePlatformConnector],
         repositories: RepositoriesInstances,
         chat_history: PersistentChatHistory,
+        tool_scratchpad: Optional[ToolScratchpad],
         memory_compactor: Optional[LLMMemoryCompactor] = None,
     ):
         super().__init__(repositories)
@@ -27,6 +29,7 @@ class Injector(BaseInjector):
         self._ecommerce_platform_connector = ecommerce_platform_connector
         self._chat_history = chat_history
         self._memory_compactor = memory_compactor
+        self._tool_scratchpad = tool_scratchpad or ToolScratchpad()
 
     @property
     def document_retriever(self) -> BaseVectorStoreRetriever[DocumentChunk]:
@@ -47,3 +50,7 @@ class Injector(BaseInjector):
     @property
     def memory_compactor(self) -> Optional[BaseMemoryCompactor]:
         return self._memory_compactor
+
+    @property
+    def tool_scratchpad(self) -> ToolScratchpad:
+        return self._tool_scratchpad

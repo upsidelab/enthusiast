@@ -1,9 +1,11 @@
 from typing import Any
 
+from enthusiast_agent_tools import FileListTool, FileRetrievalTool
 from enthusiast_common.agents import BaseAgent
 from enthusiast_agent_tool_calling.context_window_builder import ContextWindowBuilder
 from langchain.agents import create_agent
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from langchain_core.chat_history import BaseChatMessageHistory
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, trim_messages
 from langchain_core.tools import BaseTool
 from langgraph.graph.state import CompiledStateGraph
 
@@ -11,6 +13,17 @@ MAX_HISTORY_TOKENS = 3000
 
 
 class BaseToolCallingAgent(BaseAgent):
+    DEFAULT_FILE_TOOLS = [FileListTool, FileRetrievalTool]
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        if getattr(cls, "FILE_UPLOAD", False):
+            from enthusiast_common.config import FileToolConfig
+
+            cls.TOOLS = getattr(cls, "TOOLS", []) + [
+                FileToolConfig(tool_class=file_tool_class) for file_tool_class in cls.DEFAULT_FILE_TOOLS
+            ]
+
     def get_answer(self, input_text: str) -> str:
         history = self._injector.chat_history
         compactor = self._injector.memory_compactor

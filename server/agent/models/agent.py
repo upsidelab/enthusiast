@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 from django.utils import timezone
 
 from catalog.models import DataSet
@@ -33,7 +34,7 @@ class Agent(models.Model):
     all_objects = models.Manager()
 
     class Meta:
-        constraints = [models.UniqueConstraint(fields=["dataset", "name"], name="unique_agent_name_per_dataset")]
+        constraints = [models.UniqueConstraint(fields=["dataset", "name"], name="unique_agent_name_per_dataset", condition=Q(deleted_at__isnull=True))]
 
     def __str__(self):
         return self.name

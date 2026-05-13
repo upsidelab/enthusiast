@@ -4,6 +4,7 @@ from enthusiast_common.config import AgentConfigWithDefaults
 from .agent import OrderIntakeAgent
 from .prompt import ORDER_INTAKE_TOOL_CALLING_AGENT_PROMPT
 
+
 class OrderIntakeConfigProvider(BaseAgentConfigProvider):
     def get_config(self, config_type: ConfigType = ConfigType.CONVERSATION) -> AgentConfigWithDefaults:
         return AgentConfigWithDefaults(

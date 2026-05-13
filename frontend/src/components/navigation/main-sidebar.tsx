@@ -99,13 +99,15 @@ export function MainSidebar() {
           title: "Getting Started",
           link: "https://upsidelab.io/tools/enthusiast/docs/getting-started/import-test-data",
           key: "documentation-getting-started",
-          icon: <SparklesIcon />
+          icon: <SparklesIcon />,
+          external: true
         },
         {
           title: "API Documentation",
           link: `${import.meta.env.VITE_API_BASE}/api/docs`,
           key: "api-documentation",
-          icon: <BookTextIcon />
+          icon: <BookTextIcon />,
+          external: true
         }
       ]
     },
@@ -118,9 +120,9 @@ export function MainSidebar() {
         icon: <BotMessageSquareIcon />
       },
       {
-        title: "Agent Executions",
-        link: `/data-sets/${dataSetId}/agent-executions`,
-        key: "agent-executions",
+        title: "Agentic Executions",
+        link: `/data-sets/${dataSetId}/agentic-executions`,
+        key: "agentic-executions",
         icon: <PlayIcon />
       },
       {

@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from django.test import override_settings
@@ -8,6 +8,7 @@ from pydantic import Field
 from rest_framework import status
 
 from agent.core.registries.agents.agent_registry import AgentRegistry
+from agent.core.registries.embeddings.embedding_provider_registry import EmbeddingProviderRegistry
 from agent.models import Agent
 from catalog.models import DataSet
 
@@ -78,3 +79,41 @@ class TestDataSetListViewPost:
         mock_agent_registry.assert_called()
 
         assert Agent.objects.filter(dataset=dataset).exists()
+
+    @patch.object(EmbeddingProviderRegistry, "provider_class_by_name")
+    def test_dataset_creation_with_constrained_vector_size_success(
+        self, mock_provider_class_by_name, admin_api_client, url
+    ):
+        mock_provider = MagicMock()
+        mock_provider.vector_size_constraints.return_value = {"constrained-embed": [1024]}
+        mock_provider_class_by_name.return_value = mock_provider
+
+        payload = {
+            "name": "Constrained DataSet",
+            "embedding_provider": "MockProvider",
+            "embedding_model": "constrained-embed",
+            "embedding_vector_dimensions": 1024,
+        }
+        response = admin_api_client.post(url, payload, format="json")
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert DataSet.objects.filter(name="Constrained DataSet").exists()
+
+    @patch.object(EmbeddingProviderRegistry, "provider_class_by_name")
+    def test_dataset_creation_with_constrained_vector_size_failure(
+        self, mock_provider_class_by_name, admin_api_client, url
+    ):
+        mock_provider = MagicMock()
+        mock_provider.vector_size_constraints.return_value = {"constrained-embed": [1024]}
+        mock_provider_class_by_name.return_value = mock_provider
+
+        payload = {
+            "name": "Constrained DataSet",
+            "embedding_provider": "MockProvider",
+            "embedding_model": "constrained-embed",
+            "embedding_vector_dimensions": 512,
+        }
+        response = admin_api_client.post(url, payload, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert not DataSet.objects.filter(name="Constrained DataSet").exists()

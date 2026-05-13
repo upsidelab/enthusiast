@@ -33,13 +33,14 @@ class AnthropicDocumentContent(BaseContent):
 class AnthropicLanguageModelProvider(LanguageModelProvider):
 
     NAME = "Anthropic"
-    STREAMING_REQUIRES_MESSAGE_BUFFERING = True
+    # Anthropic models support streaming at the API level, but they emit intermediate text tokens
+    # before tool calls that are indistinguishable from final-message text tokens. Since our system
+    # has no mechanism to filter these out, we treat Anthropic as non-streaming to avoid surfacing
+    # partial tool-call preamble to the user.
+    STREAMING_AVAILABLE = False
 
     def provide_language_model(self, callbacks: list[BaseCallbackHandler] | None = None) -> BaseLanguageModel:
         return ChatAnthropic(model=self._model, callbacks=callbacks)
-
-    def provide_streaming_language_model(self, callbacks: list[BaseCallbackHandler] | None = None) -> BaseLanguageModel:
-        return ChatAnthropic(model=self._model, callbacks=callbacks, streaming=True)
 
     def model_name(self) -> str:
         return self._model

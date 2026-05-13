@@ -1,9 +1,9 @@
+import json
 from typing import Any, Optional
 
 from enthusiast_common import ProductDetails, ProductSourcePlugin
 from enthusiast_common.utils import RequiredFieldsModel
 from pydantic import Field
-import json
 
 from .medusa_api_client import MedusaAPIClient
 

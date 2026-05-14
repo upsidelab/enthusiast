@@ -107,6 +107,7 @@ export function EditDataSetForm() {
         disabledFields={['embeddingProvider', 'embeddingModel', 'embeddingVectorSize']}
       />
       <div className="mt-8 border-t pt-6">
+        <h3 className="text-sm font-semibold text-destructive mb-4">Danger Zone</h3>
         <Button variant="destructive" onClick={() => setDeleteModalOpen(true)}>Delete Data Set</Button>
       </div>
       <DeleteDataSetModal

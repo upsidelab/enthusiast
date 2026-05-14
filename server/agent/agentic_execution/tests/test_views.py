@@ -13,6 +13,7 @@ from agent.agentic_execution.registry import AgenticExecutionDefinitionRegistry
 from agent.agentic_execution.services import FileUploadNotSupportedError, UnsupportedFileTypeError
 from agent.models.agent import Agent
 from agent.models.agentic_execution import AgenticExecution
+from agent.models.conversation import Conversation
 from catalog.models import DataSet
 
 pytestmark = pytest.mark.django_db
@@ -72,8 +73,9 @@ def agent(dataset):
 
 
 @pytest.fixture
-def execution(agent):
-    return baker.make(AgenticExecution, agent=agent, input={"required_field": "hello"})
+def execution(agent, user, dataset):
+    conversation = baker.make(Conversation, user=user, agent=agent, data_set=dataset)
+    return baker.make(AgenticExecution, agent=agent, conversation=conversation, input={"required_field": "hello"})
 
 
 class TestAgenticExecutionListView:
@@ -88,11 +90,13 @@ class TestAgenticExecutionListView:
         assert len(response.data["results"]) == 1
         assert response.data["results"][0]["id"] == execution.id
 
-    def test_filters_by_agent_id(self, api_client, dataset, url):
+    def test_filters_by_agent_id(self, api_client, user, dataset, url):
         agent1 = baker.make(Agent, deleted_at=None, dataset=dataset)
         agent2 = baker.make(Agent, deleted_at=None, dataset=dataset)
-        exec1 = baker.make(AgenticExecution, agent=agent1, input={})
-        baker.make(AgenticExecution, agent=agent2, input={})
+        conv1 = baker.make(Conversation, user=user, agent=agent1, data_set=dataset)
+        conv2 = baker.make(Conversation, user=user, agent=agent2, data_set=dataset)
+        exec1 = baker.make(AgenticExecution, agent=agent1, conversation=conv1, input={})
+        baker.make(AgenticExecution, agent=agent2, conversation=conv2, input={})
 
         response = api_client.get(url, {"agent_id": agent1.id})
 
@@ -105,9 +109,21 @@ class TestAgenticExecutionListView:
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_returns_results_ordered_newest_first(self, api_client, agent, url):
-        older = baker.make(AgenticExecution, agent=agent, input={})
-        newer = baker.make(AgenticExecution, agent=agent, input={})
+    def test_excludes_executions_belonging_to_other_user(self, api_client, agent, dataset, url):
+        other_user = baker.make(User)
+        conversation = baker.make(Conversation, user=other_user, agent=agent, data_set=dataset)
+        baker.make(AgenticExecution, agent=agent, conversation=conversation, input={})
+
+        response = api_client.get(url)
+
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 0
+
+    def test_returns_results_ordered_newest_first(self, api_client, user, agent, dataset, url):
+        conv1 = baker.make(Conversation, user=user, agent=agent, data_set=dataset)
+        conv2 = baker.make(Conversation, user=user, agent=agent, data_set=dataset)
+        older = baker.make(AgenticExecution, agent=agent, conversation=conv1, input={})
+        newer = baker.make(AgenticExecution, agent=agent, conversation=conv2, input={})
 
         response = api_client.get(url)
 
@@ -150,6 +166,16 @@ class TestAgenticExecutionDetailView:
         response = APIClient().get(url)
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_returns_404_for_other_users_execution(self, api_client, agent, dataset):
+        other_user = baker.make(User)
+        conversation = baker.make(Conversation, user=other_user, agent=agent, data_set=dataset)
+        other_execution = baker.make(AgenticExecution, agent=agent, conversation=conversation, input={})
+        url = reverse("agentic-execution-detail", kwargs={"pk": other_execution.pk})
+
+        response = api_client.get(url)
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
 class TestAgenticExecutionDefinitionTypesView:

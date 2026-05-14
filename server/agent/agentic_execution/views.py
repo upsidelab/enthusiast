@@ -137,7 +137,7 @@ class AgenticExecutionListView(ListAPIView):
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        qs = AgenticExecution.objects.select_related("agent")
+        qs = AgenticExecution.objects.select_related("agent").filter(conversation__user=self.request.user)
         dataset_id = self.request.query_params.get("dataset_id")
         if dataset_id:
             qs = qs.filter(agent__dataset_id=dataset_id)
@@ -167,4 +167,6 @@ class AgenticExecutionDetailView(RetrieveAPIView):
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        return AgenticExecution.objects.select_related("agent", "conversation")
+        return AgenticExecution.objects.select_related("agent", "conversation").filter(
+            conversation__user=self.request.user
+        )

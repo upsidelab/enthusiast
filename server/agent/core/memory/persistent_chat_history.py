@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from enthusiast_common.repositories import BaseConversationRepository
 from langchain_core.chat_history import BaseChatMessageHistory
@@ -78,6 +78,26 @@ class PersistentChatHistory(BaseChatMessageHistory):
         for msg in messages:
             message_dicts.append(self._parse_message_to_dict(msg))
         return messages_from_dict(message_dicts)
+
+    @property
+    def last_message_database_id(self) -> Optional[int]:
+        """Return the DB primary key of the most recent message in this conversation, or None."""
+        last = self._conversation.messages.filter(answer_failed=False).order_by("id").last()
+        return last.id if last else None
+
+    def messages_after(self, message_id: Optional[int]) -> list[BaseMessage]:
+        """Return messages after the given message ID.
+
+        If message_id is None, returns all messages. Used by the memory compactor to fetch
+        only messages that have not yet been included in the conversation summary.
+        """
+        queryset = self._conversation.messages.filter(answer_failed=False).order_by("id")
+        if message_id is not None:
+            queryset = queryset.filter(id__gt=message_id)
+        db_messages = list(queryset)
+        if not db_messages:
+            return []
+        return messages_from_dict([self._parse_message_to_dict(m) for m in db_messages])
 
     @staticmethod
     def _parse_message_to_dict(message: BaseMessage) -> Dict[str, Any]:

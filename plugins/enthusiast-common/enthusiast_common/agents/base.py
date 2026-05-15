@@ -68,8 +68,11 @@ class BaseAgent(ABC, ExtraArgsClassBase):
         return {}
 
     def set_runtime_arguments(self, runtime_arguments: Any) -> None:
-        tool_config = runtime_arguments.pop("tool_config", {})
+        """Inject stored config values into agent fields and named tool instances."""
+        tool_config = runtime_arguments.get("tool_config", {})
         for key, value in runtime_arguments.items():
+            if key == "tool_config":
+                continue
             class_field_key = key.upper()
             field = getattr(self, class_field_key)
             if field is None:

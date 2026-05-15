@@ -1,6 +1,10 @@
 from unittest.mock import MagicMock
 from enthusiast_common.agents.base import BaseAgent
 
+# Pure-Python unit tests — no Django DB required, no pytest.mark.django_db needed.
+# _StubAgent is a minimal non-metaclass object used to call BaseAgent.set_runtime_arguments
+# directly as an unbound method, bypassing the AgentExtraArgsClassBaseMeta validation.
+
 
 class _StubAgent:
     """Minimal agent-like object for testing set_runtime_arguments without metaclass validation."""

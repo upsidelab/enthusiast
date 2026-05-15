@@ -28,6 +28,11 @@ export function AgentConfigurationForm({
 
   useEffect(() => {
     const checkForSectionErrors = (section: string, fields: Record<string, unknown> | Record<string, unknown>[]) => {
+      if (section === 'tool_config' && fields && typeof fields === 'object' && !Array.isArray(fields)) {
+        return Object.entries(fields as Record<string, Record<string, unknown>>).some(([toolName, toolFields]) =>
+          Object.keys(toolFields || {}).some(key => fieldErrors[`tool_config_${toolName}_${key}`])
+        );
+      }
       if (Array.isArray(fields)) {
         return fields.some(obj => {
           if (obj && typeof obj === 'object') {
@@ -120,9 +125,30 @@ export function AgentConfigurationForm({
     });
   };
 
+  const renderToolConfigFields = (fields: Record<string, Record<string, unknown>>) => {
+    return Object.entries(fields).map(([toolName, toolFields]) => {
+      const sFields = toolFields && typeof toolFields === 'object' ? toolFields : {};
+      if (Object.keys(sFields).length === 0) return null;
+      return (
+        <div key={toolName} className="pl-4 border-l-2 border-muted bg-muted/20 rounded-r-md p-3">
+          <div className="space-y-3">
+            {Object.entries(sFields).map(([key, schema]) => {
+              const configKey = `tool_config_${toolName}_${key}`;
+              return typeof key === 'string' ? renderConfigField(key, schema, configKey) : null;
+            })}
+          </div>
+        </div>
+      );
+    });
+  };
+
   const renderConfigSection = (section: string, fields: Record<string, unknown> | Record<string, unknown>[]) => {
     let hasFields = false;
-    if (Array.isArray(fields)) {
+    if (section === 'tool_config' && !Array.isArray(fields) && fields && typeof fields === 'object') {
+      hasFields = Object.values(fields as Record<string, Record<string, unknown>>).some(
+        toolFields => toolFields && typeof toolFields === 'object' && Object.keys(toolFields).length > 0
+      );
+    } else if (Array.isArray(fields)) {
       hasFields = fields.some(obj => obj && typeof obj === 'object' && Object.keys(obj).length > 0);
     } else if (fields && typeof fields === 'object') {
       hasFields = Object.keys(fields).length > 0;
@@ -132,9 +158,9 @@ export function AgentConfigurationForm({
     const sectionTitle = String(section).replace(/_/g, ' ');
 
     return (
-      <Collapsible 
-        key={section} 
-        open={openSections[section]} 
+      <Collapsible
+        key={section}
+        open={openSections[section]}
         onOpenChange={(open) => setOpenSections({ ...openSections, [section]: open })}
       >
         <CollapsibleTrigger asChild>
@@ -149,7 +175,9 @@ export function AgentConfigurationForm({
         </CollapsibleTrigger>
         <CollapsibleContent className="space-y-4 mt-2">
           <div className="pl-4 space-y-4">
-            {Array.isArray(fields)
+            {section === 'tool_config' && !Array.isArray(fields)
+              ? renderToolConfigFields(fields as Record<string, Record<string, unknown>>)
+              : Array.isArray(fields)
               ? renderToolsArrayFields(section, fields)
               : renderRegularFields(section, fields as Record<string, unknown>)}
           </div>

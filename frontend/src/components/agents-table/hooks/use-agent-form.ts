@@ -94,7 +94,13 @@ export function useAgentForm(
     const createDefaultConfigValues = (configSections: Record<string, unknown>) => {
       const defaults: Record<string, string | number | boolean> = {};
       Object.entries(configSections).forEach(([section, sectionData]) => {
-        if (Array.isArray(sectionData)) {
+        if (section === 'tool_config' && sectionData && typeof sectionData === 'object' && !Array.isArray(sectionData)) {
+          Object.entries(sectionData as Record<string, Record<string, unknown>>).forEach(([toolName, toolFields]) => {
+            if (toolFields && typeof toolFields === 'object') {
+              Object.keys(toolFields).forEach(k => { defaults[`tool_config_${toolName}_${k}`] = ""; });
+            }
+          });
+        } else if (Array.isArray(sectionData)) {
           sectionData.forEach(obj => {
             if (obj && typeof obj === 'object') {
               Object.keys(obj).forEach(k => { defaults[`${section}_${k}`] = ""; });
@@ -138,10 +144,26 @@ export function useAgentForm(
     setConfig(prev => ({ ...prev, [key]: value }));
   };
 
+  const buildToolConfigDictConfig = (fields: Record<string, Record<string, unknown>>) => {
+    const out: Record<string, Record<string, string | number | boolean>> = {};
+    Object.entries(fields).forEach(([toolName, toolFields]) => {
+      out[toolName] = {};
+      if (toolFields && typeof toolFields === 'object') {
+        Object.keys(toolFields).forEach(k => {
+          const v = config[`tool_config_${toolName}_${k}`];
+          if (v !== '' && v !== null && v !== undefined) out[toolName][k] = v;
+        });
+      }
+    });
+    return out;
+  };
+
   const buildNestedConfigFromFlattened = () => {
     const configObj: Record<string, unknown> = {};
     Object.entries(agentConfigSections).forEach(([section, fields]) => {
-      if (Array.isArray(fields)) {
+      if (section === 'tool_config' && fields && typeof fields === 'object' && !Array.isArray(fields)) {
+        configObj[section] = buildToolConfigDictConfig(fields as Record<string, Record<string, unknown>>);
+      } else if (Array.isArray(fields)) {
         configObj[section] = buildToolsArrayConfig(section, fields);
       } else if (fields && typeof fields === 'object') {
         configObj[section] = buildRegularSectionConfig(section, fields);
@@ -203,7 +225,7 @@ export function useAgentForm(
           parseSingleConfigSection(sectionName, (configErrors as Record<string, unknown>)[sectionName], newFieldErrors);
         });
         
-        parseToolsArrayErrors((configErrors as Record<string, unknown>).tools, newFieldErrors);
+        parseToolConfigErrors((configErrors as Record<string, unknown>).tool_config, newFieldErrors);
       }
     }
     
@@ -218,12 +240,12 @@ export function useAgentForm(
     }
   };
 
-  const parseToolsArrayErrors = (toolsErrors: unknown, newFieldErrors: Record<string, string>) => {
-    if (toolsErrors && Array.isArray(toolsErrors)) {
-      toolsErrors.forEach((toolErrors: unknown) => {
+  const parseToolConfigErrors = (toolConfigErrors: unknown, newFieldErrors: Record<string, string>) => {
+    if (toolConfigErrors && typeof toolConfigErrors === 'object' && !Array.isArray(toolConfigErrors)) {
+      Object.entries(toolConfigErrors as Record<string, unknown>).forEach(([toolName, toolErrors]) => {
         if (toolErrors && typeof toolErrors === 'object') {
           Object.entries(toolErrors as Record<string, unknown>).forEach(([field, error]) => {
-            newFieldErrors[`tools_${field}`] = Array.isArray(error) ? String(error[0]) : String(error);
+            newFieldErrors[`tool_config_${toolName}_${field}`] = Array.isArray(error) ? String(error[0]) : String(error);
           });
         }
       });

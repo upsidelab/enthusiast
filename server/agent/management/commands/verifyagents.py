@@ -34,7 +34,7 @@ class Command(BaseCommand):
 
             try:
                 self._validate_agent_config(agent_class, config, tool_config)
-            except ValidationError:
+            except (ValidationError, TypeError):
                 corrupted_count += 1
                 agent.corrupted = True
                 agent.save(update_fields=["corrupted"])

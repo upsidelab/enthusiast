@@ -6,7 +6,7 @@ export type AgentChoice = {
   key: string;
   name: string;
   agent_args: Record<string, string>;
-  prompt_inputs: Record<string, string>;
+  prompt_input: Record<string, string>;
   prompt_extension: Record<string, string>;
   tool_config: Record<string, Record<string, string>>;
 };

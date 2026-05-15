@@ -226,7 +226,7 @@ export function useAgentForm(
 
       parseToolConfigErrors((configErrors as Record<string, unknown>).tool_config, newFieldErrors);
     }
-
+    
     return newFieldErrors;
   };
 

@@ -7,14 +7,14 @@ export function flattenConfigForForm(
   sectionMapping?: Record<string, string>
 ): Record<string, string | number | boolean> {
   const flattenedConfig: Record<string, string | number | boolean> = {};
-
+  
   if (!config || typeof config !== 'object') {
     return flattenedConfig;
   }
-
+  
   Object.entries(config as Record<string, unknown>).forEach(([section, sectionData]) => {
     const frontendSection = sectionMapping?.[section] || section;
-
+    
     if (section === 'tool_config' && sectionData && typeof sectionData === 'object' && !Array.isArray(sectionData)) {
       // 2-level: {toolName: {fieldName: value}}
       Object.entries(sectionData as Record<string, Record<string, unknown>>).forEach(([toolName, toolFields]) => {
@@ -62,7 +62,7 @@ export function flattenConfigForForm(
       });
     }
   });
-
+  
   return flattenedConfig;
 }
 

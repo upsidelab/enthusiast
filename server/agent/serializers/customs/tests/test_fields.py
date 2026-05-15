@@ -228,3 +228,37 @@ def test_pydantic_model_tool_config_field_invalid_field_values(mock_import, mock
 
     assert "dummy_tool" in serializer.errors["config"]
     assert "dummy_tool_2" in serializer.errors["config"]
+
+
+@patch("agent.core.registries.agents.agent_registry.settings")
+@patch("agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_type")
+def test_pydantic_model_tool_config_field_tool_without_config_args_is_invalid_key(
+    mock_import, mock_settings, available_agents
+):
+    """A tool with CONFIGURATION=None must not be a valid key."""
+
+    class NoConfigTool:
+        NAME = "no_config_tool"
+        CONFIGURATION = None
+
+    class MockToolConfigEntry:
+        def __init__(self, tool_class):
+            self.tool_class = tool_class
+
+    mock_settings.AVAILABLE_AGENTS = available_agents
+    mock_import.return_value = type(
+        "Agent",
+        (),
+        {
+            "TOOLS": [
+                MockToolConfigEntry(DummyTool),
+                MockToolConfigEntry(NoConfigTool),
+            ]
+        },
+    )
+    input_data = {"config": {"no_config_tool": {}}}
+    serializer = get_tool_config_serializer(agent_field_name="TOOLS", tool_field_name="CONFIGURATION", data=input_data)
+
+    with pytest.raises(serializers.ValidationError) as e:
+        serializer.is_valid(raise_exception=True)
+    assert "Unknown tool" in str(e.value)

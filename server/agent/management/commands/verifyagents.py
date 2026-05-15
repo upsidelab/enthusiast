@@ -30,11 +30,11 @@ class Command(BaseCommand):
                 agent_types_cache[agent.agent_type] = agent_class
 
             config = deepcopy(agent.config)
-            tools_config = config.pop("tools", [])
+            tool_config = config.pop("tool_config", {})
 
             try:
-                self._validate_agent_config(agent_class, config, tools_config)
-            except (ValidationError, IndexError):
+                self._validate_agent_config(agent_class, config, tool_config)
+            except ValidationError:
                 corrupted_count += 1
                 agent.corrupted = True
                 agent.save(update_fields=["corrupted"])
@@ -42,7 +42,7 @@ class Command(BaseCommand):
         print(f"Corrupted agent configurations found: {corrupted_count}")
 
     @staticmethod
-    def _validate_agent_config(agent_class, config, tools_config):
+    def _validate_agent_config(agent_class, config, tool_config):
         for key, value in config.items():
             class_field_key = key.upper()
             field = getattr(agent_class, class_field_key, None)
@@ -50,11 +50,12 @@ class Command(BaseCommand):
                 continue
             field(**value)
 
-        if len(agent_class.TOOLS) != len(tools_config):
-            raise ValidationError.from_exception_data("Agent configurations do not match", line_errors=[])
-
-        for index, tool in enumerate(agent_class.TOOLS):
-            field = getattr(tool, "CONFIGURATION_ARGS", None)
+        for tool_config_entry in agent_class.TOOLS:
+            tool_class = tool_config_entry.tool_class
+            field = getattr(tool_class, "CONFIGURATION_ARGS", None)
             if field is None:
                 continue
-            field(**tools_config[index])
+            tool_name = tool_class.NAME
+            if tool_name not in tool_config:
+                raise ValidationError.from_exception_data("Agent configurations do not match", line_errors=[])
+            field(**tool_config[tool_name])

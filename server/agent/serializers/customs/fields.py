@@ -130,6 +130,7 @@ class PydanticModelToolConfigField(BasePydanticModelField):
             tc.tool_class.NAME: tc.tool_class
             for tc in tool_config_list
             if getattr(tc.tool_class, "NAME", None) is not None
+            and getattr(tc.tool_class, self.tool_field_name, None) is not None
         }
 
         validated = {}

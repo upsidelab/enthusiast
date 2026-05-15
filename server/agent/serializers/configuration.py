@@ -4,7 +4,7 @@ from utils.serializers import ExtraArgDetailSerializer, ParentDataContextSeriali
 
 from agent.core.registries.agents.agent_registry import AgentRegistry
 from agent.models import Agent
-from agent.serializers.customs.fields import PydanticModelField, PydanticModelToolConfigField, PydanticModelToolListField
+from agent.serializers.customs.fields import PydanticModelField, PydanticModelToolConfigField
 from catalog.models import DataSet
 
 

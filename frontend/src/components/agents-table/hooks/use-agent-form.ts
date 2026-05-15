@@ -213,22 +213,20 @@ export function useAgentForm(
   };
 
   const parseFieldErrors = (errorData: unknown) => {
-    const newFieldErrors = parseFieldErrorsBase(errorData);
-    
+    const { config: configErrors, ...topLevelErrors } = (errorData as Record<string, unknown>) ?? {};
+    const newFieldErrors = parseFieldErrorsBase(topLevelErrors);
+
     // Add agent-specific error parsing for complex sections
-    if (typeof errorData === 'object' && errorData && 'config' in errorData) {
-      const configErrors = (errorData as { config: unknown }).config;
-      if (typeof configErrors === 'object' && configErrors) {
-        const sectionNames = ['agent_args', 'prompt_input', 'prompt_extension'];
-        
-        sectionNames.forEach(sectionName => {
-          parseSingleConfigSection(sectionName, (configErrors as Record<string, unknown>)[sectionName], newFieldErrors);
-        });
-        
-        parseToolConfigErrors((configErrors as Record<string, unknown>).tool_config, newFieldErrors);
-      }
+    if (typeof configErrors === 'object' && configErrors) {
+      const sectionNames = ['agent_args', 'prompt_input', 'prompt_extension'];
+
+      sectionNames.forEach(sectionName => {
+        parseSingleConfigSection(sectionName, (configErrors as Record<string, unknown>)[sectionName], newFieldErrors);
+      });
+
+      parseToolConfigErrors((configErrors as Record<string, unknown>).tool_config, newFieldErrors);
     }
-    
+
     return newFieldErrors;
   };
 

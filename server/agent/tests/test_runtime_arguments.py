@@ -1,4 +1,5 @@
 from unittest.mock import MagicMock
+
 from enthusiast_common.agents.base import BaseAgent
 
 # Pure-Python unit tests — no Django DB required, no pytest.mark.django_db needed.

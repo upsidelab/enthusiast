@@ -254,10 +254,13 @@ class AgentTypesView(APIView):
                     "agent_args": get_model_descriptor_from_class_field(agent_class, "AGENT_ARGS"),
                     "prompt_input": get_model_descriptor_from_class_field(agent_class, "PROMPT_INPUT"),
                     "prompt_extension": get_model_descriptor_from_class_field(agent_class, "PROMPT_EXTENSION"),
-                    "tools": [
-                        get_model_descriptor_from_class_field(tool_config.tool_class, "CONFIGURATION_ARGS")
+                    "tool_config": {
+                        tool_config.tool_class.NAME: get_model_descriptor_from_class_field(
+                            tool_config.tool_class, "CONFIGURATION_ARGS"
+                        )
                         for tool_config in agent_class.TOOLS
-                    ],
+                        if getattr(tool_config.tool_class, "NAME", None) is not None
+                    },
                 }
             )
         response_serializer = AvailableAgentsResponseSerializer(data={"choices": choices})

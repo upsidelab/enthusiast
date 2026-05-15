@@ -45,7 +45,6 @@ class PydanticModelField(BasePydanticModelField):
         swagger_schema_fields = {"type": openapi.TYPE_OBJECT}
 
 
-
 class PydanticModelToolConfigField(BasePydanticModelField):
     """Validates a ``tool_config`` dict keyed by tool NAME against each tool's CONFIGURATION_ARGS schema."""
 

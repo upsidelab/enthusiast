@@ -240,6 +240,21 @@ class TestVerifyAgentsCommand:
 
         assert Agent.objects.filter(corrupted=True).count() == 0
 
+    @patch("agent.management.commands.verifyagents.AgentRegistry")
+    def test_verifyagents_command_non_dict_config_value(self, mock_agent_registry):
+        baker.make(
+            Agent,
+            agent_type=self.AGENT_TYPE,
+            config={"agent_args": "not_a_dict", "prompt_input": {}, "prompt_extension": {}, "tool_config": {}},
+        )
+        mock_registry_instance = Mock()
+        mock_registry_instance.get_agent_class_by_type.return_value = self.MOCK_AGENT_CLASS
+        mock_agent_registry.return_value = mock_registry_instance
+
+        call_command("verifyagents")
+
+        assert Agent.objects.filter(corrupted=True).count() == 1
+
     def test_verifyagents_command_empty_database(self):
         Agent.objects.all().delete()
 

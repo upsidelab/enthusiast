@@ -22,12 +22,12 @@ class BadSchema(BaseModel):
 
 class DummyTool(BaseFunctionTool):
     NAME = "dummy_tool"
-    CONFIGURATION = DummySchema
+    CONFIGURATION_ARGS = DummySchema
 
 
 class DummyTool2(BaseFunctionTool):
     NAME = "dummy_tool_2"
-    CONFIGURATION = DummySchema
+    CONFIGURATION_ARGS = DummySchema
 
 
 def get_model_serializer(
@@ -116,7 +116,7 @@ def test_pydantic_model_tool_list_field_valid(mock_import, mock_settings, availa
         "Agent", (), {"TOOLS": [FunctionToolConfig(tool_class=DummyTool), FunctionToolConfig(tool_class=DummyTool)]}
     )
     input_data = {"config": [{"value_1": "Alice", "value_2": 25}, {"value_1": "Bob", "value_2": 30}]}
-    serializer = get_list_model_serializer(agent_field_name="TOOLS", tool_field_name="CONFIGURATION", data=input_data)
+    serializer = get_list_model_serializer(agent_field_name="TOOLS", tool_field_name="CONFIGURATION_ARGS", data=input_data)
 
     serializer.is_valid(raise_exception=True)
 
@@ -129,7 +129,7 @@ def test_pydantic_model_tool_list_field_invalid_configs_number(mock_import, mock
     mock_settings.AVAILABLE_AGENTS = available_agents
     mock_import.return_value = type("Agent", (), {"TOOLS": [DummyTool]})
     input_data = {"config": []}
-    serializer = get_list_model_serializer(agent_field_name="TOOLS", tool_field_name="CONFIGURATION", data=input_data)
+    serializer = get_list_model_serializer(agent_field_name="TOOLS", tool_field_name="CONFIGURATION_ARGS", data=input_data)
 
     with pytest.raises(ValidationError) as e:
         serializer.is_valid(raise_exception=True)
@@ -142,7 +142,7 @@ def test_pydantic_model_tool_list_field_invalid_config_type(mock_import, mock_se
     mock_settings.AVAILABLE_AGENTS = available_agents
     mock_import.return_value = type("Agent", (), {"TOOLS": [DummyTool]})
     input_data = {"config": {}}
-    serializer = get_list_model_serializer(agent_field_name="TOOLS", tool_field_name="CONFIGURATION", data=input_data)
+    serializer = get_list_model_serializer(agent_field_name="TOOLS", tool_field_name="CONFIGURATION_ARGS", data=input_data)
 
     with pytest.raises(ValidationError) as e:
         serializer.is_valid(raise_exception=True)
@@ -157,7 +157,7 @@ def test_pydantic_model_tool_list_field_invalid_data(mock_import, mock_settings,
         "Agent", (), {"TOOLS": [FunctionToolConfig(tool_class=DummyTool), FunctionToolConfig(tool_class=DummyTool)]}
     )
     input_data = {"config": [{"value_1": "Missing age"}, {"value_2": 28}]}
-    serializer = get_list_model_serializer(agent_field_name="TOOLS", tool_field_name="CONFIGURATION", data=input_data)
+    serializer = get_list_model_serializer(agent_field_name="TOOLS", tool_field_name="CONFIGURATION_ARGS", data=input_data)
 
     serializer.is_valid()
 
@@ -174,7 +174,7 @@ def test_pydantic_model_tool_config_field_valid(mock_import, mock_settings, avai
         "Agent", (), {"TOOLS": [FunctionToolConfig(tool_class=DummyTool), FunctionToolConfig(tool_class=DummyTool2)]}
     )
     input_data = {"config": {"dummy_tool": {"value_1": "Alice", "value_2": 25}}}
-    serializer = get_tool_config_serializer(agent_field_name="TOOLS", tool_field_name="CONFIGURATION", data=input_data)
+    serializer = get_tool_config_serializer(agent_field_name="TOOLS", tool_field_name="CONFIGURATION_ARGS", data=input_data)
 
     serializer.is_valid(raise_exception=True)
 
@@ -189,7 +189,7 @@ def test_pydantic_model_tool_config_field_invalid_type(mock_import, mock_setting
         "Agent", (), {"TOOLS": [FunctionToolConfig(tool_class=DummyTool)]}
     )
     input_data = {"config": [{"value_1": "Alice", "value_2": 25}]}
-    serializer = get_tool_config_serializer(agent_field_name="TOOLS", tool_field_name="CONFIGURATION", data=input_data)
+    serializer = get_tool_config_serializer(agent_field_name="TOOLS", tool_field_name="CONFIGURATION_ARGS", data=input_data)
 
     with pytest.raises(ValidationError) as e:
         serializer.is_valid(raise_exception=True)
@@ -204,7 +204,7 @@ def test_pydantic_model_tool_config_field_unknown_tool_name(mock_import, mock_se
         "Agent", (), {"TOOLS": [FunctionToolConfig(tool_class=DummyTool)]}
     )
     input_data = {"config": {"nonexistent_tool": {"value_1": "Alice", "value_2": 25}}}
-    serializer = get_tool_config_serializer(agent_field_name="TOOLS", tool_field_name="CONFIGURATION", data=input_data)
+    serializer = get_tool_config_serializer(agent_field_name="TOOLS", tool_field_name="CONFIGURATION_ARGS", data=input_data)
 
     with pytest.raises(ValidationError) as e:
         serializer.is_valid(raise_exception=True)
@@ -222,7 +222,7 @@ def test_pydantic_model_tool_config_field_invalid_field_values(mock_import, mock
         "dummy_tool": {"value_1": "Missing value_2"},
         "dummy_tool_2": {"value_2": 99},
     }}
-    serializer = get_tool_config_serializer(agent_field_name="TOOLS", tool_field_name="CONFIGURATION", data=input_data)
+    serializer = get_tool_config_serializer(agent_field_name="TOOLS", tool_field_name="CONFIGURATION_ARGS", data=input_data)
 
     serializer.is_valid()
 
@@ -235,11 +235,11 @@ def test_pydantic_model_tool_config_field_invalid_field_values(mock_import, mock
 def test_pydantic_model_tool_config_field_tool_without_config_args_is_invalid_key(
     mock_import, mock_settings, available_agents
 ):
-    """A tool with CONFIGURATION=None must not be a valid key."""
+    """A tool with CONFIGURATION_ARGS=None must not be a valid key."""
 
     class NoConfigTool:
         NAME = "no_config_tool"
-        CONFIGURATION = None
+        CONFIGURATION_ARGS = None
 
     class MockToolConfigEntry:
         def __init__(self, tool_class):
@@ -257,7 +257,7 @@ def test_pydantic_model_tool_config_field_tool_without_config_args_is_invalid_ke
         },
     )
     input_data = {"config": {"no_config_tool": {}}}
-    serializer = get_tool_config_serializer(agent_field_name="TOOLS", tool_field_name="CONFIGURATION", data=input_data)
+    serializer = get_tool_config_serializer(agent_field_name="TOOLS", tool_field_name="CONFIGURATION_ARGS", data=input_data)
 
     with pytest.raises(serializers.ValidationError) as e:
         serializer.is_valid(raise_exception=True)

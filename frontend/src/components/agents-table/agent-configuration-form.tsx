@@ -69,13 +69,16 @@ export function AgentConfigurationForm({
     expandSectionsWithErrors();
   }, [fieldErrors, agentConfigSections, openSections, setOpenSections]);
 
-  const hasConfigFields = Object.values(agentConfigSections).some(section => {
-    if (Array.isArray(section)) {
-      return section.some(obj => obj && typeof obj === 'object' && Object.keys(obj).length > 0);
-    } else if (section && typeof section === 'object') {
-      return Object.keys(section).length > 0;
+  const hasConfigFields = Object.entries(agentConfigSections).some(([section, sectionData]) => {
+    if (section === 'tool_config' && !Array.isArray(sectionData) && sectionData && typeof sectionData === 'object') {
+      return Object.values(sectionData as Record<string, Record<string, unknown>>).some(
+        toolFields => toolFields && typeof toolFields === 'object' && Object.keys(toolFields).length > 0
+      );
     }
-    return false;
+    if (Array.isArray(sectionData)) {
+      return sectionData.some(obj => obj && typeof obj === 'object' && Object.keys(obj).length > 0);
+    }
+    return sectionData !== null && sectionData !== undefined && typeof sectionData === 'object' && Object.keys(sectionData as object).length > 0;
   });
 
   const renderConfigField = (key: string, schema: unknown, configKey: string) => {
@@ -131,6 +134,9 @@ export function AgentConfigurationForm({
       if (Object.keys(sFields).length === 0) return null;
       return (
         <div key={toolName} className="pl-4 border-l-2 border-muted bg-muted/20 rounded-r-md p-3">
+          <p className="text-xs font-medium text-muted-foreground mb-2 capitalize">
+            {toolName.replace(/_/g, ' ')}
+          </p>
           <div className="space-y-3">
             {Object.entries(sFields).map(([key, schema]) => {
               const configKey = `tool_config_${toolName}_${key}`;

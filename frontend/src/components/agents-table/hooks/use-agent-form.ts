@@ -144,13 +144,13 @@ export function useAgentForm(
     setConfig(prev => ({ ...prev, [key]: value }));
   };
 
-  const buildToolConfigDictConfig = (fields: Record<string, Record<string, unknown>>) => {
+  const buildToolConfigDictConfig = (fields: Record<string, Record<string, unknown>>, currentConfig: Record<string, string | number | boolean>) => {
     const out: Record<string, Record<string, string | number | boolean>> = {};
     Object.entries(fields).forEach(([toolName, toolFields]) => {
       out[toolName] = {};
       if (toolFields && typeof toolFields === 'object') {
         Object.keys(toolFields).forEach(k => {
-          const v = config[`tool_config_${toolName}_${k}`];
+          const v = currentConfig[`tool_config_${toolName}_${k}`];
           if (v !== '' && v !== null && v !== undefined) out[toolName][k] = v;
         });
       }
@@ -162,7 +162,7 @@ export function useAgentForm(
     const configObj: Record<string, unknown> = {};
     Object.entries(agentConfigSections).forEach(([section, fields]) => {
       if (section === 'tool_config' && fields && typeof fields === 'object' && !Array.isArray(fields)) {
-        configObj[section] = buildToolConfigDictConfig(fields as Record<string, Record<string, unknown>>);
+        configObj[section] = buildToolConfigDictConfig(fields as Record<string, Record<string, unknown>>, config);
       } else if (Array.isArray(fields)) {
         configObj[section] = buildToolsArrayConfig(section, fields);
       } else if (fields && typeof fields === 'object') {

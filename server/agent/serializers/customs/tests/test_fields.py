@@ -127,7 +127,7 @@ def test_pydantic_model_tool_list_field_valid(mock_import, mock_settings, availa
 @patch("agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_type")
 def test_pydantic_model_tool_list_field_invalid_configs_number(mock_import, mock_settings, available_agents):
     mock_settings.AVAILABLE_AGENTS = available_agents
-    mock_import.return_value = type("Agent", (), {"TOOLS": [DummyTool]})
+    mock_import.return_value = type("Agent", (), {"TOOLS": [FunctionToolConfig(tool_class=DummyTool)]})
     input_data = {"config": []}
     serializer = get_list_model_serializer(agent_field_name="TOOLS", tool_field_name="CONFIGURATION_ARGS", data=input_data)
 
@@ -140,7 +140,7 @@ def test_pydantic_model_tool_list_field_invalid_configs_number(mock_import, mock
 @patch("agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_type")
 def test_pydantic_model_tool_list_field_invalid_config_type(mock_import, mock_settings, available_agents):
     mock_settings.AVAILABLE_AGENTS = available_agents
-    mock_import.return_value = type("Agent", (), {"TOOLS": [DummyTool]})
+    mock_import.return_value = type("Agent", (), {"TOOLS": [FunctionToolConfig(tool_class=DummyTool)]})
     input_data = {"config": {}}
     serializer = get_list_model_serializer(agent_field_name="TOOLS", tool_field_name="CONFIGURATION_ARGS", data=input_data)
 

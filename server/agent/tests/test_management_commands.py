@@ -107,10 +107,13 @@ class TestVerifyAgentsCommand:
         # mock_tool has valid config, but mock_tool_2 key is entirely absent
         config_dict["tool_config"] = {"mock_tool": {"tool_value_1": "value_1", "tool_value_2": True}}
         corrupted_agent = baker.make(Agent, name="Corrupted Tools", agent_type=self.AGENT_TYPE, config=config_dict)
+
         mock_registry_instance = Mock()
         mock_registry_instance.get_agent_class_by_type.return_value = self.MOCK_AGENT_CLASS
         mock_agent_registry.return_value = mock_registry_instance
+
         call_command("verifyagents")
+
         corrupted_agent.refresh_from_db()
         assert corrupted_agent.corrupted is True
 

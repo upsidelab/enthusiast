@@ -242,7 +242,7 @@ class TestVerifyAgentsCommand:
 
     @patch("agent.management.commands.verifyagents.AgentRegistry")
     def test_verifyagents_command_non_dict_config_value(self, mock_agent_registry):
-        baker.make(
+        corrupted_agent = baker.make(
             Agent,
             agent_type=self.AGENT_TYPE,
             config={"agent_args": "not_a_dict", "prompt_input": {}, "prompt_extension": {}, "tool_config": {}},
@@ -253,7 +253,8 @@ class TestVerifyAgentsCommand:
 
         call_command("verifyagents")
 
-        assert Agent.objects.filter(corrupted=True).count() == 1
+        corrupted_agent.refresh_from_db()
+        assert corrupted_agent.corrupted is True
 
     def test_verifyagents_command_empty_database(self):
         Agent.objects.all().delete()

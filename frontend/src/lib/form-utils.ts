@@ -21,12 +21,12 @@ export function flattenConfigForForm(
         if (toolFields && typeof toolFields === 'object') {
           Object.entries(toolFields).forEach(([key, value]) => {
             if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-              flattenedConfig[`${frontendSection}_${toolName}_${key}`] = value;
+              flattenedConfig[`${section}_${toolName}_${key}`] = value;
             } else if (typeof value === 'object' && value !== null) {
               try {
-                flattenedConfig[`${frontendSection}_${toolName}_${key}`] = JSON.stringify(value);
+                flattenedConfig[`${section}_${toolName}_${key}`] = JSON.stringify(value);
               } catch {
-                flattenedConfig[`${frontendSection}_${toolName}_${key}`] = '{}';
+                flattenedConfig[`${section}_${toolName}_${key}`] = '{}';
               }
             }
           });

@@ -145,7 +145,9 @@ def test_pydantic_model_tool_config_field_unknown_tool_name(mock_import, mock_se
 
     with pytest.raises(ValidationError) as e:
         serializer.is_valid(raise_exception=True)
-    assert "Unknown tool" in str(e.value)
+    error_detail = e.value.detail["config"]["nonexistent_tool"]
+    assert isinstance(error_detail, list)
+    assert "Unknown tool" in str(error_detail[0])
 
 
 @patch("agent.core.registries.agents.agent_registry.settings")

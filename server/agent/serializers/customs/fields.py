@@ -81,7 +81,7 @@ class PydanticModelToolConfigField(BasePydanticModelField):
         for tool_name, tool_config_dict in data.items():
             tool_class = tool_map.get(tool_name)
             if tool_class is None:
-                all_errors[tool_name] = f"Unknown tool: {tool_name}"
+                all_errors[tool_name] = [f"Unknown tool: {tool_name}"]
                 has_errors = True
                 continue
 

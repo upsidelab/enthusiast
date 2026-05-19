@@ -15,7 +15,7 @@ Tools in the system define per-tool configuration via `CONFIGURATION_ARGS` on `B
   "agent_args": {},
   "prompt_input": {"auto_confirm": true},
   "prompt_extension": {},
-  "tools": [{"proxy": ""}, {}]
+  "tools": [{"field_name": ""}, {}]
 }
 ```
 
@@ -39,7 +39,7 @@ Two concrete problems:
   "prompt_input": {"auto_confirm": true},
   "prompt_extension": {},
   "tool_config": {
-    "scrape_product_data": {"proxy": ""}
+    "tool_name": {"field_name": "value"}
   }
 }
 ```
@@ -85,7 +85,7 @@ Builds a `tool_config` dict instead of a `tools` list. Tools with `CONFIGURATION
 
 Validates the `tool_config` dict on API config updates:
 
-- Accepts `{"scrape_product_data": {"proxy": ""}}` instead of `[{"proxy": ""}, {}]`
+- Accepts `{"tool_name": {"field_name": "value"}}` instead of `[{"field_name": "value"}, {}]`
 - Validates each key against the agent's tool list by `NAME`
 - Validates values against the tool's `CONFIGURATION_ARGS` Pydantic schema
 - Unknown tool names → validation error `"Unknown tool: {name}"`

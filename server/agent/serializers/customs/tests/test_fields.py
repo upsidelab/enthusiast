@@ -174,8 +174,6 @@ def test_pydantic_model_tool_config_field_invalid_field_values(mock_import, mock
 def test_pydantic_model_tool_config_field_tool_without_config_args_is_accepted(
     mock_import, mock_settings, available_agents
 ):
-    """A tool with CONFIGURATION_ARGS=None has no schema to validate — accepted silently."""
-
     class NoConfigTool:
         NAME = "no_config_tool"
         CONFIGURATION_ARGS = None

@@ -46,8 +46,6 @@ class PydanticModelField(BasePydanticModelField):
 
 
 class PydanticModelToolConfigField(BasePydanticModelField):
-    """Validates a ``tool_config`` dict keyed by tool NAME against each tool's CONFIGURATION_ARGS schema."""
-
     def __init__(self, *, agent_field_name: str, tool_field_name: str, **kwargs):
         self.agent_field_name = agent_field_name
         self.tool_field_name = tool_field_name

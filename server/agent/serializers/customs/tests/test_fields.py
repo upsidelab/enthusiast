@@ -171,10 +171,10 @@ def test_pydantic_model_tool_config_field_invalid_field_values(mock_import, mock
 
 @patch("agent.core.registries.agents.agent_registry.settings")
 @patch("agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_type")
-def test_pydantic_model_tool_config_field_tool_without_config_args_is_invalid_key(
+def test_pydantic_model_tool_config_field_tool_without_config_args_is_accepted(
     mock_import, mock_settings, available_agents
 ):
-    """A tool with CONFIGURATION_ARGS=None must not be a valid key."""
+    """A tool with CONFIGURATION_ARGS=None has no schema to validate — accepted silently."""
 
     class NoConfigTool:
         NAME = "no_config_tool"
@@ -198,6 +198,5 @@ def test_pydantic_model_tool_config_field_tool_without_config_args_is_invalid_ke
     input_data = {"config": {"no_config_tool": {}}}
     serializer = get_tool_config_serializer(agent_field_name="TOOLS", tool_field_name="CONFIGURATION_ARGS", data=input_data)
 
-    with pytest.raises(serializers.ValidationError) as e:
-        serializer.is_valid(raise_exception=True)
-    assert "Unknown tool" in str(e.value)
+    assert serializer.is_valid()
+    assert serializer.validated_data["config"]["no_config_tool"] == {}

@@ -8,6 +8,8 @@ import { DataSetFormSchema } from "./data-set-form-schema.ts";
 import { useEffect, useState } from "react";
 import { Spinner } from "@/components/util/spinner.tsx";
 import { Alert, AlertDescription } from "@/components/ui/alert.tsx";
+import { Button } from "@/components/ui/button.tsx";
+import { DeleteDataSetModal } from "./delete-data-set-modal.tsx";
 
 const api = new ApiClient(authenticationProviderInstance);
 
@@ -18,6 +20,7 @@ export function EditDataSetForm() {
   const [dataSet, setDataSet] = useState<DataSet | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   // Fetch the actual data set
   useEffect(() => {
@@ -96,11 +99,27 @@ export function EditDataSetForm() {
   }
 
   return (
-    <DataSetForm
-      initialData={dataSet}
-      onSubmit={handleSubmit}
-      submitButtonText="Update"
-      disabledFields={['embeddingProvider', 'embeddingModel', 'embeddingVectorSize']}
-    />
+    <>
+      <DataSetForm
+        initialData={dataSet}
+        onSubmit={handleSubmit}
+        submitButtonText="Update"
+        disabledFields={['embeddingProvider', 'embeddingModel', 'embeddingVectorSize']}
+      />
+      <div className="mt-8 border-t pt-6">
+        <h3 className="text-sm font-semibold text-destructive mb-4">Danger Zone</h3>
+        <Button variant="destructive" onClick={() => setDeleteModalOpen(true)}>Delete Data Set</Button>
+      </div>
+      <DeleteDataSetModal
+        open={deleteModalOpen}
+        onOpenChange={setDeleteModalOpen}
+        dataSet={dataSet}
+        onConfirm={async () => {
+          const updatedDataSets = await api.dataSets().getDataSets();
+          setDataSets(updatedDataSets);
+          navigate('/data-sets');
+        }}
+      />
+    </>
   );
 } 

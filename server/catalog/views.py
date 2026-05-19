@@ -13,6 +13,8 @@ from account.models import User
 from account.serializers import UserSerializer
 from agent.core.registries.embeddings import EmbeddingProviderRegistry
 from agent.core.registries.language_models import LanguageModelRegistry
+from agent.models import AgenticExecution, Message
+from agent.models.conversation import ConversationFile
 from agent.services import AgentPreconfigurationService
 from sync.tasks import (
     sync_all_document_sources,
@@ -127,6 +129,30 @@ class DataSetDetailView(RetrieveAPIView):
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        operation_description="Delete a data set",
+        manual_parameters=[
+            openapi.Parameter(
+                "data_set_id", openapi.IN_PATH, description="ID of the data set", type=openapi.TYPE_INTEGER
+            )
+        ],
+    )
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        with transaction.atomic():
+            Message.objects.filter(conversation__data_set=instance).delete()
+            ConversationFile.objects.filter(conversation__data_set=instance).delete()
+            AgenticExecution.objects.filter(conversation__data_set=instance).delete()
+            instance.conversation_set.all().delete()
+            instance.products.all().delete()
+            instance.documents.all().delete()
+            instance.product_sources.all().delete()
+            instance.document_sources.all().delete()
+            instance.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class DataSetUserListView(ListCreateAPIView):

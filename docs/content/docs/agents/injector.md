@@ -38,12 +38,7 @@ class BaseInjector(ABC):
 
     @property
     @abstractmethod
-    def chat_summary_memory(self) -> BaseMemory:
-        pass
-
-    @property
-    @abstractmethod
-    def chat_limited_memory(self) -> BaseMemory:
+    def chat_history(self) -> BaseChatMessageHistory:
         pass
 ```
 
@@ -58,14 +53,12 @@ class Injector(BaseInjector):
         document_retriever: BaseVectorStoreRetriever[DocumentChunk],
         product_retriever: BaseProductRetriever,
         repositories: RepositoriesInstances,
-        chat_summary_memory: SummaryChatMemory,
-        chat_limited_memory: LimitedChatMemory,
+        chat_history: BaseChatMessageHistory,
     ):
         super().__init__(repositories)
         self._document_retriever = document_retriever
         self._product_retriever = product_retriever
-        self._chat_summary_memory = chat_summary_memory
-        self._chat_limited_memory = chat_limited_memory
+        self._chat_history = chat_history
 
     @property
     def document_retriever(self) -> BaseVectorStoreRetriever[DocumentChunk]:
@@ -76,12 +69,8 @@ class Injector(BaseInjector):
         return self._product_retriever
 
     @property
-    def chat_summary_memory(self) -> SummaryChatMemory:
-        return self._chat_summary_memory
-
-    @property
-    def chat_limited_memory(self) -> LimitedChatMemory:
-        return self._chat_limited_memory
+    def chat_history(self) -> BaseChatMessageHistory:
+        return self._chat_history
 ```
 
 ## Available Resources
@@ -94,9 +83,9 @@ The document retriever provides access to document content through vector search
 
 The product retriever provides access to product information:
 
-### 3. Chat Memory Systems
+### 3. Chat History
 
-The injector provides access to two types of memory systems Summary Chat Memory and Limited Chat Memory:
+The injector provides access to the persistent conversation history via `chat_history: BaseChatMessageHistory`. See [Memory](./memory.md) for details on token limiting and persistence.
 
 
 ### 4. Repository Access
@@ -150,15 +139,14 @@ class ExampleTool(BaseLLMTool):
 Agents receive the injector during construction and can access all resources:
 
 ```python
-class ExampleAgent(BaseAgent):
-    def _build_agent_executor(self) -> AgentExecutor:
-        tools = self._build_tools()
-        agent = create_tool_calling_agent(
-            tools=tools,
-            llm=self._llm,
-            prompt=self._prompt,
-        )
-        return AgentExecutor(agent=agent, tools=tools, memory=self.injector.chat_limited_memory)
+class ExampleAgent(BaseToolCallingAgent):
+    def get_answer(self, input_text: str) -> str:
+        # Fetch relevant documents before invoking the agent
+        # and inject them as additional context into the user message
+        docs = self._injector.document_retriever.find_content_matching_query(input_text)
+        context = "\n".join(doc.content for doc in docs)
+        enriched_input = f"{input_text}\n\nContext:\n{context}"
+        return super().get_answer(enriched_input)
 
 ```
 
@@ -173,16 +161,14 @@ def _build_injector(self) -> BaseInjector:
     # Build individual components
     document_retriever = self._build_document_retriever()
     product_retriever = self._build_product_retriever()
-    chat_summary_memory = self._build_chat_summary_memory()
-    chat_limited_memory = self._build_chat_limited_memory()
-    
+    chat_history = self._build_chat_history()
+
     # Create injector with all components
     return self._config.injector(
         product_retriever=product_retriever,
         document_retriever=document_retriever,
         repositories=self._repositories,
-        chat_summary_memory=chat_summary_memory,
-        chat_limited_memory=chat_limited_memory,
+        chat_history=chat_history,
     )
 ```
 
@@ -206,12 +192,8 @@ class CustomInjector(BaseInjector):
         return self._build_custom_product_retriever()
 
     @property
-    def chat_summary_memory(self) -> BaseMemory:
-        return self._build_custom_summary_memory()
-
-    @property
-    def chat_limited_memory(self) -> BaseMemory:
-        return self._build_custom_limited_memory()
+    def chat_history(self) -> BaseChatMessageHistory:
+        return self._build_custom_chat_history()
 
     @property
     def custom_service(self) -> CustomService:

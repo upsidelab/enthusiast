@@ -54,7 +54,7 @@ agentcore/
     manage.py
     settings.py             # base settings, INSTALLED_APPS = ['agentcore']
     settings_override.py    # env-based user config (add verticale here)
-    pecl/
+    agentcore_project/      # Django project config (replaces old 'pecl' name)
       urls.py
       wsgi.py / asgi.py
       celery.py
@@ -469,7 +469,7 @@ No decisions locked in here.
 - **Final name for agentcore** — placeholder only, needs branding discussion
 - **PyPI namespace** — check `agentcore` availability before publishing
 - **Versioning strategy** — agentcore and enthusiast version independently
-- **Repository/Integration type registration** — how does agentcore know the config schema for a plugin-defined type (e.g. what fields does a `medusa` Integration require)? Options: (a) JSON Schema registered by plugin in `AppConfig.ready()`, (b) agentcore renders raw JSONField and plugin provides no schema, (c) plugin registers a Django form/serializer per type. Needs decision before building the DataSet configuration UI.
+- **Repository/Integration config schema** — how does agentcore know what fields to show when configuring a plugin-defined type? Recommendation: plugin registers a JSON Schema in `AppConfig.ready()`, agentcore renders a generic form (e.g. via `react-jsonschema-form`). Same pattern as Airbyte connector config. Needs confirmation before building the DataSet configuration UI.
 - **Custom frontend** — agentcore's generic UI covers DataSet/Repository/Integration management. Whether enthusiast needs a custom Catalog page or custom chat tool renderers is an open question. Consult with Filip before any frontend work begins.
 
 ---

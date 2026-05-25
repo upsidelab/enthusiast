@@ -47,7 +47,7 @@ A vertical plugin fills in everything domain-specific: what data to index, how t
 │  Agent                                   │  │
 │  AgenticExecution                        │  │
 │  ToolCallingAgent                        │  │
-│  Integration (1 per DataSet)             │  │
+│  Integration (1 per type per DataSet)    │  │
 │                                          │  │
 │  settings_override.py:                   │  │
 │    AVAILABLE_AGENTS            ──────────┼──┼──► loads classes
@@ -124,7 +124,7 @@ Repositories are **code-defined** — the admin does not create them in the UI. 
 
 **2. Integration — the external system**
 
-Each DataSet connects to one external system. The plugin defines the Integration type:
+A DataSet can have multiple integrations — one per type (e.g. Medusa + Shopify on the same DataSet). The plugin defines the Integration type:
 
 ```python
 class MedusaIntegration(BaseIntegration):

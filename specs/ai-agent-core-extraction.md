@@ -192,7 +192,7 @@ agentcore `settings.py` defines base config. Users extend via `settings_override
 # agentcore/server/settings.py
 INSTALLED_APPS = [
     'agentcore',
-    # vertical plugins added via settings_override:
+    # vertical plugins added via settings_override
 ]
 
 AGENTCORE_LANGUAGE_MODEL_PLUGINS = [
@@ -203,8 +203,11 @@ AGENTCORE_LANGUAGE_MODEL_PLUGINS = [
     'agentcore_model_ollama.OllamaLanguageModelProvider',
     'agentcore_model_azureopenai.AzureOpenAILanguageModelProvider',
 ]
-AGENTCORE_AGENT_PLUGINS = []
 AGENTCORE_EMBEDDING_PLUGINS = []
+AGENTCORE_AGENT_PLUGINS = []
+AGENTCORE_TOOL_PLUGINS = []
+AGENTCORE_BUILDER_PLUGINS = []
+AGENTCORE_INTEGRATION_PLUGINS = []
 
 # agentcore/server/settings_override.py (user-configured, env-based)
 INSTALLED_APPS += ['enthusiast']
@@ -216,9 +219,17 @@ AGENTCORE_AGENT_PLUGINS = [
     'enthusiast_agent_user_manual_search.UserManualSearchAgent',
     'enthusiast_agent_invoice_scanning.InvoiceScanningAgent',
 ]
-AGENTCORE_SOURCE_PLUGINS = [
-    'enthusiast_source_medusa.MedusaIntegration',
-    # ...
+AGENTCORE_TOOL_PLUGINS = [
+    'enthusiast.tools.ProductSearchTool',
+    'enthusiast.tools.DocumentSearchTool',
+    'enthusiast.tools.OrderManagementTool',
+]
+AGENTCORE_BUILDER_PLUGINS = [
+    'enthusiast.builder.EnthusiastAgentBuilder',
+]
+AGENTCORE_INTEGRATION_PLUGINS = [
+    'enthusiast.integrations.MedusaIntegration',
+    'enthusiast.integrations.ShopifyIntegration',
 ]
 ```
 
@@ -228,24 +239,9 @@ Each vertical plugin follows the same pattern — never modifies agentcore setti
 
 ### How enthusiast extends agentcore
 
-enthusiast registers its builder, tools, and integration types with agentcore via `AppConfig.ready()`. agentcore has no knowledge of what these do — it only knows they implement the right interfaces.
+enthusiast is registered entirely through `settings_override.py`. agentcore reads the settings lists at startup and loads the declared classes — no runtime `register()` calls, no `AppConfig.ready()` magic.
 
 ```python
-# enthusiast/apps.py
-class EnthusiastAppConfig(AppConfig):
-    def ready(self):
-        from agentcore.registry import agent_registry, tool_registry, integration_registry
-        from .builder import EnthusiastAgentBuilder
-        from .tools import ProductSearchTool, DocumentSearchTool, OrderManagementTool
-        from .integrations import MedusaIntegration, ShopifyIntegration
-
-        agent_registry.register_builder(EnthusiastAgentBuilder)
-        tool_registry.register(ProductSearchTool)
-        tool_registry.register(DocumentSearchTool)
-        tool_registry.register(OrderManagementTool)
-        integration_registry.register('medusa', MedusaIntegration)
-        integration_registry.register('shopify', ShopifyIntegration)
-
 # enthusiast/injector.py
 from agentcore_common.injectors import BaseInjector
 
@@ -266,8 +262,8 @@ class EnthusiastAgentBuilder(BaseAgentBuilder):
         # builds product + document retrievers, passes to EnthusiastInjector
         ...
 
-    def _build_tools(self) -> list:
-        # picks up registered tools from tool_registry
+    def _build_tools(self) -> list[BaseTool]:
+        # instantiates tools from AGENTCORE_TOOL_PLUGINS
         ...
 ```
 
@@ -298,7 +294,7 @@ Enthusiast's models (`Product`, `Document`, `ProductChunk`, `DocumentChunk`) all
 |---|---|
 | `agentcore/models/dataset.py` | `DataSet` model — replaces `Workspace`, holds LLM + embedding config |
 | `agentcore/models/integration.py` | `Integration` model — generic external system connector, type defined by plugin |
-| `agentcore/registry/` | Global registries: `agent_registry`, `tool_registry`, `integration_registry` |
+| `agentcore/registry/` | Loads plugin classes from settings lists at startup (`AGENTCORE_*_PLUGINS`) |
 | `agentcore/agents/tool_calling.py` | `ToolCallingAgent` — generic tool-calling agent, no built-in tools |
 
 ### Stays in enthusiast
@@ -540,9 +536,11 @@ The guide should cover:
 
 | Item | Required? | Purpose |
 |---|---|---|
-| `AppConfig.ready()` registers builder, tools, integration types | required | agentcore discovers what this plugin contributes |
 | `INSTALLED_APPS` entry | required | Django discovers models, migrations, admin |
-| `settings_override.py` entries (`AGENTCORE_AGENT_PLUGINS`, etc.) | required | registers agents with agentcore registries |
+| `AGENTCORE_BUILDER_PLUGINS` entry | required | agentcore loads your AgentBuilder |
+| `AGENTCORE_TOOL_PLUGINS` entries | required | agentcore loads your tools |
+| `AGENTCORE_AGENT_PLUGINS` entries | required | agentcore exposes your agents in the UI |
+| `AGENTCORE_INTEGRATION_PLUGINS` entries | optional | registers integration types with config schema |
 
 ### What the guide should walk through step by step
 
@@ -551,9 +549,8 @@ The guide should cover:
 3. Implement `BaseInjector.get_retriever(type)` for your data types
 4. Implement `BaseAgentBuilder` — wires up injector, reads DataSet embedding config, builds tools
 5. Write domain-specific tools using `self._injector.get_retriever('your_type')`
-6. Register integration types in `AppConfig.ready()` (provide JSON Schema for config form)
-7. Register builder and tools in `AppConfig.ready()`
-8. Ship it: `pip install yourplugin` + `INSTALLED_APPS += ['yourplugin']`
+6. Add entries to `settings_override.py`: `AGENTCORE_BUILDER_PLUGINS`, `AGENTCORE_TOOL_PLUGINS`, `AGENTCORE_AGENT_PLUGINS`
+7. Ship it: `pip install yourplugin` + add settings entries
 
 enthusiast itself serves as the living reference for all of the above.
 

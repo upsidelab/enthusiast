@@ -68,7 +68,7 @@ agentcore/
         memory/             # PersistentChatHistory, memory strategies
         registries/         # LanguageModelRegistry, EmbeddingRegistry, etc.
         repositories.py     # Django ORM implementations of base repos
-        retrievers/         # DocumentRetriever, base vector search
+        retrievers/         # BaseVectorStoreRetriever (infrastructure only)
         callbacks/          # WebSocket callback handler
       consumers/            # Django Channels WebSocket consumer
       conversation/         # ConversationManager
@@ -175,12 +175,15 @@ agentcore (Django app)         agentcore-model-*
 enthusiast-common         (no dependency on agentcore-common — fully independent)
       ↑                              ↑               ↑
 enthusiast (Django app)    enthusiast-agent-*    enthusiast-source-*
-      ↑                         ↑
+      ↑                         ↑    ↑
    agentcore              agentcore-common
                           enthusiast-common
+                          enthusiast          # domain models (Product, Document, retrievers)
 ```
 
 Key rule: **`enthusiast-common` has zero dependency on `agentcore-common`**. E-commerce interfaces are fully independent of the AI agent framework.
+
+**`BaseProductRetriever` inheritance:** `enthusiast-common` declares `BaseProductRetriever(ABC)` with no dependency on agentcore-common. The concrete `ProductRetriever` in `enthusiast` uses multiple inheritance — `ProductRetriever(BaseProductRetriever, BaseVectorStoreRetriever)` — picking up the agentcore-common interface at the Django app level where both packages are available.
 
 ---
 
@@ -408,7 +411,7 @@ class Document(models.Model):
     ...
 ```
 
-agentcore has **no knowledge** of what `type` means for Integration — it is a black box. The plugin registers a handler in `AppConfig.ready()` and agentcore renders a generic config form using the JSON Schema the plugin provides.
+agentcore has **no knowledge** of what `type` means for Integration — it is a black box. The plugin declares a `config_schema` class attribute (JSON Schema) on its integration class; agentcore reads it from `AGENTCORE_INTEGRATION_PLUGINS` at startup and renders a generic config form.
 
 **BaseInjector (agentcore-common) — generic retriever access:**
 ```python

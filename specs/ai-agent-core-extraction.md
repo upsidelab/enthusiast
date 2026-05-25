@@ -398,7 +398,7 @@ class Conversation(models.Model):
     dataset = FK(DataSet)
 ```
 
-**Sensitive credentials** (API keys, tokens) always go to environment variables — never stored in `Integration.config`.
+**Credential separation:** Global credentials shared across all DataSets (e.g. `OPENAI_API_KEY`) go to environment variables. Per-DataSet credentials (e.g. Medusa API key — each DataSet is a different store) go into `Integration.config` in the database, since there's no sensible way to put per-DataSet secrets in a flat env var namespace.
 
 ```python
 # enthusiast — e-commerce models reference DataSet directly
@@ -454,14 +454,17 @@ class ProductSearchTool(BaseFunctionTool):
 
 **Config cascade:**
 ```
-[1] settings.py / env vars    sensitive credentials only (OPENAI_API_KEY etc.)
-[2] DataSet                   llm_provider, llm_model,
-                              embedding_provider, embedding_model,
-                              embedding_dimensions, chunk_size, chunk_overlap
-[3] Agent config              system_prompt, tools, memory strategy
+[1] env vars          global credentials — OPENAI_API_KEY, ANTHROPIC_API_KEY
+                      (one per deployment, shared across all DataSets)
+[2] DataSet           llm_provider, llm_model,
+                      embedding_provider, embedding_model,
+                      embedding_dimensions, chunk_size, chunk_overlap
+[3] Integration       per-DataSet external system config — url, api_key
+                      (e.g. each DataSet has its own Medusa store + key)
+[4] Agent config      system_prompt, tools, memory strategy
 ```
 
-Embedding config lives on `DataSet`, not per-repository. All DataSet config is set in the UI at creation time — no settings file entries for these values.
+All DataSet and Integration config is set in the UI — no settings file entries for these values.
 
 ## Frontend Architecture
 

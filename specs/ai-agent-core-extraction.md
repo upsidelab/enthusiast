@@ -60,7 +60,7 @@ agentcore/
       celery.py
     docker-compose.yml
     agentcore/              # Django app
-      models/               # DataSet, Repository, Integration,
+      models/               # DataSet, Integration,
                             # Conversation, Message, Agent, AgenticExecution
       core/
         builder.py          # AgentBuilder (Django implementation)
@@ -107,7 +107,8 @@ agentcore/
 
 **What agentcore provides out of the box:**
 - Conversation management (create, respond, history)
-- Agent registration and execution
+- Agent registration and execution (global registry, `AppConfig.ready()` pattern)
+- `ToolCallingAgent` — generic tool-calling agent, no built-in tools (plugins register tools)
 - WebSocket streaming of agent responses
 - Agentic execution engine (autonomous multi-step tasks with retries/validators)
 - LLM provider plugins (OpenAI, Anthropic, Google, Mistral, Ollama, Azure)
@@ -134,13 +135,15 @@ enthusiast/
       retrievers/           # BaseProductRetriever
     enthusiast/             # Django app (PyPI: enthusiast)
       models/               # Product, ProductChunk, Document, DocumentChunk
-                            # (no DataSet — that lives in agentcore now)
-      sync/                 # Source synchronization engine (syncs to agentcore Repository)
+                            # all with FK to agentcore.DataSet
+      apps.py               # AppConfig.ready() registers builder, tools, integrations
+      sync/                 # Source synchronization engine (products + documents)
+      integrations/         # MedusaIntegration, ShopifyIntegration handlers
       injector.py           # EnthusiastInjector — implements get_retriever(type)
       builder.py            # EnthusiastAgentBuilder (extends BaseAgentBuilder)
       repositories.py       # Django ORM implementations for e-commerce models
       retrievers/           # ProductRetriever, DocumentRetriever (pgvector)
-      handlers.py           # ProductRepositoryHandler, MedusaIntegrationHandler, etc.
+      tools/                # ProductSearchTool, DocumentSearchTool, OrderManagementTool
       admin.py
       urls.py
       serializers/
@@ -225,17 +228,23 @@ Each vertical plugin follows the same pattern — never modifies agentcore setti
 
 ### How enthusiast extends agentcore
 
-enthusiast provides Django-specific implementations of agentcore's abstract bases. It registers its repository types (`products`, `documents`) and integration types (`medusa`, `shopify`, etc.) with agentcore at startup:
+enthusiast registers its builder, tools, and integration types with agentcore via `AppConfig.ready()`. agentcore has no knowledge of what these do — it only knows they implement the right interfaces.
 
 ```python
 # enthusiast/apps.py
 class EnthusiastAppConfig(AppConfig):
     def ready(self):
-        from agentcore.registry import register_repository_type, register_integration_type
-        register_repository_type('products', ProductRepositoryHandler)
-        register_repository_type('documents', DocumentRepositoryHandler)
-        register_integration_type('medusa', MedusaIntegrationHandler)
-        register_integration_type('shopify', ShopifyIntegrationHandler)
+        from agentcore.registry import agent_registry, tool_registry, integration_registry
+        from .builder import EnthusiastAgentBuilder
+        from .tools import ProductSearchTool, DocumentSearchTool, OrderManagementTool
+        from .integrations import MedusaIntegration, ShopifyIntegration
+
+        agent_registry.register_builder(EnthusiastAgentBuilder)
+        tool_registry.register(ProductSearchTool)
+        tool_registry.register(DocumentSearchTool)
+        tool_registry.register(OrderManagementTool)
+        integration_registry.register('medusa', MedusaIntegration)
+        integration_registry.register('shopify', ShopifyIntegration)
 
 # enthusiast/injector.py
 from agentcore_common.injectors import BaseInjector
@@ -249,13 +258,22 @@ class EnthusiastInjector(BaseInjector):
         raise ValueError(f"No retriever for repository type: {repository_type}")
 
 # enthusiast/builder.py
-from agentcore.core.builder import AgentBuilder
+from agentcore_common.agents import BaseAgentBuilder
 
-class EnthusiastAgentBuilder(AgentBuilder):
+class EnthusiastAgentBuilder(BaseAgentBuilder):
     def _build_injector(self) -> EnthusiastInjector:
+        # reads dataset.embedding_provider, dataset.embedding_model from DataSet
         # builds product + document retrievers, passes to EnthusiastInjector
         ...
+
+    def _build_tools(self) -> list:
+        # picks up registered tools from tool_registry
+        ...
 ```
+
+**Repositories are code-defined, not UI-created.** When enthusiast is installed, every DataSet automatically has product and document retrieval capabilities — no "Add Repository" step in UI. The admin sees this reflected in "Agent Capabilities", not in a repository list.
+
+Enthusiast's models (`Product`, `Document`, `ProductChunk`, `DocumentChunk`) all have a direct FK to `DataSet` from agentcore. No OneToOne extension of DataSet is needed — all configuration lives in `DataSet` itself (LLM config, embedding config) or in enthusiast's own `Integration` records.
 
 ---
 
@@ -278,10 +296,10 @@ class EnthusiastAgentBuilder(AgentBuilder):
 ### New in agentcore (greenfield)
 | What | Notes |
 |---|---|
-| `agentcore/models/dataset.py` | `DataSet` model — replaces `Workspace`, generic tenant |
-| `agentcore/models/repository.py` | `Repository` model — generic data collection |
-| `agentcore/models/integration.py` | `Integration` model — generic external system connector |
-| `agentcore/registry/repository_types.py` | registry for plugin-defined repository/integration type handlers |
+| `agentcore/models/dataset.py` | `DataSet` model — replaces `Workspace`, holds LLM + embedding config |
+| `agentcore/models/integration.py` | `Integration` model — generic external system connector, type defined by plugin |
+| `agentcore/registry/` | Global registries: `agent_registry`, `tool_registry`, `integration_registry` |
+| `agentcore/agents/tool_calling.py` | `ToolCallingAgent` — generic tool-calling agent, no built-in tools |
 
 ### Stays in enthusiast
 | Current location | Notes |
@@ -347,7 +365,9 @@ class EnthusiastAgentBuilder(AgentBuilder):
 
 ## Data Model (resolved)
 
-`DataSet` replaces `Workspace` as the central tenant model and moves to agentcore. It is fully generic — no e-commerce concepts. Plugins extend agentcore by registering `Repository` and `Integration` types, not by extending the DataSet model via OneToOne.
+`DataSet` replaces `Workspace` as the central tenant model and moves to agentcore. It is fully generic — no e-commerce concepts. Plugins do **not** extend DataSet via OneToOne — all shared configuration (LLM + embedding) lives directly on `DataSet`. Plugin models (e.g. `Product`, `Document`) reference `DataSet` via a plain FK.
+
+There is no `Repository` model in agentcore. Repositories are code-defined by plugins — installed automatically when a plugin is added to `INSTALLED_APPS`, not created through the UI.
 
 ```python
 # agentcore — all generic, no e-commerce concepts
@@ -356,23 +376,22 @@ class DataSet(models.Model):
     name = CharField()
     owner = FK(User)
     created_at = DateTimeField()
+    # LLM config — selected per DataSet in UI, credentials in env vars
     llm_provider = CharField()
     llm_model = CharField()
+    # Embedding config — agentcore stores these, plugins read and use them
+    embedding_provider = CharField()
+    embedding_model = CharField()
+    embedding_dimensions = IntegerField()
+    chunk_size = IntegerField()
+    chunk_overlap = IntegerField()
 
 class Integration(models.Model):
-    """External system connection. Type and config defined by plugin."""
+    """External system connection (e.g. Medusa, Shopify). Type and config defined by plugin."""
     dataset = FK(DataSet)
     name = CharField()
-    type = CharField()       # e.g. 'medusa', 'shopify', 'epic_ehr' — plugin-defined
-    config = JSONField()     # credentials, URLs, etc. — schema defined by plugin
-
-class Repository(models.Model):
-    """Data collection that agents can search. Type and config defined by plugin."""
-    dataset = FK(DataSet)
-    name = CharField()
-    type = CharField()       # e.g. 'products', 'documents', 'patients' — plugin-defined
-    config = JSONField()     # embedding model, etc. — schema defined by plugin
-    source = FK(Integration, null=True, blank=True)  # optional sync source
+    type = CharField()       # e.g. 'medusa', 'shopify' — registered by plugin
+    config = JSONField()     # URLs, non-sensitive config — schema defined by plugin
 
 class Agent(models.Model):
     dataset = FK(DataSet)
@@ -381,7 +400,20 @@ class Conversation(models.Model):
     dataset = FK(DataSet)
 ```
 
-agentcore has **no knowledge** of what `type` means for Repository or Integration — it is a black box. The plugin registers handlers for each type it owns.
+**Sensitive credentials** (API keys, tokens) always go to environment variables — never stored in `Integration.config`.
+
+```python
+# enthusiast — e-commerce models reference DataSet directly
+class Product(models.Model):
+    dataset = FK("agentcore.DataSet")
+    ...
+
+class Document(models.Model):
+    dataset = FK("agentcore.DataSet")
+    ...
+```
+
+agentcore has **no knowledge** of what `type` means for Integration — it is a black box. The plugin registers a handler in `AppConfig.ready()` and agentcore renders a generic config form using the JSON Schema the plugin provides.
 
 **BaseInjector (agentcore-common) — generic retriever access:**
 ```python
@@ -424,27 +456,29 @@ class ProductSearchTool(BaseFunctionTool):
 
 **Config cascade:**
 ```
-[1] settings.py defaults      (DEFAULT_LLM_PROVIDER, DEFAULT_LLM_MODEL)
-[2] DataSet                   (llm_provider, llm_model) — agentcore
-[3] Agent config              (system_prompt, tools, memory) — agentcore
+[1] settings.py / env vars    sensitive credentials only (OPENAI_API_KEY etc.)
+[2] DataSet                   llm_provider, llm_model,
+                              embedding_provider, embedding_model,
+                              embedding_dimensions, chunk_size, chunk_overlap
+[3] Agent config              system_prompt, tools, memory strategy
 ```
 
-No level 3 for embedding config — that lives in `Repository.config` (per-repository, not per-DataSet).
+Embedding config lives on `DataSet`, not per-repository. All DataSet config is set in the UI at creation time — no settings file entries for these values.
 
 ## Frontend Architecture
 
-With DataSet, Repository, and Integration now living in agentcore as generic concepts, agentcore's frontend can provide a **complete, working UI without any plugin injection**.
+agentcore's frontend provides a **complete, working UI without any plugin injection**.
 
-**agentcore frontend covers everything generically:**
+**agentcore frontend covers:**
 ```
 Conversations     ← chat, history, WebSocket streaming
-DataSets          ← list, create, LLM config
-  ├── Repositories  ← add/configure/sync (generic — shows type + config)
-  └── Integrations  ← add/configure (generic — shows type + config)
+DataSets          ← list, create, configure (LLM + embedding)
+  └── Integrations  ← add/configure external systems (generic — type + config form)
+Agent Capabilities  ← auto-discovered from registry (read-only, code-defined)
 Settings          ← LLM providers, embedding providers
 ```
 
-A developer installs enthusiast, creates a DataSet, adds a Repository of type `products` sourced from a `medusa` Integration — all through agentcore's generic UI. enthusiast adds **no frontend** of its own for this to work.
+**Repositories are not managed in the UI.** When enthusiast is installed, product and document retrieval capabilities appear automatically in "Agent Capabilities" — the admin does not create or configure them. Only `Integration` records (e.g. Medusa API connection) require UI configuration.
 
 **enthusiast is pure backend.** No `bundle.js`, no `window.agentcore.registerPlugin()`, no staticfiles frontend. The plugin injection system is not needed.
 
@@ -469,8 +503,8 @@ No decisions locked in here.
 - **Final name for agentcore** — placeholder only, needs branding discussion
 - **PyPI namespace** — check `agentcore` availability before publishing
 - **Versioning strategy** — agentcore and enthusiast version independently
-- **Repository/Integration config schema** — how does agentcore know what fields to show when configuring a plugin-defined type? Recommendation: plugin registers a JSON Schema in `AppConfig.ready()`, agentcore renders a generic form (e.g. via `react-jsonschema-form`). Same pattern as Airbyte connector config. Needs confirmation before building the DataSet configuration UI.
-- **Custom frontend** — agentcore's generic UI covers DataSet/Repository/Integration management. Whether enthusiast needs a custom Catalog page or custom chat tool renderers is an open question. Consult with Filip before any frontend work begins.
+- **Integration config schema** — how does agentcore know what fields to show when configuring a plugin-defined Integration type? Recommendation: plugin registers a JSON Schema in `AppConfig.ready()`, agentcore renders a generic form (e.g. via `react-jsonschema-form`). Same pattern as Airbyte connector config. Needs confirmation before building the Integration configuration UI.
+- **Custom frontend** — agentcore's generic UI covers DataSet/Integration management and a read-only Agent Capabilities view. Whether enthusiast needs a richer Catalog page (products grid, document browser) or custom chat tool renderers is deferred. Consult with Filip before any frontend work begins.
 
 ---
 
@@ -506,19 +540,20 @@ The guide should cover:
 
 | Item | Required? | Purpose |
 |---|---|---|
-| `AppConfig.ready()` registers repository/integration types | optional | agentcore knows what types this plugin handles |
+| `AppConfig.ready()` registers builder, tools, integration types | required | agentcore discovers what this plugin contributes |
 | `INSTALLED_APPS` entry | required | Django discovers models, migrations, admin |
 | `settings_override.py` entries (`AGENTCORE_AGENT_PLUGINS`, etc.) | required | registers agents with agentcore registries |
 
 ### What the guide should walk through step by step
 
 1. Create a new Python package (pip-installable)
-2. Register repository types and integration types in `AppConfig.ready()`
-3. Implement `BaseInjector.get_retriever(type)` for your repository types
-4. Implement `BaseAgentBuilder` wiring up the injector and tools
+2. Define your domain models with FK to `agentcore.DataSet`
+3. Implement `BaseInjector.get_retriever(type)` for your data types
+4. Implement `BaseAgentBuilder` — wires up injector, reads DataSet embedding config, builds tools
 5. Write domain-specific tools using `self._injector.get_retriever('your_type')`
-6. Register agents in `settings_override.py`
-7. Ship it: `pip install yourplugin` + `INSTALLED_APPS += ['yourplugin']`
+6. Register integration types in `AppConfig.ready()` (provide JSON Schema for config form)
+7. Register builder and tools in `AppConfig.ready()`
+8. Ship it: `pip install yourplugin` + `INSTALLED_APPS += ['yourplugin']`
 
 enthusiast itself serves as the living reference for all of the above.
 

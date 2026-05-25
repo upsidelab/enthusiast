@@ -24,68 +24,98 @@ Extract a standalone AI agent platform (**agentcore** — name TBD) that is comp
 
 ---
 
-## What agentcore Owns
+## agentcore as the Building Block
 
-agentcore is a pure AI agent framework. It knows nothing about products, documents, or e-commerce. It provides:
+agentcore is a pure AI agent framework — it knows nothing about products, documents, patients, or any other domain. It provides the infrastructure that all verticals share:
 
-- **DataSet** — the central tenant concept. Holds LLM config, embedding config, and is the anchor all plugin models reference via FK. Replaces the current Workspace.
+- **DataSet** — central tenant concept. Holds LLM config, embedding config. All plugin models anchor to it via FK. Replaces the current Workspace.
 - **Conversation / Message / Agent** — core conversation management
 - **AgenticExecution** — autonomous multi-step task execution with retries
-- **ToolCallingAgent** — a generic tool-calling agent shipped out of the box. No built-in tools — plugins register tools via settings.
-- **Integration** — a single external system connection per DataSet (e.g. Medusa, Shopify). Type and config defined by the plugin. Configured in the UI.
+- **ToolCallingAgent** — generic tool-calling agent. No built-in tools — plugins bring their own.
+- **Integration** — one external system connection per DataSet (type and config defined by the plugin, configured in the UI)
 - **LLM provider plugins** — OpenAI, Anthropic, Google, Mistral, Ollama, Azure
-- **WebSocket streaming, memory strategies, React chat UI, REST API**
+- **WebSocket streaming, memory strategies, REST API**
+
+A vertical plugin fills in everything domain-specific: what data to index, how to search it, what tools to expose to the agent.
 
 ---
 
-## What enthusiast Owns
+## How a Vertical Plugin Works
 
-enthusiast is the e-commerce vertical. It adds:
+A plugin is responsible for three things:
 
-- **Product / Document models** — with FK to `agentcore.DataSet`
-- **Sync engine** — pulls products and documents from Medusa, Shopify, etc. and stores embeddings
-- **E-commerce tools** — ProductSearchTool, DocumentSearchTool, OrderManagementTool
-- **AgentBuilder + Injector** — wires up e-commerce retrievers and tools for the agent
-- **Source plugins** — `enthusiast-source-medusa`, `enthusiast-source-shopify`, etc.
-- **Agent plugins** — ProductSearchAgent, CatalogEnrichmentAgent, OrderIntakeAgent, etc.
+**1. Repositories — the domain knowledge**
 
-agentcore knows nothing about products or documents. That's enthusiast's domain.
+The plugin defines what data sources exist and how to search them. These are not models in agentcore — they are defined entirely by the plugin. Examples:
 
----
+| Vertical | Repositories |
+|---|---|
+| enthusiast (e-commerce) | Products, Documents |
+| healthcare | Patient records, Clinical notes |
+| logistics | Shipments, Warehouses |
 
-## Plugin System
+The plugin owns the models (with FK to `agentcore.DataSet`), the sync logic, the embeddings, and the vector search. agentcore is unaware of any of this.
 
-Plugins register with agentcore via `settings_override.py`. One mechanism, no magic:
+**2. Integration — the external system**
 
-```python
-# settings_override.py
-INSTALLED_APPS += ['enthusiast']
-
-AGENTCORE_BUILDER_PLUGINS  = ['enthusiast.builder.EnthusiastAgentBuilder']
-AGENTCORE_TOOL_PLUGINS     = ['enthusiast.tools.ProductSearchTool', ...]
-AGENTCORE_AGENT_PLUGINS    = ['enthusiast_agent_product_search.ProductSearchAgent', ...]
-AGENTCORE_INTEGRATION_PLUGINS = ['enthusiast.integrations.MedusaIntegration', ...]
-```
-
-agentcore reads these lists at startup and loads the declared classes. No `AppConfig.ready()` registration calls.
-
----
-
-## Integration Model
-
-Each DataSet has one Integration — a connection to an external system. The plugin defines the Integration type by extending `BaseIntegration`:
+Each DataSet connects to one external system. The plugin defines the Integration type:
 
 ```python
 class MedusaIntegration(BaseIntegration):
     type = 'medusa'
     label = 'Medusa'
 
-    def get_config_schema(self): ...   # fields for the UI form
+    def get_config_schema(self): ...   # drives the UI config form
     def test_connection(self, config): ...
     def get_client(self, config): ...
 ```
 
-agentcore renders a generic config form in the UI based on the schema the plugin provides. Integration credentials (e.g. Medusa API key) are stored per-DataSet in the database — not in env vars, because each DataSet connects to a different store.
+Integration config (URL, API key) is stored per-DataSet in the database — not in env vars, because each DataSet connects to a different store instance.
+
+**3. AgentBuilder + Tools — how the agent is assembled**
+
+The plugin provides a builder that wires up its repositories and tools into an agent that agentcore can run:
+
+```python
+class EnthusiastAgentBuilder(BaseAgentBuilder):
+    def build(self, dataset, conversation):
+        # reads embedding config from dataset
+        # builds product + document retrievers
+        # instantiates injector and tools
+        # returns a ToolCallingAgent ready to answer questions
+        ...
+```
+
+---
+
+## Plugin Registration
+
+Plugins register with agentcore via `settings_override.py`:
+
+```python
+# settings_override.py
+INSTALLED_APPS += ['enthusiast']
+
+AGENTCORE_BUILDER_PLUGINS     = ['enthusiast.builder.EnthusiastAgentBuilder']
+AGENTCORE_TOOL_PLUGINS        = ['enthusiast.tools.ProductSearchTool', ...]
+AGENTCORE_AGENT_PLUGINS       = ['enthusiast_agent_product_search.ProductSearchAgent', ...]
+AGENTCORE_INTEGRATION_PLUGINS = ['enthusiast.integrations.MedusaIntegration', ...]
+```
+
+agentcore reads these lists at startup and loads the declared classes. One mechanism, no magic.
+
+---
+
+## What enthusiast Brings
+
+enthusiast is the reference implementation of a vertical plugin:
+
+- **Product / Document models** — with FK to `agentcore.DataSet`
+- **Sync engine** — pulls data from Medusa, Shopify, etc. and stores embeddings
+- **Tools** — ProductSearchTool, DocumentSearchTool, OrderManagementTool
+- **AgentBuilder + Injector** — wires up e-commerce retrievers and tools
+- **Source plugins** — `enthusiast-source-medusa`, `enthusiast-source-shopify`, etc.
+- **Agent plugins** — ProductSearchAgent, CatalogEnrichmentAgent, OrderIntakeAgent, etc.
 
 ---
 
@@ -113,6 +143,12 @@ enthusiast/
 ```
 
 Key rule: `enthusiast-common` has **zero dependency on `agentcore-common`**. E-commerce interfaces are fully independent of the AI agent framework.
+
+---
+
+## Frontend
+
+> **Note:** At this stage there is no frontend plan beyond writing it manually. agentcore ships a React UI for chat, DataSet management, and Integration configuration. Any richer plugin-specific UI (e.g. a Catalog page for products and documents) requires manual frontend development — no injection mechanism exists. This is a known gap to address in a future iteration, ideally after a consultation with a frontend developer.
 
 ---
 
@@ -144,4 +180,3 @@ Key rule: `enthusiast-common` has **zero dependency on `agentcore-common`**. E-c
 - **Final name for agentcore** — placeholder only, needs branding discussion
 - **PyPI namespace** — check `agentcore` availability
 - **Versioning** — agentcore and enthusiast version independently
-- **Frontend for rich plugin UI** — agentcore's generic UI covers DataSet, Integration, chat. Whether enthusiast needs a richer Catalog view (products grid, document browser) is deferred. Consult with Filip before any frontend work begins.

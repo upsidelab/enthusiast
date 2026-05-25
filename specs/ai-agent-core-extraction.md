@@ -120,6 +120,8 @@ The plugin defines what data sources exist and how to search them. These are not
 
 The plugin owns the models (with FK to `agentcore.DataSet`), the sync logic, the embeddings, and the vector search. agentcore is unaware of any of this.
 
+Repositories are **code-defined** — the admin does not create them in the UI. They exist automatically when the plugin is installed. The UI shows them read-only per DataSet so the admin can see what knowledge sources are available. The exact name for this UI section is TBD (deferred to the frontend discussion).
+
 **2. Integration — the external system**
 
 Each DataSet connects to one external system. The plugin defines the Integration type:

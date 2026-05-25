@@ -383,9 +383,8 @@ class DataSet(models.Model):
     chunk_overlap = IntegerField()
 
 class Integration(models.Model):
-    """External system connection (e.g. Medusa, Shopify). Type and config defined by plugin."""
-    dataset = FK(DataSet)
-    name = CharField()
+    """External system connection (e.g. Medusa, Shopify). One per DataSet."""
+    dataset = OneToOneField(DataSet, on_delete=CASCADE)
     type = CharField()       # e.g. 'medusa', 'shopify' — registered by plugin
     config = JSONField()     # URLs, non-sensitive config — schema defined by plugin
 

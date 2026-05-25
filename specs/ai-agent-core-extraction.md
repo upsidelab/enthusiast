@@ -38,6 +38,69 @@ agentcore is a pure AI agent framework — it knows nothing about products, docu
 
 A vertical plugin fills in everything domain-specific: what data to index, how to search it, what tools to expose to the agent.
 
+```
+                        ┌─────────────────────────────────────────┐
+                        │               agentcore                 │
+                        │                                         │
+                        │  DataSet ◄──────────────── FK ◄──────┐  │
+                        │  Conversation                         │  │
+                        │  Agent                                │  │
+                        │  AgenticExecution                     │  │
+                        │  ToolCallingAgent ◄── uses tools ──┐  │  │
+                        │  Integration (1 per DataSet)        │  │  │
+                        │                                     │  │  │
+                        │  settings_override.py:              │  │  │
+                        │    AVAILABLE_AGENTS       ──────────┼──┼──┼──► loads agent classes
+                        │    AGENTCORE_TOOL_PLUGINS ──────────┘  │  │
+                        │    AGENTCORE_BUILDER_PLUGINS            │  │
+                        │    AGENTCORE_INTEGRATION_PLUGINS        │  │
+                        └─────────────────────────────────────────┘
+                                           ▲
+                                           │ INSTALLED_APPS += ['enthusiast']
+                                           │ + settings lists
+                                           │
+                        ┌─────────────────────────────────────────┐
+                        │               enthusiast                │
+                        │                                         │
+                        │  Product  ──────────────────── FK ──────┘
+                        │  Document ──────────────────── FK ──────┘
+                        │                                         │
+                        │  EnthusiastAgentBuilder                 │
+                        │    └─ builds: injector + tools          │
+                        │                                         │
+                        │  ProductSearchTool                      │
+                        │  DocumentSearchTool                     │
+                        │  OrderManagementTool                    │
+                        │                                         │
+                        │  MedusaIntegration                      │
+                        │  enthusiast-source-medusa (sync)        │
+                        └─────────────────────────────────────────┘
+```
+
+```
+User message
+    │
+    ▼
+ConversationManager (agentcore)
+    │  czyta AGENTCORE_BUILDER_PLUGINS z settings
+    │  ładuje EnthusiastAgentBuilder
+    ▼
+EnthusiastAgentBuilder (enthusiast)
+    │  czyta dataset.embedding_model
+    │  buduje ProductRetriever, DocumentRetriever
+    │  zwraca ToolCallingAgent z narzędziami
+    ▼
+ToolCallingAgent (agentcore)
+    │  LangChain tool-calling loop
+    │  wywołuje ProductSearchTool.run(query)
+    ▼
+ProductSearchTool (enthusiast)
+    │  vector search na ProductChunk w pgvector
+    │  zwraca wyniki
+    ▼
+LLM generuje odpowiedź → WebSocket → User
+```
+
 ---
 
 ## How a Vertical Plugin Works

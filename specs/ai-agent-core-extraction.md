@@ -499,7 +499,7 @@ No decisions locked in here.
 - **Final name for agentcore** — placeholder only, needs branding discussion
 - **PyPI namespace** — check `agentcore` availability before publishing
 - **Versioning strategy** — agentcore and enthusiast version independently
-- **Integration config schema** — how does agentcore know what fields to show when configuring a plugin-defined Integration type? Recommendation: plugin registers a JSON Schema in `AppConfig.ready()`, agentcore renders a generic form (e.g. via `react-jsonschema-form`). Same pattern as Airbyte connector config. Needs confirmation before building the Integration configuration UI.
+- **Integration config schema** — how does agentcore know what fields to show when configuring a plugin-defined Integration type? Recommendation: plugin declares a JSON Schema on its integration class (class attribute), agentcore reads it from `AGENTCORE_INTEGRATION_PLUGINS` and renders a generic form (e.g. via `react-jsonschema-form`). Same pattern as Airbyte connector config. Needs confirmation before building the Integration configuration UI.
 - **Custom frontend** — agentcore's generic UI covers DataSet/Integration management and a read-only Agent Capabilities view. Whether enthusiast needs a richer Catalog page (products grid, document browser) or custom chat tool renderers is deferred. Consult with Filip before any frontend work begins.
 
 ---
@@ -512,14 +512,14 @@ The guide should cover:
 
 ### What agentcore exposes (the extension points)
 
-**Must implement** — these are abstract, agentcore won't run without a concrete implementation:
+**Must implement** — these are the two classes every vertical plugin must provide:
 
 | Class | Where | What to implement |
 |---|---|---|
 | `BaseInjector` | `agentcore-common` | `get_retriever(type)`, `chat_history`, `tool_scratchpad` |
-| `BaseAgentBuilder` | `agentcore-common` | `_build_injector()`, `_build_llm_registry()`, `_build_tools()`, `_build_agent()`, and related factory methods |
-| `BaseConversationRepository` | `agentcore-common` | `get_dataset_id()`, `get_agent_id()`, `list_files()`, `get_file_objects()` |
-| `BaseDataSetRepository` | `agentcore-common` | standard CRUD methods from `BaseRepository` |
+| `BaseAgentBuilder` | `agentcore-common` | `_build_injector()`, `_build_llm_registry()`, `_build_tools()`, `_build_agent()` |
+
+`BaseConversationRepository`, `BaseDataSetRepository`, and all other repository bases are implemented by agentcore itself in `agentcore/core/repositories.py`. Plugins use them — they do not re-implement them.
 
 **Can implement** — optional extension points that unlock additional capabilities:
 

@@ -115,8 +115,6 @@ The plugin defines what data sources exist and how to search them. These are not
 | Vertical | Repositories |
 |---|---|
 | enthusiast (e-commerce) | Products, Documents |
-| healthcare | Patient records, Clinical notes |
-| logistics | Shipments, Warehouses |
 
 The plugin owns the models (with FK to `agentcore.DataSet`), the sync logic, the embeddings, and the vector search. agentcore is unaware of any of this.
 

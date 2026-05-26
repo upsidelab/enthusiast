@@ -61,7 +61,7 @@ class ScrapeProductTool(BaseLLMTool):
     )
     ARGS_SCHEMA = ScrapeProductInput
     RETURN_DIRECT = False
-    _config: ScrapeProductConfig = ScrapeProductConfig()  # default; overridden by set_runtime_arguments
+    _config: ScrapeProductConfig = ScrapeProductConfig()
 
     _FETCH_ERROR_PREFIXES = ("Could not reach the provided URL", "Internal error")
 

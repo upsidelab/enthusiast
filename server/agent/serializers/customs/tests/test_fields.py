@@ -5,7 +5,6 @@ import pytest
 from enthusiast_common.config import FunctionToolConfig
 from enthusiast_common.tools import BaseFunctionTool
 from enthusiast_common.utils import RequiredFieldsModel
-from pydantic import BaseModel
 from rest_framework import serializers
 from rest_framework.exceptions import APIException, ValidationError
 
@@ -19,12 +18,10 @@ class DummySchema(RequiredFieldsModel):
 
 class DummyTool(BaseFunctionTool):
     NAME = "dummy_tool"
-    # CONFIGURATION_ARGS removed — schema now lives in FunctionToolConfig
 
 
 class DummyTool2(BaseFunctionTool):
     NAME = "dummy_tool_2"
-    # CONFIGURATION_ARGS removed
 
 
 def get_model_serializer(agent_field_name: str, data):

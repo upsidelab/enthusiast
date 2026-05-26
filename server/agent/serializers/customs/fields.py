@@ -25,7 +25,7 @@ class PydanticModelField(BasePydanticModelField):
 
         try:
             schema = getattr(class_obj, self.agent_field_name)
-        except KeyError:
+        except AttributeError:
             raise serializers.ValidationError(f"Unknown schema for field: {self.agent_field_name}")
 
         if not schema:

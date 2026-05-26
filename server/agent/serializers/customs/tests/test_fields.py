@@ -4,6 +4,7 @@ from unittest.mock import patch
 import pytest
 from enthusiast_common.config import FunctionToolConfig
 from enthusiast_common.tools import BaseFunctionTool
+from enthusiast_common.utils import RequiredFieldsModel
 from pydantic import BaseModel
 from rest_framework import serializers
 from rest_framework.exceptions import APIException, ValidationError
@@ -11,51 +12,37 @@ from rest_framework.exceptions import APIException, ValidationError
 from agent.serializers.customs.fields import PydanticModelField, PydanticModelToolConfigField
 
 
-class DummySchema(BaseModel):
+class DummySchema(RequiredFieldsModel):
     value_1: str
     value_2: int
 
 
-class BadSchema(BaseModel):
-    value: int
-
-
 class DummyTool(BaseFunctionTool):
     NAME = "dummy_tool"
-    CONFIGURATION_ARGS = DummySchema
+    # CONFIGURATION_ARGS removed — schema now lives in FunctionToolConfig
 
 
 class DummyTool2(BaseFunctionTool):
     NAME = "dummy_tool_2"
-    CONFIGURATION_ARGS = DummySchema
+    # CONFIGURATION_ARGS removed
 
 
-def get_model_serializer(
-    agent_field_name: str,
-    data,
-):
+def get_model_serializer(agent_field_name: str, data):
     class FieldTestSerializer(serializers.Serializer):
         config = PydanticModelField(agent_field_name=agent_field_name)
-
     return FieldTestSerializer(data=data, context={"agent_type": "dummy_agent"})
 
 
-def get_tool_config_serializer(agent_field_name: str, tool_field_name: str, data: Any):
+def get_tool_config_serializer(agent_field_name: str, data: Any):
+    # Construct with the current signature — check fields.py for exact params
     class FieldTestSerializer(serializers.Serializer):
-        config = PydanticModelToolConfigField(agent_field_name=agent_field_name, tool_field_name=tool_field_name)
-
+        config = PydanticModelToolConfigField(agent_field_name=agent_field_name, tool_field_name="tool_configuration_args")
     return FieldTestSerializer(data=data, context={"agent_type": "dummy_agent"})
-
-
-
-@pytest.fixture
-def agent_context():
-    return {"agent_type": "dummy_agent"}
 
 
 @pytest.fixture
 def available_agents():
-    return [ "dummy_path.AgentClass" ]
+    return ["dummy_path.AgentClass"]
 
 
 @patch("agent.core.registries.agents.agent_registry.settings")
@@ -64,9 +51,7 @@ def test_pydantic_model_field_valid(mock_import, mock_settings, available_agents
     mock_settings.AVAILABLE_AGENTS = available_agents
     mock_import.return_value = type("Agent", (), {"AGENT_ARGS": DummySchema})
     input_data = {"config": {"value_1": "John", "value_2": 30}}
-
     serializer = get_model_serializer(agent_field_name="AGENT_ARGS", data=input_data)
-
     assert serializer.is_valid(raise_exception=True)
 
 
@@ -77,7 +62,6 @@ def test_pydantic_model_field_invalid_data(mock_import, mock_settings, available
     mock_import.return_value = type("Agent", (), {"AGENT_ARGS": DummySchema})
     input_data = {"config": {"value_1": "John"}}
     serializer = get_model_serializer(agent_field_name="AGENT_ARGS", data=input_data)
-
     with pytest.raises(ValidationError) as e:
         serializer.is_valid(raise_exception=True)
     assert "value_2" in str(e.value)
@@ -96,11 +80,9 @@ def test_pydantic_model_field_import_error(mock_import, mock_settings, available
     mock_settings.AVAILABLE_AGENTS = available_agents
     input_data = {"config": {}}
     serializer = get_model_serializer(agent_field_name="AGENT_ARGS", data=input_data)
-
     with pytest.raises(APIException) as e:
         serializer.is_valid(raise_exception=True)
     assert "Error loading agent" in str(e.value)
-
 
 
 @patch("agent.core.registries.agents.agent_registry.settings")
@@ -108,13 +90,15 @@ def test_pydantic_model_field_import_error(mock_import, mock_settings, available
 def test_pydantic_model_tool_config_field_valid(mock_import, mock_settings, available_agents):
     mock_settings.AVAILABLE_AGENTS = available_agents
     mock_import.return_value = type(
-        "Agent", (), {"TOOLS": [FunctionToolConfig(tool_class=DummyTool), FunctionToolConfig(tool_class=DummyTool2)]}
+        "Agent", (),
+        {"TOOLS": [
+            FunctionToolConfig(tool_class=DummyTool, tool_configuration_args=DummySchema),
+            FunctionToolConfig(tool_class=DummyTool2, tool_configuration_args=DummySchema),
+        ]},
     )
     input_data = {"config": {"dummy_tool": {"value_1": "Alice", "value_2": 25}}}
-    serializer = get_tool_config_serializer(agent_field_name="TOOLS", tool_field_name="CONFIGURATION_ARGS", data=input_data)
-
+    serializer = get_tool_config_serializer(agent_field_name="TOOLS", data=input_data)
     serializer.is_valid(raise_exception=True)
-
     assert serializer.data == input_data
 
 
@@ -123,11 +107,11 @@ def test_pydantic_model_tool_config_field_valid(mock_import, mock_settings, avai
 def test_pydantic_model_tool_config_field_invalid_type(mock_import, mock_settings, available_agents):
     mock_settings.AVAILABLE_AGENTS = available_agents
     mock_import.return_value = type(
-        "Agent", (), {"TOOLS": [FunctionToolConfig(tool_class=DummyTool)]}
+        "Agent", (),
+        {"TOOLS": [FunctionToolConfig(tool_class=DummyTool, tool_configuration_args=DummySchema)]},
     )
     input_data = {"config": [{"value_1": "Alice", "value_2": 25}]}
-    serializer = get_tool_config_serializer(agent_field_name="TOOLS", tool_field_name="CONFIGURATION_ARGS", data=input_data)
-
+    serializer = get_tool_config_serializer(agent_field_name="TOOLS", data=input_data)
     with pytest.raises(ValidationError) as e:
         serializer.is_valid(raise_exception=True)
     assert "Expected a dict" in str(e.value)
@@ -138,11 +122,11 @@ def test_pydantic_model_tool_config_field_invalid_type(mock_import, mock_setting
 def test_pydantic_model_tool_config_field_unknown_tool_name(mock_import, mock_settings, available_agents):
     mock_settings.AVAILABLE_AGENTS = available_agents
     mock_import.return_value = type(
-        "Agent", (), {"TOOLS": [FunctionToolConfig(tool_class=DummyTool)]}
+        "Agent", (),
+        {"TOOLS": [FunctionToolConfig(tool_class=DummyTool, tool_configuration_args=DummySchema)]},
     )
     input_data = {"config": {"nonexistent_tool": {"value_1": "Alice", "value_2": 25}}}
-    serializer = get_tool_config_serializer(agent_field_name="TOOLS", tool_field_name="CONFIGURATION_ARGS", data=input_data)
-
+    serializer = get_tool_config_serializer(agent_field_name="TOOLS", data=input_data)
     with pytest.raises(ValidationError) as e:
         serializer.is_valid(raise_exception=True)
     error_detail = e.value.detail["config"]["nonexistent_tool"]
@@ -155,16 +139,18 @@ def test_pydantic_model_tool_config_field_unknown_tool_name(mock_import, mock_se
 def test_pydantic_model_tool_config_field_invalid_field_values(mock_import, mock_settings, available_agents):
     mock_settings.AVAILABLE_AGENTS = available_agents
     mock_import.return_value = type(
-        "Agent", (), {"TOOLS": [FunctionToolConfig(tool_class=DummyTool), FunctionToolConfig(tool_class=DummyTool2)]}
+        "Agent", (),
+        {"TOOLS": [
+            FunctionToolConfig(tool_class=DummyTool, tool_configuration_args=DummySchema),
+            FunctionToolConfig(tool_class=DummyTool2, tool_configuration_args=DummySchema),
+        ]},
     )
     input_data = {"config": {
         "dummy_tool": {"value_1": "Missing value_2"},
         "dummy_tool_2": {"value_2": 99},
     }}
-    serializer = get_tool_config_serializer(agent_field_name="TOOLS", tool_field_name="CONFIGURATION_ARGS", data=input_data)
-
+    serializer = get_tool_config_serializer(agent_field_name="TOOLS", data=input_data)
     serializer.is_valid()
-
     assert "dummy_tool" in serializer.errors["config"]
     assert "dummy_tool_2" in serializer.errors["config"]
 
@@ -174,27 +160,15 @@ def test_pydantic_model_tool_config_field_invalid_field_values(mock_import, mock
 def test_pydantic_model_tool_config_field_tool_without_config_args_is_accepted(
     mock_import, mock_settings, available_agents
 ):
-    class NoConfigTool:
-        NAME = "no_config_tool"
-        CONFIGURATION_ARGS = None
-
-    class MockToolConfigEntry:
-        def __init__(self, tool_class):
-            self.tool_class = tool_class
-
     mock_settings.AVAILABLE_AGENTS = available_agents
     mock_import.return_value = type(
-        "Agent",
-        (),
-        {
-            "TOOLS": [
-                MockToolConfigEntry(DummyTool),
-                MockToolConfigEntry(NoConfigTool),
-            ]
-        },
+        "Agent", (),
+        {"TOOLS": [
+            FunctionToolConfig(tool_class=DummyTool, tool_configuration_args=DummySchema),
+            FunctionToolConfig(tool_class=DummyTool2),  # no tool_configuration_args
+        ]},
     )
-    input_data = {"config": {"no_config_tool": {}}}
-    serializer = get_tool_config_serializer(agent_field_name="TOOLS", tool_field_name="CONFIGURATION_ARGS", data=input_data)
-
+    input_data = {"config": {"dummy_tool_2": {}}}
+    serializer = get_tool_config_serializer(agent_field_name="TOOLS", data=input_data)
     assert serializer.is_valid()
-    assert serializer.validated_data["config"]["no_config_tool"] == {}
+    assert serializer.validated_data["config"]["dummy_tool_2"] == {}

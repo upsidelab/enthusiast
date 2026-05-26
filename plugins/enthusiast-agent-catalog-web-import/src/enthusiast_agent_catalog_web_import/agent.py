@@ -4,7 +4,7 @@ from enthusiast_common.config.base import LLMToolConfig
 from enthusiast_common.utils import RequiredFieldsModel
 from pydantic import Field, Json
 
-from .tools.scrape_product_tool import ScrapeProductTool
+from .tools.scrape_product_tool import ScrapeProductTool, ScrapeProductConfig
 
 _CONFIRMATION_REQUIRED_INSTRUCTION = (
     "CONFIRMATION REQUIRED: Do NOT call the upsert tool without explicit user confirmation first. "
@@ -58,7 +58,7 @@ class CatalogWebImportAgent(BaseToolCallingAgent):
     PROMPT_INPUT = CatalogWebImportPromptInput
     FILE_UPLOAD = False
     TOOLS = [
-        LLMToolConfig(tool_class=ScrapeProductTool),
+        LLMToolConfig(tool_class=ScrapeProductTool, tool_configuration_args=ScrapeProductConfig),
         LLMToolConfig(tool_class=UpsertProductDetailsTool),
     ]
 

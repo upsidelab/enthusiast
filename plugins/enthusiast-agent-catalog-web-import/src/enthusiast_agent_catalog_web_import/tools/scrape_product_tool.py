@@ -61,7 +61,6 @@ class ScrapeProductTool(BaseLLMTool):
     )
     ARGS_SCHEMA = ScrapeProductInput
     RETURN_DIRECT = False
-    CONFIGURATION_ARGS = ScrapeProductConfig
 
     _FETCH_ERROR_PREFIXES = ("Could not reach the provided URL", "Internal error")
 
@@ -138,9 +137,9 @@ class ScrapeProductTool(BaseLLMTool):
         return self._llm.invoke(messages).content
 
     def _get_proxies(self) -> dict | None:
-        if self.CONFIGURATION_ARGS.proxy:
+        if self._config.proxy:
             return {
-                "http": self.CONFIGURATION_ARGS.proxy,
-                "https": self.CONFIGURATION_ARGS.proxy,
+                "http": self._config.proxy,
+                "https": self._config.proxy,
             }
         return None

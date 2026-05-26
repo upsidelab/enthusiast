@@ -78,7 +78,7 @@ class BaseAgent(ABC, ExtraArgsClassBase):
             if key == "tool_config":
                 continue
             class_field_key = key.upper()
-            field = getattr(self, class_field_key)
+            field = getattr(self, class_field_key, None)
             if field is None:
                 continue
             setattr(self, key.upper(), field(**value))

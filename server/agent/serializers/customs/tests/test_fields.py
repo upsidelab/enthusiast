@@ -93,7 +93,10 @@ def test_pydantic_model_tool_config_field_valid(mock_import, mock_settings, avai
             FunctionToolConfig(tool_class=DummyTool2, tool_configuration_args=DummySchema),
         ]},
     )
-    input_data = {"config": {"dummy_tool": {"value_1": "Alice", "value_2": 25}}}
+    input_data = {"config": {
+        "dummy_tool": {"value_1": "Alice", "value_2": 25},
+        "dummy_tool_2": {"value_1": "Bob", "value_2": 30},
+    }}
     serializer = get_tool_config_serializer(agent_field_name="TOOLS", data=input_data)
     serializer.is_valid(raise_exception=True)
     assert serializer.data == input_data
@@ -165,7 +168,7 @@ def test_pydantic_model_tool_config_field_tool_without_config_args_is_accepted(
             FunctionToolConfig(tool_class=DummyTool2),  # no tool_configuration_args
         ]},
     )
-    input_data = {"config": {"dummy_tool_2": {}}}
+    input_data = {"config": {"dummy_tool": {"value_1": "Alice", "value_2": 25}, "dummy_tool_2": {}}}
     serializer = get_tool_config_serializer(agent_field_name="TOOLS", data=input_data)
     assert serializer.is_valid()
     assert serializer.validated_data["config"]["dummy_tool_2"] == {}

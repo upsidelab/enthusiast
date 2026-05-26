@@ -75,6 +75,15 @@ class PydanticModelToolConfigField(BasePydanticModelField):
         all_errors = {}
         has_errors = False
 
+        for tc in tool_config_list:
+            config_schema = getattr(tc, self.tool_field_name, None)
+            if not config_schema or not isinstance(config_schema, type) or not issubclass(config_schema, BaseModel):
+                continue
+            tool_name = getattr(tc.tool_class, "NAME", None)
+            if tool_name is not None and tool_name not in data:
+                all_errors[tool_name] = [f"Configuration required for tool: {tool_name}"]
+                has_errors = True
+
         for tool_name, tool_config_dict in data.items():
             tc = tool_map.get(tool_name)
             if tc is None:
@@ -85,6 +94,11 @@ class PydanticModelToolConfigField(BasePydanticModelField):
             config_schema = getattr(tc, self.tool_field_name, None)
             if not config_schema or not isinstance(config_schema, type) or not issubclass(config_schema, BaseModel):
                 validated[tool_name] = {}
+                continue
+
+            if not isinstance(tool_config_dict, dict):
+                all_errors[tool_name] = ["Expected a dict of field values."]
+                has_errors = True
                 continue
 
             try:

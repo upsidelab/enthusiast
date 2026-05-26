@@ -24,24 +24,26 @@ class MockToolConfigurationArgs(BaseModel):
 
 class MockToolClass:
     NAME = "mock_tool"
-    CONFIGURATION_ARGS = MockToolConfigurationArgs
 
 
 class MockToolClass2:
     NAME = "mock_tool_2"
-    CONFIGURATION_ARGS = MockToolConfigurationArgs
 
 
 class MockToolConfig:
-    def __init__(self, tool_class):
+    def __init__(self, tool_class, tool_configuration_args=None):
         self.tool_class = tool_class
+        self.tool_configuration_args = tool_configuration_args
 
 
 class MockAgentClass:
     AGENT_ARGS = MockConfigurationArgs
     PROMPT_INPUT = MockConfigurationArgs
     PROMPT_EXTENSION = MockConfigurationArgs
-    TOOLS = [MockToolConfig(MockToolClass), MockToolConfig(MockToolClass2)]
+    TOOLS = [
+        MockToolConfig(MockToolClass, tool_configuration_args=MockToolConfigurationArgs),
+        MockToolConfig(MockToolClass2, tool_configuration_args=MockToolConfigurationArgs),
+    ]
 
 
 @pytest.fixture

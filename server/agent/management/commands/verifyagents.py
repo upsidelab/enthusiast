@@ -52,7 +52,7 @@ class Command(BaseCommand):
 
         for tool_config_entry in agent_class.TOOLS:
             tool_class = tool_config_entry.tool_class
-            field = getattr(tool_class, "CONFIGURATION_ARGS", None)
+            field = getattr(tool_config_entry, "tool_configuration_args", None)
             if field is None:
                 continue
             tool_name = tool_class.NAME

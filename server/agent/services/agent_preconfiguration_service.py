@@ -46,9 +46,9 @@ class AgentPreconfigurationService:
             "prompt_extension": get_model_descriptor_default_value_from_class(agent_class, "PROMPT_EXTENSION"),
             "tool_config": {
                 tool_config.tool_class.NAME: get_model_descriptor_default_value_from_class(
-                    tool_config.tool_class, "CONFIGURATION_ARGS"
+                    tool_config, "tool_configuration_args"
                 )
                 for tool_config in agent_class.TOOLS
-                if tool_config.tool_class.CONFIGURATION_ARGS is not None
+                if tool_config.tool_configuration_args is not None
             },
         }

@@ -20,7 +20,6 @@ class ToolArgs(RequiredFieldsModel):
 
 class DummyTool(BaseFunctionTool):
     NAME = "dummy_tool"
-    CONFIGURATION_ARGS = ToolArgs
 
 
 class AgentArgs(RequiredFieldsModel):
@@ -46,7 +45,7 @@ class MockAgentClass:
     AGENT_ARGS = AgentArgs
     PROMPT_INPUT = PromptInput
     PROMPT_EXTENSION = PromptExtension
-    TOOLS = [FunctionToolConfig(tool_class=DummyTool)]
+    TOOLS = [FunctionToolConfig(tool_class=DummyTool, tool_configuration_args=ToolArgs)]
     FILE_UPLOAD = False
 
 

@@ -66,7 +66,7 @@ class PydanticModelToolConfigField(BasePydanticModelField):
             raise serializers.ValidationError("Expected a dict of tool configurations keyed by tool name.")
 
         tool_map = {
-            tc.tool_class.NAME: tc.tool_class
+            tc.tool_class.NAME: tc
             for tc in tool_config_list
             if getattr(tc.tool_class, "NAME", None) is not None
         }
@@ -76,13 +76,13 @@ class PydanticModelToolConfigField(BasePydanticModelField):
         has_errors = False
 
         for tool_name, tool_config_dict in data.items():
-            tool_class = tool_map.get(tool_name)
-            if tool_class is None:
+            tc = tool_map.get(tool_name)
+            if tc is None:
                 all_errors[tool_name] = [f"Unknown tool: {tool_name}"]
                 has_errors = True
                 continue
 
-            config_schema = getattr(tool_class, self.tool_field_name, None)
+            config_schema = getattr(tc, self.tool_field_name, None)
             if not config_schema or not isinstance(config_schema, type) or not issubclass(config_schema, BaseModel):
                 validated[tool_name] = {}
                 continue

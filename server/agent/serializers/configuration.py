@@ -29,7 +29,7 @@ class AgentConfigSerializer(ParentDataContextSerializerMixin, serializers.Serial
     agent_args = PydanticModelField(agent_field_name="AGENT_ARGS")
     prompt_input = PydanticModelField(agent_field_name="PROMPT_INPUT")
     prompt_extension = PydanticModelField(agent_field_name="PROMPT_EXTENSION")
-    tool_config = PydanticModelToolConfigField(agent_field_name="TOOLS", tool_field_name="CONFIGURATION_ARGS")
+    tool_config = PydanticModelToolConfigField(agent_field_name="TOOLS", tool_field_name="tool_configuration_args")
 
 
 class AgentSerializer(ParentDataContextSerializerMixin, serializers.ModelSerializer):

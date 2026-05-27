@@ -172,3 +172,17 @@ def test_pydantic_model_tool_config_field_tool_without_config_args_is_accepted(
     serializer = get_tool_config_serializer(agent_field_name="TOOLS", data=input_data)
     assert serializer.is_valid()
     assert serializer.validated_data["config"]["dummy_tool_2"] == {}
+
+
+@patch("agent.core.registries.agents.agent_registry.settings")
+@patch("agent.serializers.customs.fields.AgentRegistry.get_agent_class_by_type")
+def test_pydantic_model_tool_config_field_missing_required_tool_config(mock_import, mock_settings, available_agents):
+    mock_settings.AVAILABLE_AGENTS = available_agents
+    mock_import.return_value = type(
+        "Agent", (),
+        {"TOOLS": [FunctionToolConfig(tool_class=DummyTool, tool_configuration_args=DummySchema)]},
+    )
+    serializer = get_tool_config_serializer(agent_field_name="TOOLS", data={"config": {}})
+    assert not serializer.is_valid()
+    assert "dummy_tool" in serializer.errors["config"]
+    assert "Configuration required" in str(serializer.errors["config"]["dummy_tool"][0])

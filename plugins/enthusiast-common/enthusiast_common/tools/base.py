@@ -13,7 +13,7 @@ from langchain_core.tools import StructuredTool
 from pydantic import BaseModel
 
 from ..injectors import BaseInjector
-from ..utils import RequiredFieldsModel, validate_required_vars
+from ..utils import validate_required_vars
 
 
 class ToolMeta(ABCMeta):

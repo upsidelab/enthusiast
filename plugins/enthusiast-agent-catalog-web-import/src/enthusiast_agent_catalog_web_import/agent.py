@@ -4,7 +4,7 @@ from enthusiast_common.config.base import LLMToolConfig
 from enthusiast_common.utils import RequiredFieldsModel
 from pydantic import Field, Json
 
-from .tools.scrape_product_tool import ScrapeProductTool, ScrapeProductConfig
+from .tools.scrape_product_tool import ScrapeProductConfig, ScrapeProductTool
 
 _CONFIRMATION_REQUIRED_INSTRUCTION = (
     "CONFIRMATION REQUIRED: Do NOT call the upsert tool without explicit user confirmation first. "

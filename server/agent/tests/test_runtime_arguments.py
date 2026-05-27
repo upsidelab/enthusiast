@@ -1,8 +1,7 @@
 from unittest.mock import MagicMock
 
-from pydantic import BaseModel
-
 from enthusiast_common.agents.base import BaseAgent
+from pydantic import BaseModel
 
 
 class _StubToolConfig:

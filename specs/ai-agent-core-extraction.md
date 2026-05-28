@@ -168,6 +168,10 @@ AGENTCORE_INTEGRATION_PLUGINS = ['enthusiast.integrations.MedusaIntegration', ..
 
 agentcore reads these lists at startup and loads the declared classes. One mechanism, no magic.
 
+**Assumed deployment model: one plugin per agentcore instance.** The primary use case is a single vertical (e.g. enthusiast for e-commerce) installed on top of agentcore. Mixing unrelated verticals (e.g. e-commerce + healthcare) on one instance is technically possible via the settings lists but is not a design goal and has not been thought through (e.g. builder routing, DataSet ownership).
+
+> **Open question:** Should agentcore explicitly support multi-plugin deployments? A large enterprise may want multiple domain plugins on one instance (e.g. separate DataSets per department, each with a different plugin). This would require a builder routing mechanism (which builder handles which agent/DataSet). Deferred — not in scope for the initial extraction?.
+
 ---
 
 ## What enthusiast Brings
@@ -200,13 +204,23 @@ enthusiast/
   plugins/
     enthusiast-common/    # Pure Python e-commerce structs — ProductDetails,
                           # DocumentDetails, BaseProductRetriever, etc.
-                          # Zero dependency on agentcore-common.
+                          # Depends on agentcore-common (extends its interfaces).
     enthusiast/           # Django app — Product, Document, tools, builder, injector
     enthusiast-agent-*/   # Agent plugins
     enthusiast-source-*/  # Source sync plugins (Medusa, Shopify, etc.)
 ```
 
-Key rule: `enthusiast-common` has **zero dependency on `agentcore-common`**. E-commerce interfaces are fully independent of the AI agent framework.
+Dependency graph:
+
+```
+agentcore-common          # pure framework interfaces, no domain knowledge
+       ↑
+enthusiast-common         # extends agentcore-common with e-commerce types
+       ↑
+enthusiast (Django app)   # wires it all together
+```
+
+`enthusiast-common` depends on `agentcore-common`. E-commerce interfaces extend the framework interfaces — for example, `BaseProductRetriever` extends `BaseVectorStoreRetriever` from agentcore-common. Each layer knows only what it needs to; agentcore-common stays pure.
 
 ---
 

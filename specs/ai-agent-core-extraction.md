@@ -32,7 +32,7 @@ agentcore is a pure AI agent framework — it knows nothing about products, docu
 - **Conversation / Message / Agent** — core conversation management
 - **AgenticExecution** — autonomous multi-step task execution with retries
 - **ToolCallingAgent** — generic tool-calling agent. No built-in tools — plugins bring their own.
-- **Integration** — one external system connection per DataSet (type and config defined by the plugin, configured in the UI)
+- **Integration** — one connection per integration type per DataSet (type and config defined by the plugin, configured in the UI)
 - **LLM provider plugins** — OpenAI, Anthropic, Google, Mistral, Ollama, Azure
 - **WebSocket streaming, memory strategies, REST API**
 
@@ -108,17 +108,15 @@ LLM generates response → WebSocket → User
 
 A plugin is responsible for three things:
 
-**1. Repositories — the domain knowledge**
+**1. Domain Models — the domain knowledge**
 
-The plugin defines what data sources exist and how to search them. These are not models in agentcore — they are defined entirely by the plugin. Examples:
+The plugin defines its own models with a FK to `agentcore.DataSet`. agentcore is unaware of their structure — the plugin owns the models, the sync logic, the embeddings, and the vector search entirely.
 
-| Vertical | Repositories |
+Plugin models declare themselves as `DomainEntity` (see [DomainEntity](#domainentity)), which makes them automatically visible in the agentcore UI as read-only tables — no extra frontend work needed per plugin.
+
+| Vertical | Domain Models |
 |---|---|
-| enthusiast (e-commerce) | Products, Documents |
-
-The plugin owns the models (with FK to `agentcore.DataSet`), the sync logic, the embeddings, and the vector search. agentcore is unaware of any of this.
-
-Repositories are **code-defined** — the admin does not create them in the UI. They exist automatically when the plugin is installed. The UI shows them read-only per DataSet so the admin can see what knowledge sources are available. The exact name for this UI section is TBD (deferred to the frontend discussion).
+| enthusiast (e-commerce) | Product, Document |
 
 **2. Integration — the external system**
 
@@ -318,4 +316,3 @@ agentcore ships a React UI for chat, DataSet management, Integration configurati
 
 - **Final name for agentcore** — placeholder only, needs branding discussion
 - **PyPI namespace** — check `agentcore` availability
-- **Versioning** — agentcore and enthusiast version independently

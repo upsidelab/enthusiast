@@ -224,9 +224,70 @@ enthusiast (Django app)   # wires it all together
 
 ---
 
+## Migrations
+
+Plugin models live in the plugin's own Django app and define their own migrations. When a plugin is added to `INSTALLED_APPS`, Django's standard migration system picks them up automatically — no special mechanism needed.
+
+```bash
+# After adding enthusiast to INSTALLED_APPS:
+python manage.py migrate          # applies agentcore + enthusiast migrations together
+python manage.py makemigrations   # generates new migrations for any plugin model change
+```
+
+Each plugin ships its own `migrations/` directory. agentcore's migrations and plugin migrations are independent and applied in the correct order via Django's dependency graph (`dependencies = [('agentcore', '0001_initial')]` in the plugin migration).
+
+---
+
+## DomainEntity
+
+`DomainEntity` is a pure Python ABC in `agentcore-common` (zero Django dependency). Plugin models inherit from it alongside `models.Model` to declare themselves as visible in the agentcore UI and API.
+
+```python
+# enthusiast/models/product.py
+from agentcore_common.entities import DomainEntity, EntityField
+
+class Product(DomainEntity, models.Model):
+    dataset = models.ForeignKey('agentcore.DataSet', on_delete=models.CASCADE)
+    sku = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
+    price = models.DecimalField(...)
+
+    class EntityMeta:
+        slug = 'products'
+        label = 'Products'
+        list_fields = [
+            EntityField('sku', label='SKU'),
+            EntityField('name', label='Product Name'),
+            EntityField('price', label='Price'),
+        ]
+```
+
+**Design decisions:**
+
+- **`EntityMeta` inner class** — mirrors Django's `Meta` convention, keeps namespace clean
+- **`EntityField` objects** — not plain strings; carries `label` for UI rendering
+- **Read-only** — list endpoint only (`GET /api/datasets/{id}/products/`), no detail view, no write operations; write goes through Integration/sync engine
+- **Pagination** — automatic via DRF global settings; no filtering (YAGNI)
+- **Dynamic serializer** — agentcore builds a `ModelSerializer` via `type()` once at startup in `AppConfig.ready()`, cached in entity registry; no per-entity serializer needed
+- **Frontend discovery** — `GET /api/entities/` returns entity definitions (slug, label, fields); React renders a generic `EntityTable` component per entity — zero frontend work per plugin
+
+**Registration** — via settings list, consistent with all other plugin registration in the project:
+
+```python
+# settings_override.py
+AGENTCORE_ENTITY_PLUGINS = [
+    'enthusiast.models.Product',
+    'enthusiast.models.Document',
+]
+```
+
+**Settings prefix** — all agentcore settings use `AGENTCORE_*` prefix. The current `CATALOG_*` prefix disappears after the split — it is an e-commerce concept, not a framework concept.
+
+---
+
 ## Frontend
 
-> **Note:** At this stage there is no frontend plan beyond writing it manually. agentcore ships a React UI for chat, DataSet management, and Integration configuration. Any richer plugin-specific UI (e.g. a Catalog page for products and documents) requires manual frontend development — no injection mechanism exists. This is a known gap to address in a future iteration, ideally after a consultation with a frontend developer.
+agentcore ships a React UI for chat, DataSet management, Integration configuration, and **entity tables** rendered dynamically from `AGENTCORE_ENTITY_PLUGINS` via `GET /api/entities/`. Plugin-specific UI beyond generic tables (e.g. a multi-step enrichment workflow, custom forms, bulk actions) requires manual frontend development — there is no plugin slot or injection mechanism for React components yet.
 
 ---
 

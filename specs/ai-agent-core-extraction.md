@@ -123,16 +123,35 @@ Plugin models declare themselves as `DomainEntity` (see [DomainEntity](#domainen
 A DataSet can have multiple integrations — one per type (e.g. Medusa + Shopify on the same DataSet). The plugin defines the Integration type:
 
 ```python
-class MedusaIntegration(BaseIntegration):
-    type = 'medusa'
-    label = 'Medusa'
+# agentcore-common
+class BaseIntegration:
+    type: str
+    label: str
 
     def get_config_schema(self): ...   # drives the UI config form
     def test_connection(self, config): ...
-    def get_client(self, config): ...
+    def sync(self, dataset_id): ...    # agentcore calls this on "Sync" action
+
+# enthusiast-common
+class ECommerceIntegrationPlugin(BaseIntegration):
+    def build_connector(self) -> ECommercePlatformConnector: ...
+
+# enthusiast
+class MedusaIntegration(ECommerceIntegrationPlugin):
+    type = 'medusa'
+    label = 'Medusa'
+
+    def get_config_schema(self): ...
+    def test_connection(self, config): ...
+    def sync(self, dataset_id): ...       # pulls products, stores embeddings
+    def build_connector(self) -> MedusaPlatformConnector: ...
 ```
 
-Integration config (URL, API key) is stored per-DataSet in the database — not in env vars, because each DataSet connects to a different store instance.
+**Design decisions:**
+
+- **Integration lifecycle** — agentcore stores integration config (URL, API key, etc.) as JSON in the `Integration` model. Before calling any method on an integration, agentcore loads the DB record, resolves the plugin class from `AGENTCORE_INTEGRATION_PLUGINS`, and instantiates it with the stored config. The instance is stateful — config lives on `self`, not passed as a parameter. This is consistent with the current `CONFIGURATION_ARGS` pattern.
+- **Sync trigger** — `BaseIntegration` exposes `sync(dataset_id)`. agentcore UI shows a generic "Sync" button per integration and calls this method on a freshly instantiated plugin. The plugin owns what gets synced and how — agentcore is unaware of the internals.
+- **Connector access in tools** — `build_connector()` is not on `BaseIntegration`; it lives on `ECommerceIntegrationPlugin` in enthusiast-common. `EnthusiastAgentBuilder` instantiates the integration plugin with config (same lifecycle as above) and calls `build_connector()`. The resulting connector is passed to `EnthusiastInjector`, which exposes it as `ecommerce_platform_connector`. Tools access it via the injector — `self.injector.ecommerce_platform_connector`. `BaseInjector` in agentcore-common has no connector property; it remains domain-agnostic.
 
 **3. AgentBuilder + Tools — how the agent is assembled**
 
@@ -143,8 +162,9 @@ class EnthusiastAgentBuilder(BaseAgentBuilder):
     def build(self, dataset, conversation):
         # reads embedding config from dataset
         # builds product + document retrievers
-        # instantiates injector and tools
-        # returns a ToolCallingAgent ready to answer questions
+        # loads Integration from DB, builds ECommercePlatformConnector
+        # instantiates EnthusiastInjector with retrievers + connector
+        # returns a ToolCallingAgent with tools
         ...
 ```
 

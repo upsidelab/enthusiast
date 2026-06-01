@@ -1,6 +1,6 @@
 [project]
 name = "enthusiast-agent-user-manual-search"
-version = "1.3.0"
+version = "1.4.0"
 description = "User Manual Search Agent for Enthusiast"
 authors = [
     {name = "Damian Sowiński",email = "damian.sowinski@upsidelab.io"}

@@ -429,6 +429,70 @@ Conversation → Agent (agent_type)
 
 ---
 
+## Writing a New Agent
+
+Because a deployment runs **one vertical = one builder**, every agent shares the same injector (`EnthusiastInjector`), so adding an agent on top of an installed vertical is deliberately simple.
+
+**1 — Reuse existing tools (the common case).** Write the agent class, declare the tools it needs, register it:
+
+```python
+# my_pkg/agents.py
+from agentcore.agents import ToolCallingAgent
+from agentcore_common.config import LLMToolConfig
+from enthusiast.tools import ProductSearchTool
+
+class BundleAdvisorAgent(ToolCallingAgent):
+    AGENT_KEY = 'my-bundle-advisor'
+    NAME = 'Bundle Advisor'
+    TOOLS = [LLMToolConfig(tool_class=ProductSearchTool)]
+    # + system prompt
+```
+
+```python
+# settings_override.py
+AGENTCORE_AGENT_PLUGINS += ['my_pkg.agents.BundleAdvisorAgent']
+```
+
+That is the whole registration. The agent already has product/document retrievers and the connector via the shared injector.
+
+**2 — Add a new tool.** Extend a tool base from agentcore-common and reach domain data through the injector; then reference the tool in the agent's `TOOLS`:
+
+```python
+# my_pkg/tools.py
+from agentcore_common.tools import BaseLLMTool
+
+class BundleTool(BaseLLMTool):
+    NAME = 'find_bundles'
+    DESCRIPTION = 'Finds complementary products for a given SKU.'
+    ARGS_SCHEMA = BundleArgs
+
+    def run(self, sku: str) -> str:
+        retriever = self.injector.product_retriever   # provided by EnthusiastInjector
+        ...
+```
+
+```python
+TOOLS = [LLMToolConfig(tool_class=ProductSearchTool),
+         LLMToolConfig(tool_class=BundleTool)]   # referencing the class IS the registration
+```
+
+A tool needs **no settings entry** — it is referenced by class in the agent's `TOOLS`, so registering the agent brings its tools transitively. (This is why there is no `AGENTCORE_TOOL_PLUGINS`.)
+
+**Runtime flow:**
+
+```
+Conversation → Agent (agent_type = 'my-bundle-advisor')
+   → AgentRegistry resolves the class by AGENT_KEY (from AGENTCORE_AGENT_PLUGINS)
+   → EnthusiastAgentBuilder.build():
+        LLM from dataset + build_injector() + instantiate each tool in TOOLS (inject injector)
+        → BundleAdvisorAgent instance
+   → get_answer(): LangChain tool-calling loop → BundleTool.run() → injector → pgvector
+```
+
+**Boundary.** This stays easy as long as the tool relies on what the injector already exposes (retrievers, connector). A tool needing something the injector does not provide (e.g. a new retriever type) requires extending `EnthusiastInjector`/the builder — a larger change, and the same territory as building a brand-new vertical.
+
+---
+
 ## AgenticExecution
 
 Alongside interactive chat, agentcore supports **agentic executions** — autonomous, non-interactive runs of an agent against structured input, with an automatic validate-and-retry loop. This already exists today (catalog enrichment, invoice scanning, order intake) and is domain-agnostic infrastructure, so the engine moves to agentcore while the concrete definitions stay in the vertical.

@@ -109,7 +109,7 @@ class StartAgenticExecutionView(APIView):
         except UnsupportedFileTypeError as exc:
             return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(AgenticExecutionSerializer(execution).data, status=status.HTTP_202_ACCEPTED)
+        return Response(AgenticExecutionDetailSerializer(execution).data, status=status.HTTP_202_ACCEPTED)
 
 
 class AgenticExecutionListView(ListAPIView):

@@ -317,10 +317,13 @@ class TestStartAgenticExecutionView:
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_happy_path_returns_202_with_execution_data(self, api_client, url):
+    def test_happy_path_returns_202_with_execution_data(self, api_client, url, user, agent, dataset):
         with patch("agent.agentic_execution.views.AgenticExecutionService.start") as mock_start, \
              patch("agent.agentic_execution.services.run_agentic_execution_task.delay"):
-            mock_start.return_value = baker.make(AgenticExecution)
+            conversation = baker.make(Conversation, user=user, agent=agent, data_set=dataset)
+            baker.make("agent.ConversationFile", conversation=conversation, is_hidden=False)
+            execution = baker.make(AgenticExecution, agent=agent, conversation=conversation, input={"required_field": "hello"})
+            mock_start.return_value = execution
             response = api_client.post(
                 url, {"execution_key": "dummy", "input": {"required_field": "hello"}}, format="json"
             )

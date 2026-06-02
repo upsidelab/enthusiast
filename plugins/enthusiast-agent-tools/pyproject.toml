@@ -14,7 +14,6 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://upsidelab.io/tools/enthusiast"
-Documentation = "https://upsidelab.io/tools/enthusiast/agents/tools"
 Repository = "https://github.com/upsidelab/enthusiast.git"
 Issues = "https://github.com/upsidelab/enthusiast/issues"
 

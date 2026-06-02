@@ -320,7 +320,9 @@ class TestStartAgenticExecutionView:
     def test_happy_path_returns_202_with_execution_data(self, api_client, url):
         with patch("agent.agentic_execution.views.AgenticExecutionService.start") as mock_start, \
              patch("agent.agentic_execution.services.run_agentic_execution_task.delay"):
-            mock_start.return_value = baker.make(AgenticExecution)
+            mock_execution = baker.prepare(AgenticExecution)
+            mock_execution.pk = 1
+            mock_start.return_value = mock_execution
             response = api_client.post(
                 url, {"execution_key": "dummy", "input": {"required_field": "hello"}}, format="json"
             )

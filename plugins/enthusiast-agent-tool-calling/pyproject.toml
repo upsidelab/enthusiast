@@ -1,6 +1,6 @@
 [project]
 name = "enthusiast-agent-tool-calling"
-version = "1.2.0"
+version = "1.1.0"
 description = "Base implementation of a Tool Calling agent for Enthusiast"
 authors = [
     {name = "Damian Sowiński",email = "damian.sowinski@upsidelab.io"}
@@ -9,7 +9,7 @@ readme = "README.md"
 requires-python = ">=3.10,<4"
 dependencies = [
     "enthusiast-agent-tools (>=1.0.0,<2.0.0)",
-    "enthusiast-common (>=1.7.0,<2.0.0)",
+    "enthusiast-common (>=1.6.0,<2.0.0)",
     "langchain (>=1.2.0,<2.0.0)",
 ]
 

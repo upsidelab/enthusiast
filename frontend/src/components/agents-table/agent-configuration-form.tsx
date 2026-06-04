@@ -6,7 +6,7 @@ import { DynamicConfigInput } from "./dynamic-config-input";
 import { TypeInfo } from "@/lib/types";
 
 interface AgentConfigurationFormProps {
-  agentConfigSections: Record<string, Record<string, unknown> | Record<string, unknown>[]>;
+  agentConfigSections: Record<string, Record<string, unknown>>;
   openSections: Record<string, boolean>;
   setOpenSections: (sections: Record<string, boolean>) => void;
   config: Record<string, string | number | boolean>;
@@ -27,18 +27,13 @@ export function AgentConfigurationForm({
   };
 
   useEffect(() => {
-    const checkForSectionErrors = (section: string, fields: Record<string, unknown> | Record<string, unknown>[]) => {
-      if (Array.isArray(fields)) {
-        return fields.some(obj => {
-          if (obj && typeof obj === 'object') {
-            return Object.keys(obj).some(key => fieldErrors[`${section}_${key}`]);
-          }
-          return false;
-        });
-      } else if (fields && typeof fields === 'object') {
-        return Object.keys(fields).some(key => fieldErrors[`${section}_${key}`]);
+    const checkForSectionErrors = (section: string, fields: Record<string, unknown>) => {
+      if (section === 'tool_config') {
+        return Object.entries(fields as Record<string, Record<string, unknown>>).some(([toolName, toolFields]) =>
+          Object.keys(toolFields || {}).some(key => fieldErrors[`tool_config_${toolName}_${key}`])
+        );
       }
-      return false;
+      return Object.keys(fields).some(key => fieldErrors[`${section}_${key}`]);
     };
 
     const expandSectionsWithErrors = () => {
@@ -64,13 +59,13 @@ export function AgentConfigurationForm({
     expandSectionsWithErrors();
   }, [fieldErrors, agentConfigSections, openSections, setOpenSections]);
 
-  const hasConfigFields = Object.values(agentConfigSections).some(section => {
-    if (Array.isArray(section)) {
-      return section.some(obj => obj && typeof obj === 'object' && Object.keys(obj).length > 0);
-    } else if (section && typeof section === 'object') {
-      return Object.keys(section).length > 0;
+  const hasConfigFields = Object.entries(agentConfigSections).some(([section, sectionData]) => {
+    if (section === 'tool_config') {
+      return Object.values(sectionData as Record<string, Record<string, unknown>>).some(
+        toolFields => toolFields && typeof toolFields === 'object' && Object.keys(toolFields).length > 0
+      );
     }
-    return false;
+    return sectionData !== null && sectionData !== undefined && typeof sectionData === 'object' && Object.keys(sectionData as object).length > 0;
   });
 
   const renderConfigField = (key: string, schema: unknown, configKey: string) => {
@@ -95,16 +90,25 @@ export function AgentConfigurationForm({
     );
   };
 
-  const renderToolsArrayFields = (section: string, fields: Record<string, unknown>[]) => {
-    return fields.map((obj, idx) => {
-      const sObj = obj && typeof obj === 'object' ? obj : {};
-      if (Object.keys(sObj).length === 0) return null;
-      
+  const renderRegularFields = (section: string, fields: Record<string, unknown>) => {
+    return Object.entries(fields).map(([key, schema]) => {
+      const configKey = `${section}_${key}`;
+      return typeof key === 'string' ? renderConfigField(key, schema, configKey) : null;
+    });
+  };
+
+  const renderToolConfigFields = (fields: Record<string, Record<string, unknown>>) => {
+    return Object.entries(fields).map(([toolName, toolFields]) => {
+      const sFields = toolFields && typeof toolFields === 'object' ? toolFields : {};
+      if (Object.keys(sFields).length === 0) return null;
       return (
-        <div key={idx} className="pl-4 border-l-2 border-muted bg-muted/20 rounded-r-md p-3">
+        <div key={toolName} className="pl-4 border-l-2 border-muted bg-muted/20 rounded-r-md p-3">
+          <p className="text-xs font-medium text-muted-foreground mb-2 capitalize">
+            {toolName.replace(/_/g, ' ')}
+          </p>
           <div className="space-y-3">
-            {Object.entries(sObj).map(([key, schema]) => {
-              const configKey = `${section}_${key}`;
+            {Object.entries(sFields).map(([key, schema]) => {
+              const configKey = `tool_config_${toolName}_${key}`;
               return typeof key === 'string' ? renderConfigField(key, schema, configKey) : null;
             })}
           </div>
@@ -113,18 +117,13 @@ export function AgentConfigurationForm({
     });
   };
 
-  const renderRegularFields = (section: string, fields: Record<string, unknown>) => {
-    return Object.entries(fields).map(([key, schema]) => {
-      const configKey = `${section}_${key}`;
-      return typeof key === 'string' ? renderConfigField(key, schema, configKey) : null;
-    });
-  };
-
-  const renderConfigSection = (section: string, fields: Record<string, unknown> | Record<string, unknown>[]) => {
+  const renderConfigSection = (section: string, fields: Record<string, unknown>) => {
     let hasFields = false;
-    if (Array.isArray(fields)) {
-      hasFields = fields.some(obj => obj && typeof obj === 'object' && Object.keys(obj).length > 0);
-    } else if (fields && typeof fields === 'object') {
+    if (section === 'tool_config') {
+      hasFields = Object.values(fields as Record<string, Record<string, unknown>>).some(
+        toolFields => toolFields && typeof toolFields === 'object' && Object.keys(toolFields).length > 0
+      );
+    } else {
       hasFields = Object.keys(fields).length > 0;
     }
     if (!hasFields) return null;
@@ -132,9 +131,9 @@ export function AgentConfigurationForm({
     const sectionTitle = String(section).replace(/_/g, ' ');
 
     return (
-      <Collapsible 
-        key={section} 
-        open={openSections[section]} 
+      <Collapsible
+        key={section}
+        open={openSections[section]}
         onOpenChange={(open) => setOpenSections({ ...openSections, [section]: open })}
       >
         <CollapsibleTrigger asChild>
@@ -149,9 +148,9 @@ export function AgentConfigurationForm({
         </CollapsibleTrigger>
         <CollapsibleContent className="space-y-4 mt-2">
           <div className="pl-4 space-y-4">
-            {Array.isArray(fields)
-              ? renderToolsArrayFields(section, fields)
-              : renderRegularFields(section, fields as Record<string, unknown>)}
+            {section === 'tool_config'
+              ? renderToolConfigFields(fields as Record<string, Record<string, unknown>>)
+              : renderRegularFields(section, fields)}
           </div>
         </CollapsibleContent>
       </Collapsible>

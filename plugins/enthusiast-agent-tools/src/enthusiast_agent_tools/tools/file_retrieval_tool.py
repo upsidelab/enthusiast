@@ -13,7 +13,6 @@ class FileRetrievalTool(BaseFileTool):
     DESCRIPTION = "It's AI tool for perform action with file/s."
     ARGS_SCHEMA = FileRetrievalToolInput
     RETURN_DIRECT = False
-    CONFIGURATION_ARGS = None
 
     def run(self, file_ids: str, action: str):
         parsed_file_ids = file_ids.split(",")

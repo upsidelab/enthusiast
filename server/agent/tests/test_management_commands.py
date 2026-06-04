@@ -23,14 +23,27 @@ class MockToolConfigurationArgs(BaseModel):
 
 
 class MockToolClass:
-    CONFIGURATION_ARGS = MockToolConfigurationArgs
+    NAME = "mock_tool"
+
+
+class MockToolClass2:
+    NAME = "mock_tool_2"
+
+
+class MockToolConfig:
+    def __init__(self, tool_class, tool_configuration_args=None):
+        self.tool_class = tool_class
+        self.tool_configuration_args = tool_configuration_args
 
 
 class MockAgentClass:
     AGENT_ARGS = MockConfigurationArgs
     PROMPT_INPUT = MockConfigurationArgs
     PROMPT_EXTENSION = MockConfigurationArgs
-    TOOLS = [MockToolClass, MockToolClass]
+    TOOLS = [
+        MockToolConfig(MockToolClass, tool_configuration_args=MockToolConfigurationArgs),
+        MockToolConfig(MockToolClass2, tool_configuration_args=MockToolConfigurationArgs),
+    ]
 
 
 @pytest.fixture
@@ -39,10 +52,10 @@ def config_dict() -> dict[Any, Any]:
         "agent_args": {"value_1": "value_1", "value_2": "value_2"},
         "prompt_input": {"value_1": "value_1", "value_2": "value_2"},
         "prompt_extension": {"value_1": "value_1", "value_2": "value_2"},
-        "tools": [
-            {"tool_value_1": "value_1", "tool_value_2": True},
-            {"tool_value_1": "value_1", "tool_value_2": False},
-        ],
+        "tool_config": {
+            "mock_tool": {"tool_value_1": "value_1", "tool_value_2": True},
+            "mock_tool_2": {"tool_value_1": "value_1", "tool_value_2": False},
+        },
     }
 
 
@@ -92,8 +105,23 @@ class TestVerifyAgentsCommand:
         assert corrupted_agent.corrupted is True
 
     @patch("agent.management.commands.verifyagents.AgentRegistry")
+    def test_verifyagents_command_missing_tool_name_in_tool_config(self, mock_agent_registry, config_dict):
+        # mock_tool has valid config, but mock_tool_2 key is entirely absent
+        config_dict["tool_config"] = {"mock_tool": {"tool_value_1": "value_1", "tool_value_2": True}}
+        corrupted_agent = baker.make(Agent, name="Corrupted Tools", agent_type=self.AGENT_TYPE, config=config_dict)
+
+        mock_registry_instance = Mock()
+        mock_registry_instance.get_agent_class_by_type.return_value = self.MOCK_AGENT_CLASS
+        mock_agent_registry.return_value = mock_registry_instance
+
+        call_command("verifyagents")
+
+        corrupted_agent.refresh_from_db()
+        assert corrupted_agent.corrupted is True
+
+    @patch("agent.management.commands.verifyagents.AgentRegistry")
     def test_verifyagents_command_missing_tool_config(self, mock_agent_registry, config_dict):
-        config_dict["tools"] = [{"tool_value_1": "tool1", "tool_value_2": True}, {}]
+        config_dict["tool_config"] = {"mock_tool": {}}
         corrupted_agent = baker.make(Agent, name="Corrupted Tools", agent_type=self.AGENT_TYPE, config=config_dict)
 
         mock_registry_instance = Mock()
@@ -107,10 +135,10 @@ class TestVerifyAgentsCommand:
 
     @patch("agent.management.commands.verifyagents.AgentRegistry")
     def test_verifyagents_command_invalid_tool_config_type(self, mock_agent_registry, config_dict):
-        config_dict["tools"] = [
-            {"tool_value_1": "tool1", "tool_value_2": True},
-            {"tool_value_1": "tool1", "tool_value_2": "InvalidType"},
-        ]
+        config_dict["tool_config"] = {
+            "mock_tool": {"tool_value_1": "val", "tool_value_2": True},
+            "mock_tool_2": {"tool_value_1": "val", "tool_value_2": "InvalidType"},
+        }
         corrupted_agent = baker.make(Agent, name="Corrupted Tools", agent_type=self.AGENT_TYPE, config=config_dict)
 
         mock_registry_instance = Mock()
@@ -124,7 +152,7 @@ class TestVerifyAgentsCommand:
 
     @patch("agent.management.commands.verifyagents.AgentRegistry")
     def test_verifyagents_command_additional_tool(self, mock_agent_registry, config_dict):
-        config_dict["tools"] = []
+        config_dict["tool_config"] = {}
         corrupted_agent = baker.make(Agent, name="Corrupted Tools", agent_type=self.AGENT_TYPE, config=config_dict)
 
         mock_registry_instance = Mock()
@@ -137,13 +165,9 @@ class TestVerifyAgentsCommand:
         assert corrupted_agent.corrupted is True
 
     @patch("agent.management.commands.verifyagents.AgentRegistry")
-    def test_verifyagents_command_missing_tool(self, mock_agent_registry, config_dict):
-        config_dict["tools"] = [
-            {"tool_value_1": "value_1", "tool_value_2": True},
-            {"tool_value_1": "value_1", "tool_value_2": True},
-            {"tool_value_1": "value_1", "tool_value_2": True},
-        ]
-        corrupted_agent = baker.make(Agent, name="Corrupted Tools", agent_type=self.AGENT_TYPE, config=config_dict)
+    def test_verifyagents_command_extra_tool_key_is_ignored(self, mock_agent_registry, config_dict):
+        config_dict["tool_config"]["unknown_tool"] = {"tool_value_1": "value_1", "tool_value_2": True}
+        valid_agent = baker.make(Agent, name="Extra Tool Key Agent", agent_type=self.AGENT_TYPE, config=config_dict)
 
         mock_registry_instance = Mock()
         mock_registry_instance.get_agent_class_by_type.return_value = self.MOCK_AGENT_CLASS
@@ -151,8 +175,8 @@ class TestVerifyAgentsCommand:
 
         call_command("verifyagents")
 
-        corrupted_agent.refresh_from_db()
-        assert corrupted_agent.corrupted is True
+        valid_agent.refresh_from_db()
+        assert valid_agent.corrupted is False
 
     @patch("agent.management.commands.verifyagents.AgentRegistry")
     def test_verifyagents_command_missing_agent_type(self, mock_agent_registry, config_dict):
@@ -169,7 +193,7 @@ class TestVerifyAgentsCommand:
 
     @patch("agent.management.commands.verifyagents.AgentRegistry")
     def test_verifyagents_command_multiple_corrupted_agents(self, mock_agent_registry, config_dict):
-        config_dict["tools"] = [{}, {}]
+        config_dict["tool_config"] = {"mock_tool": {}}
         baker.make(Agent, name="Corrupted Agent 1", agent_type=self.AGENT_TYPE, config=config_dict)
 
         baker.make(Agent, name="Corrupted Agent 2", agent_type=self.AGENT_TYPE, config=config_dict)
@@ -211,12 +235,28 @@ class TestVerifyAgentsCommand:
             Agent,
             name="Minimal Agent",
             agent_type="minimal_agent",
-            config={"agent_args": {}, "prompt_input": {}, "prompt_extension": {}, "tools": []},
+            config={"agent_args": {}, "prompt_input": {}, "prompt_extension": {}, "tool_config": {}},
         )
 
         call_command("verifyagents")
 
         assert Agent.objects.filter(corrupted=True).count() == 0
+
+    @patch("agent.management.commands.verifyagents.AgentRegistry")
+    def test_verifyagents_command_non_dict_config_value(self, mock_agent_registry):
+        corrupted_agent = baker.make(
+            Agent,
+            agent_type=self.AGENT_TYPE,
+            config={"agent_args": "not_a_dict", "prompt_input": {}, "prompt_extension": {}, "tool_config": {}},
+        )
+        mock_registry_instance = Mock()
+        mock_registry_instance.get_agent_class_by_type.return_value = self.MOCK_AGENT_CLASS
+        mock_agent_registry.return_value = mock_registry_instance
+
+        call_command("verifyagents")
+
+        corrupted_agent.refresh_from_db()
+        assert corrupted_agent.corrupted is True
 
     def test_verifyagents_command_empty_database(self):
         Agent.objects.all().delete()

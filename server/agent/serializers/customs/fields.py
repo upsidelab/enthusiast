@@ -25,7 +25,7 @@ class PydanticModelField(BasePydanticModelField):
 
         try:
             schema = getattr(class_obj, self.agent_field_name)
-        except KeyError:
+        except AttributeError:
             raise serializers.ValidationError(f"Unknown schema for field: {self.agent_field_name}")
 
         if not schema:
@@ -45,7 +45,7 @@ class PydanticModelField(BasePydanticModelField):
         swagger_schema_fields = {"type": openapi.TYPE_OBJECT}
 
 
-class PydanticModelToolListField(BasePydanticModelField):
+class PydanticModelToolConfigField(BasePydanticModelField):
     def __init__(self, *, agent_field_name: str, tool_field_name: str, **kwargs):
         self.agent_field_name = agent_field_name
         self.tool_field_name = tool_field_name
@@ -62,30 +62,51 @@ class PydanticModelToolListField(BasePydanticModelField):
         except Exception as e:
             raise serializers.ValidationError(f"Error loading agent or field: {str(e)}")
 
-        if not isinstance(data, list):
-            raise serializers.ValidationError("Expected a list of tool configurations.")
-        if len(tool_config_list) != len(data):
-            raise serializers.ValidationError("Mismatch between number of tools and provided configs.")
+        if not isinstance(data, dict):
+            raise serializers.ValidationError("Expected a dict of tool configurations keyed by tool name.")
 
-        validated = []
-        all_errors = []
+        tool_map = {
+            tc.tool_class.NAME: tc
+            for tc in tool_config_list
+            if getattr(tc.tool_class, "NAME", None) is not None
+        }
+
+        validated = {}
+        all_errors = {}
         has_errors = False
 
-        for idx, (tool_config_obj, tool_config_dict) in enumerate(zip(tool_config_list, data)):
-            config_schema = getattr(tool_config_obj.tool_class, self.tool_field_name, None)
+        for tc in tool_config_list:
+            config_schema = getattr(tc, self.tool_field_name, None)
             if not config_schema or not isinstance(config_schema, type) or not issubclass(config_schema, BaseModel):
-                all_errors.append({})
-                validated.append({})
+                continue
+            tool_name = getattr(tc.tool_class, "NAME", None)
+            if tool_name is not None and tool_name not in data:
+                all_errors[tool_name] = [f"Configuration required for tool: {tool_name}"]
+                has_errors = True
+
+        for tool_name, tool_config_dict in data.items():
+            tc = tool_map.get(tool_name)
+            if tc is None:
+                all_errors[tool_name] = [f"Unknown tool: {tool_name}"]
+                has_errors = True
+                continue
+
+            config_schema = getattr(tc, self.tool_field_name, None)
+            if not config_schema or not isinstance(config_schema, type) or not issubclass(config_schema, BaseModel):
+                validated[tool_name] = {}
+                continue
+
+            if not isinstance(tool_config_dict, dict):
+                all_errors[tool_name] = ["Expected a dict of field values."]
+                has_errors = True
                 continue
 
             try:
                 instance = config_schema(**tool_config_dict)
-                validated.append(instance.model_dump())
-                all_errors.append({})
+                validated[tool_name] = instance.model_dump()
             except PydanticValidationError as e:
                 has_errors = True
-                all_errors.append(self._format_pydantic_errors(e))
-                validated.append(None)
+                all_errors[tool_name] = self._format_pydantic_errors(e)
 
         if has_errors:
             raise serializers.ValidationError(all_errors)
@@ -93,12 +114,7 @@ class PydanticModelToolListField(BasePydanticModelField):
         return validated
 
     def to_representation(self, value):
-        if isinstance(value, list) and all(isinstance(v, BaseModel) for v in value):
-            return [v.model_dump() for v in value]
         return value
 
     class Meta:
-        swagger_schema_fields = {
-            "type": openapi.TYPE_ARRAY,
-            "items": {"type": openapi.TYPE_OBJECT},
-        }
+        swagger_schema_fields = {"type": openapi.TYPE_OBJECT}

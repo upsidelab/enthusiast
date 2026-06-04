@@ -58,7 +58,7 @@ class ToolArgs(RequiredFieldsModel):
 
 
 class DummyTool(BaseFunctionTool):
-    CONFIGURATION_ARGS = ToolArgs
+    NAME = "dummy_tool"
 
 
 class AgentArgs(RequiredFieldsModel):
@@ -80,7 +80,7 @@ class DummyAgentBase:
     AGENT_ARGS = AgentArgs
     PROMPT_INPUT = PromptInput
     PROMPT_EXTENSION = PromptExtension
-    TOOLS = [FunctionToolConfig(tool_class=DummyTool), FunctionToolConfig(tool_class=DummyTool)]
+    TOOLS = [FunctionToolConfig(tool_class=DummyTool, tool_configuration_args=ToolArgs)]
     FILE_UPLOAD = False
 
 
@@ -115,10 +115,9 @@ def config():
             "required_test": "required_test",
             "optional_test": "optional_test",
         },
-        "tools": [
-            {"required_test": "required_test", "optional_test": "optional_test"},
-            {"required_test": "required_test", "optional_test": "optional_test"},
-        ],
+        "tool_config": {
+            "dummy_tool": {"required_test": "required_test", "optional_test": "optional_test"},
+        },
     }
 
 
@@ -132,9 +131,12 @@ class TestAgentTypesView:
             assert len(response.data["choices"]) == 2
             assert response.data["choices"][0]["key"] == "agent_1"
             assert response.data["choices"][1]["key"] == "agent_2"
-            assert len(response.data["choices"][0]["tools"]) == 2
-            assert len(response.data["choices"][1]["tools"]) == 2
-            assert list(response.data["choices"][0]["tools"][0].keys()) == ["required_test", "optional_test"]
+            assert len(response.data["choices"][0]["tool_config"]) == 1
+            assert len(response.data["choices"][1]["tool_config"]) == 1
+            assert list(response.data["choices"][0]["tool_config"]["dummy_tool"].keys()) == [
+                "required_test",
+                "optional_test",
+            ]
 
     def test_get_agent_types_returns_401(self):
         response = APIClient().get(reverse("agent-types"))
@@ -223,14 +225,11 @@ class TestAgentView:
             "prompt_extension": {
                 "required_test": "required_test",
             },
-            "tools": [
-                {
+            "tool_config": {
+                "dummy_tool": {
                     "required_test": "required_test",
                 },
-                {
-                    "required_test": "required_test",
-                },
-            ],
+            },
         }
         payload = {
             "name": "name",
@@ -262,10 +261,9 @@ class TestAgentView:
                 "required_test": "required_test",
                 "optional_test": "optional_test",
             },
-            "tools": [
-                {"required_test": "required_test", "optional_test": "optional_test"},
-                {"required_test": "required_test", "optional_test": "optional_test"},
-            ],
+            "tool_config": {
+                "dummy_tool": {"required_test": "required_test", "optional_test": "optional_test"},
+            },
         }
         payload = {
             "name": "name",
@@ -281,8 +279,7 @@ class TestAgentView:
             assert response.status_code == status.HTTP_201_CREATED
             created = Agent.objects.get(pk=response.data["id"])
             assert created.name == "name"
-            assert created.config["tools"][0].get("optional_test") == "optional_test"
-            assert created.config["tools"][1].get("optional_test") == "optional_test"
+            assert created.config["tool_config"]["dummy_tool"].get("optional_test") == "optional_test"
             assert created.config["agent_args"].get("optional_test") == "optional_test"
             assert created.config["prompt_input"].get("optional_test") == "optional_test"
             assert created.config["prompt_extension"].get("optional_test") == "optional_test"
@@ -299,7 +296,9 @@ class TestAgentView:
             "prompt_extension": {
                 "required_test": "required_test",
             },
-            "tools": [{"required_test": "required_test"}, {"required_test": "required_test"}],
+            "tool_config": {
+                "dummy_tool": {"required_test": "required_test"},
+            },
         }
         payload = {
             "name": "name",
@@ -309,14 +308,11 @@ class TestAgentView:
             "agent_type": "agent_1",
         }
 
-        class NoArgsDummyTool(BaseFunctionTool):
-            CONFIGURATION_ARGS = None
-
         class NoArgsDummyAgent:
             AGENT_ARGS = None
             PROMPT_INPUT = PromptInput
             PROMPT_EXTENSION = PromptExtension
-            TOOLS = [FunctionToolConfig(tool_class=NoArgsDummyTool), FunctionToolConfig(tool_class=DummyTool)]
+            TOOLS = [FunctionToolConfig(tool_class=DummyTool, tool_configuration_args=ToolArgs)]
             FILE_UPLOAD = False
 
         with patch(
@@ -328,8 +324,10 @@ class TestAgentView:
             created = Agent.objects.get(pk=response.data["id"])
             assert created.name == "name"
             assert created.config["agent_args"] == {}
-            assert created.config["tools"][0] == {}
-            assert created.config["tools"][1] == {"required_test": "required_test", "optional_test": "default"}
+            assert created.config["tool_config"]["dummy_tool"] == {
+                "required_test": "required_test",
+                "optional_test": "default",
+            }
 
 
 class TestAgentDetailsView:
@@ -370,10 +368,9 @@ class TestAgentDetailsView:
                 "required_test": "required_updated",
                 "optional_test": "optional_updated",
             },
-            "tools": [
-                {"required_test": "required_upated", "optional_test": "optional_updated"},
-                {"required_test": "required_updated", "optional_test": "optional_updated"},
-            ],
+            "tool_config": {
+                "dummy_tool": {"required_test": "required_updated", "optional_test": "optional_updated"},
+            },
         }
         payload = {
             "name": "updated",
@@ -407,10 +404,9 @@ class TestAgentDetailsView:
                 "required_test": "required_updated",
                 "optional_test": "optional_updated",
             },
-            "tools": [
-                {"required_test": "required_upated", "optional_test": "optional_updated"},
-                {"required_test": "required_updated", "optional_test": "optional_updated"},
-            ],
+            "tool_config": {
+                "dummy_tool": {"required_test": "required_updated", "optional_test": "optional_updated"},
+            },
         }
         payload = {
             "name": "updated",

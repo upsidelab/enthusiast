@@ -7,6 +7,7 @@ const mapping = {
   "prompts": "",
   "tools": "",
   "builder": "",
+  "agentic-execution": "",
 };
 
 export default mapping;

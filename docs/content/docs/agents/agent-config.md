@@ -96,7 +96,12 @@ class AgentConfig(ArbitraryTypeBaseModel, Generic[InjectorT]):
   - `LLMToolConfig`: AI-powered operations with language models
   - `AgentToolConfig`: Tools that use other agents
 
-#### 9. **agent_callback_handler**
+#### 9. **memory_compactor_enabled**
+- **Type**: `bool`
+- **Required**: No (default: `False`)
+- **Description**: Enables the memory compactor for this agent. When `True`, an LLM-generated summary of the conversation is persisted every 10 human messages and injected as a `SystemMessage` at the start of each agent call. See [Memory](./memory.md) for details.
+
+#### 10. **agent_callback_handler**
 - **Type**: `Optional[AgentCallbackHandlerConfig]`
 - **Required**: No
 - **Description**: Callback handler for agent-specific events and monitoring

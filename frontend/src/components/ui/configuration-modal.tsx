@@ -48,7 +48,7 @@ export function ConfigurationModal({
           </div>
         )}
         
-        <DialogFooter className="flex-shrink-0">
+        <DialogFooter className="flex-shrink-0 gap-y-2">
           <Button onClick={onCancel} disabled={submitting}>
             {cancelLabel}
           </Button>

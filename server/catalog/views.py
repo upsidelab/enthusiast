@@ -13,7 +13,9 @@ from account.models import User
 from account.serializers import UserSerializer
 from agent.core.registries.embeddings import EmbeddingProviderRegistry
 from agent.core.registries.language_models import LanguageModelRegistry
-from agent.services import AgentService
+from agent.models import AgenticExecution, Message
+from agent.models.conversation import ConversationFile
+from agent.services import AgentPreconfigurationService
 from sync.tasks import (
     sync_all_document_sources,
     sync_all_product_sources,
@@ -83,7 +85,7 @@ class DataSetListView(ListCreateAPIView):
             data_set = serializer.save()
             data_set.users.add(self.request.user)
             if preconfigure_agents:
-                AgentService.preconfigure_available_agents(data_set)
+                AgentPreconfigurationService.preconfigure_available_agents(data_set)
 
 
 class DataSetDetailView(RetrieveAPIView):
@@ -127,6 +129,30 @@ class DataSetDetailView(RetrieveAPIView):
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        operation_description="Delete a data set",
+        manual_parameters=[
+            openapi.Parameter(
+                "data_set_id", openapi.IN_PATH, description="ID of the data set", type=openapi.TYPE_INTEGER
+            )
+        ],
+    )
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        with transaction.atomic():
+            Message.objects.filter(conversation__data_set=instance).delete()
+            ConversationFile.objects.filter(conversation__data_set=instance).delete()
+            AgenticExecution.objects.filter(conversation__data_set=instance).delete()
+            instance.conversation_set.all().delete()
+            instance.products.all().delete()
+            instance.documents.all().delete()
+            instance.product_sources.all().delete()
+            instance.document_sources.all().delete()
+            instance.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class DataSetUserListView(ListCreateAPIView):
@@ -659,19 +685,40 @@ class ConfigEmbeddingModelView(GenericAPIView):
     permission_classes = [IsAdminUser]
 
     @swagger_auto_schema(
-        operation_description="Get available embedding models for a given provider",
+        operation_description="Get available embedding models and vector size constraints for a given provider",
         responses={
             200: openapi.Response(
-                description="List of available embedding models",
+                description="Embedding models config",
                 schema=openapi.Schema(
-                    type=openapi.TYPE_ARRAY,
-                    items=openapi.Schema(type=openapi.TYPE_STRING),
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "models": openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(type=openapi.TYPE_STRING),
+                            description="List of available embedding model names",
+                        ),
+                        "vector_size_constraints": openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            description=(
+                                "Map of model name to allowed vector sizes. "
+                                "Empty object means no constraints."
+                            ),
+                            additional_properties=openapi.Schema(
+                                type=openapi.TYPE_ARRAY,
+                                items=openapi.Schema(type=openapi.TYPE_INTEGER),
+                            ),
+                        ),
+                    },
                 ),
             )
         },
     )
     def get(self, request, *args, **kwargs):
         provider_name = kwargs.get("provider_name")
-        response_body = EmbeddingProviderRegistry().provider_class_by_name(provider_name).available_models()
+        provider_class = EmbeddingProviderRegistry().provider_class_by_name(provider_name)
+        response_body = {
+            "models": provider_class.available_models(),
+            "vector_size_constraints": provider_class.vector_size_constraints(),
+        }
 
         return Response(response_body)

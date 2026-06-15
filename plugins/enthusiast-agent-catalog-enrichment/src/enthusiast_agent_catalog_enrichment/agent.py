@@ -1,7 +1,7 @@
 from enthusiast_agent_tool_calling import BaseToolCallingAgent
-from enthusiast_common.utils import RequiredFieldsModel
+from enthusiast_agent_tools import UpsertProductDetailsTool
 from enthusiast_common.config.base import LLMToolConfig
-from .tools.upsert_product_details_tool import UpsertProductDetailsTool
+from enthusiast_common.utils import RequiredFieldsModel
 from pydantic import Field, Json
 
 
@@ -20,9 +20,5 @@ class CatalogEnrichmentAgent(BaseToolCallingAgent):
         LLMToolConfig(tool_class=UpsertProductDetailsTool),
     ]
 
-    def get_answer(self, input_text: str) -> str:
-        agent_executor = self._build_agent_executor()
-        agent_output = agent_executor.invoke(
-            {"input": input_text, "data_format": self.PROMPT_INPUT.output_format}, config=self._build_invoke_config()
-        )
-        return agent_output["output"]
+    def _get_system_prompt_variables(self) -> dict:
+        return {"data_format": self.PROMPT_INPUT.output_format}

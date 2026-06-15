@@ -37,7 +37,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("catalog.urls")),
     path("", include("agent.urls")),
-    path("", include("agent.execution.urls")),
+    path("", include("agent.agentic_execution.urls")),
     path("", include("account.urls")),
     path("", include("sync.urls")),
 ]

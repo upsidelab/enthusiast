@@ -4,7 +4,6 @@ from enthusiast_common.config import (
     AgentCallbackHandlerConfig,
     AgentConfig,
     AgentConfigWithDefaults,
-    CallbackHandlerConfig,
     EmbeddingsRegistryConfig,
     LLMConfig,
     LLMRegistryConfig,
@@ -73,12 +72,8 @@ def get_default_config() -> DefaultAgentConfig:
             embeddings=EmbeddingsRegistryConfig(registry_class=EmbeddingProviderRegistry),
             model=ModelsRegistryConfig(registry_class=BaseDjangoSettingsDBModelRegistry),
         ),
-        llm=LLMConfig(
-            callbacks=[
-                CallbackHandlerConfig(handler_class=ConversationWebSocketCallbackHandler),
-            ],
-        ),
-        agent_callback_handler=None,
+        llm=LLMConfig(),
+        agent_callback_handler=AgentCallbackHandlerConfig(handler_class=ConversationWebSocketCallbackHandler),
     )
 
 

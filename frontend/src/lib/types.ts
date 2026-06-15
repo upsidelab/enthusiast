@@ -21,6 +21,7 @@ export type Product = {
   description: string;
   categories: string;
   properties: string;
+  price: number;
 }
 
 export type CatalogSource = {
@@ -99,6 +100,11 @@ export type ProvidersConfig = {
   embeddingProviders: string[];
 }
 
+export type EmbeddingModelsConfig = {
+  models: string[];
+  vectorSizeConstraints: Record<string, number[]>;
+}
+
 export type TypeInfo = {
   container: string | null;
   inner_type?: string;
@@ -127,7 +133,7 @@ export type ConversationFile = {
   content_type: string;
 };
 
-export type AgentExecution = {
+export type AgenticExecution = {
   id: number;
   agent: number;
   execution_key: string;
@@ -143,11 +149,11 @@ export type AgentExecution = {
   duration_seconds: number | null;
 };
 
-export type AgentExecutionDetail = AgentExecution & {
+export type AgenticExecutionDetail = AgenticExecution & {
   files: ConversationFile[];
 };
 
-export type ExecutionType = {
+export type ExecutionDefinition = {
   key: string;
   name: string;
   description: string | null;

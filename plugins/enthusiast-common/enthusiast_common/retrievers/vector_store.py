@@ -3,6 +3,7 @@ from typing import Any, Generic, Iterable, TypeVar
 
 from enthusiast_common.registry import BaseEmbeddingProviderRegistry
 from enthusiast_common.repositories import BaseDataSetRepository, BaseModelChunkRepository
+
 from .base import BaseRetriever
 
 T = TypeVar("T")

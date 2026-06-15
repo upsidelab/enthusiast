@@ -35,6 +35,21 @@ class EmbeddingProvider(ABC):
             A list of supported model names.
         """
 
+    @classmethod
+    def vector_size_constraints(cls) -> dict[str, list[int]]:
+        """Returns a mapping of model name to allowed vector sizes.
+
+        Override this method in provider subclasses when specific models only
+        support a fixed set of output dimensions (e.g. models that do not accept
+        an ``output_dimension`` parameter).  An empty dict (the default) means no
+        constraints — any positive integer is accepted.
+
+        Returns:
+            A dict mapping model name to a list of allowed vector sizes, e.g.
+            ``{"mistral-embed": [1024]}``.  Return ``{}`` when unconstrained.
+        """
+        return {}
+
 
 class BaseEmbeddingProviderRegistry(ABC):
     """Registry of available embedding providers.

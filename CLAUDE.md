@@ -83,7 +83,7 @@ Plugins are standalone Python packages in `plugins/`:
 - **Agent plugins** (`enthusiast-agent-*`): product-search, catalog-enrichment, order-intake, user-manual-search, tool-calling
 - **Model plugins** (`enthusiast-model-*`): openai, azureopenai, google, mistral, ollama
 - **Source plugins** (`enthusiast-source-*`): sample, medusa, shopify, shopware, solidus, woocommerce, wordpress, sanitycms
-- **Shared**: `enthusiast-common`, `enthusiast-file-parsers`
+- **Shared**: `enthusiast-common`
 
 **`enthusiast-common`** is the core interfaces package that all plugins depend on. It defines the abstract base classes and contracts that the plugin system is built around:
 - **Plugin interfaces**: `ProductSourcePlugin`, `DocumentSourcePlugin`, `ECommerceIntegrationPlugin` — ABCs that source plugins implement
@@ -94,7 +94,7 @@ Plugins are standalone Python packages in `plugins/`:
 - **Tool system**: `BaseTool`, `BaseFunctionTool`, `BaseLLMTool`, `BaseAgentTool` — for building agent capabilities
 - **E-commerce connector**: `ECommercePlatformConnector` ABC for order/product management across platforms
 - **Data structures**: `ProductDetails`, `DocumentDetails`, `Address`, `LLMFile`, content types
-- **Configuration**: Pydantic config models (`AgentConfig`, `LLMConfig`, `RepositoriesConfig`) and prompt template system (`ChatPromptTemplateConfig`, `MessageRole`)
+- **Configuration**: Pydantic config models (`AgentConfig`, `LLMConfig`, `RepositoriesConfig`)
 - **Dependency injection**: `BaseInjector` provides retrievers, connectors, and memory to agents
 
 Each plugin has its own `pyproject.toml` and is installed via poetry.

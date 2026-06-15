@@ -1,26 +1,23 @@
 from enthusiast_common.agents import BaseAgentConfigProvider, ConfigType
-from enthusiast_common.config import (
-    AgentConfigWithDefaults,
-)
-from enthusiast_common.config.prompts import ChatPromptTemplateConfig, Message, MessageRole
+from enthusiast_common.config import AgentConfigWithDefaults, LLMToolConfig
 
 from .agent import OrderIntakeAgent
+from .execution_prompt import ORDER_INTAKE_EXECUTION_SYSTEM_PROMPT
 from .prompt import ORDER_INTAKE_TOOL_CALLING_AGENT_PROMPT
+from .tools import StopExecutionTool
+
 
 class OrderIntakeConfigProvider(BaseAgentConfigProvider):
     def get_config(self, config_type: ConfigType = ConfigType.CONVERSATION) -> AgentConfigWithDefaults:
+        if config_type == ConfigType.CONVERSATION:
+            system_prompt = ORDER_INTAKE_TOOL_CALLING_AGENT_PROMPT
+            tools = OrderIntakeAgent.TOOLS
+        else:
+            system_prompt = ORDER_INTAKE_EXECUTION_SYSTEM_PROMPT
+            tools = OrderIntakeAgent.TOOLS + [LLMToolConfig(tool_class=StopExecutionTool)]
+
         return AgentConfigWithDefaults(
-            prompt_template=ChatPromptTemplateConfig(
-                messages=[
-                    Message(
-                        role=MessageRole.SYSTEM,
-                        content=ORDER_INTAKE_TOOL_CALLING_AGENT_PROMPT,
-                    ),
-                    Message(role=MessageRole.PLACEHOLDER, content="{chat_history}"),
-                    Message(role=MessageRole.USER, content="{input}"),
-                    Message(role=MessageRole.PLACEHOLDER, content="{agent_scratchpad}"),
-                ]
-            ),
+            system_prompt=system_prompt,
             agent_class=OrderIntakeAgent,
-            tools=OrderIntakeAgent.TOOLS,
+            tools=tools,
         )

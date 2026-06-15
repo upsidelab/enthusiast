@@ -64,7 +64,7 @@ jobs:
 
         - name: Upload built artifacts to S3
           run: |
-            aws s3 sync out/ s3://${{ secrets.DOCS_UPLOAD_BUCKET }}/tools/enthusiast/ --acl public-read --delete
+            aws s3 sync out/ s3://${{ secrets.DOCS_UPLOAD_BUCKET }}/tools/enthusiast/ --delete
 
         - name: Invalidate CloudFront cache
           run: |

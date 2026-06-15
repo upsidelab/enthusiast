@@ -1,8 +1,7 @@
 from enthusiast_agent_tool_calling import BaseToolCallingAgent
 from enthusiast_common.config.base import LLMToolConfig
 
-from .tools import RetrieveDocumentsTool
-from .tools import VerifySolutionTool
+from .tools import RetrieveDocumentsTool, VerifySolutionTool
 
 
 class UserManualSearchAgent(BaseToolCallingAgent):

@@ -1,102 +1,21 @@
-from typing import Callable
-
 from enthusiast_common.registry.llm import LanguageModelProvider
 from enthusiast_common.structures import BaseContent, LLMFile
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
 from langchain_ollama import ChatOllama
 from ollama import Client
-from pydantic import ConfigDict
+
+from .embedding import OllamaEmbeddingProvider
 
 
-class OllamaFileObject(BaseContent):
-    model_config = ConfigDict(extra="allow")
-
-
-class OllamaPrepareFileMapper:
-    @staticmethod
-    def gpt_image(file_object: LLMFile) -> OllamaFileObject:
-        image_url = f'data:{file_object.content_type};base64,"{file_object.content}"'
-        return OllamaFileObject(
-            type="input_image",
-            image_url=image_url,
-        )
-
-    @staticmethod
-    def gpt_file(file_object: LLMFile) -> OllamaFileObject:
-        file_data = file_object.content
-        return OllamaFileObject(
-            type="input_file",
-            file_data=file_data,
-            filename=file_object.filename,
-        )
-
-    @staticmethod
-    def mistral_image(file_object: LLMFile) -> OllamaFileObject:
-        image_url = f"data:{file_object.content_type};base64,{file_object.content}"
-        return OllamaFileObject(
-            type="image_url",
-            image_url=image_url,
-        )
-
-    @staticmethod
-    def mistral_file(file_object: LLMFile) -> OllamaFileObject:
-        document_url = f"data:{file_object.content_type};base64,{file_object.content}"
-        return OllamaFileObject(
-            type="document_url",
-            document_url=document_url,
-        )
-
-    @staticmethod
-    def gemma_image(file_object: LLMFile) -> OllamaFileObject:
-        image_url = f"data:{file_object.content_type};base64,{file_object.content}"
-        return OllamaFileObject(
-            type="image_url",
-            image_url=image_url,
-        )
-
-    @staticmethod
-    def gemma_file(file_object: LLMFile) -> OllamaFileObject:
-        data = file_object.content
-        return OllamaFileObject(
-            type="input_file",
-            data=data,
-            mime_type=file_object.content_type,
-        )
-
-    MODEL_MAPPING: dict[str, dict[str, Callable[[LLMFile], OllamaFileObject]]] = {
-        "gpt": {
-            "image": gpt_image.__func__,
-            "file": gpt_file.__func__,
-        },
-        "mistral": {
-            "image": mistral_image.__func__,
-            "file": mistral_file.__func__,
-        },
-        "gemma": {
-            "image": gemma_image.__func__,
-            "file": gemma_file.__func__,
-        },
-    }
-
-    def get_prepare_file_function(self, model: str, file_type: str) -> Callable[[LLMFile], OllamaFileObject]:
-        family_matches = [key for key in self.MODEL_MAPPING.keys() if model.startswith(key)]
-        if not family_matches:
-            raise ValueError(f"Model {model} not supported.")
-        model_family = family_matches[0]
-        model_object = self.MODEL_MAPPING.get(model_family)
-        if not model_object:
-            raise ValueError(f"Model {model} not supported.")
-        prepare_file_function = model_object.get(file_type)
-        if not prepare_file_function:
-            raise ValueError(f"Invalid file type {file_type} for model {model}.")
-        return prepare_file_function
+class OllamaImageContent(BaseContent):
+    type: str = "image_url"
+    image_url: str
 
 
 class OllamaLanguageModelProvider(LanguageModelProvider):
     NAME = "Ollama"
     STREAMING_AVAILABLE = False
-    MODEL_MAPPING_CLASS = OllamaPrepareFileMapper
 
     def provide_language_model(self, callbacks: list[BaseCallbackHandler] | None = None) -> BaseLanguageModel:
         return ChatOllama(model=self._model)
@@ -106,11 +25,18 @@ class OllamaLanguageModelProvider(LanguageModelProvider):
 
     @staticmethod
     def available_models() -> list[str]:
-        ollama_client = Client()
-        return [model.model for model in ollama_client.list().models]
+        all_model_names = [m.model for m in Client().list().models]
+        llm_models = [
+            model_name for model_name in all_model_names
+                        if model_name and not OllamaEmbeddingProvider.is_embedding_model(model_name)
+        ]
+        return llm_models
 
-    def prepare_image_object(self, file_object: LLMFile) -> OllamaFileObject:
-        return self.MODEL_MAPPING_CLASS().get_prepare_file_function(model=self._model, file_type="image")(file_object)
+    @staticmethod
+    def prepare_image_object(file_object: LLMFile) -> OllamaImageContent:
+        image_url = f"data:{file_object.content_type};base64,{file_object.content}"
+        return OllamaImageContent(image_url=image_url)
 
-    def prepare_file_object(self, file_object: LLMFile) -> OllamaFileObject:
-        return self.MODEL_MAPPING_CLASS().get_prepare_file_function(model=self._model, file_type="file")(file_object)
+    @staticmethod
+    def prepare_file_object(_):
+        raise NotImplementedError("Ollama does not support document file inputs.")

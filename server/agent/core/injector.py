@@ -1,12 +1,14 @@
 from typing import Optional
 
+from enthusiast_common.agentic_execution.memory import ToolScratchpad
 from enthusiast_common.connectors import ECommercePlatformConnector
 from enthusiast_common.injectors import BaseInjector
+from enthusiast_common.memory import BaseMemoryCompactor
 from enthusiast_common.retrievers import BaseProductRetriever, BaseVectorStoreRetriever
 from enthusiast_common.structures import RepositoriesInstances
+from langchain_core.chat_history import BaseChatMessageHistory
 
-from agent.core.memory import SummaryChatMemory
-from agent.core.memory.limited_chat_memory import LimitedChatMemory
+from agent.core.memory import LLMMemoryCompactor, PersistentChatHistory
 from catalog.models import DocumentChunk
 
 
@@ -17,15 +19,17 @@ class Injector(BaseInjector):
         product_retriever: BaseProductRetriever,
         ecommerce_platform_connector: Optional[ECommercePlatformConnector],
         repositories: RepositoriesInstances,
-        chat_summary_memory: SummaryChatMemory,
-        chat_limited_memory: LimitedChatMemory,
+        chat_history: PersistentChatHistory,
+        tool_scratchpad: Optional[ToolScratchpad],
+        memory_compactor: Optional[LLMMemoryCompactor] = None,
     ):
         super().__init__(repositories)
         self._document_retriever = document_retriever
         self._product_retriever = product_retriever
         self._ecommerce_platform_connector = ecommerce_platform_connector
-        self._chat_summary_memory = chat_summary_memory
-        self._chat_limited_memory = chat_limited_memory
+        self._chat_history = chat_history
+        self._memory_compactor = memory_compactor
+        self._tool_scratchpad = tool_scratchpad or ToolScratchpad()
 
     @property
     def document_retriever(self) -> BaseVectorStoreRetriever[DocumentChunk]:
@@ -40,9 +44,13 @@ class Injector(BaseInjector):
         return self._ecommerce_platform_connector
 
     @property
-    def chat_summary_memory(self) -> SummaryChatMemory:
-        return self._chat_summary_memory
+    def chat_history(self) -> BaseChatMessageHistory:
+        return self._chat_history
 
     @property
-    def chat_limited_memory(self) -> LimitedChatMemory:
-        return self._chat_limited_memory
+    def memory_compactor(self) -> Optional[BaseMemoryCompactor]:
+        return self._memory_compactor
+
+    @property
+    def tool_scratchpad(self) -> ToolScratchpad:
+        return self._tool_scratchpad

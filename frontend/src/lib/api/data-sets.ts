@@ -49,8 +49,17 @@ export type ECommerceIntegrationResponse = {
 
 export class DataSetsApiClient extends BaseApiClient {
   async getDataSets(): Promise<DataSet[]> {
-    const response = await fetch(`${this.apiBase}/api/data_sets`, this._requestConfiguration());
-    return (await response.json()).results as DataSet[];
+    const results: DataSet[] = [];
+    let url: string | null = `${this.apiBase}/api/data_sets`;
+
+    while (url) {
+      const response: Response = await fetch(url, this._requestConfiguration());
+      const data: { results: DataSet[]; next: string | null } = await response.json();
+      results.push(...data.results);
+      url = data.next;
+    }
+
+    return results;
   }
 
   async createDataSet(dataSet: DataSet, preconfigureAgents: boolean): Promise<number> {
@@ -298,6 +307,20 @@ export class DataSetsApiClient extends BaseApiClient {
       embeddingModel: data.embedding_model,
       embeddingVectorSize: data.embedding_vector_dimensions,
     } as DataSet;
+  }
+
+  async deleteDataSet(dataSetId: number): Promise<void> {
+    const response = await fetch(
+      `${this.apiBase}/api/data_sets/${dataSetId}`,
+      {
+        ...this._requestConfiguration(),
+        method: "DELETE",
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to delete data set");
+    }
   }
 
   async updateDataSet(dataSetId: number, dataSet: DataSet): Promise<void> {

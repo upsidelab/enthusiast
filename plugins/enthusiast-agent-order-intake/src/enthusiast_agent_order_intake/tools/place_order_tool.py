@@ -40,7 +40,11 @@ class PlaceOrderTool(BaseLLMTool):
             quantities_list = quantities.split(",")
             order_id = ecommerce_platform_connector.create_order_with_items(list(zip(product_ids_list, quantities_list)))
             admin_url = ecommerce_platform_connector.get_admin_url_for_order_id(order_id)
+            if self.injector and self.injector.tool_scratchpad:
+                self.injector.tool_scratchpad.record(self.NAME, {"success": True, "order_id": order_id, "order_url": admin_url})
             return f"Order placed successfully, url: {admin_url}"
         except Exception as e:
             logger.error(e)
+            if self.injector and self.injector.tool_scratchpad:
+                self.injector.tool_scratchpad.record(self.NAME, {"success": False, "order_id": None, "order_url": None})
             return f"Error: {str(e)}"

@@ -255,6 +255,8 @@ CATALOG_MODELS = {
 
 AVAILABLE_AGENTS: list[str] = []
 
+AVAILABLE_AGENTIC_EXECUTION_DEFINITIONS: list[str] = []
+
 FILE_PARSER_CLASSES: dict[tuple[str] : str] = {
     (".txt",): "agent.file_parsers.text.PlainTextFileParser",
     (".pdf",): "agent.file_parsers.pdf.PDFFileParser",

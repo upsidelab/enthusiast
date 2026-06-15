@@ -8,7 +8,7 @@ from pydantic import Field
 
 from agent.core.registries.agents.agent_registry import AgentRegistry
 from agent.models import Agent
-from agent.services import AgentService
+from agent.services import AgentPreconfigurationService
 from catalog.models import DataSet
 
 pytestmark = pytest.mark.django_db
@@ -78,7 +78,7 @@ def django_settings(settings):
     ]
 
 
-class TestAgentService:
+class TestAgentPreconfigurationService:
     @pytest.fixture
     def dataset(self):
         return DataSet.objects.create(name="Test Dataset")
@@ -96,7 +96,7 @@ class TestAgentService:
     ):
         mock_agent_registry.return_value = [agent_class]
 
-        AgentService.preconfigure_available_agents(dataset)
+        AgentPreconfigurationService.preconfigure_available_agents(dataset)
 
         agent = Agent.objects.filter(dataset=dataset).first()
         assert agent
@@ -107,7 +107,7 @@ class TestAgentService:
     def test_preconfigure_available_agents_skip_agents_without_defaults(self, mock_agent_registry, dataset):
         mock_agent_registry.return_value = [MockAgentClassWithoutDefaults]
 
-        AgentService.preconfigure_available_agents(dataset)
+        AgentPreconfigurationService.preconfigure_available_agents(dataset)
         assert Agent.objects.filter(dataset=dataset).count() == 0
 
     @patch.object(AgentRegistry, "get_plugin_classes")
@@ -121,6 +121,6 @@ class TestAgentService:
         )
         mock_agent_registry.return_value = [MockAgentClass]
 
-        AgentService.preconfigure_available_agents(dataset)
+        AgentPreconfigurationService.preconfigure_available_agents(dataset)
 
         assert Agent.objects.filter(dataset=dataset, agent_type="dummy_agent").count() == 1

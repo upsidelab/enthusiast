@@ -27,7 +27,7 @@ class MedusaAPIClient:
         if not response.ok:
             message = response.json().get("message") or response.text
             raise ECommerceConnectorError(message, status_code=response.status_code)
-        return response.json()
+        return response.json() if response.content else {}
 
     @staticmethod
     def _propagate_request_error(url: str, exc: requests.exceptions.RequestException) -> None:

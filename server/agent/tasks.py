@@ -8,10 +8,10 @@ from django.utils import timezone
 
 from agent.conversation import ConversationManager
 from agent.core.callbacks import BaseWebSocketHandler
-from agent.file_service import FileService
 from agent.models import Message
 from agent.models.conversation import Conversation, ConversationFile
 from agent.serializers.conversation import ConversationFileSerializer
+from agent.services import FileParsingService
 from pecl import settings
 
 
@@ -77,7 +77,7 @@ def process_file_upload_task(conversation_id: int, file_content: bytes, filename
             file=django_file,
             content_type=content_type,
             file_category=file_category,
-            llm_content=FileService(django_file, content_type).process() or "",
+            llm_content=FileParsingService(django_file, content_type).process() or "",
         )
 
         obj.save()

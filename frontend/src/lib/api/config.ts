@@ -1,9 +1,14 @@
 import { BaseApiClient } from "@/lib/api/base.ts";
-import { ProvidersConfig } from "@/lib/types.ts";
+import { EmbeddingModelsConfig, ProvidersConfig } from "@/lib/types.ts";
 
 type ProvidersConfigResponse = {
   language_model_providers: string[];
   embedding_providers: string[];
+};
+
+type EmbeddingModelsConfigResponse = {
+  models: string[];
+  vector_size_constraints: Record<string, number[]>;
 };
 
 export class ConfigApiClient extends BaseApiClient {
@@ -22,8 +27,13 @@ export class ConfigApiClient extends BaseApiClient {
     return await response.json() as string[];
   }
 
-  async getEmbeddingModelsForProvider(name: string): Promise<string[]> {
+  async getEmbeddingModelsForProvider(name: string): Promise<EmbeddingModelsConfig> {
     const response = await fetch(`${this.apiBase}/api/config/embedding_providers/${name}`, this._requestConfiguration());
-    return await response.json() as string[];
+    const result = await response.json() as EmbeddingModelsConfigResponse;
+
+    return {
+      models: result.models,
+      vectorSizeConstraints: result.vector_size_constraints,
+    };
   }
 }

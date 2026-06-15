@@ -18,6 +18,14 @@ class OllamaEmbeddingProvider(EmbeddingProvider):
 
     @staticmethod
     def available_models() -> list[str]:
-        all_models = Client().list().models
-        embedding_models = [model.name for model in all_models if model.name.contains("embed")]
+        all_model_names = [m.model for m in Client().list().models]
+        embedding_models = [
+            model_name for model_name in all_model_names
+                        if model_name and OllamaEmbeddingProvider.is_embedding_model(model_name)
+        ]
         return embedding_models
+
+
+    @staticmethod
+    def is_embedding_model(model_name: str) -> bool:
+        return 'embed' in model_name

@@ -3,13 +3,10 @@ from typing import Any
 
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel
 
 from ..injectors import BaseInjector
-from ..tools.files.list_files_tool import FileListTool
-from ..tools.files.perform_file_operation_tool import FileRetrievalTool
 from ..utils import RequiredFieldsModel, validate_required_vars
 
 
@@ -45,36 +42,30 @@ class BaseAgent(ABC, ExtraArgsClassBase):
     TOOLS = []
 
     FILE_UPLOAD = False
-    DEFAULT_FILE_TOOLS = [FileListTool, FileRetrievalTool]
 
     def __init__(
         self,
         tools: list[BaseTool],
         llm: BaseLanguageModel,
-        prompt: ChatPromptTemplate,
+        system_prompt: str,
         conversation_id: Any,
         injector: BaseInjector,
         callback_handler: BaseCallbackHandler | None = None,
     ):
         self._tools = tools
         self._llm = llm
-        self._prompt = prompt
+        self._system_prompt = system_prompt
         self._conversation_id = conversation_id
         self._callback_handler = callback_handler
         self._injector = injector
 
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-        if getattr(cls, "FILE_UPLOAD", False):
-            from ..config import FileToolConfig
-
-            cls.TOOLS = getattr(cls, "TOOLS", []) + [
-                FileToolConfig(tool_class=file_tool_class) for file_tool_class in cls.DEFAULT_FILE_TOOLS
-            ]
-
     @abstractmethod
     def get_answer(self, input_text: str) -> str:
         pass
+
+    def _get_system_prompt_variables(self) -> dict:
+        """Return variables to format into the system prompt template."""
+        return {}
 
     def set_runtime_arguments(self, runtime_arguments: Any) -> None:
         tools_runtime_arguments = runtime_arguments.pop("tools")
@@ -84,5 +75,5 @@ class BaseAgent(ABC, ExtraArgsClassBase):
             if field is None:
                 continue
             setattr(self, key.upper(), field(**value))
-        for index, tool in enumerate(self._tools):
-            tool.set_runtime_arguments(tools_runtime_arguments[index])
+        for index, tool_runtime_args in enumerate(tools_runtime_arguments):
+            self._tools[index].set_runtime_arguments(tool_runtime_args)

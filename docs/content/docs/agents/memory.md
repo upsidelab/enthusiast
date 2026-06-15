@@ -119,7 +119,9 @@ class Injector(BaseInjector):
     def document_retriever(self) -> BaseRetriever:
         return self._document_retriever
 
-If you need to persist additional state beyond conversation messages, extend `BaseInjector` with a custom property backed by its own repository or service:
+    @property
+    def product_retriever(self) -> BaseRetriever:
+        return self._product_retriever
 
     @property
     def chat_history(self) -> BaseChatMessageHistory:

@@ -61,6 +61,21 @@ Extend agent capabilities through specialized functions and services.
 - Provide results to agents
 - Handle errors and edge cases
 
+### 4. Memory
+
+Manages conversation history and optional context compaction.
+
+**Purpose**: Persists chat history across turns and, when enabled, compacts older context using an LLM to keep prompts within token limits.
+
+**Components**:
+- **Persistent Chat History**: Stores conversation messages in the database
+- **Memory Compactor**: Summarizes older messages when the history grows too long
+
+**Responsibilities**:
+- Maintain conversation state between turns
+- Reduce prompt size through summarization
+- Provide history to agents on each request
+
 ### 5. Builder
 
 Orchestrates the construction of fully configured agent instances.
@@ -80,13 +95,11 @@ Orchestrates the construction of fully configured agent instances.
 - Handle configuration validation
 - Ensure proper component initialization
 
-### 6. Prompts
+### 6. System Prompt
 
-Define agent behavior, instructions, and reasoning patterns.
+Defines agent behavior, instructions, and reasoning patterns.
 
-**Types**:
-- **PromptTemplate**: Text-based prompts for simple interactions
-- **ChatPromptTemplate**: Multi-message prompts for complex conversations
+**Purpose**: A plain string provided via `AgentConfig.system_prompt` that shapes how the agent behaves, what tools it uses, and how it responds.
 
 **Responsibilities**:
 - Guide agent behavior and reasoning
@@ -99,10 +112,11 @@ Define agent behavior, instructions, and reasoning patterns.
 Manages agent settings, dependencies, and runtime parameters.
 
 **Components**:
-- **AgentConfig**: Core agent configuration
+- **AgentConfig**: Core agent configuration including system prompt and memory settings
 - **LLMConfig**: Language model settings
-- **ToolConfig**: Tool-specific configurations
-- **MemoryConfig**: Memory system settings
+- **FunctionToolConfig / LLMToolConfig / AgentToolConfig / FileToolConfig**: Per-tool-type configurations
+- **RepositoriesConfig**: Data access layer configuration
+- **RetrieversConfig**: Document and product retriever configuration
 
 **Responsibilities**:
 - Define agent capabilities and settings

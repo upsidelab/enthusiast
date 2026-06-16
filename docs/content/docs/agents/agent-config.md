@@ -23,7 +23,7 @@ class AgentConfig(ArbitraryTypeBaseModel, Generic[InjectorT]):
     injector: Type[InjectorT]
     registry: RegistryConfig
     system_prompt: str
-    tools: Optional[list[FunctionToolConfig | LLMToolConfig | AgentToolConfig]] = None
+    tools: Optional[list[FunctionToolConfig | LLMToolConfig | AgentToolConfig | FileToolConfig]] = None
     agent_callback_handler: Optional[AgentCallbackHandlerConfig] = None
 ```
 
@@ -147,28 +147,69 @@ Ready to use, built in defaults:
 #### **LLM Configuration**
 - **LLM**: `BaseLLM`
 
-## Configuration File Placement
+## Configuration Provider
 
-Understanding where to place configuration files is crucial for the Enthusiast framework to properly discover and load your agent configurations. The framework follows a specific directory structure and import pattern.
+Agent configuration is provided through a `BaseAgentConfigProvider` subclass. The framework registry discovers this class automatically at runtime by scanning the agent's package module.
 
-### **Directory Structure Requirements**
+### **Required ConfigProvider Class**
 
-The Enthusiast framework expects agent configurations to be organized in a specific directory structure:
+- **Base class**: Must subclass `BaseAgentConfigProvider` from `enthusiast_common.agents`
+- **Method**: Must implement `get_config(config_type: ConfigType = ConfigType.CONVERSATION) -> AgentConfigWithDefaults`
+- **Discoverability**: Must be importable at the same module level as the agent class path registered in `AVAILABLE_AGENTS`
 
+The registry derives the discovery path from `AVAILABLE_AGENTS`. For example, with `AVAILABLE_AGENTS = ['enthusiast_agent_catalog_enrichment.CatalogEnrichmentAgent']`, the registry strips the class name and imports `enthusiast_agent_catalog_enrichment`, then scans it for any subclass of `BaseAgentConfigProvider`. The first match is used.
+
+There are no restrictions on file naming or directory layout — as long as the `BaseAgentConfigProvider` subclass is importable from that module (e.g. exported via `__init__.py`), the framework will find it.
+
+### **Example**
+
+```python
+# config.py
+from enthusiast_common.agents import BaseAgentConfigProvider, ConfigType
+from enthusiast_common.config import AgentConfigWithDefaults
+
+from .agent import YourAgent
+from .prompt import YOUR_AGENT_SYSTEM_PROMPT
+
+
+class YourAgentConfigProvider(BaseAgentConfigProvider):
+    def get_config(self, config_type: ConfigType = ConfigType.CONVERSATION) -> AgentConfigWithDefaults:
+        return AgentConfigWithDefaults(
+            agent_class=YourAgent,
+            system_prompt=YOUR_AGENT_SYSTEM_PROMPT,
+            tools=YourAgent.TOOLS,
+        )
 ```
-your_project/
-├── your_agent_package/
-│   ├── __init__.py
-│   ├── agent.py          # Agent implementation
-│   ├── config.py         # Configuration file (REQUIRED)
+
+```python
+# __init__.py
+from .agent import YourAgent
+from .config import YourAgentConfigProvider
+
+__all__ = ["YourAgent", "YourAgentConfigProvider"]
 ```
 
-### **Required Configuration File**
+### **Context-Specific Configuration**
 
-- **File Name**: `config.py`
-- **Location**: Must be in the same directory as your agent implementation
-- **Function Name**: Must contain a function named `get_config()`
-- **Return Type**: Must return `AgentConfigWithDefaults`
+`get_config` receives a `config_type` argument that allows returning a different configuration depending on the call context:
+
+- `ConfigType.CONVERSATION` — interactive user conversations (default)
+- `ConfigType.AGENTIC_EXECUTION_DEFINITION` — autonomous agentic execution runs
+
+```python
+def get_config(self, config_type: ConfigType = ConfigType.CONVERSATION) -> AgentConfigWithDefaults:
+    if config_type == ConfigType.AGENTIC_EXECUTION_DEFINITION:
+        return AgentConfigWithDefaults(
+            agent_class=YourAgent,
+            system_prompt=YOUR_AGENT_EXECUTION_PROMPT,
+            tools=YourAgent.TOOLS + [LLMToolConfig(tool_class=StopExecutionTool)],
+        )
+    return AgentConfigWithDefaults(
+        agent_class=YourAgent,
+        system_prompt=YOUR_AGENT_SYSTEM_PROMPT,
+        tools=YourAgent.TOOLS,
+    )
+```
 
 
 ## Summary

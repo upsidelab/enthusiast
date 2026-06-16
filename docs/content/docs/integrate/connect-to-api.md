@@ -2,8 +2,6 @@
 sidebar_position: 2
 ---
 
-import { Callout } from 'nextra/components'
-
 # Connect to Enthusiast's API
 
 Once you have the API token for a service account, you can connect to Enthusiast's API.

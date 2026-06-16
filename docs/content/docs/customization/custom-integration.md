@@ -13,15 +13,15 @@ Custom integrations let you connect Enthusiast to systems that aren’t supporte
 
 An E-Commerce Integration enables bidirectional communication between Enthusiast AI Agents and an e-commerce platform.
 
-To build one, implement the [enthusiast_common.interfaces.ECommerceIntegrationPlugin](https://github.com/upsidelab/enthusiast/blob/main/plugins/enthusiast-common/enthusiast_common/interfaces.py#L69) interface.
+To build one, implement the [enthusiast_common.interfaces.ECommerceIntegrationPlugin](https://github.com/upsidelab/enthusiast/blob/main/plugins/enthusiast-common/enthusiast_common/interfaces.py) interface.
 
 Your integration class must define two static fields:
 - `NAME` - The name shown to admins in the integrations list.
-- `CONFIGURATION_ARGS` - A subclass of [enthusiast_common.utils.RequiredFieldsModel](https://github.com/upsidelab/enthusiast/blob/main/plugins/enthusiast-common/enthusiast_common/utils.py#L77) defining the integration's configuration schema.
+- `CONFIGURATION_ARGS` - A subclass of [enthusiast_common.utils.RequiredFieldsModel](https://github.com/upsidelab/enthusiast/blob/main/plugins/enthusiast-common/enthusiast_common/utils.py) defining the integration's configuration schema.
 
 Your class must also implement the following methods:
 - `build_connector(self)` - Returns an implementation of [enthusiast_common.connector.ECommercePlatformConnector](https://github.com/upsidelab/enthusiast/blob/main/plugins/enthusiast-common/enthusiast_common/connectors/ecommerce_platform_connector.py). This connector is available to agents at runtime.
-- `build_product_source(self)` - Returns an implementation of [enthusiast_common.interfaces.ProductSourcePlugin](https://github.com/upsidelab/enthusiast/blob/main/plugins/enthusiast-common/enthusiast_common/interfaces.py#L36), used to build a local product index.
+- `build_product_source(self)` - Returns an implementation of [enthusiast_common.interfaces.ProductSourcePlugin](https://github.com/upsidelab/enthusiast/blob/main/plugins/enthusiast-common/enthusiast_common/interfaces.py), used to build a local product index.
 
 ### Example Implementation
 
@@ -73,13 +73,13 @@ class UpCommerceProductSource(ProductSourcePlugin):
 
 A Product Source enables one-way fetching of product data from an e-commerce or PIM system. 
 
-To build a product source, implement the [enthusiast_common.interfaces.ProductSourcePlugin](https://github.com/upsidelab/enthusiast/blob/main/plugins/enthusiast-common/enthusiast_common/interfaces.py#L36) interface.
+To build a product source, implement the [enthusiast_common.interfaces.ProductSourcePlugin](https://github.com/upsidelab/enthusiast/blob/main/plugins/enthusiast-common/enthusiast_common/interfaces.py) interface.
 
 Your integration class must define the following static field:
-- `CONFIGURATION_ARGS` - A subclass of [enthusiast_common.utils.RequiredFieldsModel](https://github.com/upsidelab/enthusiast/blob/main/plugins/enthusiast-common/enthusiast_common/utils.py#L77) defining the integration's configuration schema.
+- `CONFIGURATION_ARGS` - A subclass of [enthusiast_common.utils.RequiredFieldsModel](https://github.com/upsidelab/enthusiast/blob/main/plugins/enthusiast-common/enthusiast_common/utils.py) defining the integration's configuration schema.
 
 It should also implement the following method:
-- `fetch(self)` - Returns a list of [enthusiast_common.structures.ProductDetails](https://github.com/upsidelab/enthusiast/blob/main/plugins/enthusiast-common/enthusiast_common/structures.py#L19). These products will be indexed in Enthusiast.
+- `fetch(self)` - Returns a list of [enthusiast_common.structures.ProductDetails](https://github.com/upsidelab/enthusiast/blob/main/plugins/enthusiast-common/enthusiast_common/structures.py). These products will be indexed in Enthusiast.
 
 ### Example Implementation
 
@@ -93,13 +93,13 @@ class UpCommerceProductSource(ProductSourcePlugin):
 
 A Document Source enables one-way fetching of documents such as manuals, FAQs, or internal content.
 
-To build a document source, implement the [enthusiast_common.interfaces.DocumentSourcePlugin](https://github.com/upsidelab/enthusiast/blob/main/plugins/enthusiast-common/enthusiast_common/interfaces.py#L52) interface.
+To build a document source, implement the [enthusiast_common.interfaces.DocumentSourcePlugin](https://github.com/upsidelab/enthusiast/blob/main/plugins/enthusiast-common/enthusiast_common/interfaces.py) interface.
 
 Your integration class must define the following static field:
-- `CONFIGURATION_ARGS` - A subclass of [enthusiast_common.utils.RequiredFieldsModel](https://github.com/upsidelab/enthusiast/blob/main/plugins/enthusiast-common/enthusiast_common/utils.py#L77) defining the integration's configuration schema.
+- `CONFIGURATION_ARGS` - A subclass of [enthusiast_common.utils.RequiredFieldsModel](https://github.com/upsidelab/enthusiast/blob/main/plugins/enthusiast-common/enthusiast_common/utils.py) defining the integration's configuration schema.
 
 It should also implement the following method:
-- `fetch(self)` - Returns a list of [enthusiast_common.structures.DocumentDetails](https://github.com/upsidelab/enthusiast/blob/main/plugins/enthusiast-common/enthusiast_common/structures.py#L31). These documents will be indexed in Enthusiast.
+- `fetch(self)` - Returns a list of [enthusiast_common.structures.DocumentDetails](https://github.com/upsidelab/enthusiast/blob/main/plugins/enthusiast-common/enthusiast_common/structures.py). These documents will be indexed in Enthusiast.
 
 ### Example Implementation
 

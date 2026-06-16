@@ -38,7 +38,21 @@ class BaseInjector(ABC):
 
     @property
     @abstractmethod
+    def ecommerce_platform_connector(self) -> Optional[ECommercePlatformConnector]:
+        pass
+
+    @property
+    @abstractmethod
     def chat_history(self) -> BaseChatMessageHistory:
+        pass
+
+    @property
+    def memory_compactor(self) -> Optional[BaseMemoryCompactor]:
+        pass
+
+    @property
+    @abstractmethod
+    def tool_scratchpad(self) -> ToolScratchpad:
         pass
 ```
 
@@ -52,13 +66,19 @@ class Injector(BaseInjector):
         self,
         document_retriever: BaseVectorStoreRetriever[DocumentChunk],
         product_retriever: BaseProductRetriever,
+        ecommerce_platform_connector: Optional[ECommercePlatformConnector],
         repositories: RepositoriesInstances,
-        chat_history: BaseChatMessageHistory,
+        chat_history: PersistentChatHistory,
+        tool_scratchpad: Optional[ToolScratchpad],
+        memory_compactor: Optional[LLMMemoryCompactor] = None,
     ):
         super().__init__(repositories)
         self._document_retriever = document_retriever
         self._product_retriever = product_retriever
+        self._ecommerce_platform_connector = ecommerce_platform_connector
         self._chat_history = chat_history
+        self._memory_compactor = memory_compactor
+        self._tool_scratchpad = tool_scratchpad or ToolScratchpad()
 
     @property
     def document_retriever(self) -> BaseVectorStoreRetriever[DocumentChunk]:
@@ -69,37 +89,57 @@ class Injector(BaseInjector):
         return self._product_retriever
 
     @property
+    def ecommerce_platform_connector(self) -> Optional[ECommercePlatformConnector]:
+        return self._ecommerce_platform_connector
+
+    @property
     def chat_history(self) -> BaseChatMessageHistory:
         return self._chat_history
+
+    @property
+    def memory_compactor(self) -> Optional[BaseMemoryCompactor]:
+        return self._memory_compactor
+
+    @property
+    def tool_scratchpad(self) -> ToolScratchpad:
+        return self._tool_scratchpad
 ```
 
 ## Available Resources
 
 ### 1. Document Retriever
 
-The document retriever provides access to document content through vector search:
+The document retriever provides access to document content through vector search.
 
 ### 2. Product Retriever
 
-The product retriever provides access to product information:
+The product retriever provides access to product information.
 
-### 3. Chat History
+### 3. E-commerce Platform Connector
 
-The injector provides access to the persistent conversation history via `chat_history: BaseChatMessageHistory`. See [Memory](./memory.md) for details on token limiting and persistence.
+Optional connector for platform-specific operations (orders, products) via `ecommerce_platform_connector: Optional[ECommercePlatformConnector]`. Returns `None` when no e-commerce integration is configured.
 
+### 4. Chat History
 
-### 4. Repository Access
+Persistent conversation history via `chat_history: BaseChatMessageHistory`. See [Memory](./memory.md) for details on persistence.
+
+### 5. Memory Compactor
+
+Optional LLM-based compactor via `memory_compactor: Optional[BaseMemoryCompactor]`. Present only when `memory_compactor_enabled` is set in `AgentConfig`. See [Memory](./memory.md) for details.
+
+### 6. Tool Scratchpad
+
+Shared scratchpad for inter-tool state during agentic execution runs, accessible via `tool_scratchpad: ToolScratchpad`.
+
+### 7. Repository Access
 
 The injector provides access to all data repositories:
 
 ```python
-# Access repositories through injector
 repositories = self.injector.repositories
 
-# User repository
 user_repo = repositories.user
 current_user = user_repo.get_by_id(user_id)
-
 ```
 
 ## Usage in Tools
@@ -158,17 +198,14 @@ The injector is constructed using the agent builder pattern:
 
 ```python
 def _build_injector(self) -> BaseInjector:
-    # Build individual components
-    document_retriever = self._build_document_retriever()
-    product_retriever = self._build_product_retriever()
-    chat_history = self._build_chat_history()
-
-    # Create injector with all components
     return self._config.injector(
-        product_retriever=product_retriever,
-        document_retriever=document_retriever,
+        document_retriever=self._build_document_retriever(),
+        product_retriever=self._build_product_retriever(),
+        ecommerce_platform_connector=self._build_ecommerce_platform_connector(),
         repositories=self._repositories,
-        chat_history=chat_history,
+        chat_history=self._build_chat_history(),
+        tool_scratchpad=self._tool_scratchpad,
+        memory_compactor=self._build_memory_compactor(),
     )
 ```
 
@@ -179,7 +216,7 @@ def _build_injector(self) -> BaseInjector:
 
 ```python
 class CustomInjector(BaseInjector):
-    def __init__(self, repositories: RepositoriesInstances, custom_service: CustomService):
+    def __init__(self, repositories: RepositoriesInstances, custom_service: CustomService, **kwargs):
         super().__init__(repositories)
         self._custom_service = custom_service
 
@@ -192,8 +229,16 @@ class CustomInjector(BaseInjector):
         return self._build_custom_product_retriever()
 
     @property
+    def ecommerce_platform_connector(self) -> Optional[ECommercePlatformConnector]:
+        return None
+
+    @property
     def chat_history(self) -> BaseChatMessageHistory:
         return self._build_custom_chat_history()
+
+    @property
+    def tool_scratchpad(self) -> ToolScratchpad:
+        return self._build_custom_tool_scratchpad()
 
     @property
     def custom_service(self) -> CustomService:

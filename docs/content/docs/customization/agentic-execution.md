@@ -125,7 +125,7 @@ class MyAgentConfigProvider(BaseAgentConfigProvider):
             if config_type == ConfigType.AGENTIC_EXECUTION_DEFINITION
             else CONVERSATION_PROMPT
         )
-        return AgentConfigWithDefaults(prompt_template=..., system_prompt=system_prompt)
+        return AgentConfigWithDefaults(system_prompt=system_prompt)
 ```
 
 Agents that don't need context-specific behaviour can ignore `config_type` and always return the same configuration.

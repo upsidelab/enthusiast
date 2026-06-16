@@ -1,10 +1,10 @@
 # Importing Test Data
 
-When you sign in to Enthusiast for the first time, you’ll be prompted to create your first [data set](/docs/synchronize/manage-data-sets).
+When you sign in to Enthusiast for the first time, you’ll be prompted to create your first [data set](/docs/management/data-sets).
 
 ![Create the first data set](./img/create-data-set.png)
 
-Pick a name for your data set and click “Create”. This will take you to a screen where you can configure data sources.
+Pick a name for your data set and click “Continue”. This will take you to a screen where you can configure data sources.
 
 ## Configuring Data Sources
 
@@ -18,7 +18,7 @@ It also provides a sample source for products and documents, that can be used to
 
 ![Add a product source](./img/add-product-source.png)
 
-Click on "Add Source" in the top right corner of the screen. From the dropdown menu select "Product source". A popup will appear on the screen, allowing you to configure the source.
+To add a product source, navigate to "Configure" > "Integrations" and click on "Add Integration" in the top right corner of the screen. From the dropdown menu select "Product source". A popup will appear on the screen, allowing you to configure the source.
 
 ![Configure a product source](./img/configure-product-source.png)
 

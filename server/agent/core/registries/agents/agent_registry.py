@@ -96,7 +96,7 @@ class AgentRegistry(BaseAgentRegistry):
     def _get_config_by_name(self, agent_type: str, config_type: ConfigType = ConfigType.CONVERSATION) -> AgentConfig:
         agent_directory_path = self._get_agent_directory_path(agent_type)
         try:
-            config_cls = self._get_class_by_path(agent_directory_path, BaseAgentConfigProvider)
+            config_cls = self._get_class_by_path(agent_directory_path, BaseAgentConfigProvider, BaseRegistry.PathType.MODULE)
             return config_cls().get_config(config_type=config_type)
         except (ModuleNotFoundError, ValueError):
             raise AgentImportError(f"Cannot config module of a BaseAgentConfigProvider class for agent '{agent_type}'.")

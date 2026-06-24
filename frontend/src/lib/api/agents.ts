@@ -1,14 +1,14 @@
 import {BaseApiClient} from "@/lib/api/base.ts";
-import {Agent, AgentConfig, AgentDetails} from "@/lib/types.ts";
+import {Agent, AgentConfig, AgentDetails, ExtraArgDetail} from "@/lib/types.ts";
 import {ApiError} from "@/lib/api-error.ts";
 
 export type AgentChoice = {
   key: string;
   name: string;
   agent_args: Record<string, string>;
-  prompt_inputs: Record<string, string>;
+  prompt_input: Record<string, string>;
   prompt_extension: Record<string, string>;
-  tools: Record<string, string>[];
+  tool_config: Record<string, Record<string, ExtraArgDetail>>;
 };
 
 type AvailableAgentsResponse = {

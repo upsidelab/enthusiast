@@ -24,6 +24,7 @@ from ..repositories.base import (
 )
 from ..retrievers import BaseRetriever
 from ..tools import BaseAgentTool, BaseFileTool, BaseFunctionTool, BaseLLMTool
+from ..utils import RequiredFieldsModel
 
 InjectorT = TypeVar("InjectorT", bound=BaseInjector)
 
@@ -75,21 +76,25 @@ class RepositoriesConfig(ArbitraryTypeBaseModel):
 
 class FunctionToolConfig(ArbitraryTypeBaseModel):
     tool_class: Type[BaseFunctionTool]
+    tool_configuration_args: Optional[Type[RequiredFieldsModel]] = None
 
 
 class LLMToolConfig(ArbitraryTypeBaseModel):
     tool_class: Type[BaseLLMTool]
     llm: Optional[LLMConfig] = None
+    tool_configuration_args: Optional[Type[RequiredFieldsModel]] = None
 
 
 class FileToolConfig(ArbitraryTypeBaseModel):
     tool_class: Type[BaseFileTool]
     llm: Optional[LLMConfig] = None
+    tool_configuration_args: Optional[Type[RequiredFieldsModel]] = None
 
 
 class AgentToolConfig(ArbitraryTypeBaseModel):
     tool_class: Type[BaseAgentTool]
     agent: AgentConfig
+    tool_configuration_args: Optional[Type[RequiredFieldsModel]] = None
 
 
 class RetrieverConfig(ArbitraryTypeBaseModel):

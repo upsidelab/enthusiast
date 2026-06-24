@@ -1,7 +1,11 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from enum import StrEnum
+from typing import TYPE_CHECKING
 
-from ..config import AgentConfig
+if TYPE_CHECKING:
+    from ..config.base import AgentConfig
 
 
 class ConfigType(StrEnum):

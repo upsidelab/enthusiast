@@ -1,6 +1,6 @@
 import inspect
 from abc import ABC, ABCMeta, abstractmethod
-from typing import TYPE_CHECKING, Any, Type
+from typing import TYPE_CHECKING, Any, Optional, Type
 
 from enthusiast_common.registry import BaseLanguageModelRegistry
 
@@ -13,7 +13,7 @@ from langchain_core.tools import StructuredTool
 from pydantic import BaseModel
 
 from ..injectors import BaseInjector
-from ..utils import RequiredFieldsModel, validate_required_vars
+from ..utils import validate_required_vars
 
 
 class ToolMeta(ABCMeta):
@@ -22,7 +22,6 @@ class ToolMeta(ABCMeta):
         "DESCRIPTION": str,
         "ARGS_SCHEMA": type,
         "RETURN_DIRECT": bool,
-        "CONFIGURATION_ARGS": RequiredFieldsModel,
     }
 
     def __new__(mcs, name, bases, namespace, **kwargs):
@@ -37,14 +36,12 @@ class BaseTool(metaclass=ToolMeta):
     DESCRIPTION: str
     ARGS_SCHEMA: Type[BaseModel]
     RETURN_DIRECT: bool
-    CONFIGURATION_ARGS = None
 
     REQUIRED_CLASS_VARS = {
         "NAME": str,
         "DESCRIPTION": str,
         "ARGS_SCHEMA": type,
         "RETURN_DIRECT": bool,
-        "CONFIGURATION_ARGS": RequiredFieldsModel,
     }
 
     @abstractmethod
@@ -60,11 +57,10 @@ class BaseTool(metaclass=ToolMeta):
             return_direct=self.RETURN_DIRECT,
         )
 
-    def set_runtime_arguments(self, runtime_arguments: Any) -> None:
-        field = getattr(self, "CONFIGURATION_ARGS", None)
-        if field is None:
+    def set_runtime_arguments(self, runtime_arguments: Any, schema: Optional[Type[BaseModel]] = None) -> None:
+        if schema is None:
             return
-        setattr(self, "CONFIGURATION_ARGS", field(**runtime_arguments))
+        self._config = schema(**runtime_arguments)
 
 
 class BaseFunctionTool(BaseTool, ABC):

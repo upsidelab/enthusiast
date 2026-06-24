@@ -4,7 +4,7 @@ from utils.serializers import ExtraArgDetailSerializer, ParentDataContextSeriali
 
 from agent.core.registries.agents.agent_registry import AgentRegistry
 from agent.models import Agent
-from agent.serializers.customs.fields import PydanticModelField, PydanticModelToolListField
+from agent.serializers.customs.fields import PydanticModelField, PydanticModelToolConfigField
 from catalog.models import DataSet
 
 
@@ -14,7 +14,9 @@ class AgentChoiceSerializer(serializers.Serializer):
     agent_args = serializers.DictField(child=ExtraArgDetailSerializer(), allow_empty=True)
     prompt_input = serializers.DictField(child=ExtraArgDetailSerializer(), allow_empty=True)
     prompt_extension = serializers.DictField(child=ExtraArgDetailSerializer(), allow_empty=True)
-    tools = serializers.ListField(child=serializers.DictField(child=ExtraArgDetailSerializer()), allow_empty=True)
+    tool_config = serializers.DictField(
+        child=serializers.DictField(child=ExtraArgDetailSerializer(), allow_empty=True), allow_empty=True
+    )
 
 
 class AvailableAgentsResponseSerializer(serializers.Serializer):
@@ -27,7 +29,7 @@ class AgentConfigSerializer(ParentDataContextSerializerMixin, serializers.Serial
     agent_args = PydanticModelField(agent_field_name="AGENT_ARGS")
     prompt_input = PydanticModelField(agent_field_name="PROMPT_INPUT")
     prompt_extension = PydanticModelField(agent_field_name="PROMPT_EXTENSION")
-    tools = PydanticModelToolListField(agent_field_name="TOOLS", tool_field_name="CONFIGURATION_ARGS")
+    tool_config = PydanticModelToolConfigField(agent_field_name="TOOLS", tool_field_name="tool_configuration_args")
 
 
 class AgentSerializer(ParentDataContextSerializerMixin, serializers.ModelSerializer):

@@ -123,7 +123,7 @@ export type AgentConfig = {
   agent_args?: Record<string, ExtraArgDetail>;
   prompt_input?: Record<string, ExtraArgDetail>;
   prompt_extension?: Record<string, ExtraArgDetail>;
-  tools?: Array<Record<string, ExtraArgDetail>>;
+  tool_config?: Record<string, Record<string, ExtraArgDetail>>;
 };
 
 export type ConversationFile = {

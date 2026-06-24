@@ -3,7 +3,7 @@
  */
 
 export function flattenConfigForForm(
-  config: unknown, 
+  config: unknown,
   sectionMapping?: Record<string, string>
 ): Record<string, string | number | boolean> {
   const flattenedConfig: Record<string, string | number | boolean> = {};
@@ -15,17 +15,18 @@ export function flattenConfigForForm(
   Object.entries(config as Record<string, unknown>).forEach(([section, sectionData]) => {
     const frontendSection = sectionMapping?.[section] || section;
     
-    if (Array.isArray(sectionData)) {
-      sectionData.forEach(obj => {
-        if (obj && typeof obj === 'object') {
-          Object.entries(obj).forEach(([key, value]) => {
+    if (section === 'tool_config' && sectionData && typeof sectionData === 'object' && !Array.isArray(sectionData)) {
+      // 2-level: {toolName: {fieldName: value}}
+      Object.entries(sectionData as Record<string, Record<string, unknown>>).forEach(([toolName, toolFields]) => {
+        if (toolFields && typeof toolFields === 'object') {
+          Object.entries(toolFields).forEach(([key, value]) => {
             if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-              flattenedConfig[`${frontendSection}_${key}`] = value;
+              flattenedConfig[`${section}_${toolName}_${key}`] = value;
             } else if (typeof value === 'object' && value !== null) {
               try {
-                flattenedConfig[`${frontendSection}_${key}`] = JSON.stringify(value);
+                flattenedConfig[`${section}_${toolName}_${key}`] = JSON.stringify(value);
               } catch {
-                flattenedConfig[`${frontendSection}_${key}`] = '{}';
+                flattenedConfig[`${section}_${toolName}_${key}`] = '{}';
               }
             }
           });

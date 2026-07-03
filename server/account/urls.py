@@ -7,6 +7,8 @@ import account.views.users
 
 urlpatterns = [
     path("api/auth/login", account.views.login.LoginView.as_view(), name="login"),
+    path("api/auth/logout", account.views.login.SessionLogoutView.as_view(), name="logout"),
+    path("api/auth/csrf", account.views.login.CSRFView.as_view(), name="csrf"),
     path("api/account", account.views.accounts.AccountView.as_view(), name="account"),
     path("api/users", account.views.users.UserListView.as_view(), name="user_list"),
     path("api/users/<int:id>", account.views.users.UserView.as_view(), name="user_details"),

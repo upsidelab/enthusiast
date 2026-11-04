@@ -1,0 +1,23 @@
+import { Cards } from "nextra/components"
+import AgentCard from "@/components/agent-card"
+
+# Pre-built Agents
+
+Enthusiast comes with a bunch of pre-built agents that cover many common use cases for back-office operations, such as enhancing product data, searching internal documentation, and processing business documents.
+
+This curated library allows you to quickly deploy specialized AI solutions for automation and productivity without needing to build custom agents from scratch. Furthermore, these agents can be customized and extended by a developer to precisely adjust their behavior and integrate with your business workflows.
+
+<Cards className="x:py-4" num={2}>
+  <AgentCard name="Product Search" imageSrc="/tools/enthusiast/img/agents/product-search.png" href="/docs/v1.7/pre-built-agents/product-search" />
+  <AgentCard name="Catalog Enrichment" imageSrc="/tools/enthusiast/img/agents/catalog-enrichment.png" href="/docs/v1.7/pre-built-agents/catalog-enrichment" />
+  <AgentCard name="Order Intake" imageSrc="/tools/enthusiast/img/agents/order-intake.png" href="/docs/v1.7/pre-built-agents/order-intake" />
+  <AgentCard name="User Manual Search" imageSrc="/tools/enthusiast/img/agents/user-manual-search.png" href="/docs/v1.7/pre-built-agents/user-manual-search" />
+  <AgentCard name="Catalog Web Import" href="/docs/v1.7/pre-built-agents/catalog-web-import" />
+  <AgentCard name="Invoice Scanning" href="/docs/v1.7/pre-built-agents/invoice-scanning" />
+</Cards>
+
+## Build a Custom Agent
+
+These pre-built agents are just a starting point. Enthusiast allows you to build custom agents from the ground up, tailored to your specific workflows.
+
+<Cards.Card className="x:my-4" title="Learn How to Build a Custom Agent" href="/docs/v1.7/customization/custom-agent" arrow />

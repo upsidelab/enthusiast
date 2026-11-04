@@ -1,0 +1,16 @@
+export default {
+  index: "Overview",
+  medusa: "Medusa",
+  shopware: "Shopware",
+  shopify: "Shopify",
+  solidus: "Solidus",
+  woocommerce: "WooCommerce",
+  sanity: "Sanity",
+  wordpress: "WordPress",
+  openai: "OpenAI",
+  ollama: "Ollama",
+  "azure-openai": "Azure OpenAI",
+  anthropic: "Anthropic",
+  gemini: "Google Gemini",
+  mistral: "Mistral",
+};

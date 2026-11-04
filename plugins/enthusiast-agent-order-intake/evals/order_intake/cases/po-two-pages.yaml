@@ -1,0 +1,9 @@
+id: po-two-pages
+description: Seven lines over two pages
+tags: [multi-page]
+files: [po-two-pages.pdf]
+expected:
+  mock_calls:
+    create_order_with_items:
+      - items: [[MUG-BLU-ENM, 24], [SPN-WOD, 12], [TEA-BLK, 10], [SUG-CUB, 6], [FLT-PAP, 20], [KTL-ELC, 3], [SPN-STL, 48]]
+  output: {order_id: ORD-1}

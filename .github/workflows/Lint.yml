@@ -7,50 +7,15 @@ on:
   workflow_dispatch:
 
 jobs:
-  lint-backend:
+  lint-plugins:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.12'
-
-      - name: Run Ruff on server
-        uses: astral-sh/ruff-action@v3
-        with:
-          version: "0.15.9"
-          args: "check server"
+        uses: actions/checkout@v4
 
       - name: Run Ruff on plugins
         uses: astral-sh/ruff-action@v3
         with:
           version: "0.15.9"
           args: "check plugins"
-
-  lint-frontend:
-      runs-on: ubuntu-latest
-
-      steps:
-        - name: Checkout repository
-          uses: actions/checkout@v3
-
-        - name: Set up Node.js
-          uses: actions/setup-node@v3
-          with:
-            node-version: '20'
-
-        - name: Install pnpm
-          run: npm install -g pnpm
-          working-directory: frontend
-
-        - name: Install dependencies
-          run: pnpm install
-          working-directory: frontend
-
-        - name: Run ESLint
-          run: pnpm exec eslint src
-          working-directory: frontend

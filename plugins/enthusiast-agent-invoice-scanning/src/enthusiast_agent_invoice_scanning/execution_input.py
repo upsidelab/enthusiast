@@ -1,6 +1,6 @@
 from typing import Optional
 
-from enthusiast_common.agentic_execution import ExecutionInputType
+from suvereo_common.agentic_execution import ExecutionInputType
 
 
 class InvoiceScanningAgenticExecutionInput(ExecutionInputType):

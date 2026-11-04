@@ -1,4 +1,4 @@
-from enthusiast_common.agentic_execution import ExecutionInputType
+from suvereo_common.agentic_execution import ExecutionInputType
 
 
 class OrderIntakeAgenticExecutionInput(ExecutionInputType):

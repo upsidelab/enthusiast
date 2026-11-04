@@ -1,0 +1,7 @@
+id: po-skus
+description: SKUs only
+tags: [basic]
+files: [po-skus.pdf]
+expected:
+  mock_calls: {create_order_with_items: [{items: [[KTL-ELC, 2], [SUG-CUB, 10], [FLT-PAP, 5]]}]}
+  output: {order_id: ORD-1}

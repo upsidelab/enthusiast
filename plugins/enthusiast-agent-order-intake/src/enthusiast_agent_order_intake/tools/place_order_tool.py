@@ -1,9 +1,9 @@
 import logging
 
-from enthusiast_common.injectors import BaseInjector
-from enthusiast_common.tools import BaseLLMTool
 from langchain_core.language_models import BaseLanguageModel
 from pydantic import BaseModel, Field
+from suvereo_common.injectors import BaseInjector
+from suvereo_common.tools import BaseLLMTool
 
 logger = logging.getLogger(__name__)
 

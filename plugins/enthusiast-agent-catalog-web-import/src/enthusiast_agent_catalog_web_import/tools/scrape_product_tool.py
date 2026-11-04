@@ -5,10 +5,10 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from bs4 import BeautifulSoup
 from curl_cffi import requests as curl_requests
 from curl_cffi.requests import RequestsError
-from enthusiast_common.tools import BaseLLMTool
-from enthusiast_common.utils import RequiredFieldsModel
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
+from suvereo_common.tools import BaseLLMTool
+from suvereo_common.utils import RequiredFieldsModel
 
 logger = logging.getLogger(__name__)
 

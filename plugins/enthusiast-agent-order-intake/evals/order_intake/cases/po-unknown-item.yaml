@@ -1,0 +1,10 @@
+id: po-unknown-item
+description: One line matches nothing in the catalog, so no order may be placed
+tags: [error-path]
+files: [po-unknown-item.pdf]
+expected:
+  failure_code: validation_failed
+  mock_calls: {create_order_with_items: []}
+metrics:
+  - {type: json_subset, name: order_id}
+  - {type: tool_called, name: one_order, params: {name: place_order}, pass_threshold: {equals: 0}}

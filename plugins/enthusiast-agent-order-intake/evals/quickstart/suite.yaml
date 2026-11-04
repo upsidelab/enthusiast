@@ -1,0 +1,29 @@
+name: quickstart
+description: Three purchase orders the order-intake agent should turn into one correct order each
+agent: {type: enthusiast-agent-order-intake}
+models: [{provider: OpenAI, model: gpt-4o-mini}]
+judge: {provider: OpenAI, model: gpt-4.1-mini}
+budget_usd: 0.10
+reports: [report, results, comparison, cases, metrics, traces]
+integrations:
+  - class: enthusiast_vertical_common.evaluation.ECommerceMockIntegration
+    config: {data: {catalog: catalog.yaml}}
+metrics:
+  - name: line_items
+    description: right products and quantities sent to the shop, 0–1
+    type: mock_calls
+    params: {method: create_order_with_items, arg: items, key: 0, fields: {1: numeric}, coerce: true}
+    pass_threshold: {min: 0.95}
+  - name: one_order
+    description: place_order calls
+    type: tool_called
+    params: {name: place_order}
+    pass_threshold: {equals: 1}
+  - name: searched_first
+    description: LLM judge, looked items up before ordering
+    type: llm_judge
+    params:
+      include: [input, outcome, trace_summary]
+      criteria:
+        - {name: searched_first, description: The agent looked every item up in the catalog before ordering and guessed no SKU}
+cases: cases.csv

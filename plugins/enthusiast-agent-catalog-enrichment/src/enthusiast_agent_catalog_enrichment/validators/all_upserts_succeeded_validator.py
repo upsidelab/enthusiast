@@ -1,15 +1,15 @@
-from enthusiast_agent_tools.tools.upsert_product_details_tool import (
+from enthusiast_vertical_tools.tools.upsert_product_details_tool import (
     UpsertMemoryEntry,
     UpsertProductDetailsTool,
 )
-from enthusiast_common.agentic_execution import (
+from suvereo_common.agentic_execution import (
     BaseExecutionValidator,
     ExecutionInputType,
     ValidatorFailureResponse,
     ValidatorResponse,
     ValidatorSuccessResponse,
 )
-from enthusiast_common.agentic_execution.memory import ToolScratchpad
+from suvereo_common.agentic_execution.memory import ToolScratchpad
 
 
 class AllUpsertsSucceededValidator(BaseExecutionValidator):

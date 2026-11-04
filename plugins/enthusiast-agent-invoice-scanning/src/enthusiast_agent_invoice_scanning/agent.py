@@ -1,8 +1,10 @@
-from enthusiast_agent_tool_calling import BaseToolCallingAgent
-from enthusiast_common.config.base import LLMToolConfig
-from enthusiast_common.utils import RequiredFieldsModel
+from enthusiast_vertical.builder import EcommerceAgentBuilder
 from pydantic import Field, Json
+from suvereo_agent_tool_calling import BaseToolCallingAgent
+from suvereo_common.config.base import LLMToolConfig
+from suvereo_common.utils import RequiredFieldsModel
 
+from .prompt import INVOICE_SCANNING_TOOL_CALLING_AGENT_PROMPT
 from .tools.update_stock_levels_tool import UpdateStockLevelsTool
 
 _CONFIRMATION_REQUIRED_INSTRUCTION = (
@@ -48,6 +50,8 @@ class InvoiceScanningAgent(BaseToolCallingAgent):
 
     AGENT_KEY = "enthusiast-agent-invoice-scanning"
     NAME = "Invoice Scanning"
+    SYSTEM_PROMPT = INVOICE_SCANNING_TOOL_CALLING_AGENT_PROMPT
+    BUILDER_CLASS = EcommerceAgentBuilder
     PROMPT_INPUT = InvoiceScanningPromptInput
     FILE_UPLOAD = True
     TOOLS = [

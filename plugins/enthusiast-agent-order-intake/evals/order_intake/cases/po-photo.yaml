@@ -1,0 +1,7 @@
+id: po-photo
+description: A slightly rotated, blurry photo of a handwritten-style order
+tags: [image]
+files: [po-photo.png]
+expected:
+  mock_calls: {create_order_with_items: [{items: [[MUG-RED-XL, 3], [TEA-BLK, 5], [KTL-ELC, 2]]}]}
+  output: {order_id: ORD-1}

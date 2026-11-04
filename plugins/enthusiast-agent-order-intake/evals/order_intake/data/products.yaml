@@ -1,0 +1,12 @@
+- {sku: MUG-RED, name: Red ceramic mug, description: 350 ml red ceramic coffee mug, price: 12.5, stock: 100}
+- {sku: MUG-BLU, name: Blue ceramic mug, description: 350 ml blue ceramic coffee mug, price: 12.5, stock: 100}
+- {sku: MUG-BLU-ENM, name: Blue enamel camping mug, description: 400 ml blue enamel steel mug, price: 9.0, stock: 40}
+- {sku: MUG-RED-XL, name: Red ceramic mug XL, description: 500 ml large red ceramic mug, price: 15.0, stock: 30}
+- {sku: TEA-GRN, name: Green tea 100g, description: Loose leaf green tea in a 100 g tin, price: 8.0, stock: 50}
+- {sku: TEA-BLK, name: Black tea 100g, description: Assam black tea in a 100 g tin, price: 7.5, stock: 50}
+- {sku: TEA-GRN-BAG, name: Green tea bags 50 pcs, description: Green tea in 50 paper bags, price: 6.0, stock: 80}
+- {sku: SPN-STL, name: Steel teaspoon, description: Stainless steel teaspoon, price: 2.0, stock: 500}
+- {sku: SPN-WOD, name: Wooden spoon, description: Beech wood cooking spoon, price: 4.0, stock: 120}
+- {sku: KTL-ELC, name: Electric kettle 1.7l, description: 1.7 litre electric kettle, stainless steel, price: 39.0, stock: 20}
+- {sku: FLT-PAP, name: Paper coffee filters size 4, description: Box of 100 paper coffee filters size 4, price: 3.5, stock: 300}
+- {sku: SUG-CUB, name: Sugar cubes 500g, description: White sugar cubes in a 500 g box, price: 2.5, stock: 200}

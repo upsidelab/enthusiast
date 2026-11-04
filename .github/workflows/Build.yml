@@ -6,26 +6,50 @@ on:
       - main
 
 jobs:
-  build:
+  build-plugins:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Build plugin packages
+        run: |
+          for plugin in plugins/*/; do
+            echo "::group::${plugin}"
+            (cd "$plugin" && poetry build)
+            echo "::endgroup::"
+          done
+
+  build-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install pnpm
         run: npm install -g pnpm
-        working-directory: frontend
 
       - name: Install dependencies
         run: pnpm install
-        working-directory: frontend
+        working-directory: docs
 
-      - name: Build project
+      - name: Build docs
         run: pnpm build
-        working-directory: frontend
+        working-directory: docs

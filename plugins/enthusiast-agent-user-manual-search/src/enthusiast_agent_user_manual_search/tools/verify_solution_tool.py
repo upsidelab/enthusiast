@@ -1,6 +1,6 @@
-from enthusiast_common.tools import BaseLLMTool
 from langchain_core.prompts import PromptTemplate
 from pydantic import BaseModel, Field
+from suvereo_common.tools import BaseLLMTool
 
 VERIFY_DATA_PROMPT_TEMPLATE = """
 You are verifying solution for user_query based on user manual.

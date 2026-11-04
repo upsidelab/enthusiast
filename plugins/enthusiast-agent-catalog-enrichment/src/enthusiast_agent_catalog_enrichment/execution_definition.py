@@ -1,11 +1,14 @@
-from enthusiast_common.agentic_execution import (
+from suvereo_agent_tools import StopExecutionTool
+from suvereo_common.agentic_execution import (
     BaseAgenticExecutionDefinition,
     ExecutionConversationInterface,
     IsValidJsonValidator,
     StopExecutionValidator,
 )
+from suvereo_common.config import LLMToolConfig
 
 from .execution_input import CatalogEnrichmentAgenticExecutionInput
+from .prompt import CATALOG_ENRICHMENT_EXECUTION_SYSTEM_PROMPT
 from .validators import AllSkusUpsertedValidator, AllUpsertsSucceededValidator
 
 
@@ -15,6 +18,8 @@ class CatalogEnrichmentAgenticExecutionDefinition(BaseAgenticExecutionDefinition
     NAME = "Catalog Enrichment"
     INPUT_TYPE = CatalogEnrichmentAgenticExecutionInput
     VALIDATORS = [StopExecutionValidator, IsValidJsonValidator, AllUpsertsSucceededValidator, AllSkusUpsertedValidator]
+    SYSTEM_PROMPT = CATALOG_ENRICHMENT_EXECUTION_SYSTEM_PROMPT
+    EXTRA_TOOLS = [LLMToolConfig(tool_class=StopExecutionTool)]
 
     def execute(
         self,

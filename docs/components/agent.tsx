@@ -15,6 +15,7 @@ export interface IntegrationProps {
   videoUrl?: string;
   agentUseCases?: UseCase[];
   registerAgentModule?: string;
+  executionDefinitionClassName?: string;
 }
 
 const mdxComponents = getMDXComponents({});
@@ -54,14 +55,26 @@ AVAILABLE_AGENTS = [
       </UL>
       <H2>Installing {props.name} Agent</H2>
       <P>
-        Run the following command inside your application directory.<br />
-        If you're using <Link href="/docs/getting-started/installation">Enthusiast Starter</Link>, that's inside enthusiast-starter/src/
+        This agent is built on the Enthusiast vertical, so a Suvereo instance with the vertical installed is required.
+        If you haven't set it up yet, follow the <Link href="/docs/getting-started/installation">installation guide</Link> first.
+      </P>
+      <P>
+        Run the following command inside your application directory.
       </P>
       <MDXRemote compiledSource={installationInstructions} />
       <P>
-        Then, register the integration in your config/settings_override.py.
+        Then, register the agent in your config/settings_override.py.
       </P>
       {props.registerAgentModule && <MDXRemote compiledSource={await compileMdx(buildRegisterInstructionMd("AVAILABLE_AGENTS", props.registerAgentModule))}/>}
+      {props.registerAgentModule && props.executionDefinitionClassName && (
+        <>
+          <P>
+            To run the agent as an agentic execution through the API, also register its execution definition.
+          </P>
+          <MDXRemote compiledSource={await compileMdx(`\`\`\`python\nAVAILABLE_AGENTIC_EXECUTION_DEFINITIONS = [\n    '${props.registerAgentModule}.${props.executionDefinitionClassName}',\n]\n\`\`\``)}/>
+        </>
+      )}
+      <P>Then, restart your server for the newly installed agent to become available.</P>
     </>
   )
 }

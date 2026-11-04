@@ -1,0 +1,49 @@
+name: order-intake
+description: Purchase orders as PDFs and photos, including ones the agent must refuse, on two prompts
+agent: {type: enthusiast-agent-order-intake}
+models:
+  - {provider: OpenAI, model: gpt-4o-mini}
+variants:
+  - {name: v2, system_prompt_file: prompts/v2.txt}
+judge: {provider: OpenAI, model: gpt-4.1-mini}
+budget_usd: 0.10
+reports: [report, results, comparison, cases]
+integrations:
+  - class: enthusiast_vertical_common.evaluation.ECommerceMockIntegration
+    config: {data: {catalog: data/products.yaml}}
+metrics:
+  - name: line_items
+    description: right products and quantities sent to the shop, 0–1
+    type: mock_calls
+    params: {method: create_order_with_items, arg: items, key: 0, fields: {1: numeric}, coerce: true, skip_failed: true}
+    pass_threshold: {min: 0.95}
+  - name: order_id
+    description: answer has the order id
+    type: json_subset
+    pass_threshold: {min: 1}
+  - name: one_order
+    description: place_order calls
+    type: tool_called
+    params: {name: place_order}
+    pass_threshold: {equals: 1}
+  - name: retried
+    description: validator forced a retry
+    type: trace_event
+    params: {event: retry}
+    pass_threshold: {equals: false}
+    required: false
+  - name: behaviour
+    description: LLM judge of how the agent worked, 0–1
+    type: llm_judge
+    params:
+      include: [input, outcome, trace_summary]
+      criteria:
+        - name: adapts_search
+          description: After a search finds nothing, the next one changes approach instead of repeating it, and the agent does not give up while obvious variations are untried. The catalog table has name, sku and description columns and LIKE is case-sensitive, so searching a SKU code anywhere but sku, or never trying another case or the singular, is not adapting. A shop error after ordering is not a search failure. Score 1 if every search found the product.
+        - name: disambiguates
+          description: When a search returns several products, the agent picks the one matching the document's size, variant or pack, or searches further, instead of taking the first. Score 1 if no search returned several products.
+        - name: orders_cleanly
+          description: The agent resolves every line before ordering, then orders once with real SKUs and the document's quantities, with no placeholder lines and no repeated or split orders. After a tool error it fixes the cause instead of repeating the call. The agent cannot see stock, so an order the shop rejects as out of stock is clean if it was sent once and correct. Score 1 if it rightly placed no order.
+        - name: explains_stop
+          description: Score 1 when an order was placed. When the agent stopped instead, score 1 if its stop reason names each item it could not order and why, and 0 if the reason is generic.
+cases: cases

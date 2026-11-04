@@ -3,10 +3,11 @@ import re
 import urllib.parse
 
 import requests
-from enthusiast_common import DocumentDetails, DocumentSourcePlugin
-from enthusiast_common.utils import RequiredFieldsModel
+from enthusiast_vertical_common.interfaces import DocumentSourcePlugin
+from enthusiast_vertical_common.structures import DocumentDetails
 from pydantic import Field
 from requests import Response
+from suvereo_common.utils import RequiredFieldsModel
 
 logger = logging.getLogger(__name__)
 
@@ -17,11 +18,9 @@ class WordpressConfig(RequiredFieldsModel):
 
 
 class WordpressDocumentSource(DocumentSourcePlugin):
+    TYPE = "wordpress"
     NAME = "WordPress"
     CONFIGURATION_ARGS = WordpressConfig
-
-    def __init__(self, data_set_id, **kwargs):
-        super().__init__(data_set_id)
 
     def fetch(self) -> list[DocumentDetails]:
         session = self._create_http_session()

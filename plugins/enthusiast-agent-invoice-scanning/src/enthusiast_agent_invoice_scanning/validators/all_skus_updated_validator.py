@@ -1,10 +1,10 @@
-from enthusiast_common.agentic_execution import (
+from suvereo_common.agentic_execution import (
     BaseExecutionValidator,
     ValidatorFailureResponse,
     ValidatorResponse,
     ValidatorSuccessResponse,
 )
-from enthusiast_common.agentic_execution.memory import ToolScratchpad
+from suvereo_common.agentic_execution.memory import ToolScratchpad
 
 from enthusiast_agent_invoice_scanning.execution_input import InvoiceScanningAgenticExecutionInput
 from enthusiast_agent_invoice_scanning.tools.update_stock_levels_tool import (

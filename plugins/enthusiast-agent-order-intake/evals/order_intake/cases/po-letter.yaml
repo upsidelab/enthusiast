@@ -1,0 +1,7 @@
+id: po-letter
+description: A free-text letter with spelled-out quantities
+tags: [basic]
+files: [po-letter.pdf]
+expected:
+  mock_calls: {create_order_with_items: [{items: [[MUG-RED, 6], [TEA-GRN, 2], [SPN-STL, 12], [KTL-ELC, 1]]}]}
+  output: {order_id: ORD-1}

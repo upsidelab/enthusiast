@@ -1,10 +1,10 @@
-from enthusiast_common.agentic_execution import (
+from suvereo_common.agentic_execution import (
     BaseExecutionValidator,
     ValidatorFailureResponse,
     ValidatorResponse,
     ValidatorSuccessResponse,
 )
-from enthusiast_common.agentic_execution.memory import ToolScratchpad
+from suvereo_common.agentic_execution.memory import ToolScratchpad
 
 from enthusiast_agent_catalog_web_import.execution_input import CatalogWebImportExecutionInput
 from enthusiast_agent_catalog_web_import.tools.scrape_product_tool import ScrapeMemoryEntry, ScrapeProductTool

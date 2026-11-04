@@ -1,9 +1,10 @@
 import logging
 from urllib.parse import urlparse
 
-from enthusiast_common import ProductDetails, ProductSourcePlugin
-from enthusiast_common.utils import RequiredFieldsModel
+from enthusiast_vertical_common.interfaces import ProductSourcePlugin
+from enthusiast_vertical_common.structures import ProductDetails
 from pydantic import Field
+from suvereo_common.utils import RequiredFieldsModel
 from woocommerce import API
 
 logger = logging.getLogger(__name__)
@@ -17,11 +18,9 @@ class WoocommerceConfig(RequiredFieldsModel):
 
 
 class WoocommerceProductSource(ProductSourcePlugin):
+    TYPE = "woocommerce"
     NAME = "WooCommerce"
     CONFIGURATION_ARGS = WoocommerceConfig
-
-    def __init__(self, data_set_id, **kwargs):
-        super().__init__(data_set_id)
 
     def _validate_per_page(self, per_page):
         return max(10, min(int(per_page), 100))

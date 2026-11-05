@@ -18,12 +18,12 @@ It also provides a sample source for products and documents, that can be used to
 
 ![Add a product source](./img/add-product-source.png)
 
-To add a product source, navigate to "Configure" > "Integrations" and click on "Add Integration" in the top right corner of the screen. From the dropdown menu select "Product source". A popup will appear on the screen, allowing you to configure the source.
+To add a product source, navigate to "Configure" > "Integrations" and click on "Add integration" in the top right corner of the screen. From the dropdown menu select "Product source". A popup will appear on the screen, allowing you to configure the source.
 
 ![Configure a product source](./img/configure-product-source.png)
 
-Select “Sample Product Source” from the list and click “Add”. You will now see in the list of configured sources.
-Repeat the same process for the document source, this time selecting "Sample Document Source" as the source type.
+Select “Sample Products Source” from the list and click “Add”. You will now see in the list of configured sources.
+Repeat the same process for the document source, this time selecting "Document source" from the dropdown menu and "Sample Documents Source" as the source type.
 
 ![Verify source configuration](./img/source-list.png)
 

@@ -7,6 +7,7 @@ from suvereo_common.agentic_execution import (
 )
 from suvereo_common.config import LLMToolConfig
 
+from .agent import CatalogWebImportAgent
 from .execution_input import CatalogWebImportExecutionInput
 from .execution_prompt import CATALOG_WEB_IMPORT_EXECUTION_PROMPT
 from .validators import AllUpsertsSucceededValidator, AllUrlsFetchSuccessfulValidator
@@ -29,7 +30,7 @@ class CatalogWebImportAgenticExecutionDefinition(BaseAgenticExecutionDefinition)
         AllUpsertsSucceededValidator,
     ]
     SYSTEM_PROMPT = CATALOG_WEB_IMPORT_EXECUTION_PROMPT
-    EXTRA_TOOLS = [LLMToolConfig(tool_class=StopExecutionTool)]
+    TOOLS = [*CatalogWebImportAgent.TOOLS, LLMToolConfig(tool_class=StopExecutionTool)]
 
     def execute(
         self,

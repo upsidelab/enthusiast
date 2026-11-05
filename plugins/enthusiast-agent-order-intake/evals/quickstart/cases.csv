@@ -1,0 +1,4 @@
+id,description,files,expected.mock_calls.create_order_with_items.0.items
+po-skus,SKUs only,po-skus.pdf,"[[""KTL-ELC"",2],[""SUG-CUB"",10],[""FLT-PAP"",5]]"
+po-names,Product names instead of SKUs,po-names.pdf,"[[""MUG-RED"",6],[""TEA-GRN"",3],[""SPN-STL"",12]]"
+po-mixed,SKUs and names mixed,po-mixed.pdf,"[[""MUG-BLU"",4],[""TEA-BLK"",2],[""SPN-WOD"",3]]"

@@ -1,11 +1,11 @@
-from enthusiast_common.agentic_execution import (
+from suvereo_common.agentic_execution import (
     BaseExecutionValidator,
     ExecutionInputType,
     ValidatorFailureResponse,
     ValidatorResponse,
     ValidatorSuccessResponse,
 )
-from enthusiast_common.agentic_execution.memory import ToolScratchpad
+from suvereo_common.agentic_execution.memory import ToolScratchpad
 
 from enthusiast_agent_order_intake.tools.place_order_tool import PlaceOrderTool
 

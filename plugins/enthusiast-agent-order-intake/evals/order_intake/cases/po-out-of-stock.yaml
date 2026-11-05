@@ -1,0 +1,17 @@
+id: po-out-of-stock
+description: The shop rejects the order; the run must fail cleanly after one attempt to order
+tags: [error-path]
+files: [po-out-of-stock.pdf]
+integrations:
+  - class: enthusiast_vertical_common.evaluation.ECommerceMockIntegration
+    config: {behaviour: {create_order_with_items: {raises: {error: ECommerceConnectorError, message: "Out of stock: KTL-ELC"}}}}
+expected:
+  failure_code: validation_failed
+  mock_calls: {create_order_with_items: [{items: [[KTL-ELC, 40], [MUG-RED, 2]]}]}
+metrics:
+  # the expected call is the one the shop rejects, so keep rejected calls
+  - name: line_items
+    type: mock_calls
+    params: {method: create_order_with_items, arg: items, key: 0, fields: {1: numeric}, coerce: true}
+    pass_threshold: {min: 0.95}
+  - {type: json_subset, name: order_id}

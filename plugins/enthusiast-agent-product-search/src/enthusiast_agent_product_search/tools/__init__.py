@@ -1,4 +1,4 @@
-from enthusiast_agent_tools import ProductExamplesTool, ProductSQLSearchTool
+from enthusiast_vertical_tools import ProductExamplesTool, ProductSQLSearchTool
 
 from .product_search_tool import ProductSearchTool
 

@@ -47,11 +47,7 @@ export default async function Integration(props: IntegrationProps) {
     <>
       <H1>{props.name} Integration</H1>
       <Image className="x:py-4" src={`/tools/enthusiast/img/integrations/${props.integrationKey}.png`} alt={props.name} width={256} height={256} />
-      {props.description &&
-        <>
-          <MDXRemote compiledSource={installationInstructions} />
-          <P>{props.description}</P>
-        </>}
+      {props.description && <P>{props.description}</P>}
       <H2>Installation</H2>
       <P>
         This integration is part of the Enthusiast vertical, so a Suvereo instance with the vertical installed is required.

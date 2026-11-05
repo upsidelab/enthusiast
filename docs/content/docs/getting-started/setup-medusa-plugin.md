@@ -3,25 +3,35 @@
 Enthusiast provides a plugin for [Medusa](https://medusajs.com/) that integrates AI agents directly into the Medusa admin panel.
 This enables e-commerce backoffice users to use agents like catalog enrichment, order intake, and documentation search without leaving Medusa.
 
-This guide walks you through setting up Enthusiast and the plugin in Medusa.
+This guide walks you through setting up Suvereo with Enthusiast, and the plugin in Medusa.
 
-## 1. Set Up Enthusiast
+## 1. Set Up Suvereo with Enthusiast
 
-The first step is to set up [Enthusiast Starter](https://github.com/upsidelab/enthusiast-starter) - a pre-configured Docker Compose setup that includes all required services and a set of ready-to-use agents.
+The first step is to set up a Suvereo deployment with the Enthusiast vertical. The easiest way is the [Suvereo Starter](/docs/customization/using-enthusiast-starter), a pre-configured Docker Compose setup that includes all required services.
 
-### Clone the Repository
+### Add the Enthusiast Packages
+
+Follow the [installation guide](/docs/getting-started/installation) to install the vertical, together with the Medusa integration and the agents you want to use in Medusa:
 
 ```bash
-git clone https://github.com/upsidelab/enthusiast-starter
-cp config/env.sample config/env
+poetry add enthusiast-vertical enthusiast-source-medusa enthusiast-agent-order-intake enthusiast-agent-catalog-enrichment
+```
+
+Register them in `settings_override.py`, including the Medusa integration:
+
+```python
+CATALOG_INTEGRATION_PLUGINS = [
+    ...
+    "enthusiast_source_medusa.MedusaIntegration",
+]
 ```
 
 ### Configure Environment Variables
 
-Open the `config/env` file and set the following:
+In the server's env file (`server/config/.env` in the Suvereo Starter), set the following:
 
 - **`OPENAI_API_KEY`** — your OpenAI API key, required for using the language model.
-- **`ECL_DJANGO_ALLOWED_HOSTS`** — if your Medusa instance runs inside a Docker container, add `"host.docker.internal"` to this list. This is the host Medusa uses to communicate with Enthusiast.
+- **`ECL_DJANGO_ALLOWED_HOSTS`** — if your Medusa instance runs inside a Docker container, add `"host.docker.internal"` to this list. This is the host Medusa uses to communicate with Suvereo.
 
 ### Start the Docker Containers
 
@@ -33,13 +43,13 @@ docker compose build && docker compose up
 
 ### Create an Admin Service Account
 
-The Medusa plugin authenticates with Enthusiast using a service account API key. Create one with:
+The Medusa plugin authenticates with Suvereo using a service account API key. Create one with:
 
 ```bash
-docker exec -it enthusiast-starter-api-1 ./manage.py createadminserviceaccount --name Medusa
+docker exec -it suvereo-starter-api-1 ./manage.py createadminserviceaccount --name Medusa
 ```
 
-> The container name `enthusiast-starter-api-1` may differ in your setup. Run `docker ps` to find the correct container name for the Enthusiast API service.
+> The container name `suvereo-starter-api-1` may differ in your setup. Run `docker ps` to find the correct container name for the API service.
 
 Copy the returned API key — you will need it in the next section.
 
@@ -59,11 +69,11 @@ Add the following environment variables to your Medusa project:
 
 | Variable | Description                                                                                                       |
 |---|-------------------------------------------------------------------------------------------------------------------|
-| `ENTHUSIAST_API_URL` | Enthusiast instance base API URL                                                                                  |
-| `ENTHUSIAST_WS_URL` | Enthusiast instance base WebSocket URL (usually the same as the API URL, with ws:// or wss:// prefix              |
+| `ENTHUSIAST_API_URL` | Suvereo instance base API URL                                                                                     |
+| `ENTHUSIAST_WS_URL` | Suvereo instance base WebSocket URL (usually the same as the API URL, with ws:// or wss:// prefix                 |
 | `ENTHUSIAST_SERVICE_ACCOUNT_TOKEN` | Admin service account API key from the previous step                                                              |
 | `ENTHUSIAST_INTEGRATION_NAME` | Set to "Medusa"                                                                                                   |
-| `ENTHUSIAST_MEDUSA_BACKEND_URL` | *(Optional)* Medusa backend URL that Enthusiast sends requests to. Defaults to `http://host.docker.internal:9000` |
+| `ENTHUSIAST_MEDUSA_BACKEND_URL` | *(Optional)* Medusa backend URL that Suvereo sends requests to. Defaults to `http://host.docker.internal:9000` |
 | `ENTHUSIAST_MEDUSA_ADMIN_URL` | *(Optional)* Medusa admin URL. Defaults to `http://localhost:9000`                                                |
 
 If you're running Medusa in Docker, it will most likely look like this:

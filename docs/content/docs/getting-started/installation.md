@@ -1,38 +1,70 @@
 # Installation
 
-The quickest way to start using Enthusiast is with the provided Docker Compose setup. This will get you a working instance in just a few minutes.
+> [!NOTE]
+> Looking for the Enthusiast 1.7 installation guide? It is available [here](https://upsidelab.io/tools/enthusiast/v1.7/docs/getting-started/installation).
 
-## Setting Up Using Docker Compose
+Enthusiast is an e-commerce [vertical](https://upsidelab.io/tools/suvereo/docs/customization/domain-onboarding) for [Suvereo](https://upsidelab.io/tools/suvereo/docs). Suvereo provides the platform (conversations, agentic executions, language models, users and the admin UI), and Enthusiast is installed on top of it as a set of Python packages.
 
-First, clone the starter repository:
+## Prerequisites
 
-```shell
-$ git clone https://github.com/upsidelab/enthusiast-starter
-$ cp config/env.sample config/env
-```
+You need a running Suvereo instance. Follow the [Suvereo installation guide](https://upsidelab.io/tools/suvereo/docs/getting-started/installation) to set one up, then come back here.
 
-The default configuration uses the OpenAI API for generating document embeddings and for the large language model. 
-Make sure that your OpenAI has access to gpt-4.1 it is default recommended model if not - at least gpt-4o to ensure proper functioning of the application.
-You need to provide your OpenAI API key via the OPENAI_API_KEY environment variable in the `config/env` file.
+## Installing the Packages
 
-Next, run Docker Compose to start the environment:
+Enthusiast is split into packages, so you can install only what you need:
+
+| Package | Purpose |
+|---|---|
+| `enthusiast-vertical` | The vertical itself: product and document entities, migrations, retrievers and sync managers. Always required. |
+| `enthusiast-source-*` | Product and document sources, and e-commerce store integrations. See [Integrations](/integrations). |
+| `enthusiast-agent-*` | Pre-built agents. See [Pre-built Agents](/agents). |
+
+Run the following command inside your application directory. To get started, install the vertical together with the sample data source and the Product Search agent:
 
 ```bash
-$ docker compose build && docker compose up
+poetry add enthusiast-vertical enthusiast-source-sample enthusiast-agent-product-search
 ```
 
-## Accessing the Admin Panel
+## Configuring Suvereo
 
-Once the setup is complete, you can access the application UI at [http://localhost:10001](http://localhost:10001).
+Register the vertical and its plugins in your `config/settings_override.py`:
 
-![Login using the default credentials](./img/installation-login.png)
+```python
+INSTALLED_VERTICALS = ["enthusiast_vertical"]
 
-Sign in using the default admin account:
+CATALOG_ENTITY_PLUGINS = [
+    "enthusiast_vertical.models.Product",
+    "enthusiast_vertical.models.Document",
+]
 
-**Email**: admin@example.com
+CATALOG_INTEGRATION_MANAGERS = [
+    "enthusiast_vertical.sync.ProductSourceManager",
+    "enthusiast_vertical.sync.DocumentSourceManager",
+    "enthusiast_vertical.sync.ECommerceIntegrationManager",
+]
 
-**Password**: changeme
+CATALOG_INTEGRATION_PLUGINS = [
+    "enthusiast_source_sample.SampleProductSource",
+    "enthusiast_source_sample.SampleDocumentSource",
+]
 
-To customize the default email and password, set the ECL_ADMIN_EMAIL and ECL_ADMIN_PASSWORD environment variables when running Docker Compose for the first time.
+AVAILABLE_AGENTS = [
+    "enthusiast_agent_product_search.ProductSearchAgent",
+]
+```
+
+Each integration and agent page lists the exact entry to add when you install more of them.
+
+## Applying Migrations
+
+The vertical ships its own database migrations. Apply them after installing it:
+
+```bash
+./manage.py migrate
+```
+
+If you run Suvereo with Docker Compose and `RUN_MIGRATIONS=True`, migrations are applied automatically when the server starts.
+
+Then, restart the server so the vertical and its plugins become available.
 
 You can now [import test data](/docs/getting-started/import-test-data).

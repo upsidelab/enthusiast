@@ -20,7 +20,7 @@ jobs:
         id: changed
         run: |
           CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
-          if echo "$CHANGED" | grep -q '^docs/'; then
+          if echo "$CHANGED" | grep -qE '^docs(-v1\.7)?/'; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
@@ -54,6 +54,16 @@ jobs:
           env:
             GTAG_ID: ${{ vars.GTAG_ID }}
           run: pnpm build
+
+        - name: Build Enthusiast 1.7 docs
+          working-directory: docs-v1.7
+          env:
+            GTAG_ID: ${{ vars.GTAG_ID }}
+          run: |
+            pnpm install
+            pnpm build
+            mkdir -p ../docs/out/v1.7
+            cp -R out/. ../docs/out/v1.7/
 
         - name: Configure AWS Credentials
           uses: aws-actions/configure-aws-credentials@v1

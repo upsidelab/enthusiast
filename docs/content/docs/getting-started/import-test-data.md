@@ -1,6 +1,6 @@
 # Importing Test Data
 
-When you sign in to Suvereo for the first time, you’ll be prompted to create your first [data set](https://upsidelab.io/tools/suvereo/docs/management/data-sets).
+When you sign in to Enthusiast for the first time, you’ll be prompted to create your first [data set](/docs/management/data-sets).
 
 ![Create the first data set](./img/create-data-set.png)
 
@@ -8,7 +8,7 @@ Pick a name for your data set and click “Continue”. This will take you to a 
 
 ## Configuring Data Sources
 
-Data sources provide product and document catalog, that's then pulled into Suvereo and indexed by the Enthusiast vertical. This index can then be easily used by the AI agents for looking up information needed to fulfill the requests passed to the agent.
+Data sources provide product and document catalog, that's then pulled into Enthusiast and indexed. This index can then be easily used by the AI agents for looking up information needed to fulfill the requests passed to the agent.
 Data sources can be synchronized on-demand, or according to a defined schedule.
 
 Let's configure a sample data source for products and documents, to feed our agents with knowledge.
@@ -28,7 +28,7 @@ Repeat the same process for the document source, this time selecting "Sample Doc
 ![Verify source configuration](./img/source-list.png)
 
 Your source configuration will now look like in the screenshot above. By default, sources are configured to synchronize manually.
-Click on the "Sync" button next to each source to synchronize it and import data.
+Click on the "Sync" button next to each source to synchronize it and import data into Enthusiast.
 
 ## Verifying Synchronization Status
 

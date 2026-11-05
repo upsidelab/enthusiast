@@ -222,4 +222,4 @@ Supports `agent_id`, `status` (`pending`, `in_progress`, `finished`, `failed`), 
 
 ## Authentication
 
-All endpoints require authentication. Read more about [connecting with the API](/docs/v1.7/integrate/connect-to-api).
+All endpoints require authentication. Read more about [connecting with the API](/docs/integrate/connect-to-api).

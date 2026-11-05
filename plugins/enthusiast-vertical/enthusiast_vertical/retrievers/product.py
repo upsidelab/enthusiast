@@ -83,7 +83,7 @@ class ProductRetriever:
         try:
             return list(Product.objects.raw(cleaned_query))
         except django.db.utils.ProgrammingError as e:
-            raise RetrieverSQLExecutionError(e) from e
+            raise RetrieverSQLExecutionError(e)
 
     def get_sample_products(self, num_sample_products: int | None = None) -> list[Product]:
         limit = num_sample_products or self.max_sample_products

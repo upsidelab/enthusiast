@@ -10,11 +10,11 @@ A custom agent lets you define exactly which tools the agent has access to and h
 
 This example walks through building the **Catalog Knowledge Agent** — an agent that can answer questions about both products in the catalog and information from uploaded documents (service descriptions, policies, FAQs, etc.).
 
-In practice, this agent combines the functionality of two of Enthusiast's pre-built agents: the [Product Search agent](/docs/v1.7/pre-built-agents/product-search) and the [User Manual Search agent](/docs/v1.7/pre-built-agents/user-manual-search). To see what else is available out of the box, visit the [Pre-built Agents](/docs/v1.7/pre-built-agents) page.
+In practice, this agent combines the functionality of two of Enthusiast's pre-built agents: the [Product Search agent](/agents/product-search) and the [User Manual Search agent](/agents/user-manual-search). To see what else is available out of the box, visit the [Pre-built Agents](/agents) page.
 
 ### How it works
 
-The agent's knowledge comes entirely from tools we attach to it. Each tool receives Enthusiast's default **injector**, which provides a product retriever and a document retriever out of the box — giving tools direct access to the catalog and document store without any extra wiring. See [Injector](/docs/v1.7/agents/injector) for more details.
+The agent's knowledge comes entirely from tools we attach to it. Each tool receives Enthusiast's default **injector**, which provides a product retriever and a document retriever out of the box — giving tools direct access to the catalog and document store without any extra wiring. See [Injector](/docs/agents/injector) for more details.
 
 **Products — two tools**
 

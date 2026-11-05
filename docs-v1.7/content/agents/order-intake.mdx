@@ -1,0 +1,32 @@
+import Agent from "@/components/agent";
+
+export const description = "The Order Intake agent converts handwritten notes, scans, and filled purchase-order PDFs into structured orders created directly in your e-commerce system. It can also detect when the provided input is incomplete or unclear; in those cases, it initiates a human-in-the-loop clarification step to confirm missing details before creating the order.";
+
+export const useCases = [
+  {
+    title: "Field-Submitted Orders",
+    description: "Sales reps or technicians can snap a photo of a handwritten PO, and the agent creates the corresponding order without manual data entry."
+  },
+  {
+    title: "Email Attachment Processing",
+    description: "Automatically parse emailed PDFs or scans, request clarification when needed, and create the order once all details are confirmed."
+  },
+  {
+    title: "Bulk Import of Legacy Purchase Orders",
+    description: "Scanned archives of old POs can be processed into actual orders, simplifying data migrations and cleanup efforts."
+  },
+  {
+    title: "OCR to Order Automation",
+    description: "Automatically convert scanned PO documents into structured e-commerce orders. Ideal for distributors and wholesalers receiving high volumes of paper-based or emailed POs that would otherwise require manual data entry."
+  },
+]
+
+<Agent
+    name="Order Intake"
+    agentClassName="OrderIntakeAgent"
+    pipName="enthusiast-agent-order-intake"
+    registerAgentModule="enthusiast_agent_order_intake"
+    agentDescription={description}
+    agentUseCases={useCases}
+    videoUrl="https://content.upsidelab.io/enthusiast/purchase-order-ocr.mp4"
+/>

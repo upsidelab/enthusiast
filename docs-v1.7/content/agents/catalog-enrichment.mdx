@@ -1,0 +1,28 @@
+import Agent from "@/components/agent";
+
+export const description = "The Catalog Enrichment agent processes unstructured vendor product sheets - PDFs, scans, or raw text - and extracts product attributes and details for use in your catalog. It can be customized per category to pull different attribute sets and can flag unclear or missing information, triggering a human-in-the-loop step when clarification is required.";
+
+export const useCases = [
+  {
+    title: "Vendor Sheet Onboarding",
+    description: "Automatically extract product specs from vendor-provided documents and populate category-specific attributes in your catalog."
+  },
+  {
+    title: "Category Update",
+    description: "When your e-commerce store updates the attribute set for a category, the agent can reprocess vendor sheets or stored documentation to enrich and update existing products accordingly."
+  },
+  {
+    title: "Data Quality Review",
+    description: "The agent can flag anomalies - such as a couch listed at an unrealistic weight - and prompt a human-in-the-loop review to confirm or correct the data before it reaches your catalog."
+  },
+];
+
+<Agent
+  name="Catalog Enrichment"
+  agentClassName="CatalogEnrichmentAgent"
+  pipName="enthusiast-agent-catalog-enrichment"
+  registerAgentModule="enthusiast_agent_catalog_enrichment"
+  agentDescription={description}
+  agentUseCases={useCases}
+  videoUrl="https://content.upsidelab.io/enthusiast/catalog-enrichment.mp4"
+/>

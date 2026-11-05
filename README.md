@@ -6,7 +6,7 @@
 
 <h1 align="center">enthusiast.</h1>
 
-<p align="center">Production Ready Agentic AI Framework for E-commerce.</p>
+<p align="center">The e-commerce vertical for the Suvereo agentic AI framework.</p>
 <div align="center">
   <strong>
     <a href="https://upsidelab.io/tools/enthusiast">Website</a> |
@@ -17,14 +17,22 @@
 
 
 ## Introduction
-[Enthusiast](https://upsidelab.io/tools/enthusiast) is an open-source toolkit for building AI-powered agentic workflows. It provides tools like Retrieval-Agumented Generation (RAG), vector search and workflow orchestrator. You can connect it to cloud-based models, like OpenAI, as well as self-hosted deployments of Mistral, LLaMA or Deepseek.
+[Enthusiast](https://upsidelab.io/tools/enthusiast) is the open-source e-commerce vertical for [Suvereo](https://upsidelab.io/tools/suvereo/docs), an agentic AI framework.
 
-Enthusiast helps you cut down time, cost and complexity when building AI-powered tools with customized agents - for smart information search, customer support, content generation or knowledge base automation. Enthusiast provides validation and evaluation components, to reduce hallucinations and ensure responses are grounded in actual data.
+Suvereo provides the platform: conversations, agentic executions, language models, users and permissions, and the admin UI. Enthusiast adds what is specific to e-commerce:
+
+- **Data**: products and documents, indexed for semantic search.
+- **Integrations**: product and document sources and e-commerce store connectors (Medusa, Shopify, Shopware, Solidus, WooCommerce, WordPress, Sanity).
+- **Agents**: pre-built agents for product search, order intake, catalog enrichment and more.
+
+> Looking for Enthusiast 1.7, the standalone version? See the [Enthusiast 1.7 documentation](https://upsidelab.io/tools/enthusiast/v1.7/docs) and the [v1.7.1 release](https://github.com/upsidelab/enthusiast/tree/v1.7.1).
 
 ## Getting Started
-Get started with Enthusiast by either:
-- Installing Enthusiast with or without Docker (See the [installation guide](https://upsidelab.io/tools/enthusiast/docs/getting-started/installation))
-- Booking a [live demo](https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ3NyFdPn_jqYqD24asveLkfrB1NTal0PWkLNHFTT4Fmp6sNW50-0or8WyIzBriF8IFdP1jXSPjQ) to see it in action
+Enthusiast is installed into a Suvereo instance as a set of Python packages:
+1. Set up Suvereo (see the [Suvereo installation guide](https://upsidelab.io/tools/suvereo/docs/getting-started/installation)).
+2. Install the vertical and the integrations and agents you need, and register them in Suvereo's settings (see the [installation guide](https://upsidelab.io/tools/enthusiast/docs/getting-started/installation)).
+
+You can also book a [live demo](https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ3NyFdPn_jqYqD24asveLkfrB1NTal0PWkLNHFTT4Fmp6sNW50-0or8WyIzBriF8IFdP1jXSPjQ) to see it in action.
 
 ## Example use cases
 
@@ -36,19 +44,21 @@ Get started with Enthusiast by either:
 
 - [**Product Catalog Enrichment**](https://upsidelab.io/tools/enthusiast/agents/catalog-enrichment) Extract product descriptions, attributes, or translations from unstructured product sheets.
 
-## Main Features
+- [**Catalog Web Import**](https://upsidelab.io/tools/enthusiast/agents/catalog-web-import) Import product data directly from supplier or distributor web pages.
 
-- Pre-built integrations with popular e-commerce platforms
+- [**Invoice Scanning**](https://upsidelab.io/tools/enthusiast/agents/invoice-scanning) Extract line items from supplier invoices and update stock levels in your e-commerce platform.
 
-- Built on a standard Python/Django/PostgreSQL/React stack
+## Packages
 
-- Compatible with OpenAI and self-hosted LLMs
+All packages live in [`plugins/`](plugins) and are published to PyPI:
 
-- Open-source version available for customization and prompt modifications
-
-## Try It Out
-
-Check our [Getting Started guide](https://upsidelab.io/tools/enthusiast/docs/getting-started/installation) to set up your local instance and see Enthusiast in action in under 5 minutes.
+| Package | Purpose |
+|---|---|
+| `enthusiast-vertical-common` | E-commerce interfaces and data types (product, document and e-commerce integration plugins, platform connector). No Django dependency. |
+| `enthusiast-vertical` | The vertical's Django app: product and document models and migrations, retrievers, sync managers. |
+| `enthusiast-vertical-tools` | Agent tools shared by the pre-built agents. |
+| `enthusiast-source-*` | Integrations: Medusa, Shopify, Shopware, Solidus, WooCommerce, WordPress, Sanity, and sample data. |
+| `enthusiast-agent-*` | Pre-built agents. |
 
 ## Pre-built Integrations
 
@@ -58,4 +68,4 @@ Connect to your e-commerce stack in minutes, with minimal configuration required
 
 ## License
 
-Enthusiast is a fully open-source agentic AI framework that will always remain free under the [MIT License](https://github.com/upsidelab/enthusiast/blob/main/LICENSE.md).
+Enthusiast is fully open-source and will always remain free under the [MIT License](https://github.com/upsidelab/enthusiast/blob/main/LICENSE.md).

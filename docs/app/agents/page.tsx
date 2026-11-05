@@ -8,6 +8,7 @@ const Wrapper = mdxComponents.wrapper;
 const H1 = mdxComponents.h1;
 const H2 = mdxComponents.h2;
 const P = mdxComponents.p;
+const A = mdxComponents.a;
 
 export const metadata: Metadata = {
   title: "Pre-built Agents | Enthusiast",
@@ -31,9 +32,10 @@ export default async function Page() {
         <AgentCard name="Catalog Web Import" href="/agents/catalog-web-import" />
         <AgentCard name="Invoice Scanning" href="/agents/invoice-scanning" />
       </Cards>
+      <P>Looking for the Enthusiast 1.7 pre-built agents? See the <A href="https://upsidelab.io/tools/enthusiast/v1.7/agents">Enthusiast 1.7 documentation</A>.</P>
       <H2>Build a Custom Agent</H2>
-      <P>These pre-built agents are just a starting point. Enthusiast lets you build custom agents from the ground up, tailored to your specific workflows.</P>
-      <Cards.Card className="x:my-4" title="Learn How to Build a Custom Agent" href="/docs/agents/agent-architecture" arrow />
+      <P>These pre-built agents are just a starting point. Enthusiast runs on Suvereo, which lets you build custom agents from the ground up, tailored to your specific workflows.</P>
+      <Cards.Card className="x:my-4" title="Learn How to Build a Custom Agent" href="https://upsidelab.io/tools/suvereo/docs/agents/agent-architecture" arrow />
     </Wrapper>
   )
 }

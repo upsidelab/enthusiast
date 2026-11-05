@@ -8,6 +8,7 @@ const Wrapper = mdxComponents.wrapper;
 const P = mdxComponents.p;
 const H1 = mdxComponents.h1;
 const H2 = mdxComponents.h2;
+const A = mdxComponents.a;
 
 export const metadata: Metadata = {
   title: "Integrations | Enthusiast",
@@ -21,8 +22,10 @@ export default async function Page() {
   return (
     <Wrapper toc={[]} metadata={metadata} sourceCode={""} >
       <H1>Integrations</H1>
-      <P>Enthusiast comes with a set of ready-to-use integrations that connect your agents to services like major e-commerce platforms, CMS, and LLMs (e.g. Gemini and Azure OpenAI).</P>
-      <P>They allow you to immediately enable your agents to connect to product catalogs, and leverage enterprise-grade AI models for enhanced security and performance. Furthermore, each of these integrations can be customized and extended by a developer to reflect the structure of the data in your systems.</P>
+      <P>Enthusiast comes with a set of ready-to-use integrations that connect your agents to major e-commerce platforms and content management systems.</P>
+      <P>They allow you to immediately enable your agents to connect to product catalogs and documents. Furthermore, each of these integrations can be customized and extended by a developer to reflect the structure of the data in your systems.</P>
+      <P>Language model providers (such as OpenAI, Anthropic, Gemini or Azure OpenAI) are provided by Suvereo. See the <A href="https://upsidelab.io/tools/suvereo/integrations">Suvereo integrations</A> for the full list.</P>
+      <P>Looking for the Enthusiast 1.7 integrations? See the <A href="https://upsidelab.io/tools/enthusiast/v1.7/integrations">Enthusiast 1.7 documentation</A>.</P>
       <H2>E-Commerce Systems</H2>
       <Cards>
         <IntegrationCard name="Medusa" imageSrc="/tools/enthusiast/img/integrations/medusa.png" href="/integrations/medusa/" />
@@ -36,18 +39,6 @@ export default async function Page() {
         <IntegrationCard name="Sanity" imageSrc="/tools/enthusiast/img/integrations/sanity.png" href="/integrations/sanity/" />
         <IntegrationCard name="WordPress" imageSrc="/tools/enthusiast/img/integrations/wordpress.png" href="/integrations/wordpress/" />
       </Cards>
-      <H2>Language Models</H2>
-      <Cards>
-        <IntegrationCard name="OpenAI" imageSrc="/tools/enthusiast/img/integrations/openai.png" href="/integrations/openai/" />
-        <IntegrationCard name="Ollama" imageSrc="/tools/enthusiast/img/integrations/ollama.png" href="/integrations/ollama/" />
-        <IntegrationCard name="Azure OpenAI" imageSrc="/tools/enthusiast/img/integrations/azure-openai.png" href="/integrations/azure-openai/" />
-        <IntegrationCard name="Anthropic" imageSrc="/tools/enthusiast/img/integrations/anthropic.png" href="/integrations/anthropic/" />
-        <IntegrationCard name="Google Gemini" imageSrc="/tools/enthusiast/img/integrations/gemini.png" href="/integrations/gemini/" />
-        <IntegrationCard name="Mistral" imageSrc="/tools/enthusiast/img/integrations/mistral.png" href="/integrations/mistral/" />
-      </Cards>
-      <H2>Build a Custom Integration</H2>
-      <P>These ready-made integrations cover common use cases. If you need to connect a system that isn’t listed here, Enthusiast allows you to build custom integrations tailored to your stack.</P>
-      <Cards.Card className="x:my-4" title="Learn How to Build a Custom Integration" href="/docs/customization/custom-integration" arrow />
     </Wrapper>
   )
 }

@@ -1,0 +1,27 @@
+import Agent from "@/components/agent";
+
+export const description = "The Invoice Scanning agent processes supplier invoices - PDFs, scanned images, or structured files - to extract line item SKUs and quantities, then updates stock levels in your e-commerce platform in a single batch. When confirmation mode is enabled, it presents the extracted items for review before making any changes, and clearly reports which SKUs were updated and which could not be found in the catalog.";
+
+export const useCases = [
+  {
+    title: "Incoming Delivery Processing",
+    description: "When goods arrive from a supplier, upload the delivery note or invoice and the agent automatically increases stock levels for every line item, eliminating manual warehouse data entry."
+  },
+  {
+    title: "Paper Invoice Digitization",
+    description: "Scanned paper invoices from suppliers can be uploaded directly; the agent reads the line items and translates them into stock updates without any manual transcription."
+  },
+  {
+    title: "Goods Receipt Verification",
+    description: "Before committing stock updates, the confirmation step lets warehouse staff review the extracted line items and catch discrepancies between the invoice and the actual delivery."
+  },
+];
+
+<Agent
+  name="Invoice Scanning"
+  agentClassName="InvoiceScanningAgent"
+  pipName="enthusiast-agent-invoice-scanning"
+  registerAgentModule="enthusiast_agent_invoice_scanning"
+  agentDescription={description}
+  agentUseCases={useCases}
+/>

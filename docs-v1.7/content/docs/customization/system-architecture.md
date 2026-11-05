@@ -26,5 +26,5 @@ The server is organized into a few separate modules that interact with each othe
 
 ## Enthusiast Common
 
-The [enthusiast-common](https://github.com/upsidelab/enthusiast/tree/main/plugins/enthusiast-common) package provides interfaces that can be used for building custom agents and plugins, without pulling the whole server implementation to your codebase. 
+The [enthusiast-common](https://github.com/upsidelab/enthusiast/tree/v1.7.1/plugins/enthusiast-common) package provides interfaces that can be used for building custom agents and plugins, without pulling the whole server implementation to your codebase. 
 We recommend building your custom agents and plugins as custom packages, that depend on enthusiast-common, and are installed inside Enthusiast. This will make it easy to upgrade the core of the system in the future.

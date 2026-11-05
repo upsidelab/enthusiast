@@ -6,6 +6,7 @@ from suvereo_common.agentic_execution import (
 )
 from suvereo_common.config import LLMToolConfig
 
+from .agent import InvoiceScanningAgent
 from .execution_input import InvoiceScanningAgenticExecutionInput
 from .execution_prompt import INVOICE_SCANNING_EXECUTION_SYSTEM_PROMPT
 from .tools import StopExecutionTool
@@ -30,7 +31,7 @@ class InvoiceScanningAgenticExecutionDefinition(BaseAgenticExecutionDefinition):
         AllSkusUpdatedValidator,
     ]
     SYSTEM_PROMPT = INVOICE_SCANNING_EXECUTION_SYSTEM_PROMPT
-    EXTRA_TOOLS = [LLMToolConfig(tool_class=StopExecutionTool)]
+    TOOLS = [*InvoiceScanningAgent.TOOLS, LLMToolConfig(tool_class=StopExecutionTool)]
 
     def execute(
         self,

@@ -32,8 +32,8 @@ export default async function Page() {
         <AgentCard name="Invoice Scanning" href="/agents/invoice-scanning" />
       </Cards>
       <H2>Build a Custom Agent</H2>
-      <P>These pre-built agents are just a starting point. Enthusiast runs on Suvereo, which lets you build custom agents from the ground up, tailored to your specific workflows.</P>
-      <Cards.Card className="x:my-4" title="Learn How to Build a Custom Agent" href="https://upsidelab.io/tools/suvereo/docs/agents/agent-architecture" arrow />
+      <P>These pre-built agents are just a starting point. Enthusiast lets you build custom agents from the ground up, tailored to your specific workflows.</P>
+      <Cards.Card className="x:my-4" title="Learn How to Build a Custom Agent" href="/docs/agents/agent-architecture" arrow />
     </Wrapper>
   )
 }

@@ -3,7 +3,9 @@ const mapping = {
   "getting-started": "",
   customization: "",
   agents: "",
-  "v1.7": "Enthusiast 1.7 (legacy)",
+  management: "",
+  integrate: "",
+  observe: "",
 };
 
 export default mapping

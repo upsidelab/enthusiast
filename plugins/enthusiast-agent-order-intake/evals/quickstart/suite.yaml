@@ -6,7 +6,7 @@ judge: {provider: OpenAI, model: gpt-4.1-mini}
 budget_usd: 0.10
 reports: [report, results, comparison, cases, metrics, traces]
 integrations:
-  - class: enthusiast_vertical_common.evaluation.ECommerceMockIntegration
+  - class: enthusiast_domain_common.evaluation.ECommerceMockIntegration
     config: {data: {catalog: catalog.yaml}}
 metrics:
   - name: line_items

@@ -22,7 +22,7 @@ The repository uses the following structure:
 server/
   config/
     .env <- Environment variables injected into the server.
-    settings_override.py <- Your Suvereo configuration: verticals, agents, integrations.
+    settings_override.py <- Your Suvereo configuration: domain definitions, agents, integrations.
   src/
     pyproject.toml <- Describes your code as a Python package. Add Enthusiast packages as dependencies here.
     ... <- Your own agents, integrations and other code.
@@ -38,12 +38,12 @@ Add the Enthusiast packages you need to the dependencies of your package in `ser
 
 ```shell
 $ cd server/src
-$ poetry add enthusiast-vertical enthusiast-source-sample enthusiast-agent-product-search
+$ poetry add enthusiast-domain enthusiast-source-sample enthusiast-agent-product-search
 ```
 
 They are installed into the server image together with your code.
 
-Then register the vertical and its plugins in `server/config/settings_override.py`, as described in the [installation guide](/docs/getting-started/installation#configuring-suvereo).
+Then register the domain definition and its plugins in `server/config/settings_override.py`, as described in the [installation guide](/docs/getting-started/installation#configuring-suvereo).
 
 ## Running It
 
@@ -53,6 +53,6 @@ Build and start the stack with Docker Compose:
 $ docker compose build && docker compose up
 ```
 
-The admin UI is available at http://localhost:10001 and the API at http://localhost:10000. The vertical's migrations are applied when the server starts.
+The admin UI is available at http://localhost:10001 and the API at http://localhost:10000. The domain definition's migrations are applied when the server starts.
 
 To write your own e-commerce agents in `server/src/`, see [E-commerce Agents](/docs/agents/agent-types) and [Concept: Product Search Agent](/docs/customization/concept-product-search).

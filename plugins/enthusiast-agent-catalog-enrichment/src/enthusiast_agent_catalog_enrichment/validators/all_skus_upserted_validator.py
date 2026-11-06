@@ -1,4 +1,4 @@
-from enthusiast_vertical_tools.tools.upsert_product_details_tool import (
+from enthusiast_domain_tools.tools.upsert_product_details_tool import (
     UpsertMemoryEntry,
     UpsertProductDetailsTool,
 )

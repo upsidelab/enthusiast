@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-enthusiast-vertical-common = "*"
+enthusiast-domain-common = "*"
 requests = "^2.32.3"
 
 [build-system]

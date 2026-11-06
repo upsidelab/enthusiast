@@ -10,7 +10,7 @@ class ProductSourcePlugin(BaseIntegration):
     """Fetches products from an external source.
 
     Subclasses must declare ``TYPE``, ``NAME``, and implement ``fetch()``.
-    Persistence is handled by the vertical's ``ProductSourceManager``.
+    Persistence is handled by the domain definition's ``ProductSourceManager``.
     """
 
     INTEGRATION_TYPE_NAME = "Product source"

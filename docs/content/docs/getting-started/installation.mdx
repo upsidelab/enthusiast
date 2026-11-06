@@ -6,7 +6,7 @@ import { Callout } from "nextra/components"
 Looking for the Enthusiast 1.7 installation guide? It is available [here](../../../../tools/enthusiast/v1.7/docs/getting-started/installation).
 </Callout>
 
-Enthusiast is an e-commerce [vertical](../../../../suvereo/docs/customization/domain-onboarding) for [Suvereo](../../../../suvereo/docs). Suvereo provides the platform (conversations, agentic executions, language models, users and the admin UI), and Enthusiast is installed on top of it as a set of Python packages.
+Enthusiast is the e-commerce [domain definition](../../../../suvereo/docs/customization/domain-onboarding) for [Suvereo](../../../../suvereo/docs). Suvereo provides the platform (conversations, agentic executions, language models, users and the admin UI), and Enthusiast is installed on top of it as a set of Python packages.
 
 The quickest way to run Enthusiast is the [Suvereo starter](../../../../suvereo/docs/customization/using-the-suvereo-starter): a repository that starts Suvereo with Docker Compose and builds your own deployment, including the packages you add to it.
 
@@ -33,11 +33,11 @@ Enthusiast is split into packages, so you can install only what you need:
 
 | Package | Purpose |
 |---|---|
-| `enthusiast-vertical` | The vertical itself: product and document entities, migrations, retrievers and sync managers. Always required. |
+| `enthusiast-vertical` | The domain definition itself: product and document entities, migrations, retrievers and sync managers. Always required. |
 | `enthusiast-source-*` | Product and document sources, and e-commerce store integrations. See [Integrations](/integrations). |
 | `enthusiast-agent-*` | Pre-built agents. See [Pre-built Agents](/agents). |
 
-Add them as dependencies of the starter's server package in `server/src/`. To get started, install the vertical together with the sample data source and the Product Search agent:
+Add them as dependencies of the starter's server package in `server/src/`. To get started, install the domain definition together with the sample data source and the Product Search agent:
 
 ```shell
 cd server/src
@@ -48,10 +48,10 @@ The packages are installed into the server image together with your own code.
 
 ## Configuring Suvereo
 
-Register the vertical and its plugins in `server/config/settings_override.py`. The starter comes with a diet advice vertical as an example: replace its entries with the Enthusiast ones, and keep the language model provider:
+Register the domain definition and its plugins in `server/config/settings_override.py`. The starter comes with a diet advice domain definition as an example: replace its entries with the Enthusiast ones, and keep the language model provider:
 
 ```python
-INSTALLED_VERTICALS = ["enthusiast_vertical"]
+INSTALLED_DOMAIN_DEFINITIONS = ["enthusiast_vertical"]
 
 CATALOG_ENTITY_PLUGINS = [
     "enthusiast_vertical.models.Product",
@@ -88,7 +88,7 @@ Build and start the environment:
 docker compose build && docker compose up
 ```
 
-The vertical ships its own database migrations. The server applies them when it starts.
+The domain definition ships its own database migrations. The server applies them when it starts.
 
 When you add packages or change `settings_override.py` later, rebuild the image and restart the containers.
 

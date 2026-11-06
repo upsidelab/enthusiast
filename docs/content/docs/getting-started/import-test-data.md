@@ -6,7 +6,7 @@ Pick a name for your data set and click “Continue”. This will take you to a 
 
 ## Configuring Data Sources
 
-Data sources provide product and document catalog, that's then pulled into Suvereo and indexed by the Enthusiast vertical. This index can then be easily used by the AI agents for looking up information needed to fulfill the requests passed to the agent.
+Data sources provide product and document catalog, that's then pulled into Suvereo and indexed by the Enthusiast domain definition. This index can then be easily used by the AI agents for looking up information needed to fulfill the requests passed to the agent.
 Data sources can be synchronized on-demand, or according to a defined schedule.
 
 Let's configure a sample data source for products and documents, to feed our agents with knowledge.

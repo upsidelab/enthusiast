@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Enthusiast is the e-commerce vertical for [Suvereo](https://github.com/upsidelab/suvereo), a domain-agnostic agentic AI framework. This repository contains only the vertical: a set of Python packages that a Suvereo installation adds as dependencies and enables in its `settings_override.py` (`INSTALLED_VERTICALS = ["enthusiast_vertical"]`, plus agents, integrations, managers and entities). The server, frontend, LLM providers and core agent framework live in the Suvereo repository.
+Enthusiast is the e-commerce domain definition for [Suvereo](https://github.com/upsidelab/suvereo), a domain-agnostic agentic AI framework. This repository contains only the domain definition: a set of Python packages that a Suvereo installation adds as dependencies and enables in its `settings_override.py` (`INSTALLED_DOMAIN_DEFINITIONS = ["enthusiast_vertical"]`, plus agents, integrations, managers and entities). The server, frontend, LLM providers and core agent framework live in the Suvereo repository.
 
 Enthusiast 1.7 was the last standalone release (tag `v1.7.1`). Its documentation is kept frozen in `docs-v1.7/`.
 
@@ -37,7 +37,7 @@ Packages are published to PyPI on merge to `main` when their `pyproject.toml` ch
 
 ## Running Locally
 
-There is no server in this repository. To run the vertical, install the packages (editable) into a Suvereo development environment and register them in Suvereo's `settings_override.py`. See `docs/content/docs/getting-started/installation.md` for the settings to add.
+There is no server in this repository. To run the domain definition, install the packages (editable) into a Suvereo development environment and register them in Suvereo's `settings_override.py`. See `docs/content/docs/getting-started/installation.md` for the settings to add.
 
 ## Coding Conventions
 

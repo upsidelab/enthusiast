@@ -10,7 +10,7 @@ class DocumentSourcePlugin(BaseIntegration):
     """Fetches documents from an external source.
 
     Subclasses must declare ``TYPE``, ``NAME``, and implement ``fetch()``.
-    Persistence is handled by the vertical's ``DocumentSourceManager``.
+    Persistence is handled by the domain definition's ``DocumentSourceManager``.
     """
 
     INTEGRATION_TYPE_NAME = "Document source"

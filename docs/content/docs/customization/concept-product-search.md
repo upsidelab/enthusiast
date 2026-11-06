@@ -3,7 +3,7 @@ sidebar_position: 5
 ---
 
 # Concept: Product Search Agent
-This example walks you through building a tool calling agent that searches the product catalog and verifies the results against the user's request. It uses the building blocks that the Enthusiast vertical adds to Suvereo, described in [E-commerce Agents](/docs/agents/agent-types).
+This example walks you through building a tool calling agent that searches the product catalog and verifies the results against the user's request. It uses the building blocks that the Enthusiast domain definition adds to Suvereo, described in [E-commerce Agents](/docs/agents/agent-types).
 
 The agent lives in your own Python package, which depends on the Enthusiast and Suvereo packages it builds on:
 

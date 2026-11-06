@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "enthusiast-vertical"
 version = "1.0.0"
-description = "Ecommerce vertical for Enthusiast — Product and Document Django models with pgvector embeddings."
+description = "E-commerce domain definition for Suvereo (Enthusiast) — Product and Document Django models with pgvector embeddings."
 authors = ["Mateusz Porebski <mateusz.porebski@upsidelab.io>"]
 readme = "README.md"
 

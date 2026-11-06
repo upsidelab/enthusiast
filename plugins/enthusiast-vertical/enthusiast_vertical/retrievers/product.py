@@ -40,7 +40,7 @@ QUERY_PROMPT_TEMPLATE = """
 
 
 class ProductRetriever:
-    """Retrieves products from the vertical's Product table using an LLM-generated SQL where clause."""
+    """Retrieves products from the domain definition's Product table using an LLM-generated SQL where clause."""
 
     def __init__(
         self,

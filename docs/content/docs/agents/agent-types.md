@@ -6,7 +6,7 @@ sidebar_position: 2
 
 Enthusiast agents are regular [Suvereo agents](../../../../suvereo/docs/agents/agent-classes). They subclass `BaseToolCallingAgent` from `suvereo-agent-tool-calling` and are registered in `AVAILABLE_AGENTS`, like any other agent. What makes them e-commerce agents is the builder they use, which gives their tools access to the catalog and to your e-commerce platform.
 
-This page describes what the Enthusiast vertical adds on top of Suvereo. For the agent contract itself (class variables, prompts, memory, tool configuration), see the [Suvereo agent documentation](../../../../suvereo/docs/agents/agent-architecture).
+This page describes what the Enthusiast domain definition adds on top of Suvereo. For the agent contract itself (class variables, prompts, memory, tool configuration), see the [Suvereo agent documentation](../../../../suvereo/docs/agents/agent-architecture).
 
 ## The E-commerce Builder
 
@@ -46,7 +46,7 @@ Tools receive the injector when they are created and access it as `self._injecto
 
 ### Product Retriever
 
-`ProductRetriever` reads from the vertical's product table, always limited to the current data set:
+`ProductRetriever` reads from the domain definition's product table, always limited to the current data set:
 
 - `find_products_with_sql(sql_query)`: runs a `SELECT` query written by the agent. The query is validated before it runs: it may only read the product table, and a data set condition is added automatically.
 - `find_products_matching_query(user_query)`: asks the language model to build the query from a natural-language description.

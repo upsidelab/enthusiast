@@ -14,7 +14,7 @@ This page describes where your own code and configuration go.
 server/
   config/
     .env <- Environment variables injected into the server.
-    settings_override.py <- Your Suvereo configuration: verticals, agents, integrations.
+    settings_override.py <- Your Suvereo configuration: domain definitions, agents, integrations.
   src/
     pyproject.toml <- Describes your code as a Python package. Enthusiast packages are its dependencies.
     ... <- Your own agents, integrations and other code.

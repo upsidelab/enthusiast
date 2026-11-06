@@ -11,8 +11,8 @@ The agent lives in your own Python package, which depends on the Enthusiast and 
 dependencies = [
     "suvereo-common",
     "suvereo-agent-tool-calling",
-    "enthusiast-vertical",
-    "enthusiast-vertical-tools",
+    "enthusiast-domain",
+    "enthusiast-domain-tools",
 ]
 ```
 
@@ -95,11 +95,11 @@ class ProductVerificationTool(BaseLLMTool):
 ```
 
 ## Agent
-The agent is a `BaseToolCallingAgent` that uses `EcommerceAgentBuilder`, so its tools can access the product retriever. Besides the two tools above, it uses `ProductExamplesTool` from `enthusiast-vertical-tools`, which shows the agent a sample of the catalog:
+The agent is a `BaseToolCallingAgent` that uses `EcommerceAgentBuilder`, so its tools can access the product retriever. Besides the two tools above, it uses `ProductExamplesTool` from `enthusiast-domain-tools`, which shows the agent a sample of the catalog:
 
 ```python
-from enthusiast_vertical.builder import EcommerceAgentBuilder
-from enthusiast_vertical_tools import ProductExamplesTool
+from enthusiast_domain.builder import EcommerceAgentBuilder
+from enthusiast_domain_tools import ProductExamplesTool
 from suvereo_agent_tool_calling import BaseToolCallingAgent
 from suvereo_common.config.base import LLMToolConfig
 
@@ -119,7 +119,7 @@ class ProductFinderAgent(BaseToolCallingAgent):
     ]
 ```
 
-To let the agent write its own SQL queries instead, use `ProductSQLSearchTool` from `enthusiast-vertical-tools`. The queries are validated before they run, so the agent can only read products from the current data set. This is how the pre-built [Product Search agent](/agents/product-search) works.
+To let the agent write its own SQL queries instead, use `ProductSQLSearchTool` from `enthusiast-domain-tools`. The queries are validated before they run, so the agent can only read products from the current data set. This is how the pre-built [Product Search agent](/agents/product-search) works.
 
 ## Registering the Agent
 Add the agent to `AVAILABLE_AGENTS` in your `settings_override.py`:

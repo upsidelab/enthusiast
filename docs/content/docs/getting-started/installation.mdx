@@ -33,7 +33,7 @@ Enthusiast is split into packages, so you can install only what you need:
 
 | Package | Purpose |
 |---|---|
-| `enthusiast-vertical` | The domain definition itself: product and document entities, migrations, retrievers and sync managers. Always required. |
+| `enthusiast-domain` | The domain definition itself: product and document entities, migrations, retrievers and sync managers. Always required. |
 | `enthusiast-source-*` | Product and document sources, and e-commerce store integrations. See [Integrations](/integrations). |
 | `enthusiast-agent-*` | Pre-built agents. See [Pre-built Agents](/agents). |
 
@@ -41,7 +41,7 @@ Add them as dependencies of the starter's server package in `server/src/`. To ge
 
 ```shell
 cd server/src
-poetry add enthusiast-vertical enthusiast-source-sample enthusiast-agent-product-search
+poetry add enthusiast-domain enthusiast-source-sample enthusiast-agent-product-search
 ```
 
 The packages are installed into the server image together with your own code.
@@ -51,17 +51,17 @@ The packages are installed into the server image together with your own code.
 Register the domain definition and its plugins in `server/config/settings_override.py`. The starter comes with a diet advice domain definition as an example: replace its entries with the Enthusiast ones, and keep the language model provider:
 
 ```python
-INSTALLED_DOMAIN_DEFINITIONS = ["enthusiast_vertical"]
+INSTALLED_DOMAIN_DEFINITIONS = ["enthusiast_domain"]
 
 CATALOG_ENTITY_PLUGINS = [
-    "enthusiast_vertical.models.Product",
-    "enthusiast_vertical.models.Document",
+    "enthusiast_domain.models.Product",
+    "enthusiast_domain.models.Document",
 ]
 
 CATALOG_INTEGRATION_MANAGERS = [
-    "enthusiast_vertical.sync.ProductSourceManager",
-    "enthusiast_vertical.sync.DocumentSourceManager",
-    "enthusiast_vertical.sync.ECommerceIntegrationManager",
+    "enthusiast_domain.sync.ProductSourceManager",
+    "enthusiast_domain.sync.DocumentSourceManager",
+    "enthusiast_domain.sync.ECommerceIntegrationManager",
 ]
 
 CATALOG_INTEGRATION_PLUGINS = [

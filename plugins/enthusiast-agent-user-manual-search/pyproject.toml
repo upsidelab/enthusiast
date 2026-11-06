@@ -11,7 +11,7 @@ dependencies = [
     "suvereo-common (>=1.7.0,<2.0.0)",
     "langchain (>=1.2.0,<2.0.0)",
     "suvereo-agent-tool-calling (>=1.2.0)",
-    "enthusiast-vertical (>=1.0.0,<2.0.0)",
+    "enthusiast-domain (>=1.0.0,<2.0.0)",
 ]
 
 [project.urls]

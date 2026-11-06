@@ -1,5 +1,5 @@
-from enthusiast_vertical.builder import EcommerceAgentBuilder
-from enthusiast_vertical_tools import UpsertProductDetailsTool
+from enthusiast_domain.builder import EcommerceAgentBuilder
+from enthusiast_domain_tools import UpsertProductDetailsTool
 from pydantic import Field, Json
 from suvereo_agent_tool_calling import BaseToolCallingAgent
 from suvereo_common.config.base import LLMToolConfig

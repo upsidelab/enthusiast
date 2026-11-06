@@ -2,7 +2,7 @@ import base64
 from typing import Any
 
 import requests
-from enthusiast_vertical_common.connectors.errors import ECommerceConnectorError
+from enthusiast_domain_common.connectors.errors import ECommerceConnectorError
 
 
 class MedusaAPIClient:

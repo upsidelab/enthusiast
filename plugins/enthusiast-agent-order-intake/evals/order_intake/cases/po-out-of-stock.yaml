@@ -3,7 +3,7 @@ description: The shop rejects the order; the run must fail cleanly after one att
 tags: [error-path]
 files: [po-out-of-stock.pdf]
 integrations:
-  - class: enthusiast_vertical_common.evaluation.ECommerceMockIntegration
+  - class: enthusiast_domain_common.evaluation.ECommerceMockIntegration
     config: {behaviour: {create_order_with_items: {raises: {error: ECommerceConnectorError, message: "Out of stock: KTL-ELC"}}}}
 expected:
   failure_code: validation_failed

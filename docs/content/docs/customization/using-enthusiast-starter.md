@@ -38,7 +38,7 @@ Add the Enthusiast packages you need to the dependencies of your package in `ser
 
 ```shell
 $ cd server/src
-$ poetry add enthusiast-vertical enthusiast-source-sample enthusiast-agent-product-search
+$ poetry add enthusiast-domain enthusiast-source-sample enthusiast-agent-product-search
 ```
 
 They are installed into the server image together with your code.

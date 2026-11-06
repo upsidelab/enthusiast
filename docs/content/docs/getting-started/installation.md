@@ -15,14 +15,14 @@ Enthusiast is split into packages, so you can install only what you need:
 
 | Package | Purpose |
 |---|---|
-| `enthusiast-vertical` | The domain definition itself: product and document entities, migrations, retrievers and sync managers. Always required. |
+| `enthusiast-domain` | The domain definition itself: product and document entities, migrations, retrievers and sync managers. Always required. |
 | `enthusiast-source-*` | Product and document sources, and e-commerce store integrations. See [Integrations](/integrations). |
 | `enthusiast-agent-*` | Pre-built agents. See [Pre-built Agents](/agents). |
 
 Run the following command inside your application directory. To get started, install the domain definition together with the sample data source and the Product Search agent:
 
 ```bash
-poetry add enthusiast-vertical enthusiast-source-sample enthusiast-agent-product-search
+poetry add enthusiast-domain enthusiast-source-sample enthusiast-agent-product-search
 ```
 
 ## Configuring Suvereo
@@ -30,17 +30,17 @@ poetry add enthusiast-vertical enthusiast-source-sample enthusiast-agent-product
 Register the domain definition and its plugins in your `config/settings_override.py`:
 
 ```python
-INSTALLED_DOMAIN_DEFINITIONS = ["enthusiast_vertical"]
+INSTALLED_DOMAIN_DEFINITIONS = ["enthusiast_domain"]
 
 CATALOG_ENTITY_PLUGINS = [
-    "enthusiast_vertical.models.Product",
-    "enthusiast_vertical.models.Document",
+    "enthusiast_domain.models.Product",
+    "enthusiast_domain.models.Document",
 ]
 
 CATALOG_INTEGRATION_MANAGERS = [
-    "enthusiast_vertical.sync.ProductSourceManager",
-    "enthusiast_vertical.sync.DocumentSourceManager",
-    "enthusiast_vertical.sync.ECommerceIntegrationManager",
+    "enthusiast_domain.sync.ProductSourceManager",
+    "enthusiast_domain.sync.DocumentSourceManager",
+    "enthusiast_domain.sync.ECommerceIntegrationManager",
 ]
 
 CATALOG_INTEGRATION_PLUGINS = [

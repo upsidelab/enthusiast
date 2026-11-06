@@ -54,9 +54,9 @@ All packages live in [`plugins/`](plugins) and are published to PyPI:
 
 | Package | Purpose |
 |---|---|
-| `enthusiast-vertical-common` | E-commerce interfaces and data types (product, document and e-commerce integration plugins, platform connector). No Django dependency. |
-| `enthusiast-vertical` | The domain definition's Django app: product and document models and migrations, retrievers, sync managers. |
-| `enthusiast-vertical-tools` | Agent tools shared by the pre-built agents. |
+| `enthusiast-domain-common` | E-commerce interfaces and data types (product, document and e-commerce integration plugins, platform connector). No Django dependency. |
+| `enthusiast-domain` | The domain definition's Django app: product and document models and migrations, retrievers, sync managers. |
+| `enthusiast-domain-tools` | Agent tools shared by the pre-built agents. |
 | `enthusiast-source-*` | Integrations: Medusa, Shopify, Shopware, Solidus, WooCommerce, WordPress, Sanity, and sample data. |
 | `enthusiast-agent-*` | Pre-built agents. |
 

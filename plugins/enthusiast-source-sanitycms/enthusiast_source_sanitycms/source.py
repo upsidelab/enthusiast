@@ -1,6 +1,6 @@
 import requests
-from enthusiast_vertical_common.interfaces import DocumentSourcePlugin
-from enthusiast_vertical_common.structures import DocumentDetails
+from enthusiast_domain_common.interfaces import DocumentSourcePlugin
+from enthusiast_domain_common.structures import DocumentDetails
 from pydantic import Field
 from suvereo_common.utils import RequiredFieldsModel
 

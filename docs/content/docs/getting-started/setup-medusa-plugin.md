@@ -14,7 +14,7 @@ The first step is to set up a Suvereo deployment with the Enthusiast domain defi
 Follow the [installation guide](/docs/getting-started/installation) to install the domain definition, together with the Medusa integration and the agents you want to use in Medusa:
 
 ```bash
-poetry add enthusiast-vertical enthusiast-source-medusa enthusiast-agent-order-intake enthusiast-agent-catalog-enrichment
+poetry add enthusiast-domain enthusiast-source-medusa enthusiast-agent-order-intake enthusiast-agent-catalog-enrichment
 ```
 
 Register them in `settings_override.py`, including the Medusa integration:

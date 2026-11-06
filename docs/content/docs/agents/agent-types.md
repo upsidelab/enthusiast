@@ -10,11 +10,11 @@ This page describes what the Enthusiast domain definition adds on top of Suvereo
 
 ## The E-commerce Builder
 
-An agent selects its builder with the `BUILDER_CLASS` class variable. All pre-built Enthusiast agents use `EcommerceAgentBuilder` from `enthusiast-vertical`:
+An agent selects its builder with the `BUILDER_CLASS` class variable. All pre-built Enthusiast agents use `EcommerceAgentBuilder` from `enthusiast-domain`:
 
 ```python
-from enthusiast_vertical.builder import EcommerceAgentBuilder
-from enthusiast_vertical_tools import ProductExamplesTool, ProductSQLSearchTool
+from enthusiast_domain.builder import EcommerceAgentBuilder
+from enthusiast_domain_tools import ProductExamplesTool, ProductSQLSearchTool
 from suvereo_agent_tool_calling import BaseToolCallingAgent
 from suvereo_common.config.base import LLMToolConfig
 
@@ -68,11 +68,11 @@ if not connector:
 order_id = connector.create_order_with_items(items)
 ```
 
-`ECommercePlatformConnector` (from `enthusiast-vertical-common`) provides operations such as `create_order_with_items`, `get_product_by_sku`, `create_product`, `update_product`, `update_stock` and `get_admin_url_for_order_id`.
+`ECommercePlatformConnector` (from `enthusiast-domain-common`) provides operations such as `create_order_with_items`, `get_product_by_sku`, `create_product`, `update_product`, `update_stock` and `get_admin_url_for_order_id`.
 
 ## Shared Tools
 
-The `enthusiast-vertical-tools` package contains tools used by several pre-built agents, which you can also use in your own agents:
+The `enthusiast-domain-tools` package contains tools used by several pre-built agents, which you can also use in your own agents:
 
 | Tool | Purpose |
 |---|---|

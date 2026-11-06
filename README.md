@@ -6,7 +6,7 @@
 
 <h1 align="center">enthusiast.</h1>
 
-<p align="center">The e-commerce vertical for the Suvereo agentic AI framework.</p>
+<p align="center">The e-commerce domain definition for the Suvereo agentic AI framework.</p>
 <div align="center">
   <strong>
     <a href="https://upsidelab.io/tools/enthusiast">Website</a> |
@@ -17,7 +17,7 @@
 
 
 ## Introduction
-[Enthusiast](https://upsidelab.io/tools/enthusiast) is the open-source e-commerce vertical for [Suvereo](https://upsidelab.io/tools/suvereo/docs), an agentic AI framework.
+[Enthusiast](https://upsidelab.io/tools/enthusiast) is the open-source e-commerce domain definition for [Suvereo](https://upsidelab.io/tools/suvereo/docs), an agentic AI framework.
 
 Suvereo provides the platform: conversations, agentic executions, language models, users and permissions, and the admin UI. Enthusiast adds what is specific to e-commerce:
 
@@ -30,7 +30,7 @@ Suvereo provides the platform: conversations, agentic executions, language model
 ## Getting Started
 Enthusiast is installed into a Suvereo instance as a set of Python packages:
 1. Set up Suvereo (see the [Suvereo installation guide](https://upsidelab.io/tools/suvereo/docs/getting-started/installation)).
-2. Install the vertical and the integrations and agents you need, and register them in Suvereo's settings (see the [installation guide](https://upsidelab.io/tools/enthusiast/docs/getting-started/installation)).
+2. Install the domain definition and the integrations and agents you need, and register them in Suvereo's settings (see the [installation guide](https://upsidelab.io/tools/enthusiast/docs/getting-started/installation)).
 
 You can also book a [live demo](https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ3NyFdPn_jqYqD24asveLkfrB1NTal0PWkLNHFTT4Fmp6sNW50-0or8WyIzBriF8IFdP1jXSPjQ) to see it in action.
 
@@ -55,7 +55,7 @@ All packages live in [`plugins/`](plugins) and are published to PyPI:
 | Package | Purpose |
 |---|---|
 | `enthusiast-vertical-common` | E-commerce interfaces and data types (product, document and e-commerce integration plugins, platform connector). No Django dependency. |
-| `enthusiast-vertical` | The vertical's Django app: product and document models and migrations, retrievers, sync managers. |
+| `enthusiast-vertical` | The domain definition's Django app: product and document models and migrations, retrievers, sync managers. |
 | `enthusiast-vertical-tools` | Agent tools shared by the pre-built agents. |
 | `enthusiast-source-*` | Integrations: Medusa, Shopify, Shopware, Solidus, WooCommerce, WordPress, Sanity, and sample data. |
 | `enthusiast-agent-*` | Pre-built agents. |

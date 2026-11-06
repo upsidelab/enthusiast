@@ -5,7 +5,7 @@ from enthusiast_vertical.models import Document
 
 
 class DocumentSourceManager(BaseDocumentSourceManager):
-    """Syncs documents from a DocumentSourcePlugin into the ecommerce vertical."""
+    """Syncs documents from a DocumentSourcePlugin into the e-commerce domain definition."""
 
     def sync(self, plugin: DocumentSourcePlugin, dataset_id: int, integration_id: int) -> None:
         """Fetch documents via the plugin and upsert + index each one."""

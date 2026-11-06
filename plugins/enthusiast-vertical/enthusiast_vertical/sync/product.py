@@ -7,7 +7,7 @@ from enthusiast_vertical.models import Product
 
 
 class ProductSourceManager(BaseProductSourceManager):
-    """Syncs products from a ProductSourcePlugin into the ecommerce vertical."""
+    """Syncs products from a ProductSourcePlugin into the e-commerce domain definition."""
 
     def sync(self, plugin: ProductSourcePlugin, dataset_id: Any, integration_id: Any) -> None:
         """Fetch products via the plugin and upsert each one.

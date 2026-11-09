@@ -13,8 +13,6 @@ export interface IntegrationProps {
   registerProductModule?: string;
   registerDocumentModule?: string;
   registerECommerceIntegrationModule?: string;
-  registerLanguageModelModule?: string;
-  registerEmbeddingsModule?: string;
   envVariables?: string[]
 }
 
@@ -33,25 +31,36 @@ export default async function Integration(props: IntegrationProps) {
       return `\`\`\`python\n${lines}\n\`\`\``;
     };
 
+  const registerModules = [
+    props.registerProductModule,
+    props.registerDocumentModule,
+    props.registerECommerceIntegrationModule,
+  ].filter((module): module is string => !!module);
+  const registerInstructions = await Promise.all(
+    registerModules.map(async (module) => ({
+      module,
+      compiledSource: await compileMdx(buildRegisterListInstructionMd("CATALOG_INTEGRATION_PLUGINS", module)),
+    }))
+  );
+
   return (
     <>
       <H1>{props.name} Integration</H1>
       <Image className="x:py-4" src={`/tools/enthusiast/img/integrations/${props.integrationKey}.png`} alt={props.name} width={256} height={256} />
-      {props.description &&
-        <>
-          <MDXRemote compiledSource={installationInstructions} />
-          <P>{props.description}</P>
-        </>}
+      {props.description && <P>{props.description}</P>}
       <H2>Installation</H2>
       <P>
-        Run the following command inside your application directory.<br />
-        If you're using <Link href="/docs/getting-started/installation">Enthusiast Starter</Link>, that's inside enthusiast-starter/src/
+        This integration is part of the Enthusiast vertical, so a Suvereo instance with the vertical installed is required.
+        If you haven't set it up yet, follow the <Link href="/docs/getting-started/installation">installation guide</Link> first.
+      </P>
+      <P>
+        In the Suvereo starter, add the package to your server package in server/src.
       </P>
       <MDXRemote compiledSource={installationInstructions} />
     {props.envVariables && (
       <>
         <P>
-          Set variables inside .env file.
+          Set the variables in server/config/.env.
         </P>
         <MDXRemote
           compiledSource={await compileMdx(buildEnvInstructionMd(props.envVariables))}
@@ -59,15 +68,13 @@ export default async function Integration(props: IntegrationProps) {
       </>
     )}
       <P>
-        Then, register the integration in your config/settings_override.py.
+        Then, register the integration in server/config/settings_override.py.
       </P>
-      {props.registerProductModule && <MDXRemote compiledSource={await compileMdx(buildRegisterListInstructionMd("CATALOG_PRODUCT_SOURCE_PLUGINS", props.registerProductModule))}/>}
-      {props.registerDocumentModule && <MDXRemote compiledSource={await compileMdx(buildRegisterListInstructionMd("CATALOG_DOCUMENT_SOURCE_PLUGINS", props.registerDocumentModule))}/>}
-      {props.registerECommerceIntegrationModule && <MDXRemote compiledSource={await compileMdx(buildRegisterListInstructionMd("CATALOG_ECOMMERCE_INTEGRATION_PLUGINS", props.registerECommerceIntegrationModule))}/>}
-      {props.registerLanguageModelModule && <MDXRemote compiledSource={await compileMdx(buildRegisterListInstructionMd("CATALOG_LANGUAGE_MODEL_PROVIDERS", props.registerLanguageModelModule))}/>}
-      {props.registerEmbeddingsModule && <MDXRemote compiledSource={await compileMdx(buildRegisterListInstructionMd("CATALOG_EMBEDDING_PROVIDERS", props.registerEmbeddingsModule))}/>}
-      <P>Then, restart your server for the newly installed plugin to become available.</P>
-      <P>Finally, sign in to Enthusiast's Admin UI, go to the Integrations tab and configure the required credentials.</P>
+      {registerInstructions.map(({ module, compiledSource }) => (
+        <MDXRemote key={module} compiledSource={compiledSource} />
+      ))}
+      <P>Then, rebuild and restart the containers (docker compose build && docker compose up) for the newly installed plugin to become available.</P>
+      <P>Finally, sign in to the Suvereo admin UI, go to the Integrations tab and configure the required credentials.</P>
     </>
   )
 }

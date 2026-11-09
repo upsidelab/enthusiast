@@ -1,9 +1,5 @@
 const mapping = {
-  "system-architecture": "",
-  "using-enthusiast-starter": "",
-  "custom-integration": "",
-  "custom-agent": "",
-  "agentic-execution": "",
+  "using-the-suvereo-starter": "",
   "concept-product-search": "",
 };
 

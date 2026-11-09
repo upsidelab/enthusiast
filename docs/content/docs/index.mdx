@@ -2,35 +2,48 @@
 sidebar_position: 1
 ---
 
-# Introduction
-Enthusiast is your open-source AI agent for e-commerce. Connect it to your product catalog, add content that describes your products and brand, and scale your team’s capabilities.
+import { Callout } from "nextra/components"
 
-[//]: # (![Enthusiast's chat interface]&#40;imgnthusiast-ui.png&#41;)
+# Introduction
+
+<Callout type="info">
+Looking for the Enthusiast 1.7 documentation? It is available [here](../../tools/enthusiast/v1.7/docs).
+</Callout>
+
+Enthusiast is the open-source e-commerce vertical for [Suvereo](../../suvereo/docs), an agentic AI framework. Connect it to your product catalog, add content that describes your products and brand, and scale your team’s capabilities.
+
+Suvereo provides the platform: conversations, agentic executions, language models, users and permissions, and the admin UI. Enthusiast adds what is specific to e-commerce:
+
+- **Data**: products and documents, indexed for semantic search.
+- **Integrations**: product and document sources (Shopify, Shopware, Solidus, WooCommerce, WordPress, Sanity) and e-commerce store connectors.
+- **Agents**: pre-built agents for product search, order intake, catalog enrichment and more.
+
+To learn how verticals fit into Suvereo, see [Domain onboarding](../../suvereo/docs/customization/domain-onboarding).
 
 ## Example use cases
 
-- [AI-Based Product Discovery](https://upsidelab.io/tools/enthusiast/agents/product-search) Enable natural-language product search. Users describe requirements in plain terms, and the agent retrieves verifiable results from your indexed catalog.
+- [AI-Based Product Discovery](/agents/product-search) Enable natural-language product search. Users describe requirements in plain terms, and the agent retrieves verifiable results from your indexed catalog.
 
-- [User Manual Search](https://upsidelab.io/tools/enthusiast/agents/user-manual-search) Provide precise answers from technical documentation and manuals.
+- [User Manual Search](/agents/user-manual-search) Provide precise answers from technical documentation and manuals.
 
-- [Order Intake](https://upsidelab.io/tools/enthusiast/agents/order-intake) Convert unstructured inputs — such as scanned purchase order documents or notes - into e-commerce orders.
+- [Order Intake](/agents/order-intake) Convert unstructured inputs — such as scanned purchase order documents or notes - into e-commerce orders.
 
-- [Product Catalog Enrichment](https://upsidelab.io/tools/enthusiast/agents/catalog-enrichment) Extract product descriptions, attributes, or translations from unstructured product sheets.
+- [Product Catalog Enrichment](/agents/catalog-enrichment) Extract product descriptions, attributes, or translations from unstructured product sheets.
 
-- [Catalog Web Import](https://upsidelab.io/tools/enthusiast/agents/catalog-web-import) Import product data directly from supplier or distributor web pages by providing URLs.
+- [Catalog Web Import](/agents/catalog-web-import) Import product data directly from supplier or distributor web pages by providing URLs.
 
-- [Invoice Scanning](https://upsidelab.io/tools/enthusiast/agents/invoice-scanning) Process supplier invoices to extract line items and automatically update stock levels in your e-commerce platform.
+- [Invoice Scanning](/agents/invoice-scanning) Process supplier invoices to extract line items and automatically update stock levels in your e-commerce platform.
 
 ## Main Features
 
 - Pre-built integrations with popular e-commerce platforms
 
-- Built on a standard Python/Django/PostgreSQL/React stack
+- Built on Suvereo, with a standard Python/Django/PostgreSQL/React stack
 
-- Compatible with OpenAI and self-hosted LLMs
+- Compatible with OpenAI and self-hosted LLMs, through Suvereo
 
 - Open-source version available for customization and prompt modifications
 
 ## Try It Out
 
-Check our [Getting Started guide](/docs/getting-started/installation) to set up your local instance and see Enthusiast in action in under 5 minutes.
+Check our [Getting Started guide](/docs/getting-started/installation) to install Enthusiast into a Suvereo instance and see it in action in a few minutes.

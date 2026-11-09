@@ -2,170 +2,95 @@
 sidebar_position: 2
 ---
 
-# Agent Types
+# E-commerce Agents
 
-Enthusiast provides a flexible and extensible agent system built on abstract base classes that define the core architecture and capabilities. The system supports multiple agent types, each designed for different use cases and reasoning strategies.
+Enthusiast agents are regular [Suvereo agents](../../../../suvereo/docs/agents/agent-classes). They subclass `BaseToolCallingAgent` from `suvereo-agent-tool-calling` and are registered in `AVAILABLE_AGENTS`, like any other agent. What makes them e-commerce agents is the builder they use, which gives their tools access to the catalog and to your e-commerce platform.
 
-## Overview
+This page describes what the Enthusiast vertical adds on top of Suvereo. For the agent contract itself (class variables, prompts, memory, tool configuration), see the [Suvereo agent documentation](../../../../suvereo/docs/agents/agent-architecture).
 
-The agent system in Enthusiast is built on a foundation of abstract base classes that provide:
+## The E-commerce Builder
 
-- **Standardized Interface**: Common methods and properties all agents must implement
-- **Configuration Management**: Runtime configuration through structured schemas
-- **Tool Integration**: Seamless integration with the tool system
-- **Memory Management**: Built-in conversation memory and context management
-- **Extensibility**: Easy creation of custom agent types
-
-## Base Agent
-
-### Core Components
-
-Every agent in Enthusiast consists of:
-
-- **Language Model**: The underlying LLM for reasoning and text generation
-- **Tools**: Collection of tools the agent can use
-- **Prompt Template**: Instructions and context for the agent
-- **Injector**: Access to external resources and services
-- **Callback Handlers(Optional)**: Handling LLM and agent events
-
-### Core Interface
-
-The `BaseAgent` class defines the fundamental interface all agents must implement:
-
-### Required Class Variables
-
-The `ExtraArgsClassBaseMeta` metaclass enforces that all agent implementations define:
-
-#### `AGENT_ARGS` (RequiredFieldsModel)
-Configuration schema for agent-specific parameters:
+An agent selects its builder with the `BUILDER_CLASS` class variable. All pre-built Enthusiast agents use `EcommerceAgentBuilder` from `enthusiast-vertical`:
 
 ```python
-class AgentConfiguration(RequiredFieldsModel):
-    max_iterations: int = Field(title="Max Iterations", description="Maximum reasoning steps", default=10)
-    enable_debugging: bool = Field(title="Enable Debugging", description="Enable detailed logging", default=False)
+from enthusiast_vertical.builder import EcommerceAgentBuilder
+from enthusiast_vertical_tools import ProductExamplesTool, ProductSQLSearchTool
+from suvereo_agent_tool_calling import BaseToolCallingAgent
+from suvereo_common.config.base import LLMToolConfig
 
-class ExampleAgent(BaseAgent):
-    AGENT_ARGS = AgentConfiguration
-```
+from .prompt import PRODUCT_SEARCH_TOOL_CALLING_AGENT_PROMPT
 
-#### `PROMPT_INPUT` (RequiredFieldsModel)
-Schema for prompt input variables:
 
-```python
-class PromptInputSchema(RequiredFieldsModel):
-    product_type: str = Field(title="Product type", description="Product type agent with work with")
-    context: str = Field(title="Context", description="Additional context information")
-    output_format: str = Field(title="Output Format", description="Expected response format")
-
-class ExampleAgent(BaseAgent):
-    PROMPT_INPUT = PromptInputSchema
-```
-
-#### `PROMPT_EXTENSION` (RequiredFieldsModel)
-Schema for prompt extension variables:
-
-```python
-class PromptExtensionSchema(RequiredFieldsModel):
-    system_instructions: str = Field(title="System Instructions", description="Agent behavior instructions")
-    restrictions: str = Field(title="Restriction instructions", description="Restricted agent behaviours")
-
-class ExampleAgent(BaseAgent):
-    PROMPT_EXTENSION = PromptExtensionSchema
-```
-
-#### `TOOLS` (list[BaseTool])
-List of tools configurations:
-
-```python
-class ExampleAgent(BaseAgent):
+class ProductSearchAgent(BaseToolCallingAgent):
+    AGENT_KEY = "enthusiast-agent-product-search"
+    NAME = "Product Search"
+    SYSTEM_PROMPT = PRODUCT_SEARCH_TOOL_CALLING_AGENT_PROMPT
+    BUILDER_CLASS = EcommerceAgentBuilder
     TOOLS = [
-        LLMToolConfig(tools_class=ExampleTool),
-        LLMToolConfig(tools_class=ExampleTool),
+        LLMToolConfig(tool_class=ProductSQLSearchTool),
+        LLMToolConfig(tool_class=ProductExamplesTool),
     ]
 ```
 
-Those arguments can be accessed inside the agent. For example, `_get_system_prompt_variables()` is called before each invocation to resolve `{variable}` placeholders in the system prompt:
+`EcommerceAgentBuilder` extends Suvereo's `AgentBuilder`. In addition to everything the default builder provides (chat history, memory, repositories), it creates an `EcommerceInjector` that exposes three e-commerce dependencies to the agent's tools.
+
+## The E-commerce Injector
+
+Tools receive the injector when they are created and access it as `self._injector`. `EcommerceInjector` extends Suvereo's [injector](../../../../suvereo/docs/agents/injector) with:
+
+| Property | Type | Purpose |
+|---|---|---|
+| `product_retriever` | `ProductRetriever` | Looks up products in the current data set |
+| `document_retriever` | `DocumentRetriever` | Semantic search over the documents in the current data set |
+| `ecommerce_platform_connector` | `ECommercePlatformConnector` or `None` | Performs actions in the e-commerce platform configured for the data set |
+
+### Product Retriever
+
+`ProductRetriever` reads from the vertical's product table, always limited to the current data set:
+
+- `find_products_with_sql(sql_query)`: runs a `SELECT` query written by the agent. The query is validated before it runs: it may only read the product table, and a data set condition is added automatically.
+- `find_products_matching_query(user_query)`: asks the language model to build the query from a natural-language description.
+- `get_sample_products_json()`: returns a sample of products, which helps the agent understand the catalog's structure before searching it.
+- `product_details_as_json(products)`: serializes products for the agent.
+
+### Document Retriever
+
+`DocumentRetriever` performs vector search over document chunks. `find_content_matching_query(query)` returns the chunks most relevant to the query, using the embedding model configured for the data set.
+
+### E-commerce Platform Connector
+
+The connector is resolved from the data set's **E-Commerce system** integration. When no such integration is configured, the property is `None`, and tools should tell the user to configure one:
 
 ```python
-
-    def _get_system_prompt_variables(self) -> dict:
-        return {"output_format": self.PROMPT_INPUT.output_format}
-
+connector = self._injector.ecommerce_platform_connector
+if not connector:
+    return "The user needs to configure an ecommerce platform connector first"
+order_id = connector.create_order_with_items(items)
 ```
 
-## Tool Calling Agent
+`ECommercePlatformConnector` (from `enthusiast-vertical-common`) provides operations such as `create_order_with_items`, `get_product_by_sku`, `create_product`, `update_product`, `update_stock` and `get_admin_url_for_order_id`.
 
-### Overview
+## Shared Tools
 
-The `BaseToolCallingAgent` implements the standard tool calling pattern, leveraging native function calling support built into all modern LLMs. It is the recommended base class for all custom agents.
+The `enthusiast-vertical-tools` package contains tools used by several pre-built agents, which you can also use in your own agents:
 
-### Implementation
+| Tool | Purpose |
+|---|---|
+| `ProductExamplesTool` | Returns a sample of products, so the agent can learn the catalog's structure |
+| `ProductSQLSearchTool` | Lets the agent search the catalog with a SQL `SELECT` query |
+| `UpsertProductDetailsTool` | Creates or updates a product in the e-commerce platform |
+
+To add one to an agent, list it in `TOOLS`:
 
 ```python
-class BaseToolCallingAgent(BaseAgent):
-    def get_answer(self, input_text: str) -> str:
-        history = self._injector.chat_history
-        compactor = self._injector.memory_compactor
-
-        agent = self._build_agent()
-        
-        # Build conversation context with last users message appended
-        context_messages = self._build_context_messages()
-        input_messages = context_messages + [HumanMessage(content=input_text)]
-        
-        # Execute the agent
-        result = agent.invoke({"messages": input_messages}, config=self._build_invoke_config())
-
-        # Slice off only the new messages produced this turn, then persist them to the history
-        new_messages = result["messages"][len(context_messages):]
-        final_message = next(
-            m for m in reversed(new_messages)
-            if isinstance(m, AIMessage) and not m.tool_calls
-        )
-        history.add_messages(new_messages)
-
-        # If the memory compactor is present, execute it
-        if compactor:
-            compactor.compact_if_needed()
-
-        return final_message.text
-
-    def _build_context_messages(self) -> list[BaseMessage]:
-        """Build conversation history trimmed to 'MAX_HISTORY_TOKENS' number of tokens. 
-        With memory compactor present, the conversation summary will also be included for longer conversations."""
-        return ContextWindowBuilder(
-            chat_history=self._injector.chat_history,
-            memory_compactor=self._injector.memory_compactor,
-        ).build(max_tokens=MAX_HISTORY_TOKENS)
-
-    def _build_tools(self) -> list[BaseTool]:
-        """Convert internal tools to LangChain BaseTool instances."""
-        return [tool.as_tool() for tool in self._tools]
-
-    def _get_system_prompt(self) -> str:
-        """Resolve template variables in the system prompt string via _get_system_prompt_variables()."""
-        return self._system_prompt.format(**self._get_system_prompt_variables())
-
-    def _build_invoke_config(self) -> dict[str, Any]:
-        """Pass callback handler to the agent invocation if one is configured."""
-        if self._callback_handler:
-            return {"callbacks": [self._callback_handler]}
-        return {}
-
-    def _build_agent(self):
-        """Build a LangGraph agent with the configured LLM, tools, and system prompt."""
-        return create_agent(
-            model=self._llm,
-            tools=self._build_tools(),
-            system_prompt=self._get_system_prompt(),
-        )
+TOOLS = [
+    LLMToolConfig(tool_class=ProductExamplesTool),
+    LLMToolConfig(tool_class=ProductSQLSearchTool),
+]
 ```
 
-## Summary
+## Next Steps
 
-The Enthusiast agent system provides a robust foundation for building intelligent, tool-using agents:
-
-- **BaseAgent**: Abstract base class with required interface and validation
-- **BaseToolCallingAgent**: Standard implementation using native LLM tool calling
-
-By following the established patterns and implementing the required interfaces, developers can create powerful, specialized agents that leverage the full capabilities of the Enthusiast framework.
+- [Concept: Product Search Agent](/docs/customization/concept-product-search) walks through building an e-commerce agent step by step.
+- [Pre-built Agents](/agents) lists the agents that ship with Enthusiast.
+- [Building an agent](../../../../suvereo/docs/customization/tutorial/agent) in the Suvereo tutorial covers the general agent workflow.

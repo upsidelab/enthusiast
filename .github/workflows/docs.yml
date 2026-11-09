@@ -20,7 +20,7 @@ jobs:
         id: changed
         run: |
           CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
-          if echo "$CHANGED" | grep -q '^docs/'; then
+          if echo "$CHANGED" | grep -qE '^docs(-v1\.7)?/'; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"

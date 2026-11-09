@@ -2,8 +2,8 @@ import json
 import logging
 from typing import List
 
-from enthusiast_common.tools import BaseLLMTool
 from pydantic import BaseModel, Field
+from suvereo_common.tools import BaseLLMTool
 
 logger = logging.getLogger(__name__)
 

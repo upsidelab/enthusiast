@@ -1,0 +1,7 @@
+id: po-names
+description: Product names instead of SKUs
+tags: [basic]
+files: [po-names.pdf]
+expected:
+  mock_calls: {create_order_with_items: [{items: [[MUG-RED, 6], [TEA-GRN, 3], [SPN-STL, 12]]}]}
+  output: {order_id: ORD-1}

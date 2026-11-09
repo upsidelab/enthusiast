@@ -1,9 +1,10 @@
 import json
 from typing import Any, Optional
 
-from enthusiast_common import ProductDetails, ProductSourcePlugin
-from enthusiast_common.utils import RequiredFieldsModel
+from enthusiast_vertical_common.interfaces import ProductSourcePlugin
+from enthusiast_vertical_common.structures import ProductDetails
 from pydantic import Field
+from suvereo_common.utils import RequiredFieldsModel
 
 from .medusa_api_client import MedusaAPIClient
 
@@ -14,17 +15,9 @@ class MedusaProductSourceConfig(RequiredFieldsModel):
 
 
 class MedusaProductSource(ProductSourcePlugin):
+    TYPE = "medusa_product"
     NAME = "Medusa"
     CONFIGURATION_ARGS = MedusaProductSourceConfig
-
-    def __init__(self, data_set_id):
-        """
-        Initialize the plugin with the parameters to access source.
-
-        Args:
-            data_set_id (int): identifier of a data set that products are assigned to.
-        """
-        super().__init__(data_set_id)
 
     @staticmethod
     def get_product(medusa_product: dict[str, Any]) -> ProductDetails:

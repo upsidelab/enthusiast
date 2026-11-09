@@ -1,11 +1,15 @@
-from enthusiast_common.agentic_execution import (
+from suvereo_common.agentic_execution import (
     BaseAgenticExecutionDefinition,
     ExecutionConversationInterface,
     IsValidJsonValidator,
     StopExecutionValidator,
 )
+from suvereo_common.config import LLMToolConfig
 
+from .agent import OrderIntakeAgent
 from .execution_input import OrderIntakeAgenticExecutionInput
+from .execution_prompt import ORDER_INTAKE_EXECUTION_SYSTEM_PROMPT
+from .tools import StopExecutionTool
 from .validators import OrderPlacedValidator
 
 
@@ -25,6 +29,8 @@ class OrderIntakeAgenticExecutionDefinition(BaseAgenticExecutionDefinition):
         IsValidJsonValidator,
         OrderPlacedValidator,
     ]
+    SYSTEM_PROMPT = ORDER_INTAKE_EXECUTION_SYSTEM_PROMPT
+    TOOLS = [*OrderIntakeAgent.TOOLS, LLMToolConfig(tool_class=StopExecutionTool)]
 
     def execute(
         self,

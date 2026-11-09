@@ -2,9 +2,9 @@ import json
 import logging
 from typing import Optional
 
-from enthusiast_common.connectors import ECommercePlatformConnector
-from enthusiast_common.errors import ECommerceConnectorError
-from enthusiast_common.structures import Address, ProductDetails, ProductUpdateDetails
+from enthusiast_vertical_common.connectors import ECommercePlatformConnector
+from enthusiast_vertical_common.connectors.errors import ECommerceConnectorError
+from enthusiast_vertical_common.structures import Address, ProductDetails, ProductUpdateDetails
 
 from .medusa_api_client import MedusaAPIClient
 from .medusa_product_source import MedusaProductSource

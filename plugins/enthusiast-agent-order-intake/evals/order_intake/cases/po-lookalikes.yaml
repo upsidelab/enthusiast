@@ -1,0 +1,7 @@
+id: po-lookalikes
+description: Similar products the agent must tell apart by size and variant
+tags: [basic]
+files: [po-lookalikes.pdf]
+expected:
+  mock_calls: {create_order_with_items: [{items: [[MUG-BLU, 8], [MUG-RED-XL, 4], [TEA-GRN-BAG, 6], [TEA-BLK, 2]]}]}
+  output: {order_id: ORD-1}

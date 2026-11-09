@@ -1,9 +1,10 @@
 import json
 
 import shopify
-from enthusiast_common import ProductDetails, ProductSourcePlugin
-from enthusiast_common.utils import RequiredFieldsModel
+from enthusiast_vertical_common.interfaces import ProductSourcePlugin
+from enthusiast_vertical_common.structures import ProductDetails
 from pydantic import Field
+from suvereo_common.utils import RequiredFieldsModel
 
 
 class ShopifyConfig(RequiredFieldsModel):
@@ -12,11 +13,9 @@ class ShopifyConfig(RequiredFieldsModel):
 
 
 class ShopifyProductSource(ProductSourcePlugin):
+    TYPE = "shopify"
     NAME = "Shopify"
     CONFIGURATION_ARGS = ShopifyConfig
-
-    def __init__(self, data_set_id, **kwargs):
-        super().__init__(data_set_id)
 
     def get_query_template(self):
         """Prepares template for querying shopify platform.
@@ -79,7 +78,9 @@ class ShopifyProductSource(ProductSourcePlugin):
                     "tags": shopify_product.get("tags", ""),
                 }
             ),
-            categories=shopify_product.get("category", ""),
+            # Shopify returns category: null for products with no category, and a
+            # {fullName: ...} object otherwise. Extract the name, defaulting to "".
+            categories=(shopify_product.get("category") or {}).get("fullName", ""),
         )
         # Collect attributes from variants level.
         prices = []

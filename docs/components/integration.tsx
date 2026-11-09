@@ -54,13 +54,13 @@ export default async function Integration(props: IntegrationProps) {
         If you haven't set it up yet, follow the <Link href="/docs/getting-started/installation">installation guide</Link> first.
       </P>
       <P>
-        Run the following command inside your application directory.
+        In the Suvereo starter, add the package to your server package in server/src.
       </P>
       <MDXRemote compiledSource={installationInstructions} />
     {props.envVariables && (
       <>
         <P>
-          Set variables inside .env file.
+          Set the variables in server/config/.env.
         </P>
         <MDXRemote
           compiledSource={await compileMdx(buildEnvInstructionMd(props.envVariables))}
@@ -68,12 +68,12 @@ export default async function Integration(props: IntegrationProps) {
       </>
     )}
       <P>
-        Then, register the integration in your config/settings_override.py.
+        Then, register the integration in server/config/settings_override.py.
       </P>
       {registerInstructions.map(({ module, compiledSource }) => (
         <MDXRemote key={module} compiledSource={compiledSource} />
       ))}
-      <P>Then, restart your server for the newly installed plugin to become available.</P>
+      <P>Then, rebuild and restart the containers (docker compose build && docker compose up) for the newly installed plugin to become available.</P>
       <P>Finally, sign in to the Suvereo admin UI, go to the Integrations tab and configure the required credentials.</P>
     </>
   )

@@ -59,11 +59,11 @@ AVAILABLE_AGENTS = [
         If you haven't set it up yet, follow the <Link href="/docs/getting-started/installation">installation guide</Link> first.
       </P>
       <P>
-        Run the following command inside your application directory.
+        In the Suvereo starter, add the package to your server package in server/src.
       </P>
       <MDXRemote compiledSource={installationInstructions} />
       <P>
-        Then, register the agent in your config/settings_override.py.
+        Then, register the agent in server/config/settings_override.py.
       </P>
       {props.registerAgentModule && <MDXRemote compiledSource={await compileMdx(buildRegisterInstructionMd("AVAILABLE_AGENTS", props.registerAgentModule))}/>}
       {props.registerAgentModule && props.executionDefinitionClassName && (
@@ -74,7 +74,7 @@ AVAILABLE_AGENTS = [
           <MDXRemote compiledSource={await compileMdx(`\`\`\`python\nAVAILABLE_AGENTIC_EXECUTION_DEFINITIONS = [\n    '${props.registerAgentModule}.${props.executionDefinitionClassName}',\n]\n\`\`\``)}/>
         </>
       )}
-      <P>Then, restart your server for the newly installed agent to become available.</P>
+      <P>Then, rebuild and restart the containers (docker compose build && docker compose up) for the newly installed agent to become available.</P>
     </>
   )
 }

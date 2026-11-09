@@ -24,11 +24,10 @@ export default async function Page() {
       <H1>Integrations</H1>
       <P>Enthusiast comes with a set of ready-to-use integrations that connect your agents to major e-commerce platforms and content management systems.</P>
       <P>They allow you to immediately enable your agents to connect to product catalogs and documents. Furthermore, each of these integrations can be customized and extended by a developer to reflect the structure of the data in your systems.</P>
-      <P>Language model providers (such as OpenAI, Anthropic, Gemini or Azure OpenAI) are provided by Suvereo. See the <A href="https://upsidelab.io/tools/suvereo/integrations">Suvereo integrations</A> for the full list.</P>
-      <P>Looking for the Enthusiast 1.7 integrations? See the <A href="https://upsidelab.io/tools/enthusiast/v1.7/integrations">Enthusiast 1.7 documentation</A>.</P>
+      <P>Language model providers (such as OpenAI, Anthropic, Gemini or Azure OpenAI) are provided by Suvereo. See the <A href="../../suvereo/plugins">Suvereo plugins</A> for the full list.</P>
+      <P>Looking for the Enthusiast 1.7 integrations? See the <A href="../../tools/enthusiast/v1.7/integrations">Enthusiast 1.7 documentation</A>.</P>
       <H2>E-Commerce Systems</H2>
       <Cards>
-        <IntegrationCard name="Medusa" imageSrc="/tools/enthusiast/img/integrations/medusa.png" href="/integrations/medusa/" />
         <IntegrationCard name="Shopware" imageSrc="/tools/enthusiast/img/integrations/shopware.png" href="/integrations/shopware/" />
         <IntegrationCard name="Shopify" imageSrc="/tools/enthusiast/img/integrations/shopify.png" href="/integrations/shopify/" />
         <IntegrationCard name="Solidus" imageSrc="/tools/enthusiast/img/integrations/solidus.png" href="/integrations/solidus/" />

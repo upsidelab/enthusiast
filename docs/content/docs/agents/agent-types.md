@@ -4,9 +4,9 @@ sidebar_position: 2
 
 # E-commerce Agents
 
-Enthusiast agents are regular [Suvereo agents](https://upsidelab.io/tools/suvereo/docs/agents/agent-classes). They subclass `BaseToolCallingAgent` from `suvereo-agent-tool-calling` and are registered in `AVAILABLE_AGENTS`, like any other agent. What makes them e-commerce agents is the builder they use, which gives their tools access to the catalog and to your e-commerce platform.
+Enthusiast agents are regular [Suvereo agents](../../../../suvereo/docs/agents/agent-classes). They subclass `BaseToolCallingAgent` from `suvereo-agent-tool-calling` and are registered in `AVAILABLE_AGENTS`, like any other agent. What makes them e-commerce agents is the builder they use, which gives their tools access to the catalog and to your e-commerce platform.
 
-This page describes what the Enthusiast vertical adds on top of Suvereo. For the agent contract itself (class variables, prompts, memory, tool configuration), see the [Suvereo agent documentation](https://upsidelab.io/tools/suvereo/docs/agents/agent-architecture).
+This page describes what the Enthusiast vertical adds on top of Suvereo. For the agent contract itself (class variables, prompts, memory, tool configuration), see the [Suvereo agent documentation](../../../../suvereo/docs/agents/agent-architecture).
 
 ## The E-commerce Builder
 
@@ -36,7 +36,7 @@ class ProductSearchAgent(BaseToolCallingAgent):
 
 ## The E-commerce Injector
 
-Tools receive the injector when they are created and access it as `self._injector`. `EcommerceInjector` extends Suvereo's [injector](https://upsidelab.io/tools/suvereo/docs/agents/injector) with:
+Tools receive the injector when they are created and access it as `self._injector`. `EcommerceInjector` extends Suvereo's [injector](../../../../suvereo/docs/agents/injector) with:
 
 | Property | Type | Purpose |
 |---|---|---|
@@ -59,7 +59,7 @@ Tools receive the injector when they are created and access it as `self._injecto
 
 ### E-commerce Platform Connector
 
-The connector is resolved from the data set's **E-Commerce system** integration (for example [Medusa](/integrations/medusa)). When no such integration is configured, the property is `None`, and tools should tell the user to configure one:
+The connector is resolved from the data set's **E-Commerce system** integration. When no such integration is configured, the property is `None`, and tools should tell the user to configure one:
 
 ```python
 connector = self._injector.ecommerce_platform_connector
@@ -93,4 +93,4 @@ TOOLS = [
 
 - [Concept: Product Search Agent](/docs/customization/concept-product-search) walks through building an e-commerce agent step by step.
 - [Pre-built Agents](/agents) lists the agents that ship with Enthusiast.
-- [Creating a Custom Agent](https://upsidelab.io/tools/suvereo/docs/customization/custom-agent) in the Suvereo documentation covers the general agent workflow.
+- [Building an agent](../../../../suvereo/docs/customization/tutorial/agent) in the Suvereo tutorial covers the general agent workflow.

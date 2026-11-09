@@ -7,7 +7,7 @@ This guide walks you through setting up Suvereo with Enthusiast, and the plugin 
 
 ## 1. Set Up Suvereo with Enthusiast
 
-The first step is to set up a Suvereo deployment with the Enthusiast vertical. The easiest way is the [Suvereo Starter](/docs/customization/using-enthusiast-starter), a pre-configured Docker Compose setup that includes all required services.
+The first step is to set up a Suvereo deployment with the Enthusiast vertical. The easiest way is the [Suvereo Starter](/docs/customization/using-the-suvereo-starter), a pre-configured Docker Compose setup that includes all required services.
 
 ### Add the Enthusiast Packages
 

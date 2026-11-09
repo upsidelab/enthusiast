@@ -1,5 +1,5 @@
 import { Footer, Layout, Navbar } from "nextra-theme-docs";
-import { Banner, Head } from "nextra/components";
+import { Head } from "nextra/components";
 import { getPageMap } from "nextra/page-map";
 import "nextra-theme-docs/style.css";
 import Logo from "@/app/logo";
@@ -9,12 +9,6 @@ export const metadata = {
   // Define your metadata here
   // For more information on metadata API, see: https://nextjs.org/docs/app/building-your-application/optimizing/metadata
 }
-
-const banner = (
-  <Banner storageKey="banner">
-    <a href="https://github.com/upsidelab/enthusiast/releases/tag/v1.7.0">Enthusiast 1.7.0 is released 🎉</a>
-  </Banner>
-)
 
 const navbar = <Navbar logo={<Logo/>} logoLink={false} align="left" projectLink="https://github.com/upsidelab/enthusiast/"/>
 const footer = (
@@ -38,7 +32,6 @@ export default async function RootLayout({ children }: any) {
     {gtagId && <GoogleTagManager gtmId={gtagId}/>}
     <body>
     <Layout
-      banner={banner}
       navbar={navbar}
       pageMap={await getPageMap("/")}
       docsRepositoryBase="https://github.com/upsidelab/enthusiast/tree/main/docs"

@@ -17,20 +17,22 @@
 
 
 ## Introduction
-[Enthusiast](https://upsidelab.io/tools/enthusiast) is the open-source e-commerce vertical for [Suvereo](https://upsidelab.io/tools/suvereo/docs), an agentic AI framework.
+[Enthusiast](https://upsidelab.io/tools/enthusiast) is the open-source e-commerce vertical for [Suvereo](https://upsidelab.io/suvereo/docs), an agentic AI framework.
 
 Suvereo provides the platform: conversations, agentic executions, language models, users and permissions, and the admin UI. Enthusiast adds what is specific to e-commerce:
 
 - **Data**: products and documents, indexed for semantic search.
-- **Integrations**: product and document sources and e-commerce store connectors (Medusa, Shopify, Shopware, Solidus, WooCommerce, WordPress, Sanity).
+- **Integrations**: product and document sources and e-commerce store connectors (Shopify, Shopware, Solidus, WooCommerce, WordPress, Sanity).
 - **Agents**: pre-built agents for product search, order intake, catalog enrichment and more.
 
 > Looking for Enthusiast 1.7, the standalone version? See the [Enthusiast 1.7 documentation](https://upsidelab.io/tools/enthusiast/v1.7/docs) and the [v1.7.1 release](https://github.com/upsidelab/enthusiast/tree/v1.7.1).
 
 ## Getting Started
-Enthusiast is installed into a Suvereo instance as a set of Python packages:
-1. Set up Suvereo (see the [Suvereo installation guide](https://upsidelab.io/tools/suvereo/docs/getting-started/installation)).
-2. Install the vertical and the integrations and agents you need, and register them in Suvereo's settings (see the [installation guide](https://upsidelab.io/tools/enthusiast/docs/getting-started/installation)).
+Enthusiast is installed into a Suvereo deployment as a set of Python packages. The quickest way is the [Suvereo starter](https://github.com/upsidelab/suvereo-starter):
+1. Clone the starter and configure it.
+2. Add the vertical and the integrations and agents you need to its server package, and register them in its settings.
+
+See the [installation guide](https://upsidelab.io/tools/enthusiast/docs/getting-started/installation) for the steps.
 
 You can also book a [live demo](https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ3NyFdPn_jqYqD24asveLkfrB1NTal0PWkLNHFTT4Fmp6sNW50-0or8WyIzBriF8IFdP1jXSPjQ) to see it in action.
 

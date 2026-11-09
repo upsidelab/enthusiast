@@ -1,5 +1,5 @@
 const mapping = {
-  "using-enthusiast-starter": "",
+  "using-the-suvereo-starter": "",
   "concept-product-search": "",
 };
 

@@ -1,0 +1,107 @@
+import { Callout } from "nextra/components"
+
+# Installation
+
+<Callout type="info">
+Looking for the Enthusiast 1.7 installation guide? It is available [here](../../../../tools/enthusiast/v1.7/docs/getting-started/installation).
+</Callout>
+
+Enthusiast is an e-commerce [vertical](../../../../suvereo/docs/customization/domain-onboarding) for [Suvereo](../../../../suvereo/docs). Suvereo provides the platform (conversations, agentic executions, language models, users and the admin UI), and Enthusiast is installed on top of it as a set of Python packages.
+
+The quickest way to run Enthusiast is the [Suvereo starter](../../../../suvereo/docs/customization/using-the-suvereo-starter): a repository that starts Suvereo with Docker Compose and builds your own deployment, including the packages you add to it.
+
+## Setting Up the Starter
+
+Clone the starter and create the configuration files from the samples:
+
+```shell
+git clone https://github.com/upsidelab/suvereo-starter
+cd suvereo-starter
+cp server/config/sample.env server/config/.env
+cp frontend/config/sample.env frontend/config/.env
+```
+
+The default configuration uses the OpenAI API for generating embeddings and for the language model. Set your key in `server/config/.env`:
+
+```
+OPENAI_API_KEY=...
+```
+
+## Adding the Enthusiast Packages
+
+Enthusiast is split into packages, so you can install only what you need:
+
+| Package | Purpose |
+|---|---|
+| `enthusiast-vertical` | The vertical itself: product and document entities, migrations, retrievers and sync managers. Always required. |
+| `enthusiast-source-*` | Product and document sources, and e-commerce store integrations. See [Integrations](/integrations). |
+| `enthusiast-agent-*` | Pre-built agents. See [Pre-built Agents](/agents). |
+
+Add them as dependencies of the starter's server package in `server/src/`. To get started, install the vertical together with the sample data source and the Product Search agent:
+
+```shell
+cd server/src
+poetry add enthusiast-vertical enthusiast-source-sample enthusiast-agent-product-search
+```
+
+The packages are installed into the server image together with your own code.
+
+## Configuring Suvereo
+
+Register the vertical and its plugins in `server/config/settings_override.py`. The starter comes with a diet advice vertical as an example: replace its entries with the Enthusiast ones, and keep the language model provider:
+
+```python
+INSTALLED_VERTICALS = ["enthusiast_vertical"]
+
+CATALOG_ENTITY_PLUGINS = [
+    "enthusiast_vertical.models.Product",
+    "enthusiast_vertical.models.Document",
+]
+
+CATALOG_INTEGRATION_MANAGERS = [
+    "enthusiast_vertical.sync.ProductSourceManager",
+    "enthusiast_vertical.sync.DocumentSourceManager",
+    "enthusiast_vertical.sync.ECommerceIntegrationManager",
+]
+
+CATALOG_INTEGRATION_PLUGINS = [
+    "enthusiast_source_sample.SampleProductSource",
+    "enthusiast_source_sample.SampleDocumentSource",
+]
+
+CATALOG_LANGUAGE_MODEL_PROVIDERS = [
+    "suvereo_model_openai.OpenAILanguageModelProvider",
+]
+
+AVAILABLE_AGENTS = [
+    "enthusiast_agent_product_search.ProductSearchAgent",
+]
+```
+
+Each integration and agent page lists the exact entry to add when you install more of them.
+
+## Running It
+
+Build and start the environment:
+
+```shell
+docker compose build && docker compose up
+```
+
+The vertical ships its own database migrations. The server applies them when it starts.
+
+When you add packages or change `settings_override.py` later, rebuild the image and restart the containers.
+
+## Accessing the Admin Panel
+
+Once the containers are running, open the application at [http://localhost:10001](http://localhost:10001). The API is at [http://localhost:10000](http://localhost:10000).
+
+Sign in as the initial admin user. By default:
+
+**Email**: admin@example.com
+
+**Password**: changeme
+
+To change these credentials and for other configuration options, see the [Suvereo installation guide](../../../../suvereo/docs/getting-started/installation).
+
+You can now [import test data](/docs/getting-started/import-test-data).

@@ -1,4 +1,4 @@
-# Give It a Task
+# Try It Out
 
 Once the test data set has been imported and indexed, you can start chatting with an agent. This guide uses the **Product Search** agent, which you installed in the [installation guide](/docs/getting-started/installation). It searches the product catalog and asks follow-up questions to narrow down the results.
 
@@ -26,9 +26,9 @@ The sample data set also contains documents, such as the TV channel list and the
 
 ## Next Steps
 
-- [Learn more about data sets](https://upsidelab.io/tools/suvereo/docs/management/data-sets)
-- [See how to manage users](https://upsidelab.io/tools/suvereo/docs/management/users)
+- [Learn more about data sets](../../../../suvereo/docs/management/data-sets)
+- [See how to manage users](../../../../suvereo/docs/management/users)
 - [Learn how e-commerce agents work](/docs/agents/agent-types)
 - [Build your custom agent](/docs/customization/concept-product-search)
 - [View available integrations](/integrations/)
-- [Create a custom integration](https://upsidelab.io/tools/suvereo/docs/customization/custom-integration)
+- [Create a custom integration](../../../../suvereo/docs/customization/integrations)

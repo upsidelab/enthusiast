@@ -1,5 +1,6 @@
 import { Footer, Layout, Navbar } from "nextra-theme-docs";
 import { Banner, Head } from "nextra/components";
+import { LinkArrowIcon } from "nextra/icons";
 import { getPageMap } from "nextra/page-map";
 import "nextra-theme-docs/style.css";
 import Logo from "@/app/logo";
@@ -12,7 +13,15 @@ export const metadata = {
 
 const banner = (
   <Banner storageKey="v1.7-legacy" dismissible={false}>
-    You are viewing the documentation for Enthusiast 1.7. <a href="https://upsidelab.io/tools/enthusiast/docs">Go to the latest documentation</a>
+    You are viewing the documentation for Enthusiast 1.7.{" "}
+    {/* A plain anchor: the latest documentation is a separate site, outside this site's basePath. */}
+    {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+    <a
+      href="/tools/enthusiast/docs"
+      className="x:text-primary-600 x:underline x:hover:no-underline x:decoration-from-font x:[text-underline-position:from-font]"
+    >
+      Go to the latest documentation&nbsp;<LinkArrowIcon height="1em" className="x:inline x:align-baseline x:shrink-0" />
+    </a>
   </Banner>
 )
 

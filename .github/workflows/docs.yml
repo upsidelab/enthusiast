@@ -55,6 +55,16 @@ jobs:
             GTAG_ID: ${{ vars.GTAG_ID }}
           run: pnpm build
 
+        - name: Build Enthusiast 1.7 docs
+          working-directory: docs-v1.7
+          env:
+            GTAG_ID: ${{ vars.GTAG_ID }}
+          run: |
+            pnpm install
+            pnpm build
+            mkdir -p ../docs/out/v1.7
+            cp -R out/. ../docs/out/v1.7/
+
         - name: Configure AWS Credentials
           uses: aws-actions/configure-aws-credentials@v1
           with:
@@ -62,10 +72,10 @@ jobs:
             aws-secret-access-key: ${{ secrets.DOCS_UPLOAD_SECRET_ACCESS_KEY }}
             aws-region: ${{ secrets.DOCS_UPLOAD_REGION }}
 
-        - name: Upload built artifacts to S3
+        - name: Upload built artifacts to S3 (staging)
           run: |
-            aws s3 sync out/ s3://${{ secrets.DOCS_UPLOAD_BUCKET }}/tools/enthusiast/ --delete
+            aws s3 sync out/ s3://${{ secrets.DOCS_UPLOAD_BUCKET }}/staging/tools/enthusiast/ --delete
 
         - name: Invalidate CloudFront cache
           run: |
-            aws cloudfront create-invalidation --distribution-id ${{ secrets.DOCS_CLOUDFRONT_DISTRIBUTION_ID }} --paths "/tools/enthusiast/*"
+            aws cloudfront create-invalidation --distribution-id ${{ secrets.DOCS_CLOUDFRONT_DISTRIBUTION_ID }} --paths "/staging/tools/enthusiast/*"

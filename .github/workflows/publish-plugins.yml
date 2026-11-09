@@ -1,9 +1,8 @@
 name: Publish plugins
 
+# Push trigger removed while the publish pipeline is being rewritten.
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   detect-changes:

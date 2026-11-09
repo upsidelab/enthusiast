@@ -55,7 +55,7 @@ AVAILABLE_AGENTS = [
       </UL>
       <H2>Installing {props.name} Agent</H2>
       <P>
-        This agent is built on the Enthusiast vertical, so a Suvereo instance with the vertical installed is required.
+        This agent is built on the Enthusiast domain definition, so a Suvereo instance with the domain definition installed is required.
         If you haven't set it up yet, follow the <Link href="/docs/getting-started/installation">installation guide</Link> first.
       </P>
       <P>

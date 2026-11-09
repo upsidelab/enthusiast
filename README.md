@@ -6,7 +6,7 @@
 
 <h1 align="center">enthusiast.</h1>
 
-<p align="center">The e-commerce vertical for the Suvereo agentic AI framework.</p>
+<p align="center">The e-commerce domain definition for the Suvereo agentic AI framework.</p>
 <div align="center">
   <strong>
     <a href="https://upsidelab.io/tools/enthusiast">Website</a> |
@@ -17,7 +17,7 @@
 
 
 ## Introduction
-[Enthusiast](https://upsidelab.io/tools/enthusiast) is the open-source e-commerce vertical for [Suvereo](https://upsidelab.io/suvereo/docs), an agentic AI framework.
+[Enthusiast](https://upsidelab.io/tools/enthusiast) is the open-source e-commerce domain definition for [Suvereo](https://upsidelab.io/suvereo/docs), an agentic AI framework.
 
 Suvereo provides the platform: conversations, agentic executions, language models, users and permissions, and the admin UI. Enthusiast adds what is specific to e-commerce:
 
@@ -30,7 +30,7 @@ Suvereo provides the platform: conversations, agentic executions, language model
 ## Getting Started
 Enthusiast is installed into a Suvereo deployment as a set of Python packages. The quickest way is the [Suvereo starter](https://github.com/upsidelab/suvereo-starter):
 1. Clone the starter and configure it.
-2. Add the vertical and the integrations and agents you need to its server package, and register them in its settings.
+2. Add the domain definition and the integrations and agents you need to its server package, and register them in its settings.
 
 See the [installation guide](https://upsidelab.io/tools/enthusiast/docs/getting-started/installation) for the steps.
 
@@ -56,9 +56,9 @@ All packages live in [`plugins/`](plugins) and are published to PyPI:
 
 | Package | Purpose |
 |---|---|
-| `enthusiast-vertical-common` | E-commerce interfaces and data types (product, document and e-commerce integration plugins, platform connector). No Django dependency. |
-| `enthusiast-vertical` | The vertical's Django app: product and document models and migrations, retrievers, sync managers. |
-| `enthusiast-vertical-tools` | Agent tools shared by the pre-built agents. |
+| `enthusiast-domain-common` | E-commerce interfaces and data types (product, document and e-commerce integration plugins, platform connector). No Django dependency. |
+| `enthusiast-domain` | The domain definition's Django app: product and document models and migrations, retrievers, sync managers. |
+| `enthusiast-domain-tools` | Agent tools shared by the pre-built agents. |
 | `enthusiast-source-*` | Integrations: Medusa, Shopify, Shopware, Solidus, WooCommerce, WordPress, Sanity, and sample data. |
 | `enthusiast-agent-*` | Pre-built agents. |
 

@@ -1,4 +1,4 @@
-from enthusiast_vertical_tools import UpsertProductDetailsTool
+from enthusiast_domain_tools import UpsertProductDetailsTool
 
 from .scrape_product_tool import ScrapeMemoryEntry, ScrapeProductTool
 

@@ -1,8 +1,8 @@
 import csv
 from pathlib import Path
 
-from enthusiast_vertical_common.interfaces import DocumentSourcePlugin
-from enthusiast_vertical_common.structures import DocumentDetails
+from enthusiast_domain_common.interfaces import DocumentSourcePlugin
+from enthusiast_domain_common.structures import DocumentDetails
 
 
 class SampleDocumentSource(DocumentSourcePlugin):

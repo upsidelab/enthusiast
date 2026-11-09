@@ -50,7 +50,7 @@ export default async function Integration(props: IntegrationProps) {
       {props.description && <P>{props.description}</P>}
       <H2>Installation</H2>
       <P>
-        This integration is part of the Enthusiast vertical, so a Suvereo instance with the vertical installed is required.
+        This integration is part of the Enthusiast domain definition, so a Suvereo instance with the domain definition installed is required.
         If you haven't set it up yet, follow the <Link href="/docs/getting-started/installation">installation guide</Link> first.
       </P>
       <P>

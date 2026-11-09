@@ -7,14 +7,14 @@ This guide walks you through setting up Suvereo with Enthusiast, and the plugin 
 
 ## 1. Set Up Suvereo with Enthusiast
 
-The first step is to set up a Suvereo deployment with the Enthusiast vertical. The easiest way is the [Suvereo Starter](/docs/customization/using-the-suvereo-starter), a pre-configured Docker Compose setup that includes all required services.
+The first step is to set up a Suvereo deployment with the Enthusiast domain definition. The easiest way is the [Suvereo Starter](/docs/customization/using-the-suvereo-starter), a pre-configured Docker Compose setup that includes all required services.
 
 ### Add the Enthusiast Packages
 
-Follow the [installation guide](/docs/getting-started/installation) to install the vertical, together with the Medusa integration and the agents you want to use in Medusa:
+Follow the [installation guide](/docs/getting-started/installation) to install the domain definition, together with the Medusa integration and the agents you want to use in Medusa:
 
 ```bash
-poetry add enthusiast-vertical enthusiast-source-medusa enthusiast-agent-order-intake enthusiast-agent-catalog-enrichment
+poetry add enthusiast-domain enthusiast-source-medusa enthusiast-agent-order-intake enthusiast-agent-catalog-enrichment
 ```
 
 Register them in `settings_override.py`, including the Medusa integration:

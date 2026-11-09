@@ -1,8 +1,8 @@
 import logging
 from urllib.parse import urlparse
 
-from enthusiast_vertical_common.interfaces import ProductSourcePlugin
-from enthusiast_vertical_common.structures import ProductDetails
+from enthusiast_domain_common.interfaces import ProductSourcePlugin
+from enthusiast_domain_common.structures import ProductDetails
 from pydantic import Field
 from suvereo_common.utils import RequiredFieldsModel
 from woocommerce import API

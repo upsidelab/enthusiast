@@ -1,6 +1,6 @@
 [project]
 name = "enthusiast-agent-product-search"
-version = "1.4.0"
+version = "2.0.0"
 description = "Product Search Agent for Enthusiast"
 authors = [
     {name = "Damian Sowiński",email = "damian.sowinski@upsidelab.io"}
@@ -8,11 +8,11 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.10,<4"
 dependencies = [
-    "suvereo-common (>=1.7.0,<2.0.0)",
+    "suvereo-common (>=1.0.0,<2.0.0)",
     "langchain (>=1.2.0,<2.0.0)",
-    "suvereo-agent-tool-calling (>=1.2.0)",
-    "enthusiast-domain (>=1.0.0,<2.0.0)",
-    "enthusiast-domain-tools (>=1.0.0,<2.0.0)",
+    "suvereo-agent-tool-calling (>=1.0.0)",
+    "enthusiast-domain (>=2.0.0,<3.0.0)",
+    "enthusiast-domain-tools (>=2.0.0,<3.0.0)",
 ]
 
 [project.urls]

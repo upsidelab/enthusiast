@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   detect-changes:
@@ -19,6 +20,10 @@ jobs:
       - name: Check if docs changed
         id: changed
         run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
           if echo "$CHANGED" | grep -qE '^docs(-v1\.7)?/'; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
@@ -72,10 +77,10 @@ jobs:
             aws-secret-access-key: ${{ secrets.DOCS_UPLOAD_SECRET_ACCESS_KEY }}
             aws-region: ${{ secrets.DOCS_UPLOAD_REGION }}
 
-        - name: Upload built artifacts to S3 (staging)
+        - name: Upload built artifacts to S3
           run: |
-            aws s3 sync out/ s3://${{ secrets.DOCS_UPLOAD_BUCKET }}/staging/tools/enthusiast/ --delete
+            aws s3 sync out/ s3://${{ secrets.DOCS_UPLOAD_BUCKET }}/tools/enthusiast/ --delete
 
         - name: Invalidate CloudFront cache
           run: |
-            aws cloudfront create-invalidation --distribution-id ${{ secrets.DOCS_CLOUDFRONT_DISTRIBUTION_ID }} --paths "/staging/tools/enthusiast/*"
+            aws cloudfront create-invalidation --distribution-id ${{ secrets.DOCS_CLOUDFRONT_DISTRIBUTION_ID }} --paths "/tools/enthusiast/*"

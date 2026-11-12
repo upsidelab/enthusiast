@@ -34,8 +34,6 @@ Enthusiast is installed into a Suvereo deployment as a set of Python packages. T
 
 See the [installation guide](https://upsidelab.io/tools/enthusiast/docs/getting-started/installation) for the steps.
 
-You can also book a [live demo](https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ3NyFdPn_jqYqD24asveLkfrB1NTal0PWkLNHFTT4Fmp6sNW50-0or8WyIzBriF8IFdP1jXSPjQ) to see it in action.
-
 ## Example use cases
 
 - [**AI-Based Product Discovery**](https://upsidelab.io/tools/enthusiast/agents/product-search) Enable natural-language product search. Users describe requirements in plain terms, and the agent retrieves results from your indexed catalog.

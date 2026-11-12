@@ -1,39 +1,24 @@
 name: Publish plugins
 
-# Push trigger removed while the publish pipeline is being rewritten.
+# Manually triggered. Plans the publish order from the plugins' inter-dependencies, then publishes dependency level by dependency level:
+# dependency level 0 = plugins depending on no other unpublished local plugin, dependency level 1 = their direct dependents, and so on.
+# Plugins within a dependency level are published in parallel; a dependency level starts only after the previous one succeeded.
+# Versions that already exist on PyPI are skipped.
 on:
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Dry run (build and `poetry publish --dry-run`, nothing is uploaded)
+        required: true
+        default: true
+        type: boolean
 
 jobs:
-  detect-changes:
+  plan:
     runs-on: ubuntu-latest
     outputs:
-      changed: ${{ steps.changed.outputs.changed_plugins }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Get changed plugin directories
-        id: changed
-        run: |
-          CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^plugins/' | grep 'pyproject.toml$' | cut -d/ -f2 | sort -u | uniq)
-          
-          JSON_ARRAY=$(printf '%s\n' $CHANGED | jq -R . | jq -s -c .)
-
-          echo "Changed plugins: $CHANGED"
-          echo "changed_plugins=${JSON_ARRAY}" >> "$GITHUB_OUTPUT"
-        
-
-  publish:
-    environment: production
-    needs: detect-changes
-    runs-on: ubuntu-latest
-    if: ${{ needs.detect-changes.outputs.changed != '[""]' }}
-    strategy:
-      matrix:
-        plugin: ${{ fromJson(needs.detect-changes.outputs.changed) }}
+      dependency_levels: ${{ steps.plan.outputs.dependency_levels }}
+      count: ${{ steps.plan.outputs.count }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -43,17 +28,36 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install Poetry
-        run: |
-          curl -sSL https://install.python-poetry.org | python3 -
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Plan publish order
+        id: plan
+        run: python .github/scripts/plan_publish.py plugins --max-dependency-levels 6
 
-      - name: Configure Poetry
-        run: |
-          poetry config pypi-token.pypi ${{ secrets.PYPI_API_TOKEN }}
+  dependency-level-0:
+    name: Dependency level 0
+    needs: [plan]
+    if: ${{ !failure() && !cancelled() && needs.plan.result == 'success' && fromJson(needs.plan.outputs.dependency_levels)[0] != null }}
+    uses: ./.github/workflows/publish-plugin-dependency-level.yml
+    with:
+      plugins: ${{ toJSON(fromJson(needs.plan.outputs.dependency_levels)[0]) }}
+      dry_run: ${{ inputs.dry_run }}
+    secrets: inherit
 
-      - name: Build and publish ${{ matrix.plugin }}
-        working-directory: plugins/${{ matrix.plugin }}
-        run: |
-          poetry build
-          poetry publish
+  dependency-level-1:
+    name: Dependency level 1
+    needs: [plan, dependency-level-0]
+    if: ${{ !failure() && !cancelled() && needs.plan.result == 'success' && fromJson(needs.plan.outputs.dependency_levels)[1] != null }}
+    uses: ./.github/workflows/publish-plugin-dependency-level.yml
+    with:
+      plugins: ${{ toJSON(fromJson(needs.plan.outputs.dependency_levels)[1]) }}
+      dry_run: ${{ inputs.dry_run }}
+    secrets: inherit
+
+  dependency-level-2:
+    name: Dependency level 2
+    needs: [plan, dependency-level-1]
+    if: ${{ !failure() && !cancelled() && needs.plan.result == 'success' && fromJson(needs.plan.outputs.dependency_levels)[2] != null }}
+    uses: ./.github/workflows/publish-plugin-dependency-level.yml
+    with:
+      plugins: ${{ toJSON(fromJson(needs.plan.outputs.dependency_levels)[2]) }}
+      dry_run: ${{ inputs.dry_run }}
+    secrets: inherit

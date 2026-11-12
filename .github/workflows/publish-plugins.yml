@@ -61,33 +61,3 @@ jobs:
       plugins: ${{ toJSON(fromJson(needs.plan.outputs.dependency_levels)[2]) }}
       dry_run: ${{ inputs.dry_run }}
     secrets: inherit
-
-  dependency-level-3:
-    name: Dependency level 3
-    needs: [plan, dependency-level-2]
-    if: ${{ !failure() && !cancelled() && needs.plan.result == 'success' && fromJson(needs.plan.outputs.dependency_levels)[3] != null }}
-    uses: ./.github/workflows/publish-plugin-dependency-level.yml
-    with:
-      plugins: ${{ toJSON(fromJson(needs.plan.outputs.dependency_levels)[3]) }}
-      dry_run: ${{ inputs.dry_run }}
-    secrets: inherit
-
-  dependency-level-4:
-    name: Dependency level 4
-    needs: [plan, dependency-level-3]
-    if: ${{ !failure() && !cancelled() && needs.plan.result == 'success' && fromJson(needs.plan.outputs.dependency_levels)[4] != null }}
-    uses: ./.github/workflows/publish-plugin-dependency-level.yml
-    with:
-      plugins: ${{ toJSON(fromJson(needs.plan.outputs.dependency_levels)[4]) }}
-      dry_run: ${{ inputs.dry_run }}
-    secrets: inherit
-
-  dependency-level-5:
-    name: Dependency level 5
-    needs: [plan, dependency-level-4]
-    if: ${{ !failure() && !cancelled() && needs.plan.result == 'success' && fromJson(needs.plan.outputs.dependency_levels)[5] != null }}
-    uses: ./.github/workflows/publish-plugin-dependency-level.yml
-    with:
-      plugins: ${{ toJSON(fromJson(needs.plan.outputs.dependency_levels)[5]) }}
-      dry_run: ${{ inputs.dry_run }}
-    secrets: inherit

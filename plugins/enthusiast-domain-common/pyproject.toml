@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "enthusiast-domain-common"
-version = "1.0.0"
+version = "2.0.0"
 description = "Ecommerce framework layer for Enthusiast — data types, platform connector, and integration plugin interface."
 authors = ["Mateusz Porebski <mateusz.porebski@upsidelab.io>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-suvereo-common = ">=1.7.0"
+suvereo-common = ">=1.0.0"
 
 [build-system]
 requires = ["poetry-core"]

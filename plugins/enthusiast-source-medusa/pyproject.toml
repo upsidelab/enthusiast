@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "enthusiast-source-medusa"
-version = "1.4.0"
+version = "2.0.0"
 description = "A plugin for Enthusiast that provides a Medusa products importer."
 authors = ["Kuba Szczęśniak <kuba.szczęśniak@upsidelab.io>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-enthusiast-domain-common = "*"
+enthusiast-domain-common = ">=2.0.0"
 requests = "^2.32.3"
 
 [build-system]

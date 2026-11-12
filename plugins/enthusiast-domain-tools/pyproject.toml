@@ -1,6 +1,6 @@
 [project]
 name = "enthusiast-domain-tools"
-version = "1.0.0"
+version = "2.0.0"
 description = "Shared ecommerce-domain tools for Enthusiast agents"
 authors = [
     {name = "Mateusz Porebski", email = "mateusz.porebski@upsidelab.io"}
@@ -8,8 +8,8 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.10,<4"
 dependencies = [
-    "suvereo-common (>=1.7.0,<2.0.0)",
-    "enthusiast-domain-common (>=1.0.0,<2.0.0)",
+    "suvereo-common (>=1.0.0,<2.0.0)",
+    "enthusiast-domain-common (>=2.0.0,<3.0.0)",
     "langchain (>=1.2.0,<2.0.0)",
 ]
 

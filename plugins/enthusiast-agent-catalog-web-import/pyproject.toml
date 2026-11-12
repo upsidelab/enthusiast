@@ -1,6 +1,6 @@
 [project]
 name = "enthusiast-agent-catalog-web-import"
-version = "1.0.0"
+version = "2.0.0"
 description = "Catalog Web Import Agent for Enthusiast"
 authors = [
     {name = "Dawid Mularczyk", email = "dawid.mularczyk@upsidelab.io"}
@@ -8,12 +8,12 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.10,<4"
 dependencies = [
-    "suvereo-common (>=1.7.0,<2.0.0)",
+    "suvereo-common (>=1.0.0,<2.0.0)",
     "langchain (>=1.2.0,<2.0.0)",
-    "suvereo-agent-tool-calling (>=1.2.0)",
+    "suvereo-agent-tool-calling (>=1.0.0)",
     "suvereo-agent-tools (>=1.0.0,<2.0.0)",
-    "enthusiast-domain (>=1.0.0,<2.0.0)",
-    "enthusiast-domain-tools (>=1.0.0,<2.0.0)",
+    "enthusiast-domain (>=2.0.0,<3.0.0)",
+    "enthusiast-domain-tools (>=2.0.0,<3.0.0)",
     "beautifulsoup4 (>=4.14.2,<5.0.0)",
     "curl_cffi (>=0.7.0,<1.0.0)",
 ]

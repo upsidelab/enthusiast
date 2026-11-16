@@ -1,0 +1,49 @@
+name: Publish plugin dependency level
+
+# Reusable workflow: publishes one dependency level of plugins in parallel.
+# Called by publish-plugins.yml once per dependency level, strictly in order.
+on:
+  workflow_call:
+    inputs:
+      plugins:
+        description: JSON array of plugin directory names under plugins/
+        required: true
+        type: string
+      dry_run:
+        required: true
+        type: boolean
+    secrets:
+      PYPI_API_TOKEN:
+        required: true
+
+jobs:
+  publish:
+    environment: production
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        plugin: ${{ fromJson(inputs.plugins) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Build ${{ matrix.plugin }}
+        working-directory: plugins/${{ matrix.plugin }}
+        run: poetry build
+
+      - name: Publish ${{ matrix.plugin }}${{ inputs.dry_run && ' (dry run)' || '' }}
+        working-directory: plugins/${{ matrix.plugin }}
+        env:
+          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_API_TOKEN }}
+        run: poetry publish --skip-existing ${{ inputs.dry_run && '--dry-run' || '' }}

@@ -28,6 +28,7 @@ export default async function Page() {
       <P>Looking for the Enthusiast 1.7 integrations? See the <A href="../../tools/enthusiast/v1.7/integrations">Enthusiast 1.7 documentation</A>.</P>
       <H2>E-Commerce Systems</H2>
       <Cards>
+        <IntegrationCard name="Medusa" imageSrc="/tools/enthusiast/img/integrations/medusa.png" href="/integrations/medusa/" />
         <IntegrationCard name="Shopware" imageSrc="/tools/enthusiast/img/integrations/shopware.png" href="/integrations/shopware/" />
         <IntegrationCard name="Shopify" imageSrc="/tools/enthusiast/img/integrations/shopify.png" href="/integrations/shopify/" />
         <IntegrationCard name="Solidus" imageSrc="/tools/enthusiast/img/integrations/solidus.png" href="/integrations/solidus/" />

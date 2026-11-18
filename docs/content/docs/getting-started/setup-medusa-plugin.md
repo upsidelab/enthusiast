@@ -7,7 +7,7 @@ This guide walks you through setting up Suvereo with Enthusiast, and the plugin 
 
 ## 1. Set Up Suvereo with Enthusiast
 
-The first step is to set up a Suvereo deployment with the Enthusiast domain definition. The easiest way is the [Suvereo Starter](/docs/customization/using-the-suvereo-starter), a pre-configured Docker Compose setup that includes all required services.
+The first step is to set up a Suvereo deployment with the Enthusiast domain definition. If you don't have one yet, the easiest way is the [Suvereo Starter](/docs/customization/using-the-suvereo-starter), a pre-configured Docker Compose setup that includes all required services. If you already run Suvereo, add the packages below to your existing deployment.
 
 ### Add the Enthusiast Packages
 
@@ -28,14 +28,15 @@ CATALOG_INTEGRATION_PLUGINS = [
 
 ### Configure Environment Variables
 
-In the server's env file (`server/config/.env` in the Suvereo Starter), set the following:
+In the server's environment (`server/config/.env` in the Suvereo Starter), set the following:
 
-- **`OPENAI_API_KEY`** — your OpenAI API key, required for using the language model.
-- **`ECL_DJANGO_ALLOWED_HOSTS`** — if your Medusa instance runs inside a Docker container, add `"host.docker.internal"` to this list. This is the host Medusa uses to communicate with Suvereo.
+- **`OPENAI_API_KEY`** — your OpenAI API key, required for using the language model (or the key for whichever language model provider you use).
+- **`ECL_DJANGO_ALLOWED_HOSTS`** — the hosts Suvereo accepts requests for. If your Medusa instance runs inside a Docker container, add `"host.docker.internal"` to this list. This is the host Medusa uses to communicate with Suvereo.
+- **`ECL_DJANGO_CORS_ALLOWED_ORIGINS`** — add your Medusa admin URL (for example `"http://localhost:9000"`). The plugin opens WebSocket connections with this URL as the `Origin`.
 
-### Start the Docker Containers
+### Start Suvereo
 
-Build the images and start all services:
+Build and start Suvereo the way your deployment is run. With the Suvereo Starter:
 
 ```bash
 docker compose build && docker compose up
@@ -44,6 +45,12 @@ docker compose build && docker compose up
 ### Create an Admin Service Account
 
 The Medusa plugin authenticates with Suvereo using a service account API key. Create one with:
+
+```bash
+./manage.py createadminserviceaccount --name Medusa
+```
+
+Run it in the server's environment. With the Suvereo Starter, that means inside the API container:
 
 ```bash
 docker exec -it suvereo-starter-api-1 ./manage.py createadminserviceaccount --name Medusa
@@ -72,7 +79,8 @@ Add the following environment variables to your Medusa project:
 | `ENTHUSIAST_API_URL` | Suvereo instance base API URL                                                                                     |
 | `ENTHUSIAST_WS_URL` | Suvereo instance base WebSocket URL (usually the same as the API URL, with ws:// or wss:// prefix                 |
 | `ENTHUSIAST_SERVICE_ACCOUNT_TOKEN` | Admin service account API key from the previous step                                                              |
-| `ENTHUSIAST_INTEGRATION_NAME` | Set to "Medusa"                                                                                                   |
+| `ENTHUSIAST_INTEGRATION_TYPE` | *(Optional)* Type of the integration registered in Suvereo that Medusa data is synchronized through. Defaults to `medusa`, which is what `enthusiast-source-medusa` registers |
+| `ENTHUSIAST_OVERRIDE_EXISTING_INTEGRATION` | *(Optional)* When `true`, an existing integration of that type in the dataset that the plugin didn't create is adopted and its config overwritten. When `false` (default), a new integration is created instead |
 | `ENTHUSIAST_MEDUSA_BACKEND_URL` | *(Optional)* Medusa backend URL that Suvereo sends requests to. Defaults to `http://host.docker.internal:9000` |
 | `ENTHUSIAST_MEDUSA_ADMIN_URL` | *(Optional)* Medusa admin URL. Defaults to `http://localhost:9000`                                                |
 
@@ -82,7 +90,6 @@ If you're running Medusa in Docker, it will most likely look like this:
 ENTHUSIAST_API_URL=http://host.docker.internal:10000
 ENTHUSIAST_WS_URL=ws://host.docker.internal:10000
 ENTHUSIAST_SERVICE_ACCOUNT_TOKEN=<generated-service-account-token>
-ENTHUSIAST_INTEGRATION_NAME=Medusa
 ENTHUSIAST_MEDUSA_BACKEND_URL=http://host.docker.internal:9000
 ENTHUSIAST_MEDUSA_ADMIN_URL=http://localhost:9000
 ```
@@ -107,7 +114,8 @@ const plugins = [{
     enthusiastApiUrl: process.env.ENTHUSIAST_API_URL,
     enthusiastWSUrl: process.env.ENTHUSIAST_WS_URL,
     enthusiastServiceAccountToken: process.env.ENTHUSIAST_SERVICE_ACCOUNT_TOKEN,
-    enthusiastMedusaIntegrationName: process.env.ENTHUSIAST_INTEGRATION_NAME,
+    enthusiastIntegrationType: process.env.ENTHUSIAST_INTEGRATION_TYPE,
+    overrideExistingIntegration: process.env.ENTHUSIAST_OVERRIDE_EXISTING_INTEGRATION === "true",
     medusaBackendUrl: process.env.ENTHUSIAST_MEDUSA_BACKEND_URL,
     medusaAdminUrl: process.env.ENTHUSIAST_MEDUSA_ADMIN_URL,
   }
